@@ -1,0 +1,301 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-plus"></i>
+            </div>
+            <div>
+              <h4 class="title-title">Agregar Zona</h4>
+              <p class="title-subtitle">Captura la información requerida para el registro.</p>
+            </div>
+          </div>
+          <div class="title-actions">
+            <div class="title-tagline">
+              <span class="line"></span>
+              <span class="text">Control y configuración centralizada</span>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3 gy-4">
+          <form [formGroup]="zonaForm">
+            <div class="col-12">
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="field">
+                    <span class="field-label text-white">Nombre</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-user"></i>
+                      <input formControlName="nombre" class="sleek-control" type="text" placeholder="Nombre completo" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="field">
+                    <span class="field-label text-white">Descripción</span>
+                    <div class="input-sleek input-sleek--textarea">
+                      <i class="fas fa-align-left"></i>
+                      <textarea formControlName="descripcion" class="sleek-control sleek-control--textarea" rows="4"
+                        placeholder="Escribe una breve descripción..."></textarea>
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div class="col-12 mt-4">
+                <div class="plano-card">
+                  <div class="plano-head">
+                    <div class="plano-title">
+                      <div class="plano-badge">
+                        <i class="fas fa-dice"></i>
+                      </div>
+                      <div class="plano-txt">
+                        <h5>Plano de la Zona</h5>
+                        <p>Arrastra, crea zonas, edita nombres, coloca entrada/salida, usa zoom y revisa el minimapa.
+                        </p>
+                      </div>
+                    </div>
+                    <div class="plano-actions">
+                      <div class="plano-select">
+                        <i class="fas fa-slot-machine"></i>
+                        <select class="plano-select__control"
+                          (change)="addMachine($any($event.target).value); $any($event.target).value = ''">
+                          <option value="" selected disabled>Agregar máquina</option>
+                          <option value="Tragamonedas">Tragamonedas</option>
+                          <option value="Ruleta">Ruleta</option>
+                          <option value="Blackjack">Blackjack</option>
+                          <option value="Poker">Poker</option>
+                        </select>
+                      </div>
+                      <div class="plano-select">
+                        <i class="fas fa-layer-group"></i>
+                        <select class="plano-select__control"
+                          (change)="addZone($any($event.target).value); $any($event.target).value = ''">
+                          <option value="" selected disabled>Agregar zona</option>
+                          <option value="Sala">Sala / Área general</option>
+                          <option value="VIP">VIP</option>
+                          <option value="Caja">Caja</option>
+                          <option value="Baños">Baños</option>
+                        </select>
+                      </div>
+                      <div class="plano-sep"></div>
+                      <button type="button" class="plano-btn plano-btn--ghost" (click)="startPlacingDoor('ENTRADA')">
+                        <i class="fas fa-door-open"></i><span>Entrada</span>
+                      </button>
+                      <button type="button" class="plano-btn plano-btn--ghost" (click)="startPlacingDoor('SALIDA')">
+                        <i class="fas fa-door-closed"></i><span>Salida</span>
+                      </button>
+                      <div class="plano-sep"></div>
+                      <button type="button" class="plano-btn plano-btn--danger" (click)="limpiarPlano()">
+                        <i class="fas fa-broom"></i>
+                        <span>Limpiar</span>
+                      </button>
+                      <div class="plano-sep"></div>
+                      <div class="zoom-box">
+                        <button type="button" class="plano-btn plano-btn--ghost" (click)="zoomOut()">
+                          <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="zoom-val">{{ (zoom * 100) | number:'1.0-0' }}%</span>
+                        <button type="button" class="plano-btn plano-btn--ghost" (click)="zoomIn()">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                        <button type="button" class="plano-btn plano-btn--ghost" (click)="resetZoom()">
+                          <i class="fas fa-crosshairs"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="plano-wrap">
+                    <div class="plano-stage-wrap">
+                      <div class="plano-stage plano-stage--wide" #stage (pointerdown)="onStagePointerDown($event)"
+                        (click)="clearSelection()">
+                        <div class="plano-content" [style.transform]="'scale(' + zoom + ')'"
+                          [style.transformOrigin]="'0 0'">
+                          <div class="snap-line snap-line--v" *ngIf="snapGuide.showV" [style.left.px]="snapGuide.v">
+                          </div>
+                          <div class="snap-line snap-line--h" *ngIf="snapGuide.showH" [style.top.px]="snapGuide.h">
+                          </div>
+                          <div class="door" *ngIf="entrada" [style.left.px]="entrada.x" [style.top.px]="entrada.y"
+                            [style.transform]="'rotate(' + entrada.r + 'deg)'"
+                            (pointerdown)="onDoorPointerDown($event, 'ENTRADA')" (click)="$event.stopPropagation()">
+                            <i class="fas fa-door-open"></i>
+                            <span>Entrada</span>
+                            <div class="door-pop" (click)="$event.stopPropagation()"
+                              (pointerdown)="$event.stopPropagation()">
+                              <button type="button" class="door-pop-btn"
+                                (pointerdown)="$event.stopPropagation(); startHoldRotateDoor('ENTRADA', -1)"
+                                (pointerup)="$event.stopPropagation(); stopHoldRotate()"
+                                (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
+                                (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
+                                <i class="fas fa-undo"></i>
+                              </button>
+                              <button type="button" class="door-pop-btn"
+                                (pointerdown)="$event.stopPropagation(); startHoldRotateDoor('ENTRADA', 1)"
+                                (pointerup)="$event.stopPropagation(); stopHoldRotate()"
+                                (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
+                                (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
+                                <i class="fas fa-redo"></i>
+                              </button>
+                            </div>
+                          </div>
+                          <div class="door door--exit" *ngIf="salida" [style.left.px]="salida.x"
+                            [style.top.px]="salida.y" [style.transform]="'rotate(' + salida.r + 'deg)'"
+                            (pointerdown)="onDoorPointerDown($event, 'SALIDA')" (click)="$event.stopPropagation()">
+                            <i class="fas fa-door-closed"></i>
+                            <span>Salida</span>
+                            <div class="door-pop" (click)="$event.stopPropagation()"
+                              (pointerdown)="$event.stopPropagation()">
+                              <button type="button" class="door-pop-btn"
+                                (pointerdown)="$event.stopPropagation(); startHoldRotateDoor('SALIDA', -1)"
+                                (pointerup)="$event.stopPropagation(); stopHoldRotate()"
+                                (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
+                                (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
+                                <i class="fas fa-undo"></i>
+                              </button>
+                              <button type="button" class="door-pop-btn"
+                                (pointerdown)="$event.stopPropagation(); startHoldRotateDoor('SALIDA', 1)"
+                                (pointerup)="$event.stopPropagation(); stopHoldRotate()"
+                                (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
+                                (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
+                                <i class="fas fa-redo"></i>
+                              </button>
+                            </div>
+                          </div>
+                          <div class="zone" *ngFor="let z of zones" [class.is-selected]="z.id === selectedZoneId"
+                            [style.left.px]="z.x" [style.top.px]="z.y" [style.width.px]="z.w" [style.height.px]="z.h"
+                            (pointerdown)="onZonePointerDown($event, z)"
+                            (click)="$event.stopPropagation(); selectZone(z.id)">
+                            <div class="zone-head">
+                              <span class="zone-badge">{{ z.type }}</span>
+                              <button type="button" class="zone-del"
+                                (click)="$event.stopPropagation(); removeZone(z.id)">
+                                <i class="fas fa-times"></i>
+                              </button>
+                            </div>
+                            <span class="zone-hit zone-hit--n"
+                              (pointerdown)="onZoneResizePointerDown($event, z, 'n')"></span>
+                            <span class="zone-hit zone-hit--s"
+                              (pointerdown)="onZoneResizePointerDown($event, z, 's')"></span>
+                            <span class="zone-hit zone-hit--e"
+                              (pointerdown)="onZoneResizePointerDown($event, z, 'e')"></span>
+                            <span class="zone-hit zone-hit--w"
+                              (pointerdown)="onZoneResizePointerDown($event, z, 'w')"></span>
+                            <span class="zone-hit zone-hit--ne"
+                              (pointerdown)="onZoneResizePointerDown($event, z, 'ne')"></span>
+                            <span class="zone-hit zone-hit--nw"
+                              (pointerdown)="onZoneResizePointerDown($event, z, 'nw')"></span>
+                            <span class="zone-hit zone-hit--se"
+                              (pointerdown)="onZoneResizePointerDown($event, z, 'se')"></span>
+                            <span class="zone-hit zone-hit--sw"
+                              (pointerdown)="onZoneResizePointerDown($event, z, 'sw')"></span>
+                          </div>
+                          <div class="machine" *ngFor="let m of machines"
+                            [class.is-selected]="m.id === selectedMachineId" [style.left.px]="m.x" [style.top.px]="m.y"
+                            [style.width.px]="m.w" [style.height.px]="m.h"
+                            (pointerdown)="onMachinePointerDown($event, m)"
+                            (click)="$event.stopPropagation(); selectMachine(m.id)"
+                            (mouseenter)="onMachineHoverEnter(m.id)" (mouseleave)="onMachineHoverLeave(m.id)">
+                            <div class="machine-rot" [style.transform]="'rotate(' + m.r + 'deg)'">
+                              <img class="machine-img" [src]="m.img" [alt]="m.type" />
+                            </div>
+                            <div class="machine-tooltip" *ngIf="hoverId === m.id"
+                              (mouseenter)="onMachineTooltipEnter(m.id)" (mouseleave)="onMachineTooltipLeave(m.id)"
+                              (click)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()">
+                              <div class="tt-title">{{ m.type }} #{{ m.label }}</div>
+                              <div class="tt-row tt-row--name">
+                                <span>Nombre</span>
+                                <ng-container *ngIf="editNameId !== m.id">
+                                  <b class="tt-name">
+                                    <span>{{ m.name }}</span>
+                                    <button type="button" class="tt-edit"
+                                      (click)="$event.stopPropagation(); startEditName(m.id)">
+                                      <i class="fas fa-pencil-alt"></i>
+                                    </button>
+                                  </b>
+                                </ng-container>
+                                <ng-container *ngIf="editNameId === m.id">
+                                  <input class="tt-input" [value]="m.name"
+                                    (keydown.enter)="commitName(m.id, $any($event.target).value)"
+                                    (blur)="commitName(m.id, $any($event.target).value)" autofocus />
+                                </ng-container>
+                              </div>
+                              <div class="tt-row"><span>N° Serie</span><b>{{ m.serial }}</b></div>
+                              <div class="tt-row"><span>Estado</span><b>{{ m.status }}</b></div>
+                              <div class="tt-row tt-row--rotate">
+                                <span>Girar</span>
+                                <div class="tt-rotate">
+                                  <button type="button" class="tt-rotate-btn"
+                                    (pointerdown)="$event.stopPropagation(); selectMachine(m.id); startHoldRotateSelected(-1)"
+                                    (pointerup)="$event.stopPropagation(); stopHoldRotate()"
+                                    (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
+                                    (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
+                                    <i class="fas fa-undo"></i>
+                                  </button>
+                                  <button type="button" class="tt-rotate-btn"
+                                    (pointerdown)="$event.stopPropagation(); selectMachine(m.id); startHoldRotateSelected(1)"
+                                    (pointerup)="$event.stopPropagation(); stopHoldRotate()"
+                                    (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
+                                    (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
+                                    <i class="fas fa-redo"></i>
+                                  </button>
+                                  <button type="button" class="tt-rotate-btn tt-rotate-btn--center"
+                                    (click)="$event.stopPropagation(); resetMachineRotation(m.id)">
+                                    <i class="fas fa-crosshairs"></i>
+                                    <span>Centrar</span>
+                                  </button>
+                                  <button type="button" class="tt-rotate-btn tt-rotate-btn--danger"
+                                    (click)="$event.stopPropagation(); selectMachine(m.id); removeSelectedMachine()">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Eliminar</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="mini">
+                        <div class="mini-title">Minimapa</div>
+                        <div class="mini-map">
+                          <div class="mini-zone" *ngFor="let z of zones" [style.left.%]="miniX(z.x)"
+                            [style.top.%]="miniY(z.y)" [style.width.%]="miniW(z.w)" [style.height.%]="miniH(z.h)"></div>
+                          <div class="mini-dot" *ngFor="let m of machines" [style.left.%]="miniX(m.x)"
+                            [style.top.%]="miniY(m.y)"></div>
+                          <div class="mini-door" *ngIf="entrada" [style.left.%]="miniX(entrada.x)"
+                            [style.top.%]="miniY(entrada.y)"></div>
+                          <div class="mini-door mini-door--exit" *ngIf="salida" [style.left.%]="miniX(salida.x)"
+                            [style.top.%]="miniY(salida.y)"></div>
+                        </div>
+                        <div class="mini-info">
+                          <div class="mi"><span>Máquinas</span><b>{{ machines.length }}</b></div>
+                          <div class="mi"><span>Zonas</span><b>{{ zones.length }}</b></div>
+                          <div class="mi"><span>Zoom</span><b>{{ (zoom * 100) | number:'1.0-0' }}%</b></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
+            <button (click)="submit()" type="button" class="btn-alt btn-alt--success">
+              <i class="fas fa-check"></i>
+              <span>{{ submitButton }}</span>
+            </button>
+            <button (click)="regresar()" type="button" class="btn-alt btn-alt--cancel">
+              <i class="fas fa-times"></i>
+              <span>Cancelar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

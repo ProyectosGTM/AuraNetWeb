@@ -1,119 +1,193 @@
-<div class="container-fluid" [@fadeInRight]>
-  <div class="row">
-    <div class="col-12">
+<div class="container-fluid recarga-page" [@fadeInRight]>
+  <div class="row justify-content-center">
+    <div class="col-12 col-xxl-11">
       <div class="recarga-banner-card shadow-sm">
-        <div class="recarga-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-          <div class="d-flex align-items-center gap-3">
-            <div class="recarga-icon">
-              <i class="fas fa-money"></i>
+
+        <div class="recarga-header">
+          <div class="recarga-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+            <div class="d-flex align-items-center gap-3">
+              <div class="recarga-icon">
+                <i class="fas fa-money"></i>
+              </div>
+              <div>
+                <h4 class="recarga-title">Módulo de Recarga</h4>
+                <p class="recarga-subtitle">
+                  Realiza operaciones de saldo y visualiza tus movimientos fácilmente
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 class="recarga-title">Módulo de Recarga</h4>
-              <p class="recarga-subtitle">Realiza operaciones de saldo y visualiza tus movimientos
-                fácilmente</p>
+            <div class="recarga-tagline">
+              <span class="line"></span>
+              <span class="text">Accede a tu recarga en segundos</span>
             </div>
           </div>
-          <div class="recarga-tagline">
-            <span class="line"></span>
-            <span class="text">Accede a tu recarga en segundos</span>
-          </div>
+
         </div>
 
-        <div class="row mt-3 gy-4">
-          <div class="col-md-6">
-            <h5 class="section-title"><i class="fas fa-wallet me-2 text-accent"></i> Monedero</h5>
-            <div class="mb-3">
-              <label class="form-label">Número de Serie</label>
-              <input type="text" class="form-control custom-input" placeholder="Ej. 1234567890" />
-            </div>
-            <div class="row">
-              <div class="col-6">
-                <label class="form-label">Tipo</label>
-                <input type="text" class="form-control custom-input" placeholder="Ej. Virtual" />
-              </div>
-              <div class="col-6">
-                <label class="form-label">Estado</label>
-                <input type="text" class="form-control custom-input" placeholder="Ej. Activo" />
-              </div>
-            </div>
-            <div class="mt-3">
-              <label class="form-label">Venta Acumulada</label>
-              <input type="text" class="form-control custom-input" placeholder="$0.00" />
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <h5 class="section-title"><i class="fas fa-coins me-2 text-accent"></i> Saldo</h5>
-            <div class="mb-3">
-              <label class="form-label">Efectivo</label>
-              <input type="text" class="form-control custom-input" placeholder="$0.00" />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Promociones</label>
-              <input type="text" class="form-control custom-input" placeholder="$0.00" />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Lealtad</label>
-              <input type="text" class="form-control custom-input" placeholder="$0.00" />
-            </div>
-          </div>
-        </div>
-
-        <div class="row my-4">
-          <div class="col">
-            <h5 class="section-title"><i class="fas fa-user me-2 text-accent"></i> Cliente</h5>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Nombre</label>
-                <input type="text" class="form-control custom-input" />
-              </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Tipo de Identificación</label>
-                <input type="text" class="form-control custom-input" />
-              </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Número de Identificación</label>
-                <input type="text" class="form-control custom-input" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row mt-4" style="align-items: center; justify-content: center;">
-          <h5 class="section-title"><i class="fas fa-calculator me-2 text-accent"></i> Calcular</h5>
-          <div class="col-md-6 col-lg-5">
-            <div class="row g-2">
-              <ng-container *ngFor="let key of [1,2,3,4,5,6,7,8,9,0]">
-                <div class="col-4">
-                  <button class="btn btn-primary w-100 py-3">{{ key }}</button>
+        <div class="recarga-body">
+          <div class="row g-4">
+            <div class="col-12 col-lg-6">
+              <div class="recarga-panel">
+                <div class="recarga-panel-title">
+                  <h5 class="section-title mb-0">
+                    <i class="fas fa-wallet me-2 text-accent"></i> Monedero
+                  </h5>
                 </div>
-              </ng-container>
-              <div class="col-4"><button class="btn btn-light w-100 py-3">50</button></div>
-              <div class="col-4"><button class="btn btn-light w-100 py-3">100</button></div>
-              <div class="col-4"><button class="btn btn-light w-100 py-3">200</button></div>
-              <div class="col-4"><button class="btn btn-light w-100 py-3">500</button></div>
+
+                <div class="recarga-panel-content">
+                  <div class="mb-3">
+                    <label class="form-label">Número de Serie</label>
+                    <input type="text" class="form-control custom-input" placeholder="Ej. 1234567890"
+                      inputmode="numeric" pattern="^[0-9]{6,20}$" maxlength="20" />
+                  </div>
+
+                  <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label">Tipo</label>
+                      <input type="text" class="form-control custom-input" placeholder="Ej. Virtual"
+                        maxlength="30" pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,30}$" />
+                    </div>
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label">Estado</label>
+                      <input type="text" class="form-control custom-input" placeholder="Ej. Activo"
+                        maxlength="20" pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,20}$" />
+                    </div>
+                  </div>
+
+                  <div class="mt-3">
+                    <label class="form-label">Venta Acumulada</label>
+                    <input type="text" class="form-control custom-input" placeholder="$0.00"
+                      inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,2})?$" maxlength="12" />
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="col-md-3 mt-4 mt-md-0">
-            <label class="form-label">Moneda</label>
-            <input type="text" class="form-control custom-input mb-3" />
 
-            <label class="form-label">Importe</label>
-            <input type="text" class="form-control custom-input mb-3" />
+            <div class="col-12 col-lg-6">
+              <div class="recarga-panel">
+                <div class="recarga-panel-title">
+                  <h5 class="section-title mb-0">
+                    <i class="fas fa-coins me-2 text-accent"></i> Saldo
+                  </h5>
+                </div>
 
-            <label class="form-label">Cantidad Recibida</label>
-            <input type="text" class="form-control custom-input mb-3" />
+                <div class="recarga-panel-content">
+                  <div class="mb-3">
+                    <label class="form-label">Efectivo</label>
+                    <input type="text" class="form-control custom-input" placeholder="$0.00"
+                      inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,2})?$" maxlength="12" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Promociones</label>
+                    <input type="text" class="form-control custom-input" placeholder="$0.00"
+                      inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,2})?$" maxlength="12" />
+                  </div>
+                  <div class="mb-0">
+                    <label class="form-label">Lealtad</label>
+                    <input type="text" class="form-control custom-input" placeholder="$0.00"
+                      inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,2})?$" maxlength="12" />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <label class="form-label">Cambio</label>
-            <input type="text" class="form-control custom-input mb-3" />
-          </div>
-          <div class="col-md-3 mt-4 mt-md-0 d-flex flex-column gap-2">
-            <button class="btn btn-info btn-lg">Borrar</button>
-            <button class="btn btn-info btn-lg">Calcular</button>
-            <button class="btn btn-success btn-lg">Aceptar</button>
-            <button class="btn btn-danger btn-lg">Cancelar</button>
+            <div class="col-12">
+              <div class="recarga-panel">
+                <div class="recarga-panel-title">
+                  <h5 class="section-title mb-0">
+                    <i class="fas fa-user me-2 text-accent"></i> Cliente
+                  </h5>
+                </div>
+
+                <div class="recarga-panel-content">
+                  <div class="row g-3">
+                    <div class="col-12 col-lg-6">
+                      <label class="form-label">Nombre</label>
+                      <input type="text" class="form-control custom-input"
+                        maxlength="80" pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' ]{2,80}$" />
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                      <label class="form-label">Tipo de Identificación</label>
+                      <input type="text" class="form-control custom-input"
+                        maxlength="30" pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,30}$" />
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                      <label class="form-label">Número de Identificación</label>
+                      <input type="text" class="form-control custom-input"
+                        inputmode="numeric" maxlength="18" pattern="^[A-Za-z0-9-]{4,18}$" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="recarga-panel recarga-panel--calc">
+                <div class="recarga-panel-title">
+                  <h5 class="section-title mb-0">
+                    <i class="fas fa-calculator me-2 text-accent"></i> Calcular
+                  </h5>
+                </div>
+
+                <div class="recarga-panel-content">
+                  <div class="row g-4 align-items-start">
+                    <div class="col-12 col-lg-6 col-xl-5">
+                      <div class="keypad">
+                        <ng-container *ngFor="let key of [1,2,3,4,5,6,7,8,9,0]">
+                          <button class="btn keypad-btn w-100" type="button">{{ key }}</button>
+                        </ng-container>
+                        <button class="btn quick-btn w-100" type="button">50</button>
+                        <button class="btn quick-btn w-100" type="button">100</button>
+                        <button class="btn quick-btn w-100" type="button">200</button>
+                        <button class="btn quick-btn w-100" type="button">500</button>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 col-xl-4">
+                      <div class="row g-3">
+                        <div class="col-12">
+                          <label class="form-label">Moneda</label>
+                          <input type="text" class="form-control custom-input"
+                            maxlength="5" pattern="^[A-Za-z]{2,5}$" placeholder="MXN" />
+                        </div>
+
+                        <div class="col-12">
+                          <label class="form-label">Importe</label>
+                          <input type="text" class="form-control custom-input"
+                            inputmode="decimal" maxlength="12" pattern="^[0-9]+(\.[0-9]{1,2})?$" placeholder="0.00" />
+                        </div>
+
+                        <div class="col-12">
+                          <label class="form-label">Cantidad Recibida</label>
+                          <input type="text" class="form-control custom-input"
+                            inputmode="decimal" maxlength="12" pattern="^[0-9]+(\.[0-9]{1,2})?$" placeholder="0.00" />
+                        </div>
+
+                        <div class="col-12">
+                          <label class="form-label">Cambio</label>
+                          <input type="text" class="form-control custom-input"
+                            inputmode="decimal" maxlength="12" pattern="^[0-9]+(\.[0-9]{1,2})?$" placeholder="0.00" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-xl-3">
+                      <div class="action-stack">
+                        <button class="btn action-btn action-btn--info w-100" type="button">Borrar</button>
+                        <button class="btn action-btn action-btn--info w-100" type="button">Calcular</button>
+                        <button class="btn action-btn action-btn--success w-100" type="button">Aceptar</button>
+                        <button class="btn action-btn action-btn--danger w-100" type="button">Cancelar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
         </div>
+
       </div>
     </div>
   </div>

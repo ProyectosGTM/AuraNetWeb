@@ -19,7 +19,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row mt-3 gy-4">
                     <form [formGroup]="usuarioForm">
                         <div class="col-12">
@@ -127,6 +126,32 @@
                                         </div>
                                     </label>
                                 </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="field">
+                                        <span class="field-label text-white">Sala</span>
+                                        <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
+                                            (mousedown)="toggleSala($event)">
+                                            <i class="fas fa-door-open"></i>
+                                            <div class="sleek-control select-display">
+                                                <span class="select-value"
+                                                    [class.placeholder]="!usuarioForm.get('idSala')?.value">
+                                                    {{ salaLabel || 'Selecciona una sala...' }}
+                                                </span>
+                                            </div>
+                                            <span class="sleek-line"></span>
+
+                                            <div class="select-panel" *ngIf="isSalaOpen"
+                                                (mousedown)="$event.stopPropagation()">
+                                                <button type="button" class="select-option" *ngFor="let s of listaSalas"
+                                                    (mousedown)="setSala(s.idSala, s.nombreComercialSala || s.nombreSala, $event)">
+                                                    {{ s.nombreComercialSala || s.nombreSala }}
+                                                </button>
+
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
                                 <div class="col-12 col-md-6 col-lg-4" *ngIf="inputContrasena">
                                     <label class="field">
                                         <span class="field-label text-white">Contraseña</span>
@@ -191,14 +216,11 @@
                                             </div>
                                             <div class="pf-badge">3 MB</div>
                                         </div>
-
                                         <div class="pf-mid" *ngIf="logoPreviewUrl || logoFileName; else pfEmpty">
                                             <div class="pf-hero" *ngIf="logoPreviewUrl">
                                                 <img [src]="logoPreviewUrl" alt="Imagen Perfil" />
                                             </div>
-
                                             <div class="file-name" *ngIf="logoFileName">{{ logoFileName }}</div>
-
                                             <div class="pf-actions" (click)="$event.stopPropagation()">
                                                 <button type="button" class="pf-btn pf-btn--primary"
                                                     (click)="openLogoFilePicker()">
@@ -212,7 +234,6 @@
                                                 </button>
                                             </div>
                                         </div>
-
                                         <ng-template #pfEmpty>
                                             <div class="pf-empty">
                                                 <div class="pf-orb">
@@ -228,13 +249,10 @@
                                                 </div>
                                             </div>
                                         </ng-template>
-
                                         <input type="file" #logoFileInput accept=".jpg,.jpeg,.png,.webp" hidden
                                             (change)="onLogoFileSelected($event)" />
                                     </div>
                                 </div>
-
-
                                 <div class="col-12 mt-5">
                                     <div
                                         class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">

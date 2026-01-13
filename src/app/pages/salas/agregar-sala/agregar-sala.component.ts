@@ -1,43 +1,27 @@
-import { Component, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
-import { ModulosService } from 'src/app/shared/services/modulos.service';
+import { SalaService } from 'src/app/shared/services/salas.service';
+import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import Swal from 'sweetalert2';
-type MachineType = 'Tragamonedas' | 'Ruleta' | 'Blackjack' | 'Poker';
-type ZoneType = 'VIP' | 'Caja' | 'Baños' | 'Sala';
-type MachineStatus = 'Activa' | 'Mantenimiento';
-type DoorType = 'ENTRADA' | 'SALIDA';
 
-interface MachineItem {
-  id: number;
-  label: number;
-  type: MachineType;
-  name: string;
-  status: MachineStatus;
-  serial: string;
-  img: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  r: number;
-}
+type SelectItem = { id: number; text: string };
 
-interface ZoneItem {
-  id: number;
-  type: ZoneType;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+type Tool = 'pen' | 'rect' | 'eraser';
+type Pt = { x: number; y: number };
+type Stroke = { id: number; pts: Pt[]; w: number };
+type RectShape = { id: number; x: number; y: number; w: number; h: number; sw: number };
+type Snapshot = { strokes: Stroke[]; rects: RectShape[] };
+type PenAttach = { strokeIndex: number; side: 'start' | 'end' } | null;
 
-interface DoorPoint {
-  x: number;
-  y: number;
-  r: number;
-}
+type PlanoJsonV1 = {
+  v: 1;
+  worldW: number;
+  worldH: number;
+  strokes: Stroke[];
+  rects: RectShape[];
+};
 
 @Component({
   selector: 'app-agregar-sala',
@@ -45,953 +29,1247 @@ interface DoorPoint {
   styleUrl: './agregar-sala.component.scss',
   animations: [fadeInRightAnimation],
 })
-export class AgregarSalaComponent implements OnInit {
+export class AgregarSalaComponent implements OnInit, OnDestroy {
+  tool: Tool = 'pen';
+  worldW = 1320;
+  worldH = 520;
+  zoom = 1;
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
-  public salaForm: FormGroup;
-  public idModulo: number;
-  public title = 'Agregar Sala';
-  public listaClientes: any[] = [];
-  selectedFileName: string = '';
-  previewUrl: string | ArrayBuffer | null = null;
-  @ViewChild('stage', { static: false }) stageRef: ElementRef<HTMLDivElement>;
-  machines: MachineItem[] = [];
-  zones: ZoneItem[] = [];
-  selectedMachineId: number | null = null;
-  selectedZoneId: number | null = null;
-  hoverId: number | null = null;
-  editNameId: number | null = null;
-  zoom = 1;
-  snapGuide = { showV: false, showH: false, v: 0, h: 0 };
-  private draggingMachineId: number | null = null;
-  private draggingZoneId: number | null = null;
-  private resizingZoneId: number | null = null;
-  private dragOffsetX = 0;
-  private dragOffsetY = 0;
-  private pointerActive = false;
-  public stageW = 1320;
-  public stageH = 520;
+  public idSala: number;
 
-  private grid = 10;
-  placingDoor: DoorType | null = null;
-  entrada: DoorPoint | null = null;
-  salida: DoorPoint | null = null;
-  selectedDoor: DoorType | null = null;
-  draggingDoor: DoorType | null = null;
-  doorDragOffset = { x: 0, y: 0 };
-  doorPointerId: number | null = null;
-  doorHover: DoorType | null = null;
+  strokes: Stroke[] = [];
+  rects: RectShape[] = [];
 
-  private resizeHandle: 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null = null;
-  private resizeStart = { x: 0, y: 0 };
-  private resizeStartRect = { x: 0, y: 0, w: 0, h: 0 };
-  private rotateTickId: any = null;
-  private rotateAccelId: any = null;
-  private rotateStep = 3;
-  private rotateDir = 1;
-  private rotateDoorTarget: DoorType | null = null;
-  private rotateMachineTarget = false;
+  draftStroke: Stroke | null = null;
+  draftRect: RectShape | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private moduService: ModulosService,
-    private activatedRouted: ActivatedRoute,
-    private route: Router
-  ) { }
+  undoStack: Snapshot[] = [];
+  redoStack: Snapshot[] = [];
+
+  private drawing = false;
+  private activePointerId: number | null = null;
+
+  private startX = 0;
+  private startY = 0;
+
+  private nextStrokeId = 1;
+  private nextRectId = 1;
+
+  private penAttach: PenAttach = null;
+  private penStart: Pt | null = null;
+
+  private erasing = false;
+  private lastEraseTs = 0;
+
+  zonaForm: FormGroup;
+
+  selectedStrokeId: number | null = null;
+  selectedRectId: number | null = null;
+
+  private draggingStrokeIndex: number | null = null;
+  private draggingRectIndex: number | null = null;
+
+  private lastDragPt: Pt | null = null;
+
+  hoveredEndpoint: { strokeIndex: number; side: 'start' | 'end' } | null = null;
+  private draggingEndpoint: { strokeIndex: number; side: 'start' | 'end' } | null = null;
+
+  constructor(private fb: FormBuilder, private route: Router, private usuaService: UsuariosService, private salasService: SalaService) { }
 
   ngOnInit(): void {
     this.initForm();
-    this.activatedRouted.params.subscribe((params) => {
-      this.idModulo = params['idModulo'];
-      if (this.idModulo) {
-        this.title = 'Actualizar Módulo';
-        this.obtenerModulo();
-      }
+    document.addEventListener('mousedown', this.onDocMouseDownIds);
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('mousedown', this.onDocMouseDownIds);
+  }
+
+  initForm(): void {
+    this.zonaForm = this.fb.group({
+      nombre: [''],
+      nombreComercial: [''],
+      descripcion: [''],
+      logotipo: [''],
+      direccion: [''],
+      pais: [''],
+      estado: [''],
+      municipio: [''],
+      colonia: [''],
+      calle: [''],
+      numeroExterior: [''],
+      numeroInterior: [''],
+      codigoPostal: [''],
+      referencias: [''],
+      latitud: [0],
+      longitud: [0],
+      geocercaJSON: [{}],
+      rfcFacturacion: [''],
+      razonSocialFacturacion: [''],
+      regimenFiscal: [''],
+      usoCFDI: [''],
+      lugarExpedicion: [''],
+      metrosCuadrados: [0],
+      numeroNiveles: [0],
+      capacidadPersonas: [0],
+      estructuraJSON: [{}],
+      planoArquitectonico: [''],
+      planoDistribucion: [''],
+      licenciaOperacion: [''],
+      fechaVencimientoLicencia: [null],
+      idMonedaPrincipal: [0],
+      fechaInicioContrato: [null],
+      fechaFinContrato: [null],
+      idEstatusLicencia: [0],
+      motivoSuspension: [''],
+      idCliente: [0],
     });
   }
 
-  obtenerModulo() {
-    this.moduService.obtenerModulo(this.idModulo).subscribe(
-      (response: any) => {
-        this.salaForm.patchValue({
-          nombre: response.data.nombre,
-          descripcion: response.data.descripcion,
-          idModulo: response.data.idModulo,
-        });
-
-        this.loadPlano(
-          response.data?.plano,
-          response.data?.zonas,
-          response.data?.entrada,
-          response.data?.salida
-        );
-      }, (error: any) => {
-        console.log(error.error);
-      }
-    );
+  get toolLabel(): string {
+    if (this.tool === 'pen') return 'Pluma';
+    if (this.tool === 'rect') return 'Rect';
+    return 'Borrar';
   }
 
-  initForm() {
-    this.salaForm = this.fb.group({
-      nombre: ['', Validators.required],
-      descripcion: ['', Validators.required],
-      plano: [''],
-      zonas: [''],
-      entrada: [''],
-      salida: ['']
-    });
+  setTool(t: Tool): void {
+    this.tool = t;
+    this.selectedStrokeId = null;
+    this.selectedRectId = null;
+    this.cancelDraft();
   }
 
-  submit() {
-    this.submitButton = 'Cargando...';
-    this.loading = true;
-
-    if (!this.entrada || !this.salida) {
-      this.submitButton = this.idModulo ? 'Actualizar' : 'Guardar';
-      this.loading = false;
-
-      Swal.fire({
-        title: '¡Faltan campos obligatorios!',
-        background: '#0d121d',
-        html: `
-          <p style="text-align:center; font-size:15px; margin-bottom:16px; color:white">
-            Debes colocar <strong>Entrada</strong> y <strong>Salida</strong> dentro del plano antes de continuar.
-          </p>
-        `,
-        icon: 'error',
-        confirmButtonText: 'Entendido',
-        customClass: { popup: 'swal2-padding swal2-border' }
-      });
-      return;
-    }
-
-    this.persistPlanoToForm();
-
-    if (this.idModulo) {
-      this.actualizar();
-    } else {
-      this.agregar();
-    }
+  clearSelection(): void {
+    this.selectedStrokeId = null;
+    this.selectedRectId = null;
   }
 
-  agregar() {
-    this.submitButton = 'Cargando...';
-    this.loading = true;
-
-    if (this.salaForm.invalid) {
-      this.submitButton = 'Guardar';
-      this.loading = false;
-
-      const etiquetas: any = {
-        nombre: 'Nombre',
-        descripcion: 'Descripción',
-        idModulo: 'Módulo',
-      };
-
-      const camposFaltantes: string[] = [];
-      Object.keys(this.salaForm.controls).forEach(key => {
-        const control = this.salaForm.get(key);
-        if (control?.invalid && control.errors?.['required']) {
-          camposFaltantes.push(etiquetas[key] || key);
-        }
-      });
-
-      const lista = camposFaltantes.map((campo, index) => `
-            <div style="padding: 8px 12px; border-left: 4px solid #d9534f;
-                        background: #caa8a8; text-align: center; margin-bottom: 8px;
-                        border-radius: 4px;">
-              <strong style="color: #b02a37;">${index + 1}. ${campo}</strong>
-            </div>
-          `).join('');
-
-      Swal.fire({
-        title: '¡Faltan campos obligatorios!',
-        background: '#0d121d',
-        html: `
-              <p style="text-align: center; font-size: 15px; margin-bottom: 16px; color: white">
-                Los siguientes <strong>campos obligatorios</strong> están vacíos.<br>
-                Por favor complétalos antes de continuar:
-              </p>
-              <div style="max-height: 350px; overflow-y: auto;">${lista}</div>
-            `,
-        icon: 'error',
-        confirmButtonText: 'Entendido',
-        customClass: {
-          popup: 'swal2-padding swal2-border'
-        }
-      });
-      return;
-    }
-
-    this.salaForm.removeControl('id');
-    this.moduService.agregarModulo(this.salaForm.value).subscribe(
-      () => {
-        this.submitButton = 'Guardar';
-        this.loading = false;
-        Swal.fire({
-          title: '¡Operación Exitosa!',
-          background: '#0d121d',
-          text: `Se agregó un nuevo módulo de manera exitosa.`,
-          icon: 'success',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-        this.regresar();
-      },
-      () => {
-        this.submitButton = 'Guardar';
-        this.loading = false;
-        Swal.fire({
-          title: '¡Ops!',
-          background: '#0d121d',
-          text: `Ocurrió un error al agregar el módulo.`,
-          icon: 'error',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-      }
-    );
+  strokePath(s: Stroke): string {
+    const p = s.pts;
+    if (!p.length) return '';
+    let d = `M ${p[0].x} ${p[0].y}`;
+    for (let i = 1; i < p.length; i++) d += ` L ${p[i].x} ${p[i].y}`;
+    return d;
   }
 
-  actualizar() {
-    this.submitButton = 'Cargando...';
-    this.loading = true;
-
-    if (this.salaForm.invalid) {
-      this.submitButton = 'Guardar';
-      this.loading = false;
-
-      const etiquetas: any = {
-        nombre: 'Nombre',
-        descripcion: 'Descripción',
-        idModulo: 'Módulo',
-      };
-
-      const camposFaltantes: string[] = [];
-      Object.keys(this.salaForm.controls).forEach(key => {
-        const control = this.salaForm.get(key);
-        if (control?.invalid && control.errors?.['required']) {
-          camposFaltantes.push(etiquetas[key] || key);
-        }
-      });
-
-      const lista = camposFaltantes.map((campo, index) => `
-            <div style="padding: 8px 12px; border-left: 4px solid #d9534f;
-                        background: #caa8a8; text-align: center; margin-bottom: 8px;
-                        border-radius: 4px;">
-              <strong style="color: #b02a37;">${index + 1}. ${campo}</strong>
-            </div>
-          `).join('');
-
-      Swal.fire({
-        title: '¡Faltan campos obligatorios!',
-        background: '#0d121d',
-        html: `
-              <p style="text-align: center; font-size: 15px; margin-bottom: 16px; color: white">
-                Los siguientes <strong>campos obligatorios</strong> están vacíos.<br>
-                Por favor complétalos antes de continuar:
-              </p>
-              <div style="max-height: 350px; overflow-y: auto;">${lista}</div>
-            `,
-        icon: 'error',
-        confirmButtonText: 'Entendido',
-        customClass: {
-          popup: 'swal2-padding swal2-border'
-        }
-      });
-      return;
-    }
-
-    this.moduService.actualizarModulo(this.idModulo, this.salaForm.value).subscribe(
-      () => {
-        this.submitButton = 'Actualizar';
-        this.loading = false;
-        Swal.fire({
-          title: '¡Operación Exitosa!',
-          background: '#0d121d',
-          text: `Los datos del módulo se actualizaron correctamente.`,
-          icon: 'success',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-        this.regresar();
-      },
-      () => {
-        this.submitButton = 'Actualizar';
-        this.loading = false;
-        Swal.fire({
-          title: '¡Ops!',
-          background: '#0d121d',
-          text: `Ocurrió un error al actualizar el módulo.`,
-          icon: 'error',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-      }
-    );
+  zoomIn(): void {
+    this.zoom = Math.min(2.4, this.round2(this.zoom + 0.1));
   }
 
-  regresar() {
-    this.route.navigateByUrl('/modulos');
+  zoomOut(): void {
+    this.zoom = Math.max(0.35, this.round2(this.zoom - 0.1));
   }
 
-  addMachine(type: any) {
-    if (!type) return;
-    const t = type as MachineType;
-    const id = this.nextId(this.machines.map(x => x.id));
-    const img = this.machineImg(t);
-    const label = id;
-    const base: MachineItem = {
-      id,
-      label,
-      type: t,
-      name: `${t} ${label}`,
-      status: 'Activa',
-      serial: this.makeSerial(t, id),
-      img,
-      x: 60 + (id % 10) * 58,
-      y: 80 + (id % 6) * 48,
-      w: 180,
-      h: 130,
-      r: 0
-    };
-    const placed = this.placeWithoutOverlap(base);
-    this.machines = [...this.machines, placed];
-    this.selectedMachineId = id;
-    this.selectedZoneId = null;
-    this.placingDoor = null;
-    this.persistPlanoToForm();
-  }
-
-  addZone(type: any) {
-    if (!type) return;
-    const t = type as ZoneType;
-    const id = this.nextId(this.zones.map(x => x.id));
-    const z: ZoneItem = {
-      id,
-      type: t,
-      x: 40 + (id % 8) * 80,
-      y: 40 + (id % 5) * 60,
-      w: 260,
-      h: 160
-    };
-    this.zones = [...this.zones, this.snapZone(z)];
-    this.selectedZoneId = id;
-    this.selectedMachineId = null;
-    this.placingDoor = null;
-    this.persistPlanoToForm();
-  }
-
-  removeSelectedZone() {
-    if (!this.selectedZoneId) return;
-    const id = this.selectedZoneId;
-    this.zones = this.zones.filter(z => z.id !== id);
-    this.selectedZoneId = null;
-    this.persistPlanoToForm();
-  }
-
-  startPlacingDoor(type: DoorType) {
-    this.placingDoor = type;
-    this.selectedMachineId = null;
-    this.selectedZoneId = null;
-    this.editNameId = null;
-    const rect = this.stageRect();
-    const w = rect ? rect.width / this.zoom : this.stageW;
-    const h = rect ? rect.height / this.zoom : this.stageH;
-    const doorW = 130;
-    const doorH = 54;
-    const cx = this.clamp(Math.round(((w - doorW) / 2) / this.grid) * this.grid, 10, w - doorW - 10);
-    const cy = this.clamp(Math.round(((h - doorH) / 2) / this.grid) * this.grid, 10, h - doorH - 10);
-    if (type === 'ENTRADA' && !this.entrada) {
-      this.entrada = { x: cx, y: cy, r: 0 };
-      this.persistPlanoToForm();
-    }
-    if (type === 'SALIDA' && !this.salida) {
-      this.salida = { x: cx, y: cy, r: 0 };
-      this.persistPlanoToForm();
-    }
-  }
-
-  rotateDoor(type: DoorType, delta: number) {
-    if (type === 'ENTRADA') {
-      if (!this.entrada) return;
-      this.entrada = { ...this.entrada, r: this.normalizeRotation(this.entrada.r + delta) };
-    } else {
-      if (!this.salida) return;
-      this.salida = { ...this.salida, r: this.normalizeRotation(this.salida.r + delta) };
-    }
-    this.persistPlanoToForm();
-  }
-
-  placeDoorAt(x: number, y: number) {
-    if (!this.placingDoor) return;
-    const SW = this.logicalStageW();
-    const SH = this.logicalStageH();
-    const px = this.clamp(Math.round(x / this.grid) * this.grid, 10, SW - 46);
-    const py = this.clamp(Math.round(y / this.grid) * this.grid, 10, SH - 46);
-    const point: DoorPoint = { x: px, y: py, r: 0 };
-    if (this.placingDoor === 'ENTRADA') this.entrada = point;
-    else this.salida = point;
-    this.placingDoor = null;
-    this.persistPlanoToForm();
-  }
-
-  removeDoor(type: DoorType) {
-    if (type === 'ENTRADA') this.entrada = null;
-    else this.salida = null;
-    this.persistPlanoToForm();
-  }
-
-  selectMachine(id: number) {
-    this.selectedMachineId = id;
-    this.selectedZoneId = null;
-    this.placingDoor = null;
-  }
-
-  selectZone(id: number) {
-    this.selectedZoneId = id;
-    this.selectedMachineId = null;
-    this.placingDoor = null;
-  }
-
-  clearSelection() {
-    this.selectedMachineId = null;
-    this.selectedZoneId = null;
-    this.editNameId = null;
-    this.placingDoor = null;
-  }
-
-  startEditName(id: number) {
-    this.editNameId = id;
-  }
-
-  commitName(id: number, value: string) {
-    this.editNameId = null;
-    const v = (value ?? '').trim();
-    if (!v) return;
-    this.machines = this.machines.map(m => m.id === id ? { ...m, name: v } : m);
-    this.persistPlanoToForm();
-  }
-
-  rotateSelected(delta: number) {
-    if (!this.selectedMachineId) return;
-    this.machines = this.machines.map(m => {
-      if (m.id !== this.selectedMachineId) return m;
-      return { ...m, r: this.normalizeRotation(m.r + delta) };
-    });
-    this.persistPlanoToForm();
-  }
-
-  removeSelectedMachine() {
-    if (!this.selectedMachineId) return;
-    const id = this.selectedMachineId;
-    this.machines = this.machines.filter(m => m.id !== id);
-    this.selectedMachineId = null;
-    this.persistPlanoToForm();
-  }
-
-  removeZone(id: number) {
-    this.zones = this.zones.filter(z => z.id !== id);
-    if (this.selectedZoneId === id) this.selectedZoneId = null;
-    this.persistPlanoToForm();
-  }
-
-  zoomIn() {
-    this.zoom = this.clamp(this.zoom + 0.1, 0.6, 1.8);
-  }
-
-  zoomOut() {
-    this.zoom = this.clamp(this.zoom - 0.1, 0.6, 1.8);
-  }
-
-  resetZoom() {
+  resetZoom(): void {
     this.zoom = 1;
   }
 
-  orientationLabel(r: number) {
-    const rr = this.normalizeRotation(r);
-    if (rr === 0) return 'N';
-    if (rr === 90) return 'E';
-    if (rr === 180) return 'S';
-    return 'O';
+  onCanvasWheel(e: WheelEvent): void {
+    e.preventDefault();
+    const delta = Math.sign(e.deltaY);
+    if (delta > 0) this.zoomOut();
+    else this.zoomIn();
   }
 
-  onStagePointerDown(ev: PointerEvent) {
-    this.pointerActive = true;
-    if (this.placingDoor) {
-      const rect = this.stageRect();
-      if (!rect) return;
-      const px = (ev.clientX - rect.left) / this.zoom;
-      const py = (ev.clientY - rect.top) / this.zoom;
-      this.placeDoorAt(px, py);
-    }
-  }
+  private hitStroke(p: Pt, tol: number): number | null {
+    const t2 = tol * tol;
 
-  onMachinePointerDown(ev: PointerEvent, m: MachineItem) {
-    ev.stopPropagation();
-    this.pointerActive = true;
-    this.draggingMachineId = m.id;
-    this.selectedMachineId = m.id;
-    this.selectedZoneId = null;
-    this.placingDoor = null;
-    const rect = this.stageRect();
-    if (!rect) return;
-    const px = (ev.clientX - rect.left) / this.zoom;
-    const py = (ev.clientY - rect.top) / this.zoom;
-    this.dragOffsetX = px - m.x;
-    this.dragOffsetY = py - m.y;
-    (ev.target as HTMLElement).setPointerCapture(ev.pointerId);
-    window.addEventListener('pointermove', this.onPointerMove, { passive: false });
-    window.addEventListener('pointerup', this.onPointerUp, { passive: false });
-  }
+    for (let i = this.strokes.length - 1; i >= 0; i--) {
+      const s = this.strokes[i];
+      const pts = s.pts;
+      if (pts.length < 2) continue;
 
-  onZonePointerDown(ev: PointerEvent, z: ZoneItem) {
-    ev.stopPropagation();
-    this.pointerActive = true;
-    this.draggingZoneId = z.id;
-    this.selectedZoneId = z.id;
-    this.selectedMachineId = null;
-    this.placingDoor = null;
-    const rect = this.stageRect();
-    if (!rect) return;
-    const px = (ev.clientX - rect.left) / this.zoom;
-    const py = (ev.clientY - rect.top) / this.zoom;
-    this.dragOffsetX = px - z.x;
-    this.dragOffsetY = py - z.y;
-    (ev.target as HTMLElement).setPointerCapture(ev.pointerId);
-    window.addEventListener('pointermove', this.onPointerMove, { passive: false });
-    window.addEventListener('pointerup', this.onPointerUp, { passive: false });
-  }
-
-  onZoneResizePointerDown(
-    ev: PointerEvent,
-    z: ZoneItem,
-    handle: 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
-  ) {
-    ev.stopPropagation();
-    this.pointerActive = true;
-    this.resizingZoneId = z.id;
-    this.resizeHandle = handle;
-    this.selectedZoneId = z.id;
-    this.selectedMachineId = null;
-    this.placingDoor = null;
-    const rect = this.stageRect();
-    if (!rect) return;
-    const px = (ev.clientX - rect.left) / this.zoom;
-    const py = (ev.clientY - rect.top) / this.zoom;
-    this.resizeStart = { x: px, y: py };
-    this.resizeStartRect = { x: z.x, y: z.y, w: z.w, h: z.h };
-    (ev.target as HTMLElement).setPointerCapture(ev.pointerId);
-    window.addEventListener('pointermove', this.onPointerMove, { passive: false });
-    window.addEventListener('pointerup', this.onPointerUp, { passive: false });
-  }
-
-  private onPointerMove = (ev: PointerEvent) => {
-    if (!this.pointerActive) return;
-    const rect = this.stageRect();
-    if (!rect) return;
-    ev.preventDefault();
-    const px = (ev.clientX - rect.left) / this.zoom;
-    const py = (ev.clientY - rect.top) / this.zoom;
-    const SW = this.logicalStageW();
-    const SH = this.logicalStageH();
-    this.snapGuide.showV = false;
-    this.snapGuide.showH = false;
-    if (this.draggingMachineId) {
-      const idx = this.machines.findIndex(x => x.id === this.draggingMachineId);
-      if (idx < 0) return;
-      const m = this.machines[idx];
-      const maxX = SW - m.w - 10;
-      const maxY = SH - m.h - 10;
-      const nx = this.clamp(px - this.dragOffsetX, 10, maxX);
-      const ny = this.clamp(py - this.dragOffsetY, 10, maxY);
-      const snapped = this.snapWithGuides(nx, ny);
-      const candidate = { ...m, x: snapped.x, y: snapped.y };
-      const placed = this.resolveOverlap(candidate);
-      const next = [...this.machines];
-      next[idx] = placed;
-      this.machines = next;
-      return;
-    }
-
-    if (this.draggingZoneId) {
-      const idx = this.zones.findIndex(x => x.id === this.draggingZoneId);
-      if (idx < 0) return;
-      const z = this.zones[idx];
-      const maxX = SW - z.w - 10;
-      const maxY = SH - z.h - 10;
-      const nx = this.clamp(px - this.dragOffsetX, 10, maxX);
-      const ny = this.clamp(py - this.dragOffsetY, 10, maxY);
-      const next = [...this.zones];
-      next[idx] = this.snapZone({ ...z, x: nx, y: ny });
-      this.zones = next;
-      return;
-    }
-
-    if (this.resizingZoneId) {
-      const idx = this.zones.findIndex(x => x.id === this.resizingZoneId);
-      if (idx < 0) return;
-      const z = this.zones[idx];
-      const nw = this.clamp((px - z.x) - this.dragOffsetX, 140, SW - z.x - 10);
-      const nh = this.clamp((py - z.y) - this.dragOffsetY, 90, SH - z.y - 10);
-      const next = [...this.zones];
-      next[idx] = this.snapZone({ ...z, w: nw, h: nh });
-      this.zones = next;
-    }
-  };
-
-  private onPointerUp = (_ev: PointerEvent) => {
-    this.pointerActive = false;
-    this.resizeHandle = null;
-    this.draggingMachineId = null;
-    this.draggingZoneId = null;
-    this.resizingZoneId = null;
-    this.snapGuide.showV = false;
-    this.snapGuide.showH = false;
-    window.removeEventListener('pointermove', this.onPointerMove);
-    window.removeEventListener('pointerup', this.onPointerUp);
-    this.persistPlanoToForm();
-  };
-
-  private snapWithGuides(x: number, y: number) {
-    const gx = Math.round(x / this.grid) * this.grid;
-    const gy = Math.round(y / this.grid) * this.grid;
-    const showV = Math.abs(gx - x) <= 4;
-    const showH = Math.abs(gy - y) <= 4;
-    if (showV) { this.snapGuide.showV = true; this.snapGuide.v = gx; }
-    if (showH) { this.snapGuide.showH = true; this.snapGuide.h = gy; }
-    return { x: gx, y: gy };
-  }
-
-  private resolveOverlap(candidate: MachineItem) {
-    const others = this.machines.filter(m => m.id !== candidate.id);
-    if (!others.some(o => this.overlaps(candidate, o))) return this.snapMachine(candidate);
-    const step = this.grid;
-    for (let r = step; r <= 140; r += step) {
-      const tries = [
-        { x: candidate.x + r, y: candidate.y },
-        { x: candidate.x - r, y: candidate.y },
-        { x: candidate.x, y: candidate.y + r },
-        { x: candidate.x, y: candidate.y - r },
-        { x: candidate.x + r, y: candidate.y + r },
-        { x: candidate.x - r, y: candidate.y + r },
-        { x: candidate.x + r, y: candidate.y - r },
-        { x: candidate.x - r, y: candidate.y - r }
-      ];
-      for (const t of tries) {
-        const test = this.snapMachine({
-          ...candidate,
-          x: this.clamp(t.x, 10, this.stageW - candidate.w - 10),
-          y: this.clamp(t.y, 10, this.stageH - candidate.h - 10)
-        });
-        if (!others.some(o => this.overlaps(test, o))) return test;
+      for (let j = 0; j < pts.length - 1; j++) {
+        const d2 = this.pointSegDist2(p, pts[j], pts[j + 1]);
+        if (d2 <= t2) return i;
       }
     }
-    return this.snapMachine(candidate);
+
+    return null;
   }
 
-  private placeWithoutOverlap(base: MachineItem) {
-    return this.resolveOverlap(this.snapMachine(base));
-  }
+  private hitRect(p: Pt, tol: number): number | null {
+    for (let i = this.rects.length - 1; i >= 0; i--) {
+      const r = this.rects[i];
+      const x1 = r.x - tol;
+      const y1 = r.y - tol;
+      const x2 = r.x + r.w + tol;
+      const y2 = r.y + r.h + tol;
 
-  private overlaps(a: MachineItem, b: MachineItem) {
-    const ax1 = a.x, ay1 = a.y, ax2 = a.x + a.w, ay2 = a.y + a.h;
-    const bx1 = b.x, by1 = b.y, bx2 = b.x + b.w, by2 = b.y + b.h;
-    return ax1 < bx2 && ax2 > bx1 && ay1 < by2 && ay2 > by1;
-  }
-
-  private persistPlanoToForm() {
-    this.salaForm.patchValue({
-      plano: JSON.stringify(this.machines ?? []),
-      zonas: JSON.stringify(this.zones ?? []),
-      entrada: this.entrada ? JSON.stringify(this.entrada) : '',
-      salida: this.salida ? JSON.stringify(this.salida) : ''
-    }, { emitEvent: false });
-  }
-
-  loadPlano(rawPlano: any, rawZonas: any, rawEntrada: any, rawSalida: any) {
-    const ms = this.safeParseArray(rawPlano).map((p: any, i: number) => {
-      const type = (p.type as MachineType) ?? 'Tragamonedas';
-      const id = Number(p.id ?? (i + 1));
-      return {
-        id,
-        label: Number(p.label ?? id),
-        type,
-        name: String(p.name ?? `${type} ${id}`),
-        status: (p.status as MachineStatus) ?? 'Activa',
-        serial: String(p.serial ?? this.makeSerial(type, id)),
-        img: String(p.img ?? this.machineImg(type)),
-        x: Number(p.x ?? 60),
-        y: Number(p.y ?? 80),
-        w: Math.max(Number(p.w ?? 180), 180),
-        h: Math.max(Number(p.h ?? 130), 130),
-        r: this.normalizeRotation(Number(p.r ?? 0))
-      } as MachineItem;
-    }).map(m => this.snapMachine(m));
-    const zs = this.safeParseArray(rawZonas).map((p: any, i: number) => {
-      const id = Number(p.id ?? (i + 1));
-      return {
-        id,
-        type: (p.type as ZoneType) ?? 'VIP',
-        x: Number(p.x ?? 40),
-        y: Number(p.y ?? 40),
-        w: Number(p.w ?? 260),
-        h: Number(p.h ?? 160)
-      } as ZoneItem;
-    }).map(z => this.snapZone(z));
-    this.machines = ms;
-    this.zones = zs;
-    this.entrada = this.safeParsePoint(rawEntrada);
-    this.salida = this.safeParsePoint(rawSalida);
-    this.persistPlanoToForm();
-  }
-
-  private machineHoverTimer: any = null;
-
-  onMachineHoverEnter(id: number) {
-    if (this.machineHoverTimer) {
-      clearTimeout(this.machineHoverTimer);
-      this.machineHoverTimer = null;
+      if (p.x >= x1 && p.x <= x2 && p.y >= y1 && p.y <= y2) return i;
     }
-    this.hoverId = id;
+    return null;
   }
 
-  onMachineHoverLeave(id: number) {
-    if (this.machineHoverTimer) clearTimeout(this.machineHoverTimer);
+  private pointSegDist2(p: Pt, a: Pt, b: Pt): number {
+    const abx = b.x - a.x;
+    const aby = b.y - a.y;
+    const apx = p.x - a.x;
+    const apy = p.y - a.y;
 
-    this.machineHoverTimer = setTimeout(() => {
-      if (this.hoverId === id && this.editNameId !== id) {
-        this.hoverId = null;
+    const ab2 = abx * abx + aby * aby;
+    if (ab2 === 0) return this.dist2(p, a);
+
+    let t = (apx * abx + apy * aby) / ab2;
+    t = Math.max(0, Math.min(1, t));
+
+    const cx = a.x + t * abx;
+    const cy = a.y + t * aby;
+
+    const dx = p.x - cx;
+    const dy = p.y - cy;
+    return dx * dx + dy * dy;
+  }
+
+  // reemplaza COMPLETO tu onCanvasPointerDown por este (mantiene tu lógica y agrega mover rect en cualquier herramienta salvo eraser)
+  onCanvasPointerDown(e: PointerEvent): void {
+    const stage = e.currentTarget as HTMLElement;
+    stage.setPointerCapture(e.pointerId);
+    this.activePointerId = e.pointerId;
+
+    const pos = this.toWorld(e);
+    this.drawing = true;
+
+    if (this.tool !== 'eraser') {
+      const hitR = this.hitRect(pos, 10);
+      if (hitR !== null) {
+        this.pushUndo();
+        this.redoStack = [];
+        this.selectedRectId = this.rects[hitR].id;
+        this.selectedStrokeId = null;
+        this.draggingRectIndex = hitR;
+        this.lastDragPt = pos;
+        return;
       }
-    }, 150);
-  }
-
-  onMachineTooltipEnter(id: number) {
-    if (this.machineHoverTimer) {
-      clearTimeout(this.machineHoverTimer);
-      this.machineHoverTimer = null;
     }
-    this.hoverId = id;
-  }
 
-  onMachineTooltipLeave(id: number) {
-    this.onMachineHoverLeave(id);
-  }
+    if (this.tool === 'pen') {
+      const ep = this.hitEndpoint(pos, 14);
+      if (ep) {
+        this.pushUndo();
+        this.redoStack = [];
+        this.selectedStrokeId = this.strokes[ep.strokeIndex].id;
+        this.selectedRectId = null;
+        this.draggingEndpoint = { strokeIndex: ep.strokeIndex, side: ep.side };
+        return;
+      }
 
-  private safeParseArray(raw: any) {
-    try {
-      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
+      const hit = this.hitStroke(pos, 10);
+      if (hit !== null) {
+        this.pushUndo();
+        this.redoStack = [];
+        this.selectedStrokeId = this.strokes[hit].id;
+        this.selectedRectId = null;
+        this.draggingStrokeIndex = hit;
+        this.lastDragPt = pos;
+        return;
+      }
 
-  private safeParsePoint(raw: any): DoorPoint | null {
-    try {
-      if (!raw) return null;
-      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      if (!parsed || typeof parsed !== 'object') return null;
-      const x = Number(parsed.x);
-      const y = Number(parsed.y);
-      const r = this.normalizeRotation(Number(parsed.r ?? 0));
-      if (Number.isNaN(x) || Number.isNaN(y)) return null;
-      return {
-        x: this.clamp(Math.round(x / this.grid) * this.grid, 10, this.stageW - 46),
-        y: this.clamp(Math.round(y / this.grid) * this.grid, 10, this.stageH - 46),
-        r
+      this.pushUndo();
+      this.redoStack = [];
+      this.selectedStrokeId = null;
+      this.selectedRectId = null;
+
+      const snap = this.findNearestEndpoint(pos, 14);
+      if (snap) {
+        this.penAttach = { strokeIndex: snap.strokeIndex, side: snap.side };
+        this.penStart = { x: snap.pt.x, y: snap.pt.y };
+      } else {
+        this.penAttach = null;
+        this.penStart = { x: pos.x, y: pos.y };
+      }
+
+      this.draftStroke = {
+        id: -1,
+        w: 4,
+        pts: [
+          { x: this.penStart.x, y: this.penStart.y },
+          { x: this.penStart.x, y: this.penStart.y },
+        ],
       };
-    } catch {
-      return null;
+      return;
+    }
+
+    this.startX = pos.x;
+    this.startY = pos.y;
+
+    if (this.tool === 'rect') {
+      this.pushUndo();
+      this.redoStack = [];
+      this.draftRect = { id: this.nextRectId++, x: pos.x, y: pos.y, w: 0, h: 0, sw: 2 };
+      this.selectedStrokeId = null;
+      this.selectedRectId = null;
+      return;
+    }
+
+    if (this.tool === 'eraser') {
+      this.pushUndo();
+      this.redoStack = [];
+      this.erasing = true;
+      this.eraseAt(pos.x, pos.y);
+      this.lastEraseTs = performance.now();
+      this.selectedStrokeId = null;
+      this.selectedRectId = null;
+      return;
     }
   }
 
-  private stageRect() {
-    const el = this.stageRef?.nativeElement;
-    if (!el) return null;
-    const rect = el.getBoundingClientRect();
-    this.stageW = rect.width;
-    this.stageH = rect.height;
-    return rect;
+  // reemplaza COMPLETO tu onCanvasPointerMove por este (mantiene tu lógica y agrega hover + cursor)
+  onCanvasPointerMove(e: PointerEvent): void {
+    if (this.activePointerId !== null && this.drawing && e.pointerId !== this.activePointerId) return;
+
+    const pos = this.toWorld(e);
+
+    if (!this.drawing) {
+      this.hoveredRectIndex = this.tool !== 'eraser' ? this.hitRect(pos, 10) : null;
+      return;
+    }
+
+    if (this.draggingEndpoint) {
+      const idx = this.draggingEndpoint.strokeIndex;
+      const side = this.draggingEndpoint.side;
+      const s = this.strokes[idx];
+
+      if (s && s.pts.length) {
+        const pts = s.pts.map(p => ({ x: p.x, y: p.y }));
+        if (side === 'start') pts[0] = { x: pos.x, y: pos.y };
+        else pts[pts.length - 1] = { x: pos.x, y: pos.y };
+        this.strokes = this.strokes.map((x, i) => (i === idx ? { ...x, pts } : x));
+      }
+      return;
+    }
+
+    if (this.draggingStrokeIndex !== null && this.lastDragPt) {
+      const dx = pos.x - this.lastDragPt.x;
+      const dy = pos.y - this.lastDragPt.y;
+
+      const idx = this.draggingStrokeIndex;
+      const s = this.strokes[idx];
+      if (s) {
+        const pts = s.pts.map(p => ({ x: p.x + dx, y: p.y + dy }));
+        this.strokes = this.strokes.map((x, i) => (i === idx ? { ...x, pts } : x));
+      }
+
+      this.lastDragPt = pos;
+      return;
+    }
+
+    if (this.draggingRectIndex !== null && this.lastDragPt) {
+      const dx = pos.x - this.lastDragPt.x;
+      const dy = pos.y - this.lastDragPt.y;
+
+      const idx = this.draggingRectIndex;
+      const r = this.rects[idx];
+      if (r) {
+        const x = this.clamp(r.x + dx, 0, this.worldW - r.w);
+        const y = this.clamp(r.y + dy, 0, this.worldH - r.h);
+        this.rects = this.rects.map((rr, i) => (i === idx ? { ...rr, x, y } : rr));
+      }
+
+      this.lastDragPt = pos;
+      return;
+    }
+
+    if (this.tool === 'pen' && this.draftStroke && this.penStart) {
+      this.draftStroke = {
+        ...this.draftStroke,
+        pts: [{ x: this.penStart.x, y: this.penStart.y }, { x: pos.x, y: pos.y }],
+      };
+      return;
+    }
+
+    if (this.tool === 'rect' && this.draftRect) {
+      const x1 = this.startX;
+      const y1 = this.startY;
+      const x2 = pos.x;
+      const y2 = pos.y;
+      const x = Math.min(x1, x2);
+      const y = Math.min(y1, y2);
+      const w = Math.abs(x2 - x1);
+      const h = Math.abs(y2 - y1);
+      this.draftRect = { ...this.draftRect, x, y, w, h };
+      return;
+    }
+
+    if (this.tool === 'eraser' && this.erasing) {
+      const now = performance.now();
+      if (now - this.lastEraseTs < 12) return;
+      this.lastEraseTs = now;
+      this.eraseAt(pos.x, pos.y);
+      return;
+    }
   }
 
-  private logicalStageW() {
-    const rect = this.stageRect();
-    return rect ? rect.width / this.zoom : this.stageW;
+
+  onCanvasPointerUp(e: PointerEvent): void {
+    if (!this.drawing) return;
+    if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
+    this.hoveredRectIndex = null;
+
+    this.drawing = false;
+    this.activePointerId = null;
+
+    if (this.draggingEndpoint) {
+      this.draggingEndpoint = null;
+      this.hoveredEndpoint = null;
+      this.syncPlanoToForm();
+      return;
+    }
+
+    if (this.draggingStrokeIndex !== null) {
+      this.draggingStrokeIndex = null;
+      this.lastDragPt = null;
+      this.syncPlanoToForm();
+      return;
+    }
+
+    if (this.draggingRectIndex !== null) {
+      this.draggingRectIndex = null;
+      this.lastDragPt = null;
+      this.syncPlanoToForm();
+      return;
+    }
+
+    if (this.tool === 'pen' && this.draftStroke && this.penStart) {
+      const a = { x: this.penStart.x, y: this.penStart.y };
+      const b = this.draftStroke.pts[1];
+
+      if (this.dist2(a, b) >= 16) {
+        this.commitPenSegment(a, b, this.draftStroke.w);
+        this.syncPlanoToForm();
+      }
+
+      this.draftStroke = null;
+      this.penStart = null;
+      this.penAttach = null;
+      return;
+    }
+
+    if (this.tool === 'rect' && this.draftRect) {
+      if (this.draftRect.w >= 6 && this.draftRect.h >= 6) {
+        this.rects = [...this.rects, this.draftRect];
+        this.syncPlanoToForm();
+      }
+      this.draftRect = null;
+      return;
+    }
+
+    if (this.tool === 'eraser') {
+      this.erasing = false;
+      this.syncPlanoToForm();
+      return;
+    }
   }
 
-  private logicalStageH() {
-    const rect = this.stageRect();
-    return rect ? rect.height / this.zoom : this.stageH;
+  onCanvasPointerCancel(e: PointerEvent): void {
+    if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
+    this.cancelDraft();
   }
 
-  private normalizeRotation(r: number) {
-    return ((r % 360) + 360) % 360;
+  undo(): void {
+    if (!this.undoStack.length) return;
+    const prev = this.undoStack.pop() as Snapshot;
+    this.redoStack.push(this.snapshot());
+    this.strokes = prev.strokes;
+    this.rects = prev.rects;
+    this.cancelDraft();
+    this.syncPlanoToForm();
   }
 
-  resetMachineRotation(id: number) {
-    this.machines = this.machines.map(m => m.id === id ? { ...m, r: 0 } : m);
-    this.persistPlanoToForm();
+  redo(): void {
+    if (!this.redoStack.length) return;
+    const next = this.redoStack.pop() as Snapshot;
+    this.undoStack.push(this.snapshot());
+    this.strokes = next.strokes;
+    this.rects = next.rects;
+    this.cancelDraft();
+    this.syncPlanoToForm();
   }
 
-  private snapMachine(m: MachineItem) {
+  clearPlan(): void {
+    if (!this.strokes.length && !this.rects.length && !this.draftStroke && !this.draftRect) return;
+    this.pushUndo();
+    this.redoStack = [];
+    this.strokes = [];
+    this.rects = [];
+    this.cancelDraft();
+    this.syncPlanoToForm();
+  }
+
+  verPlanoJson(): void {
+    const json = this.getPlanoJsonString();
+    console.log('PLANO JSON:', json);
+  }
+
+  private commitPenSegment(a: Pt, b: Pt, w: number): void {
+    if (this.penAttach) {
+      const i = this.penAttach.strokeIndex;
+      const s = this.strokes[i];
+      if (!s || !s.pts.length) {
+        this.strokes = [...this.strokes, { id: this.nextStrokeId++, pts: [a, b], w }];
+        return;
+      }
+
+      if (this.penAttach.side === 'end') {
+        const last = s.pts[s.pts.length - 1];
+        const pts = this.dist2(last, a) <= 1 ? [...s.pts, b] : [...s.pts, a, b];
+        this.strokes = this.strokes.map((x, idx) => (idx === i ? { ...x, pts, w } : x));
+        return;
+      }
+
+      if (this.penAttach.side === 'start') {
+        const first = s.pts[0];
+        const pts = this.dist2(first, a) <= 1 ? [b, ...s.pts] : [b, a, ...s.pts];
+        this.strokes = this.strokes.map((x, idx) => (idx === i ? { ...x, pts, w } : x));
+        return;
+      }
+    }
+
+    this.strokes = [...this.strokes, { id: this.nextStrokeId++, pts: [a, b], w }];
+  }
+
+  private findNearestEndpoint(p: Pt, tol: number): { strokeIndex: number; side: 'start' | 'end'; pt: Pt } | null {
+    const t2 = tol * tol;
+    let bestStroke = -1;
+    let bestSide: 'start' | 'end' = 'end';
+    let bestPt: Pt | null = null;
+    let bestD2 = Infinity;
+
+    for (let i = 0; i < this.strokes.length; i++) {
+      const s = this.strokes[i];
+      if (!s.pts.length) continue;
+
+      const a = s.pts[0];
+      const b = s.pts[s.pts.length - 1];
+
+      const d2a = this.dist2(p, a);
+      if (d2a <= t2 && d2a < bestD2) {
+        bestD2 = d2a;
+        bestStroke = i;
+        bestSide = 'start';
+        bestPt = a;
+      }
+
+      const d2b = this.dist2(p, b);
+      if (d2b <= t2 && d2b < bestD2) {
+        bestD2 = d2b;
+        bestStroke = i;
+        bestSide = 'end';
+        bestPt = b;
+      }
+    }
+
+    if (bestStroke === -1 || !bestPt) return null;
+    return { strokeIndex: bestStroke, side: bestSide, pt: bestPt };
+  }
+
+  private eraseAt(x: number, y: number): void {
+    const r = 18;
+    const r2 = r * r;
+
+    if (this.strokes.length) {
+      const keep: Stroke[] = [];
+      for (const s of this.strokes) {
+        let hit = false;
+        for (const p of s.pts) {
+          const dx = p.x - x;
+          const dy = p.y - y;
+          if (dx * dx + dy * dy <= r2) {
+            hit = true;
+            break;
+          }
+        }
+        if (!hit) keep.push(s);
+      }
+      this.strokes = keep;
+    }
+
+    if (this.rects.length) {
+      const keepR: RectShape[] = [];
+      for (const rr of this.rects) {
+        const inside = x >= rr.x - r && x <= rr.x + rr.w + r && y >= rr.y - r && y <= rr.y + rr.h + r;
+        if (!inside) keepR.push(rr);
+      }
+      this.rects = keepR;
+    }
+  }
+
+  private pushUndo(): void {
+    this.undoStack.push(this.snapshot());
+    if (this.undoStack.length > 60) this.undoStack.shift();
+  }
+
+  private snapshot(): Snapshot {
     return {
-      ...m,
-      x: Math.round(m.x / this.grid) * this.grid,
-      y: Math.round(m.y / this.grid) * this.grid
+      strokes: this.strokes.map(s => ({
+        id: s.id,
+        w: s.w,
+        pts: s.pts.map(p => ({ x: p.x, y: p.y })),
+      })),
+      rects: this.rects.map(r => ({
+        id: r.id,
+        x: r.x,
+        y: r.y,
+        w: r.w,
+        h: r.h,
+        sw: r.sw,
+      })),
     };
   }
 
-  private snapZone(z: ZoneItem) {
-    return {
-      ...z,
-      x: Math.round(z.x / this.grid) * this.grid,
-      y: Math.round(z.y / this.grid) * this.grid,
-      w: Math.round(z.w / this.grid) * this.grid,
-      h: Math.round(z.h / this.grid) * this.grid
-    };
+  private cancelDraft(): void {
+    this.drawing = false;
+    this.activePointerId = null;
+
+    this.draftStroke = null;
+    this.draftRect = null;
+
+    this.penStart = null;
+    this.penAttach = null;
+
+    this.erasing = false;
+    this.hoveredRectIndex = null;
+
+    this.draggingStrokeIndex = null;
+    this.draggingRectIndex = null;
+    this.lastDragPt = null;
+
+    this.draggingEndpoint = null;
+    this.hoveredEndpoint = null;
   }
 
-  private nextId(ids: number[]) {
-    return ids.length ? Math.max(...ids) + 1 : 1;
+  private toWorld(e: PointerEvent): Pt {
+    const stage = e.currentTarget as HTMLElement;
+    const rect = stage.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    const x = this.clamp(px / this.zoom, 0, this.worldW);
+    const y = this.clamp(py / this.zoom, 0, this.worldH);
+    return { x, y };
   }
 
-  private machineImg(type: MachineType) {
-    if (type === 'Tragamonedas') return 'assets/maquinas/tragamonedas.svg';
-    if (type === 'Ruleta') return 'assets/maquinas/ruleta.svg';
-    if (type === 'Blackjack') return 'assets/maquinas/blackjack.svg';
-    return 'assets/maquinas/poker.svg';
+  private dist2(a: Pt, b: Pt): number {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    return dx * dx + dy * dy;
   }
 
-  private makeSerial(type: MachineType, id: number) {
-    const t = type === 'Tragamonedas' ? 'TRG' : type === 'Ruleta' ? 'RLT' : type === 'Blackjack' ? 'BLJ' : 'PKR';
-    const stamp = Date.now().toString().slice(-7);
-    return `${t}-${stamp}-${id}`;
-  }
-
-  miniX(x: number) { return (x / this.logicalStageW()) * 100; }
-  miniY(y: number) { return (y / this.logicalStageH()) * 100; }
-  miniW(w: number) { return (w / this.logicalStageW()) * 100; }
-  miniH(h: number) { return (h / this.logicalStageH()) * 100; }
-
-  onDoorPointerDown(e: PointerEvent, type: DoorType) {
-    const target = e.target as HTMLElement;
-    if (target.closest('.door-pop') || target.closest('.door-pop-btn')) return;
-    e.stopPropagation();
-    this.clearSelection();
-    this.selectedDoor = type;
-    this.draggingDoor = type;
-    const rect = this.stageRef.nativeElement.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / this.zoom;
-    const y = (e.clientY - rect.top) / this.zoom;
-
-    const d = type === 'ENTRADA' ? this.entrada : this.salida;
-    if (!d) return;
-    this.doorDragOffset = { x: x - d.x, y: y - d.y };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  }
-
-  onDoorHoverLeave(e: MouseEvent, type: DoorType) {
-    const toEl = e.relatedTarget as HTMLElement | null;
-    if (toEl && toEl.closest('.door-pop')) return;
-    if (this.doorHover === type) this.doorHover = null;
-  }
-
-  @HostListener('window:pointermove', ['$event'])
-  onDoorPointerMove(e: PointerEvent) {
-    if (!this.draggingDoor) return;
-    const rect = this.stageRef.nativeElement.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / this.zoom;
-    const y = (e.clientY - rect.top) / this.zoom;
-    const SW = this.logicalStageW();
-    const SH = this.logicalStageH();
-    const nx = this.clamp(x - this.doorDragOffset.x, 0, SW - 130);
-    const ny = this.clamp(y - this.doorDragOffset.y, 0, SH - 54);
-    if (this.draggingDoor === 'ENTRADA' && this.entrada) {
-      this.entrada = { ...this.entrada, x: nx, y: ny };
-    }
-    if (this.draggingDoor === 'SALIDA' && this.salida) {
-      this.salida = { ...this.salida, x: nx, y: ny };
-    }
-    this.persistPlanoToForm();
-  }
-
-  @HostListener('window:pointerup', ['$event'])
-  onDoorPointerUp(_: PointerEvent) {
-    this.draggingDoor = null;
-    this.doorPointerId = null;
-    this.stopHoldRotate();
-  }
-
-  private clamp(v: number, min: number, max: number) {
+  private clamp(v: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, v));
   }
 
-  startHoldRotateDoor(type: DoorType, dir: number) {
-    this.stopHoldRotate();
-    this.rotateDir = dir >= 0 ? 1 : -1;
-    this.rotateStep = 3;
-    this.rotateDoorTarget = type;
-    this.rotateMachineTarget = false;
-    this.rotateTickId = setInterval(() => {
-      if (!this.rotateDoorTarget) return;
-      this.rotateDoor(this.rotateDoorTarget, this.rotateDir * this.rotateStep);
-    }, 30);
-    this.rotateAccelId = setInterval(() => {
-      this.rotateStep = Math.min(this.rotateStep + 2, 22);
-    }, 180);
+  private round2(v: number): number {
+    return Math.round(v * 100) / 100;
   }
 
-  startHoldRotateSelected(dir: number) {
-    if (!this.selectedMachineId) return;
-    this.stopHoldRotate();
-    this.rotateDir = dir >= 0 ? 1 : -1;
-    this.rotateStep = 3;
-    this.rotateDoorTarget = null;
-    this.rotateMachineTarget = true;
-    this.rotateTickId = setInterval(() => {
-      if (!this.selectedMachineId) return;
-      this.rotateSelected(this.rotateDir * this.rotateStep);
-    }, 30);
-    this.rotateAccelId = setInterval(() => {
-      this.rotateStep = Math.min(this.rotateStep + 2, 22);
-    }, 180);
-  }
+  private hitEndpoint(p: Pt, tol: number): { strokeIndex: number; side: 'start' | 'end' } | null {
+    const t2 = tol * tol;
 
-  stopHoldRotate() {
-    if (this.rotateTickId) {
-      clearInterval(this.rotateTickId);
-      this.rotateTickId = null;
+    for (let i = this.strokes.length - 1; i >= 0; i--) {
+      const s = this.strokes[i];
+      if (!s.pts.length) continue;
+
+      const a = s.pts[0];
+      const b = s.pts[s.pts.length - 1];
+
+      if (this.dist2(p, a) <= t2) return { strokeIndex: i, side: 'start' };
+      if (this.dist2(p, b) <= t2) return { strokeIndex: i, side: 'end' };
     }
-    if (this.rotateAccelId) {
-      clearInterval(this.rotateAccelId);
-      this.rotateAccelId = null;
-    }
-    this.rotateDoorTarget = null;
-    this.rotateMachineTarget = false;
+
+    return null;
   }
 
-  @HostListener('window:keydown', ['$event'])
-  onKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      if (this.selectedZoneId) {
-        e.preventDefault();
-        this.removeSelectedZone();
-      }
+  onEndpointEnter(strokeIndex: number, side: 'start' | 'end'): void {
+    this.hoveredEndpoint = { strokeIndex, side };
+  }
+
+  onEndpointLeave(strokeIndex: number, side: 'start' | 'end'): void {
+    if (!this.hoveredEndpoint) return;
+    if (this.hoveredEndpoint.strokeIndex === strokeIndex && this.hoveredEndpoint.side === side) {
+      this.hoveredEndpoint = null;
     }
   }
 
-  limpiarPlano() {
-    this.machines = [];
-    this.zones = [];
-    this.entrada = null;
-    this.salida = null;
-    this.selectedMachineId = null;
-    this.selectedZoneId = null;
-    this.editNameId = null;
-    this.placingDoor = null;
-    this.zoom = 1;
-    this.snapGuide = { showV: false, showH: false, v: 0, h: 0 };
-    this.persistPlanoToForm();
+  buildPlanoJson(): PlanoJsonV1 {
+    return {
+      v: 1,
+      worldW: this.worldW,
+      worldH: this.worldH,
+      strokes: this.strokes.map(s => ({
+        id: s.id,
+        w: s.w,
+        pts: s.pts.map(p => ({ x: p.x, y: p.y })),
+      })),
+      rects: this.rects.map(r => ({
+        id: r.id,
+        x: r.x,
+        y: r.y,
+        w: r.w,
+        h: r.h,
+        sw: r.sw,
+      })),
+    };
+  }
+
+  getPlanoJsonString(): string {
+    return JSON.stringify(this.buildPlanoJson());
+  }
+
+  loadPlanoFromJson(json: string): void {
+    if (!json) return;
+
+    const parsed = JSON.parse(json) as PlanoJsonV1;
+
+    if (!parsed || parsed.v !== 1) return;
+    if (!Array.isArray(parsed.strokes) || !Array.isArray(parsed.rects)) return;
+
+    this.worldW = Number(parsed.worldW) || this.worldW;
+    this.worldH = Number(parsed.worldH) || this.worldH;
+
+    this.strokes = parsed.strokes
+      .map(s => ({
+        id: Number(s.id),
+        w: Number(s.w) || 4,
+        pts: Array.isArray(s.pts) ? s.pts.map(p => ({ x: Number(p.x), y: Number(p.y) })) : [],
+      }))
+      .filter(s => s.pts.length >= 2);
+
+    this.rects = parsed.rects
+      .map(r => ({
+        id: Number(r.id),
+        x: Number(r.x),
+        y: Number(r.y),
+        w: Number(r.w),
+        h: Number(r.h),
+        sw: Number(r.sw) || 2,
+      }))
+      .filter(r => r.w >= 0 && r.h >= 0);
+
+    this.nextStrokeId = this.strokes.reduce((m, s) => Math.max(m, s.id), 0) + 1;
+    this.nextRectId = this.rects.reduce((m, r) => Math.max(m, r.id), 0) + 1;
+
+    this.undoStack = [];
+    this.redoStack = [];
+    this.cancelDraft();
+    this.syncPlanoToForm();
+  }
+
+  syncPlanoToForm(): void {
+    if (!this.zonaForm) return;
+    const json = this.getPlanoJsonString();
+    const ctrl = this.zonaForm.get('planoJson');
+    if (ctrl) ctrl.setValue(json);
+  }
+
+  @ViewChild('logotipoFileInput') logotipoFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('licenciaFileInput') licenciaFileInput!: ElementRef<HTMLInputElement>;
+
+  logotipoPreviewUrl: string | ArrayBuffer | null = null;
+  logotipoDragging = false;
+  logotipoFileName: string | null = null;
+  private logotipoFile: File | null = null;
+
+  licenciaPreviewUrl: string | ArrayBuffer | null = null;
+  licenciaDragging = false;
+  licenciaFileName: string | null = null;
+  private licenciaFile: File | null = null;
+
+  private readonly MAX_LOGO_MB = 3;
+  private readonly MAX_LIC_MB = 5;
+
+  private isImage(file: File) {
+    return /^image\/(png|jpe?g|webp)$/i.test(file.type);
+  }
+
+  private isPdf(file: File) {
+    return /^application\/pdf$/i.test(file.type);
+  }
+
+  private isAllowedLogotipo(file: File) {
+    return this.isImage(file) && file.size <= this.MAX_LOGO_MB * 1024 * 1024;
+  }
+
+  private isAllowedLicencia(file: File) {
+    const ok = this.isImage(file) || this.isPdf(file);
+    return ok && file.size <= this.MAX_LIC_MB * 1024 * 1024;
+  }
+
+  private loadPreview(file: File, setter: (url: string | ArrayBuffer | null) => void) {
+    if (!this.isImage(file)) {
+      setter(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setter(reader.result);
+    reader.readAsDataURL(file);
+  }
+
+  private uploadLogotipoAuto(): void {
+    const fd = new FormData();
+    if (this.logotipoFile) fd.append('file', this.logotipoFile, this.logotipoFile.name);
+    fd.append('folder', 'usuarios');
+    fd.append('idModule', '2');
+
+    this.usuaService.uploadFile(fd).subscribe({
+      next: (res: any) => {
+        const url = res?.url ?? res?.Location ?? res?.data?.url ?? '';
+        if (url) {
+          this.zonaForm.patchValue({ logotipo: url });
+          if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(url)) {
+            this.logotipoPreviewUrl = url;
+          }
+        }
+      },
+      error: (err) => console.error('Error al subir logotipo', err),
+    });
+  }
+
+  private uploadLicenciaAuto(): void {
+    const fd = new FormData();
+    if (this.licenciaFile) fd.append('file', this.licenciaFile, this.licenciaFile.name);
+    fd.append('folder', 'usuarios');
+    fd.append('idModule', '2');
+
+    this.usuaService.uploadFile(fd).subscribe({
+      next: (res: any) => {
+        const url = res?.url ?? res?.Location ?? res?.data?.url ?? '';
+        if (url) {
+          this.zonaForm.patchValue({ licenciaOperacion: url });
+          if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(url)) {
+            this.licenciaPreviewUrl = url;
+          } else {
+            this.licenciaPreviewUrl = null;
+          }
+        }
+      },
+      error: (err) => console.error('Error al subir licencia', err),
+    });
+  }
+
+  openLogotipoFilePicker() {
+    this.logotipoFileInput.nativeElement.click();
+  }
+
+  onLogotipoDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.logotipoDragging = true;
+  }
+
+  onLogotipoDragLeave(_e: DragEvent) {
+    this.logotipoDragging = false;
+  }
+
+  onLogotipoDrop(e: DragEvent) {
+    e.preventDefault();
+    this.logotipoDragging = false;
+    const f = e.dataTransfer?.files?.[0];
+    if (f) this.handleLogotipoFile(f);
+  }
+
+  onLogotipoSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0] || null;
+    if (f) this.handleLogotipoFile(f);
+    input.value = '';
+  }
+
+  clearLogotipo(e: Event) {
+    e.stopPropagation();
+    this.logotipoPreviewUrl = null;
+    this.logotipoFileName = null;
+    this.logotipoFileInput.nativeElement.value = '';
+    this.logotipoFile = null;
+    this.zonaForm.patchValue({ logotipo: '' });
+    this.zonaForm.get('logotipo')?.setErrors(null);
+  }
+
+  private handleLogotipoFile(file: File) {
+    if (!this.isAllowedLogotipo(file)) {
+      this.zonaForm.get('logotipo')?.setErrors({ invalid: true });
+      return;
+    }
+
+    this.logotipoFileName = file.name;
+    this.loadPreview(file, (url) => (this.logotipoPreviewUrl = url));
+    this.logotipoFile = file;
+    this.zonaForm.patchValue({ logotipo: file });
+    this.zonaForm.get('logotipo')?.setErrors(null);
+    this.uploadLogotipoAuto();
+  }
+
+  openLicenciaFilePicker() {
+    this.licenciaFileInput.nativeElement.click();
+  }
+
+  onLicenciaDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.licenciaDragging = true;
+  }
+
+  onLicenciaDragLeave(_e: DragEvent) {
+    this.licenciaDragging = false;
+  }
+
+  onLicenciaDrop(e: DragEvent) {
+    e.preventDefault();
+    this.licenciaDragging = false;
+    const f = e.dataTransfer?.files?.[0];
+    if (f) this.handleLicenciaFile(f);
+  }
+
+  onLicenciaSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0] || null;
+    if (f) this.handleLicenciaFile(f);
+    input.value = '';
+  }
+
+  clearLicencia(e: Event) {
+    e.stopPropagation();
+    this.licenciaPreviewUrl = null;
+    this.licenciaFileName = null;
+    this.licenciaFileInput.nativeElement.value = '';
+    this.licenciaFile = null;
+    this.zonaForm.patchValue({ licenciaOperacion: '' });
+    this.zonaForm.get('licenciaOperacion')?.setErrors(null);
+  }
+
+  private handleLicenciaFile(file: File) {
+    if (!this.isAllowedLicencia(file)) {
+      this.zonaForm.get('licenciaOperacion')?.setErrors({ invalid: true });
+      return;
+    }
+
+    this.licenciaFileName = file.name;
+    this.loadPreview(file, (url) => (this.licenciaPreviewUrl = url));
+    this.licenciaFile = file;
+    this.zonaForm.patchValue({ licenciaOperacion: file });
+    this.zonaForm.get('licenciaOperacion')?.setErrors(null);
+    this.uploadLicenciaAuto();
+  }
+
+  isIdClienteOpen = false;
+  idClienteLabel = '';
+  idClienteItems: SelectItem[] = [];
+
+  isIdMonedaOpen = false;
+  idMonedaLabel = '';
+  idMonedaItems: SelectItem[] = [];
+
+  isIdEstatusLicOpen = false;
+  idEstatusLicLabel = '';
+  idEstatusLicItems: SelectItem[] = [];
+
+  toggleIdCliente(e: MouseEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
+    this.isIdClienteOpen = !this.isIdClienteOpen;
+    if (this.isIdClienteOpen) {
+      this.isIdMonedaOpen = false;
+      this.isIdEstatusLicOpen = false;
+    }
+  }
+
+  setIdCliente(id: number, text: string, e: MouseEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
+    this.zonaForm.patchValue({ idCliente: id });
+    this.idClienteLabel = text;
+    this.isIdClienteOpen = false;
+  }
+
+  toggleIdMoneda(e: MouseEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
+    this.isIdMonedaOpen = !this.isIdMonedaOpen;
+    if (this.isIdMonedaOpen) {
+      this.isIdClienteOpen = false;
+      this.isIdEstatusLicOpen = false;
+    }
+  }
+
+  setIdMoneda(id: number, text: string, e: MouseEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
+    this.zonaForm.patchValue({ idMonedaPrincipal: id });
+    this.idMonedaLabel = text;
+    this.isIdMonedaOpen = false;
+  }
+
+  toggleIdEstatusLic(e: MouseEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
+    this.isIdEstatusLicOpen = !this.isIdEstatusLicOpen;
+    if (this.isIdEstatusLicOpen) {
+      this.isIdClienteOpen = false;
+      this.isIdMonedaOpen = false;
+    }
+  }
+
+  setIdEstatusLic(id: number, text: string, e: MouseEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
+    this.zonaForm.patchValue({ idEstatusLicencia: id });
+    this.idEstatusLicLabel = text;
+    this.isIdEstatusLicOpen = false;
+  }
+
+  private onDocMouseDownIds = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+
+    if (target.closest('.select-sleek') || target.closest('.plano-btn') || target.closest('.mini')) {
+      return;
+    }
+
+    this.isIdClienteOpen = false;
+    this.isIdMonedaOpen = false;
+    this.isIdEstatusLicOpen = false;
+  };
+
+  setIdClienteItems(items: SelectItem[]): void {
+    this.idClienteItems = items || [];
+    const current = this.zonaForm.get('idCliente')?.value;
+    const found = this.idClienteItems.find(x => x.id === current);
+    this.idClienteLabel = found ? found.text : '';
+  }
+
+  setIdMonedaItems(items: SelectItem[]): void {
+    this.idMonedaItems = items || [];
+    const current = this.zonaForm.get('idMonedaPrincipal')?.value;
+    const found = this.idMonedaItems.find(x => x.id === current);
+    this.idMonedaLabel = found ? found.text : '';
+  }
+
+  setIdEstatusLicItems(items: SelectItem[]): void {
+    this.idEstatusLicItems = items || [];
+    const current = this.zonaForm.get('idEstatusLicencia')?.value;
+    const found = this.idEstatusLicItems.find(x => x.id === current);
+    this.idEstatusLicLabel = found ? found.text : '';
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocClickCloseIds(e: MouseEvent): void {
+    const target = e.target as HTMLElement;
+    if (target.closest('.select-sleek')) return;
+
+    this.isIdClienteOpen = false;
+    this.isIdMonedaOpen = false;
+    this.isIdEstatusLicOpen = false;
+  }
+
+  // agrega estas props (junto a selectedStrokeId / dragging...)
+  hoveredRectIndex: number | null = null;
+
+  get canvasCursor(): string {
+    if (this.draggingRectIndex !== null) return 'grabbing';
+    if (this.hoveredRectIndex !== null) return 'grab';
+    return 'crosshair';
+  }
+
+  submit(): void {
+    this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
+    this.loading = true;
+
+    if (this.zonaForm.invalid) {
+      this.submitButton = this.idSala ? 'Actualizar' : 'Guardar';
+      this.loading = false;
+
+      const etiquetas: any = {
+        nombre: 'Nombre',
+        nombreComercial: 'Nombre Comercial',
+        descripcion: 'Descripción',
+        direccion: 'Dirección',
+        pais: 'País',
+        estado: 'Estado',
+        municipio: 'Municipio',
+        colonia: 'Colonia',
+        calle: 'Calle',
+        numeroExterior: 'Número Exterior',
+        codigoPostal: 'Código Postal',
+        rfcFacturacion: 'RFC Facturación',
+        razonSocialFacturacion: 'Razón Social',
+        regimenFiscal: 'Régimen Fiscal',
+        usoCFDI: 'Uso CFDI',
+        lugarExpedicion: 'Lugar Expedición',
+        idMonedaPrincipal: 'Moneda Principal',
+        idEstatusLicencia: 'Estatus Licencia',
+        idCliente: 'Cliente',
+      };
+
+      const camposFaltantes: string[] = [];
+      Object.keys(this.zonaForm.controls).forEach((key) => {
+        const control = this.zonaForm.get(key);
+        if (control?.invalid && control.errors?.['required']) {
+          camposFaltantes.push(etiquetas[key] || key);
+        }
+      });
+
+      const lista = camposFaltantes
+        .map(
+          (campo, index) => `
+        <div style="padding: 8px 12px; border-left: 4px solid #d9534f;
+                    background: #caa8a8; text-align: center; margin-bottom: 8px;
+                    border-radius: 4px;">
+          <strong style="color: #b02a37;">${index + 1}. ${campo}</strong>
+        </div>
+      `
+        )
+        .join('');
+
+      Swal.fire({
+        title: '¡Faltan campos obligatorios!',
+        background: '#0d121d',
+        html: `
+        <p style="text-align: center; font-size: 15px; margin-bottom: 16px; color: white">
+          Los siguientes <strong>campos obligatorios</strong> están vacíos.<br>
+          Por favor complétalos antes de continuar:
+        </p>
+        <div style="max-height: 350px; overflow-y: auto;">${lista}</div>
+      `,
+        icon: 'error',
+        confirmButtonText: 'Entendido',
+        customClass: { popup: 'swal2-padding swal2-border' },
+      });
+
+      return;
+    }
+
+    if (this.idSala) this.actualizarSala();
+    else this.agregarSala();
+  }
+
+  private buildSalaPayload() {
+    const v = this.zonaForm.getRawValue();
+
+    return {
+      nombre: v.nombre ?? '',
+      nombreComercial: v.nombreComercial ?? '',
+      descripcion: v.descripcion ?? '',
+      logotipo: v.logotipo ?? '',
+      direccion: v.direccion ?? '',
+      pais: v.pais ?? '',
+      estado: v.estado ?? '',
+      municipio: v.municipio ?? '',
+      colonia: v.colonia ?? '',
+      calle: v.calle ?? '',
+      numeroExterior: v.numeroExterior ?? '',
+      numeroInterior: v.numeroInterior ?? '',
+      codigoPostal: v.codigoPostal ?? '',
+      referencias: v.referencias ?? '',
+      latitud: Number(v.latitud) || 0,
+      longitud: Number(v.longitud) || 0,
+      geocercaJSON: v.geocercaJSON ?? {},
+      rfcFacturacion: v.rfcFacturacion ?? '',
+      razonSocialFacturacion: v.razonSocialFacturacion ?? '',
+      regimenFiscal: v.regimenFiscal ?? '',
+      usoCFDI: v.usoCFDI ?? '',
+      lugarExpedicion: v.lugarExpedicion ?? '',
+      metrosCuadrados: Number(v.metrosCuadrados) || 0,
+      numeroNiveles: Number(v.numeroNiveles) || 0,
+      capacidadPersonas: Number(v.capacidadPersonas) || 0,
+      estructuraJSON: v.estructuraJSON ?? {},
+      planoArquitectonico: v.planoArquitectonico ?? '',
+      planoDistribucion: v.planoDistribucion ?? '',
+      licenciaOperacion: v.licenciaOperacion ?? '',
+      fechaVencimientoLicencia: v.fechaVencimientoLicencia ?? null,
+      idMonedaPrincipal: Number(v.idMonedaPrincipal) || 0,
+      fechaInicioContrato: v.fechaInicioContrato ?? null,
+      fechaFinContrato: v.fechaFinContrato ?? null,
+      idEstatusLicencia: Number(v.idEstatusLicencia) || 0,
+      motivoSuspension: v.motivoSuspension ?? '',
+      idCliente: Number(v.idCliente) || 0,
+    };
+  }
+  private buildPayloadSala(): any {
+    const payload = { ...this.zonaForm.getRawValue() };
+
+    delete payload.planoJson;
+
+    return payload;
+  }
+
+
+  agregarSala(): void {
+    const payload = this.buildPayloadSala();
+
+    this.salasService.agregarSala(payload).subscribe({
+      next: () => {
+        this.submitButton = 'Guardar';
+        this.loading = false;
+
+        Swal.fire({
+          title: '¡Operación Exitosa!',
+          background: '#0d121d',
+          text: 'Se agregó una nueva sala de manera exitosa.',
+          icon: 'success',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+
+        this.regresar();
+      },
+      error: () => {
+        this.submitButton = 'Guardar';
+        this.loading = false;
+
+        Swal.fire({
+          title: '¡Ops!',
+          background: '#0d121d',
+          text: 'Ocurrió un error al agregar la sala.',
+          icon: 'error',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      },
+    });
+  }
+
+  actualizarSala(): void {
+    const payload = this.buildPayloadSala();
+
+    this.salasService.actualizarSala(this.idSala, payload).subscribe({
+      next: () => {
+        this.submitButton = 'Actualizar';
+        this.loading = false;
+
+        Swal.fire({
+          title: '¡Operación Exitosa!',
+          background: '#0d121d',
+          text: 'Los datos de la sala se actualizaron correctamente.',
+          icon: 'success',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+
+        this.regresar();
+      },
+      error: () => {
+        this.submitButton = 'Actualizar';
+        this.loading = false;
+
+        Swal.fire({
+          title: '¡Ops!',
+          background: '#0d121d',
+          text: 'Ocurrió un error al actualizar la sala.',
+          icon: 'error',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      },
+    });
+  }
+
+  public regresar() {
+    this.route.navigateByUrl('/salas')
+  }
+
+  verPayloadSala(): void {
+    const payload = {
+      ...this.zonaForm.getRawValue(),
+      estructuraJSON: this.buildPlanoJson()
+    };
+
+    console.log(payload);
   }
 }

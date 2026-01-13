@@ -20,10 +20,10 @@
           </div>
         </div>
         <div class="row mt-3 gy-4">
-          <form [formGroup]="salaForm">
+          <form [formGroup]="zonaForm">
             <div class="col-12">
               <div class="row g-3">
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-lg-4">
                   <label class="field">
                     <span class="field-label text-white">Nombre</span>
                     <div class="input-sleek">
@@ -33,7 +33,43 @@
                     </div>
                   </label>
                 </div>
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Nombre Comercial</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-store"></i>
+                      <input formControlName="nombreComercial" class="sleek-control" type="text"
+                        placeholder="Nombre comercial" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Cliente</span>
+
+                    <div class="input-sleek select-sleek" [class.is-open]="isIdClienteOpen"
+                      (mousedown)="toggleIdCliente($event)">
+                      <i class="fas fa-id-badge"></i>
+
+                      <div class="sleek-control select-display">
+                        <span class="select-value" [class.placeholder]="zonaForm.get('idCliente')?.value == null">
+                          {{ idClienteLabel || 'Seleccione un cliente' }}
+                        </span>
+                      </div>
+
+                      <span class="sleek-line"></span>
+
+                      <div class="select-panel" *ngIf="isIdClienteOpen" (mousedown)="$event.stopPropagation()">
+                        <button type="button" class="select-option" *ngFor="let it of idClienteItems"
+                          (mousedown)="setIdCliente(it.id, it.text, $event)">
+                          {{ it.text }}
+                        </button>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
                   <label class="field">
                     <span class="field-label text-white">Descripción</span>
                     <div class="input-sleek input-sleek--textarea">
@@ -44,235 +80,505 @@
                     </div>
                   </label>
                 </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Dirección</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-map-marker-alt"></i>
+                      <input formControlName="direccion" class="sleek-control" type="text"
+                        placeholder="Dirección completa" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">País</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-flag"></i>
+                      <input formControlName="pais" class="sleek-control" type="text" placeholder="País" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Estado</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-map"></i>
+                      <input formControlName="estado" class="sleek-control" type="text" placeholder="Estado" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Municipio</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-city"></i>
+                      <input formControlName="municipio" class="sleek-control" type="text" placeholder="Municipio" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Colonia</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-road"></i>
+                      <input formControlName="colonia" class="sleek-control" type="text" placeholder="Colonia" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Calle</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-road"></i>
+                      <input formControlName="calle" class="sleek-control" type="text" placeholder="Calle" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Número Exterior</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-hashtag"></i>
+                      <input formControlName="numeroExterior" class="sleek-control" type="text"
+                        placeholder="No. exterior" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Número Interior</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-hashtag"></i>
+                      <input formControlName="numeroInterior" class="sleek-control" type="text"
+                        placeholder="No. interior" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Código Postal</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-mail-bulk"></i>
+                      <input formControlName="codigoPostal" class="sleek-control" type="text"
+                        placeholder="Código postal" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Referencias</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-info-circle"></i>
+                      <input formControlName="referencias" class="sleek-control" type="text"
+                        placeholder="Referencias" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">RFC Facturación</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-id-card"></i>
+                      <input formControlName="rfcFacturacion" class="sleek-control" type="text" placeholder="RFC" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Razón Social Facturación</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-building"></i>
+                      <input formControlName="razonSocialFacturacion" class="sleek-control" type="text"
+                        placeholder="Razón social" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Régimen Fiscal</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-file-invoice"></i>
+                      <input formControlName="regimenFiscal" class="sleek-control" type="text"
+                        placeholder="Régimen fiscal" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Uso CFDI</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-receipt"></i>
+                      <input formControlName="usoCFDI" class="sleek-control" type="text" placeholder="Uso CFDI" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Lugar Expedición</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-map-pin"></i>
+                      <input formControlName="lugarExpedicion" class="sleek-control" type="text"
+                        placeholder="Lugar expedición" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Metros Cuadrados</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-ruler-combined"></i>
+                      <input formControlName="metrosCuadrados" class="sleek-control" type="number" placeholder="0" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Número Niveles</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-layer-group"></i>
+                      <input formControlName="numeroNiveles" class="sleek-control" type="number" placeholder="0" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Capacidad Personas</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-users"></i>
+                      <input formControlName="capacidadPersonas" class="sleek-control" type="number" placeholder="0" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Plano Arquitectónico</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-drafting-compass"></i>
+                      <input formControlName="planoArquitectonico" class="sleek-control" type="text"
+                        placeholder="Plano arquitectónico" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Plano Distribución</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-project-diagram"></i>
+                      <input formControlName="planoDistribucion" class="sleek-control" type="text"
+                        placeholder="Plano distribución" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Fecha Vencimiento Licencia</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-calendar-alt"></i>
+                      <input formControlName="fechaVencimientoLicencia" class="sleek-control" type="datetime-local" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Moneda Principal</span>
+
+                    <div class="input-sleek select-sleek" [class.is-open]="isIdMonedaOpen"
+                      (mousedown)="toggleIdMoneda($event)">
+                      <i class="fas fa-coins"></i>
+
+                      <div class="sleek-control select-display">
+                        <span class="select-value"
+                          [class.placeholder]="zonaForm.get('idMonedaPrincipal')?.value == null">
+                          {{ idMonedaLabel || 'Seleccione una moneda' }}
+                        </span>
+                      </div>
+
+                      <span class="sleek-line"></span>
+
+                      <div class="select-panel" *ngIf="isIdMonedaOpen" (mousedown)="$event.stopPropagation()">
+                        <button type="button" class="select-option" *ngFor="let it of idMonedaItems"
+                          (mousedown)="setIdMoneda(it.id, it.text, $event)">
+                          {{ it.text }}
+                        </button>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Fecha Inicio Contrato</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-calendar-check"></i>
+                      <input formControlName="fechaInicioContrato" class="sleek-control" type="datetime-local" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Fecha Fin Contrato</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-calendar-times"></i>
+                      <input formControlName="fechaFinContrato" class="sleek-control" type="datetime-local" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Estatus Licencia</span>
+
+                    <div class="input-sleek select-sleek" [class.is-open]="isIdEstatusLicOpen"
+                      (mousedown)="toggleIdEstatusLic($event)">
+                      <i class="fas fa-toggle-on"></i>
+
+                      <div class="sleek-control select-display">
+                        <span class="select-value"
+                          [class.placeholder]="zonaForm.get('idEstatusLicencia')?.value == null">
+                          {{ idEstatusLicLabel || 'Seleccione un estatus' }}
+                        </span>
+                      </div>
+
+                      <span class="sleek-line"></span>
+
+                      <div class="select-panel" *ngIf="isIdEstatusLicOpen" (mousedown)="$event.stopPropagation()">
+                        <button type="button" class="select-option" *ngFor="let it of idEstatusLicItems"
+                          (mousedown)="setIdEstatusLic(it.id, it.text, $event)">
+                          {{ it.text }}
+                        </button>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Motivo Suspensión</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      <input formControlName="motivoSuspension" class="sleek-control" type="text"
+                        placeholder="Motivo suspensión" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 mt-2">
+                  <div class="pf-uploader" [class.has-file]="logotipoPreviewUrl || logotipoFileName"
+                    [class.dragging]="logotipoDragging" (click)="openLogotipoFilePicker()"
+                    (dragover)="onLogotipoDragOver($event)" (dragleave)="onLogotipoDragLeave($event)"
+                    (drop)="onLogotipoDrop($event)">
+                    <div class="pf-top">
+                      <div class="pf-title">
+                        <i class="fas fa-image"></i>
+                        <span>Logotipo</span>
+                      </div>
+                      <div class="pf-badge">3 MB</div>
+                    </div>
+                    <div class="pf-mid" *ngIf="logotipoPreviewUrl || logotipoFileName; else logotipoEmpty">
+                      <div class="pf-hero" *ngIf="logotipoPreviewUrl">
+                        <img [src]="logotipoPreviewUrl" alt="Logotipo" />
+                      </div>
+                      <div class="file-name" *ngIf="logotipoFileName">{{ logotipoFileName }}</div>
+                      <div class="pf-actions" (click)="$event.stopPropagation()">
+                        <button type="button" class="pf-btn pf-btn--primary" (click)="openLogotipoFilePicker()">
+                          <i class="fas fa-sync-alt"></i>
+                          <span>Reemplazar</span>
+                        </button>
+                        <button type="button" class="pf-btn pf-btn--ghost" (click)="clearLogotipo($event)">
+                          <i class="fas fa-trash"></i>
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
+                    </div>
+                    <ng-template #logotipoEmpty>
+                      <div class="pf-empty">
+                        <div class="pf-orb">
+                          <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="pf-copy">
+                          <div class="pf-main">Subir logotipo</div>
+                          <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP</div>
+                        </div>
+                        <div class="pf-cta">
+                          <span>Seleccionar</span>
+                          <i class="fas fa-arrow-right"></i>
+                        </div>
+                      </div>
+                    </ng-template>
+                    <input type="file" #logotipoFileInput accept=".jpg,.jpeg,.png,.webp" hidden
+                      (change)="onLogotipoSelected($event)" />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 mt-2">
+                  <div class="pf-uploader" [class.has-file]="licenciaPreviewUrl || licenciaFileName"
+                    [class.dragging]="licenciaDragging" (click)="openLicenciaFilePicker()"
+                    (dragover)="onLicenciaDragOver($event)" (dragleave)="onLicenciaDragLeave($event)"
+                    (drop)="onLicenciaDrop($event)">
+                    <div class="pf-top">
+                      <div class="pf-title">
+                        <i class="fas fa-file-signature"></i>
+                        <span>Licencia de Operación</span>
+                      </div>
+                      <div class="pf-badge">5 MB</div>
+                    </div>
+                    <div class="pf-mid" *ngIf="licenciaPreviewUrl || licenciaFileName; else licenciaEmpty">
+                      <div class="pf-hero" *ngIf="licenciaPreviewUrl">
+                        <img [src]="licenciaPreviewUrl" alt="Licencia" />
+                      </div>
+                      <div class="file-name" *ngIf="licenciaFileName">{{ licenciaFileName }}</div>
+                      <div class="pf-actions" (click)="$event.stopPropagation()">
+                        <button type="button" class="pf-btn pf-btn--primary" (click)="openLicenciaFilePicker()">
+                          <i class="fas fa-sync-alt"></i>
+                          <span>Reemplazar</span>
+                        </button>
+                        <button type="button" class="pf-btn pf-btn--ghost" (click)="clearLicencia($event)">
+                          <i class="fas fa-trash"></i>
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
+                    </div>
+                    <ng-template #licenciaEmpty>
+                      <div class="pf-empty">
+                        <div class="pf-orb">
+                          <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="pf-copy">
+                          <div class="pf-main">Subir licencia</div>
+                          <div class="pf-sub">Arrastra o haz clic · PDF/JPG/PNG/WEBP</div>
+                        </div>
+                        <div class="pf-cta">
+                          <span>Seleccionar</span>
+                          <i class="fas fa-arrow-right"></i>
+                        </div>
+                      </div>
+                    </ng-template>
+                    <input type="file" #licenciaFileInput accept=".pdf,.jpg,.jpeg,.png,.webp" hidden
+                      (change)="onLicenciaSelected($event)" />
+                  </div>
+                </div>
               </div>
               <div class="col-12 mt-4">
                 <div class="plano-card">
-                  <div class="plano-head">
-                    <div class="plano-title">
-                      <div class="plano-badge">
-                        <i class="fas fa-dice"></i>
-                      </div>
-                      <div class="plano-txt">
-                        <h5>Plano de Sala</h5>
-                        <p>Arrastra, crea zonas, edita nombres, coloca entrada/salida, usa zoom y revisa el minimapa.
-                        </p>
-                      </div>
-                    </div>
-                    <div class="plano-actions">
-                      <div class="plano-select">
-                        <i class="fas fa-slot-machine"></i>
-                        <select class="plano-select__control"
-                          (change)="addMachine($any($event.target).value); $any($event.target).value = ''">
-                          <option value="" selected disabled>Agregar máquina</option>
-                          <option value="Tragamonedas">Tragamonedas</option>
-                          <option value="Ruleta">Ruleta</option>
-                          <option value="Blackjack">Blackjack</option>
-                          <option value="Poker">Poker</option>
-                        </select>
-                      </div>
-                      <div class="plano-select">
-                        <i class="fas fa-layer-group"></i>
-                        <select class="plano-select__control"
-                          (change)="addZone($any($event.target).value); $any($event.target).value = ''">
-                          <option value="" selected disabled>Agregar zona</option>
-                          <option value="Sala">Sala / Área general</option>
-                          <option value="VIP">VIP</option>
-                          <option value="Caja">Caja</option>
-                          <option value="Baños">Baños</option>
-                        </select>
-                      </div>
-                      <div class="plano-sep"></div>
-                      <button type="button" class="plano-btn plano-btn--ghost" (click)="startPlacingDoor('ENTRADA')">
-                        <i class="fas fa-door-open"></i><span>Entrada</span>
-                      </button>
-                      <button type="button" class="plano-btn plano-btn--ghost" (click)="startPlacingDoor('SALIDA')">
-                        <i class="fas fa-door-closed"></i><span>Salida</span>
-                      </button>
-                      <div class="plano-sep"></div>
-                      <button type="button" class="plano-btn plano-btn--danger" (click)="limpiarPlano()">
-                        <i class="fas fa-broom"></i>
-                        <span>Limpiar</span>
-                      </button>
-                      <div class="plano-sep"></div>
-                      <div class="zoom-box">
-                        <button type="button" class="plano-btn plano-btn--ghost" (click)="zoomOut()">
-                          <i class="fas fa-minus"></i>
-                        </button>
-                        <span class="zoom-val">{{ (zoom * 100) | number:'1.0-0' }}%</span>
-                        <button type="button" class="plano-btn plano-btn--ghost" (click)="zoomIn()">
-                          <i class="fas fa-plus"></i>
-                        </button>
-                        <button type="button" class="plano-btn plano-btn--ghost" (click)="resetZoom()">
-                          <i class="fas fa-crosshairs"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                   <div class="plano-wrap">
                     <div class="plano-stage-wrap">
-                      <div class="plano-stage plano-stage--wide" #stage (pointerdown)="onStagePointerDown($event)"
+                      <!-- en tu div .plano-stage agrega el cursor -->
+                      <div class="plano-stage plano-stage--wide" #stage [style.cursor]="canvasCursor"
+                        (pointerdown)="onCanvasPointerDown($event)" (pointermove)="onCanvasPointerMove($event)"
+                        (pointerup)="onCanvasPointerUp($event)" (pointercancel)="onCanvasPointerUp($event)"
+                        (pointerleave)="onCanvasPointerUp($event)" (wheel)="onCanvasWheel($event)"
                         (click)="clearSelection()">
+
                         <div class="plano-content" [style.transform]="'scale(' + zoom + ')'"
                           [style.transformOrigin]="'0 0'">
-                          <div class="snap-line snap-line--v" *ngIf="snapGuide.showV" [style.left.px]="snapGuide.v">
-                          </div>
-                          <div class="snap-line snap-line--h" *ngIf="snapGuide.showH" [style.top.px]="snapGuide.h">
-                          </div>
-                          <div class="door" *ngIf="entrada" [style.left.px]="entrada.x" [style.top.px]="entrada.y"
-                            [style.transform]="'rotate(' + entrada.r + 'deg)'"
-                            (pointerdown)="onDoorPointerDown($event, 'ENTRADA')" (click)="$event.stopPropagation()">
-                            <i class="fas fa-door-open"></i>
-                            <span>Entrada</span>
-                            <div class="door-pop" (click)="$event.stopPropagation()"
-                              (pointerdown)="$event.stopPropagation()">
-                              <button type="button" class="door-pop-btn"
-                                (pointerdown)="$event.stopPropagation(); startHoldRotateDoor('ENTRADA', -1)"
-                                (pointerup)="$event.stopPropagation(); stopHoldRotate()"
-                                (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
-                                (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
-                                <i class="fas fa-undo"></i>
-                              </button>
-                              <button type="button" class="door-pop-btn"
-                                (pointerdown)="$event.stopPropagation(); startHoldRotateDoor('ENTRADA', 1)"
-                                (pointerup)="$event.stopPropagation(); stopHoldRotate()"
-                                (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
-                                (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
-                                <i class="fas fa-redo"></i>
-                              </button>
-                            </div>
-                          </div>
-                          <div class="door door--exit" *ngIf="salida" [style.left.px]="salida.x"
-                            [style.top.px]="salida.y" [style.transform]="'rotate(' + salida.r + 'deg)'"
-                            (pointerdown)="onDoorPointerDown($event, 'SALIDA')" (click)="$event.stopPropagation()">
-                            <i class="fas fa-door-closed"></i>
-                            <span>Salida</span>
-                            <div class="door-pop" (click)="$event.stopPropagation()"
-                              (pointerdown)="$event.stopPropagation()">
-                              <button type="button" class="door-pop-btn"
-                                (pointerdown)="$event.stopPropagation(); startHoldRotateDoor('SALIDA', -1)"
-                                (pointerup)="$event.stopPropagation(); stopHoldRotate()"
-                                (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
-                                (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
-                                <i class="fas fa-undo"></i>
-                              </button>
-                              <button type="button" class="door-pop-btn"
-                                (pointerdown)="$event.stopPropagation(); startHoldRotateDoor('SALIDA', 1)"
-                                (pointerup)="$event.stopPropagation(); stopHoldRotate()"
-                                (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
-                                (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
-                                <i class="fas fa-redo"></i>
-                              </button>
-                            </div>
-                          </div>
-                          <div class="zone" *ngFor="let z of zones" [class.is-selected]="z.id === selectedZoneId"
-                            [style.left.px]="z.x" [style.top.px]="z.y" [style.width.px]="z.w" [style.height.px]="z.h"
-                            (pointerdown)="onZonePointerDown($event, z)"
-                            (click)="$event.stopPropagation(); selectZone(z.id)">
-                            <div class="zone-head">
-                              <span class="zone-badge">{{ z.type }}</span>
-                              <button type="button" class="zone-del"
-                                (click)="$event.stopPropagation(); removeZone(z.id)">
-                                <i class="fas fa-times"></i>
-                              </button>
-                            </div>
-                            <span class="zone-hit zone-hit--n"
-                              (pointerdown)="onZoneResizePointerDown($event, z, 'n')"></span>
-                            <span class="zone-hit zone-hit--s"
-                              (pointerdown)="onZoneResizePointerDown($event, z, 's')"></span>
-                            <span class="zone-hit zone-hit--e"
-                              (pointerdown)="onZoneResizePointerDown($event, z, 'e')"></span>
-                            <span class="zone-hit zone-hit--w"
-                              (pointerdown)="onZoneResizePointerDown($event, z, 'w')"></span>
-                            <span class="zone-hit zone-hit--ne"
-                              (pointerdown)="onZoneResizePointerDown($event, z, 'ne')"></span>
-                            <span class="zone-hit zone-hit--nw"
-                              (pointerdown)="onZoneResizePointerDown($event, z, 'nw')"></span>
-                            <span class="zone-hit zone-hit--se"
-                              (pointerdown)="onZoneResizePointerDown($event, z, 'se')"></span>
-                            <span class="zone-hit zone-hit--sw"
-                              (pointerdown)="onZoneResizePointerDown($event, z, 'sw')"></span>
-                          </div>
-                          <div class="machine" *ngFor="let m of machines"
-                            [class.is-selected]="m.id === selectedMachineId" [style.left.px]="m.x" [style.top.px]="m.y"
-                            [style.width.px]="m.w" [style.height.px]="m.h"
-                            (pointerdown)="onMachinePointerDown($event, m)"
-                            (click)="$event.stopPropagation(); selectMachine(m.id)"
-                            (mouseenter)="onMachineHoverEnter(m.id)" (mouseleave)="onMachineHoverLeave(m.id)">
-                            <div class="machine-rot" [style.transform]="'rotate(' + m.r + 'deg)'">
-                              <img class="machine-img" [src]="m.img" [alt]="m.type" />
-                            </div>
-                            <div class="machine-tooltip" *ngIf="hoverId === m.id"
-                              (mouseenter)="onMachineTooltipEnter(m.id)" (mouseleave)="onMachineTooltipLeave(m.id)"
-                              (click)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()">
-                              <div class="tt-title">{{ m.type }} #{{ m.label }}</div>
-                              <div class="tt-row tt-row--name">
-                                <span>Nombre</span>
-                                <ng-container *ngIf="editNameId !== m.id">
-                                  <b class="tt-name">
-                                    <span>{{ m.name }}</span>
-                                    <button type="button" class="tt-edit"
-                                      (click)="$event.stopPropagation(); startEditName(m.id)">
-                                      <i class="fas fa-pencil-alt"></i>
-                                    </button>
-                                  </b>
-                                </ng-container>
-                                <ng-container *ngIf="editNameId === m.id">
-                                  <input class="tt-input" [value]="m.name"
-                                    (keydown.enter)="commitName(m.id, $any($event.target).value)"
-                                    (blur)="commitName(m.id, $any($event.target).value)" autofocus />
-                                </ng-container>
-                              </div>
-                              <div class="tt-row"><span>N° Serie</span><b>{{ m.serial }}</b></div>
-                              <div class="tt-row"><span>Estado</span><b>{{ m.status }}</b></div>
-                              <div class="tt-row tt-row--rotate">
-                                <span>Girar</span>
-                                <div class="tt-rotate">
-                                  <button type="button" class="tt-rotate-btn"
-                                    (pointerdown)="$event.stopPropagation(); selectMachine(m.id); startHoldRotateSelected(-1)"
-                                    (pointerup)="$event.stopPropagation(); stopHoldRotate()"
-                                    (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
-                                    (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
-                                    <i class="fas fa-undo"></i>
-                                  </button>
-                                  <button type="button" class="tt-rotate-btn"
-                                    (pointerdown)="$event.stopPropagation(); selectMachine(m.id); startHoldRotateSelected(1)"
-                                    (pointerup)="$event.stopPropagation(); stopHoldRotate()"
-                                    (pointerleave)="$event.stopPropagation(); stopHoldRotate()"
-                                    (pointercancel)="$event.stopPropagation(); stopHoldRotate()">
-                                    <i class="fas fa-redo"></i>
-                                  </button>
-                                  <button type="button" class="tt-rotate-btn tt-rotate-btn--center"
-                                    (click)="$event.stopPropagation(); resetMachineRotation(m.id)">
-                                    <i class="fas fa-crosshairs"></i>
-                                    <span>Centrar</span>
-                                  </button>
-                                  <button type="button" class="tt-rotate-btn tt-rotate-btn--danger"
-                                    (click)="$event.stopPropagation(); selectMachine(m.id); removeSelectedMachine()">
-                                    <i class="fas fa-trash"></i>
-                                    <span>Eliminar</span>
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          <svg class="plano-canvas" [attr.width]="worldW" [attr.height]="worldH"
+                            [attr.viewBox]="'0 0 ' + worldW + ' ' + worldH" xmlns="http://www.w3.org/2000/svg">
+                            <g *ngFor="let r of rects">
+                              <rect [attr.x]="r.x" [attr.y]="r.y" [attr.width]="r.w" [attr.height]="r.h"
+                                fill="rgba(0, 209, 255, .10)" stroke="rgba(0, 209, 255, .85)" [attr.stroke-width]="r.sw"
+                                rx="6" ry="6"></rect>
+                            </g>
+
+                            <rect *ngIf="draftRect" [attr.x]="draftRect.x" [attr.y]="draftRect.y"
+                              [attr.width]="draftRect.w" [attr.height]="draftRect.h" fill="rgba(0, 209, 255, .06)"
+                              stroke="rgba(0, 209, 255, .95)" [attr.stroke-width]="draftRect.sw" stroke-dasharray="8 6"
+                              rx="6" ry="6"></rect>
+
+                            <g *ngFor="let s of strokes; let i = index">
+                              <path [attr.d]="strokePath(s)" fill="none" stroke="rgba(0, 209, 255, .85)"
+                                [attr.stroke-width]="s.w" stroke-linecap="round" stroke-linejoin="round"
+                                [class.is-selected]="selectedStrokeId === s.id"
+                                [class.is-dragging]="draggingStrokeIndex !== null && selectedStrokeId === s.id">
+                              </path>
+                              <circle *ngIf="s.pts.length" class="stroke-handle-hit" [attr.cx]="s.pts[0].x"
+                                [attr.cy]="s.pts[0].y" [attr.r]="14" (pointerenter)="onEndpointEnter(i, 'start')"
+                                (pointerleave)="onEndpointLeave(i, 'start')">
+                              </circle>
+                              <circle *ngIf="s.pts.length" class="stroke-handle"
+                                [class.is-visible]="(hoveredEndpoint?.strokeIndex === i && hoveredEndpoint?.side === 'start') || (draggingEndpoint?.strokeIndex === i && draggingEndpoint?.side === 'start')"
+                                [attr.cx]="s.pts[0].x" [attr.cy]="s.pts[0].y" [attr.r]="8">
+                              </circle>
+                              <circle *ngIf="s.pts.length" class="stroke-handle-hit"
+                                [attr.cx]="s.pts[s.pts.length - 1].x" [attr.cy]="s.pts[s.pts.length - 1].y"
+                                [attr.r]="14" (pointerenter)="onEndpointEnter(i, 'end')"
+                                (pointerleave)="onEndpointLeave(i, 'end')">
+                              </circle>
+                              <circle *ngIf="s.pts.length" class="stroke-handle"
+                                [class.is-visible]="(hoveredEndpoint?.strokeIndex === i && hoveredEndpoint?.side === 'end') || (draggingEndpoint?.strokeIndex === i && draggingEndpoint?.side === 'end')"
+                                [attr.cx]="s.pts[s.pts.length - 1].x" [attr.cy]="s.pts[s.pts.length - 1].y"
+                                [attr.r]="8">
+                              </circle>
+                            </g>
+                          </svg>
                         </div>
                       </div>
                       <div class="mini">
-                        <div class="mini-title">Minimapa</div>
-                        <div class="mini-map">
-                          <div class="mini-zone" *ngFor="let z of zones" [style.left.%]="miniX(z.x)"
-                            [style.top.%]="miniY(z.y)" [style.width.%]="miniW(z.w)" [style.height.%]="miniH(z.h)"></div>
-                          <div class="mini-dot" *ngFor="let m of machines" [style.left.%]="miniX(m.x)"
-                            [style.top.%]="miniY(m.y)"></div>
-                          <div class="mini-door" *ngIf="entrada" [style.left.%]="miniX(entrada.x)"
-                            [style.top.%]="miniY(entrada.y)"></div>
-                          <div class="mini-door mini-door--exit" *ngIf="salida" [style.left.%]="miniX(salida.x)"
-                            [style.top.%]="miniY(salida.y)"></div>
-                        </div>
-                        <div class="mini-info">
-                          <div class="mi"><span>Máquinas</span><b>{{ machines.length }}</b></div>
-                          <div class="mi"><span>Zonas</span><b>{{ zones.length }}</b></div>
-                          <div class="mi"><span>Zoom</span><b>{{ (zoom * 100) | number:'1.0-0' }}%</b></div>
+                        <div class="mini-title">Herramientas</div>
+                        <div class="mini-tools">
+                          <div class="mini-tools-row">
+                            <button type="button" class="plano-btn plano-btn--ghost" [class.is-tool]="tool === 'pen'"
+                              (click)="setTool('pen')">
+                              <i class="fas fa-pen"></i><span>Pluma</span>
+                            </button>
+                            <button type="button" class="plano-btn plano-btn--ghost" [class.is-tool]="tool === 'rect'"
+                              (click)="setTool('rect')">
+                              <i class="fas fa-vector-square"></i><span>Rect</span>
+                            </button>
+                            <!-- <button type="button" class="plano-btn plano-btn--ghost" [class.is-tool]="tool === 'eraser'"
+                              (click)="setTool('eraser')">
+                              <i class="fas fa-eraser"></i><span>Borrar</span>
+                            </button> -->
+                          </div>
+                          <div class="mini-tools-row">
+                            <button type="button" class="plano-btn" (click)="undo()"
+                              [disabled]="undoStack.length === 0">
+                              <i class="fas fa-undo"></i><span>Undo</span>
+                            </button>
+                            <button type="button" class="plano-btn" (click)="redo()"
+                              [disabled]="redoStack.length === 0">
+                              <i class="fas fa-redo"></i><span>Redo</span>
+                            </button>
+                            <button type="button" class="plano-btn plano-btn--danger" (click)="clearPlan()"
+                              [disabled]="strokes.length === 0 && rects.length === 0">
+                              <i class="fas fa-broom"></i><span>Limpiar</span>
+                            </button>
+                          </div>
+                          <div class="mini-tools-row mini-tools-row--zoom">
+                            <div class="zoom-box">
+                              <button type="button" class="plano-btn plano-btn--ghost" (click)="zoomOut()"><i
+                                  class="fas fa-minus"></i></button>
+                              <span class="zoom-val">{{ (zoom * 100) | number:'1.0-0' }}%</span>
+                              <button type="button" class="plano-btn plano-btn--ghost" (click)="zoomIn()"><i
+                                  class="fas fa-plus"></i></button>
+                              <button type="button" class="plano-btn plano-btn--ghost" (click)="resetZoom()"><i
+                                  class="fas fa-crosshairs"></i></button>
+                            </div>
+                          </div>
+                          <div class="mini-info">
+                            <div class="mi"><span>Trazos</span><b>{{ strokes.length }}</b></div>
+                            <div class="mi"><span>Rect</span><b>{{ rects.length }}</b></div>
+                            <div class="mi"><span>Herr</span><b>{{ toolLabel }}</b></div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -285,11 +591,11 @@
 
         <div class="row mt-4">
           <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
-            <button (click)="submit()" type="button" class="btn-alt btn-alt--success">
-              <i class="fas fa-check"></i>
-              <span>{{ submitButton }}</span>
+            <button type="button" class="btn-alt btn-alt--info" (click)="verPayloadSala()">
+              <i class="fas fa-code"></i>
+              <span>Ver JSON</span>
             </button>
-            <button (click)="regresar()" type="button" class="btn-alt btn-alt--cancel">
+            <button type="button" class="btn-alt btn-alt--cancel">
               <i class="fas fa-times"></i>
               <span>Cancelar</span>
             </button>

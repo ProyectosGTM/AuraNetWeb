@@ -35,7 +35,7 @@ export class UsuariosService {
 	}
 
   actualizarUsuario(idUsuario: number, saveForm: any): Observable<any> {
-    return this.http.put(`${environment.API_SECURITY}/usuarios/` + idUsuario, saveForm);
+    return this.http.patch(`${environment.API_SECURITY}/usuarios/` + idUsuario, saveForm);
   }
   
   uploadFile(data: FormData): Observable<any> {

@@ -5,6 +5,7 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { ClientesService } from 'src/app/shared/services/clientes.service';
 import { PermisosService } from 'src/app/shared/services/permisos.service';
 import { RolesService } from 'src/app/shared/services/roles.service';
+import { SalaService } from 'src/app/shared/services/salas.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import Swal from 'sweetalert2';
 
@@ -24,6 +25,7 @@ export class AgregarUsuarioComponent implements OnInit {
   public listaModulos: any[] = [];
   public listaRoles: any;
   public listaClientes: any;
+  public listaSalas: any;
 
   clienteDisplayExpr = (c: any) =>
     c ? `${c.nombre || ''} ${c.apellidoPaterno || ''}`.trim() : '';
@@ -37,7 +39,8 @@ export class AgregarUsuarioComponent implements OnInit {
     private activatedRouted: ActivatedRoute,
     private permService: PermisosService,
     private rolService: RolesService,
-    private clienService: ClientesService
+    private clienService: ClientesService,
+    private salaService: SalaService
   ) { }
 
   ngOnInit(): void {
@@ -45,6 +48,7 @@ export class AgregarUsuarioComponent implements OnInit {
     this.obtenerRoles();
     this.obtenerModulos();
     this.initForm();
+    this.obtenerSalas()
 
     this.activatedRouted.params.subscribe((params) => {
       this.idUsuario = params['idUsuario'];
@@ -57,19 +61,17 @@ export class AgregarUsuarioComponent implements OnInit {
   }
 
   @HostListener('document:mousedown', ['$event'])
-onDocMouseDown(ev: MouseEvent) {
-  const target = ev.target as HTMLElement;
-
-  // si el click NO fue dentro de un select custom, cierra todos
-  if (!target.closest('.select-sleek')) {
-    this.closeSelects();
+  onDocMouseDown(ev: MouseEvent) {
+    const target = ev.target as HTMLElement;
+    if (!target.closest('.select-sleek')) {
+      this.closeSelects();
+    }
   }
-}
 
-private closeSelects() {
-  this.isRolOpen = false;
-  this.isClienteOpen = false;
-}
+  private closeSelects() {
+    this.isRolOpen = false;
+    this.isClienteOpen = false;
+  }
 
 
   passwordsMatchValidator(formGroup: FormGroup) {
@@ -93,11 +95,23 @@ private closeSelects() {
         emailConfirmado: [1],
         estatus: [1],
         idCliente: [null, [Validators.required]],
+        idSala: [null, [Validators.required]],
         permisosIds: this.fb.control<number[]>([]),
       },
       { validators: this.passwordsMatchValidator }
     );
   }
+
+  obtenerSalas() {
+    this.salaService.obtenerSalas().subscribe((response: any) => {
+      const data = Array.isArray(response)
+        ? response
+        : (response?.data ?? response?.result ?? response?.salas ?? []);
+
+      this.listaSalas = Array.isArray(data) ? data : [];
+    });
+  }
+
 
   obtenerModulos() {
     this.permService.obtenerPermisosAgrupados().subscribe((response: any) => {
@@ -185,6 +199,7 @@ private closeSelects() {
   }
 
   private _pendingIdRol: number | null = null;
+  private _pendingIdSala: number | null = null;
 
   obtenerUsuarioID() {
     this.usuaService.obtenerUsuario(this.idUsuario).subscribe((response: any) => {
@@ -229,6 +244,16 @@ private closeSelects() {
         if (found) this.clienteLabel = found.nombre;
       }
 
+      const idSalaNum = u?.idSala != null ? Number(u.idSala) : null;
+
+if (idSalaNum) {
+  const foundSala = (this.listaSalas || []).find((x: any) => Number(x.id) === idSalaNum);
+  if (foundSala) this.salaLabel = foundSala.nombre;
+}
+
+if (!this.listaSalas || this.listaSalas.length === 0) {
+  this._pendingIdSala = idSalaNum;
+}
 
 
       if (!this.listaRoles || this.listaRoles.length === 0) {
@@ -517,7 +542,6 @@ private closeSelects() {
     this.usuarioForm.get('logotipo')?.setErrors(null);
     this.uploadLogoAuto();
   }
-
   agregar() {
     if (this.loading) return;
 
@@ -533,6 +557,7 @@ private closeSelects() {
       userName: 'Correo electrónico',
       idRol: 'Rol',
       idCliente: 'Cliente',
+      idSala: 'Sala',
       passwordHash: 'Contraseña',
       confirmPassword: 'Confirmar contraseña',
       fotoPerfil: 'Foto de perfil',
@@ -582,15 +607,35 @@ private closeSelects() {
       return;
     }
 
-    const { confirmPassword, idCliente, idRol, permisosIds, ...rest } = this.usuarioForm.value;
 
-    const toNumOrNull = (v: any) =>
-      v === null || v === undefined || v === '' ? null : Number(v);
+    const {
+      confirmPassword,
+      permisosIds,
+      userName,
+      passwordHash,
+      nombre,
+      apellidoPaterno,
+      apellidoMaterno,
+      telefono,
+      fotoPerfil,
+      idRol,
+      idCliente,
+      idSala,
+    } = this.usuarioForm.value;
+
+    const toNumOrNull = (v: any) => (v === null || v === undefined || v === '' ? null : Number(v));
 
     const payload: any = {
-      ...rest,
-      idCliente: toNumOrNull(idCliente),
+      userName,
+      passwordHash,
+      nombre,
+      apellidoPaterno,
+      apellidoMaterno,
+      telefono,
+      fotoPerfil,
       idRol: toNumOrNull(idRol),
+      idCliente: toNumOrNull(idCliente),
+      idSala: toNumOrNull(idSala),
       permisosIds: (permisosIds || []).map((x: any) => Number(x)),
     };
 
@@ -638,8 +683,10 @@ private closeSelects() {
 
   actualizar() {
     if (this.loading) return;
+
     this.submitButton = 'Cargando...';
     this.loading = true;
+
     if (!this.inputContrasena) {
       const passCtrl = this.usuarioForm.get('passwordHash');
       const confirmCtrl = this.usuarioForm.get('confirmPassword');
@@ -648,6 +695,7 @@ private closeSelects() {
       confirmCtrl?.clearValidators();
       confirmCtrl?.updateValueAndValidity({ emitEvent: false });
     }
+
     const etiquetas: Record<string, string> = {
       nombre: 'Nombre',
       apellidoPaterno: 'Apellido Paterno',
@@ -655,11 +703,13 @@ private closeSelects() {
       userName: 'Correo electrónico',
       idRol: 'Rol',
       idCliente: 'Cliente',
+      idSala: 'Sala',
       passwordHash: 'Contraseña',
       confirmPassword: 'Confirmar contraseña',
       fotoPerfil: 'Foto de perfil',
       permisosIds: 'Permisos',
     };
+
     const camposFaltantes: string[] = [];
     Object.keys(this.usuarioForm.controls).forEach((key) => {
       if (!this.inputContrasena && (key === 'passwordHash' || key === 'confirmPassword')) return;
@@ -668,13 +718,16 @@ private closeSelects() {
         camposFaltantes.push(etiquetas[key] || key);
       }
     });
+
     const listaMensajes: string[] = [...camposFaltantes];
     if (this.inputContrasena && this.usuarioForm.hasError('passwordMismatch')) {
       listaMensajes.push('Las contraseñas no coinciden');
     }
+
     if (this.usuarioForm.invalid || listaMensajes.length > 0) {
       this.submitButton = 'Actualizar';
       this.loading = false;
+
       Swal.fire({
         title: '¡Faltan campos obligatorios!',
         background: '#0d121d',
@@ -698,27 +751,55 @@ private closeSelects() {
       });
       return;
     }
-    const { userName, confirmPassword, passwordHash, idRol, idCliente, permisosIds, ...rest } =
-      this.usuarioForm.value;
+
+    const {
+      confirmPassword,
+      permisosIds,
+      userName,
+      passwordHash,
+      nombre,
+      apellidoPaterno,
+      apellidoMaterno,
+      telefono,
+      fotoPerfil,
+      idRol,
+      idCliente,
+      idSala,
+    } = this.usuarioForm.value;
+
+    const toNumOrNull = (v: any) => (v === null || v === undefined || v === '' ? null : Number(v));
+
     const payload: any = {
-      ...rest,
-      idRol: Number(idRol),
-      idCliente: Number(idCliente),
+      userName,
+      nombre,
+      apellidoPaterno,
+      apellidoMaterno,
+      telefono,
+      fotoPerfil,
+      idRol: toNumOrNull(idRol),
+      idCliente: toNumOrNull(idCliente),
+      idSala: toNumOrNull(idSala),
       permisosIds: (permisosIds || []).map((x: any) => Number(x)),
     };
+
+    if (this.inputContrasena && passwordHash) {
+      payload.passwordHash = passwordHash;
+    }
+
+
     if (!payload.permisosIds || payload.permisosIds.length === 0) {
       this.submitButton = 'Actualizar';
       this.loading = false;
       this.mostrarAlertaPermisos();
       return;
     }
-    if (this.inputContrasena && passwordHash) {
-      payload.passwordHash = passwordHash;
-    }
+
+
     this.usuaService.actualizarUsuario(this.idUsuario, payload).subscribe({
       next: () => {
         this.submitButton = 'Actualizar';
         this.loading = false;
+
         Swal.fire({
           title: '¡Operación Exitosa!',
           background: '#0d121d',
@@ -727,11 +808,13 @@ private closeSelects() {
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
         });
+
         this.regresar();
       },
       error: () => {
         this.submitButton = 'Actualizar';
         this.loading = false;
+
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
@@ -743,6 +826,7 @@ private closeSelects() {
       },
     });
   }
+
 
   private mostrarAlertaPermisos(): void {
     const html = `
@@ -801,4 +885,22 @@ private closeSelects() {
     this.rolLabel = nombre;
     this.isRolOpen = false;
   }
+
+  isSalaOpen = false;
+  salaLabel = '';
+
+  toggleSala(event: MouseEvent) {
+    event.preventDefault();
+    this.isSalaOpen = !this.isSalaOpen;
+  }
+
+  setSala(id: any, nombre: string, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.usuarioForm.patchValue({ idSala: id });
+    this.salaLabel = nombre;
+    this.isSalaOpen = false;
+  }
+
 }

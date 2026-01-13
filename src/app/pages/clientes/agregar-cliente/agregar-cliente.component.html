@@ -55,8 +55,9 @@
                                         <span class="field-label text-white">RFC</span>
                                         <div class="input-sleek">
                                             <i class="fas fa-id-card"></i>
-                                            <input class="sleek-control" id="rfc" placeholder="ABC123456789"
-                                                formControlName="rfc" maxlength="13" minlength="12" (input)="sanitizeInput($event)" />
+                                            <input class="sleek-control" id="rfc" placeholder="XAXX010101000"
+                                                formControlName="rfc" maxlength="13" minlength="12"
+                                                (input)="sanitizeInput($event)" />
                                             <span class="sleek-line"></span>
                                         </div>
                                     </label>
@@ -70,9 +71,10 @@
                                             <i class="fas fa-user-tag"></i>
                                             <div class="sleek-control select-display">
                                                 <span class="select-value"
-                                                    [class.placeholder]="!clienteForm.get('tipoPersona')?.value">
+                                                    [class.placeholder]="clienteForm.get('tipoPersona')?.value == null">
                                                     {{ tipoPersonaLabel || 'Seleccione un tipo' }}
                                                 </span>
+
                                             </div>
                                             <span class="sleek-line"></span>
                                             <div class="select-panel" *ngIf="isTipoPersonaOpen"
@@ -108,7 +110,7 @@
                                             <div class="input-sleek">
                                                 <i class="fas fa-user"></i>
                                                 <input type="text" class="sleek-control"
-                                                    formControlName="apellidoPaterno" placeholder="Rodríguez">
+                                                    formControlName="apellidoPaterno" placeholder="Pérez">
                                                 <span class="sleek-line"></span>
                                             </div>
                                         </label>
@@ -120,7 +122,7 @@
                                             <div class="input-sleek">
                                                 <i class="fas fa-user"></i>
                                                 <input type="text" class="sleek-control"
-                                                    formControlName="apellidoMaterno" placeholder="Santos">
+                                                    formControlName="apellidoMaterno" placeholder="López">
                                                 <span class="sleek-line"></span>
                                             </div>
                                         </label>
@@ -133,7 +135,7 @@
                                         <div class="input-sleek">
                                             <i class="fas fa-phone"></i>
                                             <input class="sleek-control" formControlName="telefono"
-                                                placeholder="5555555555" maxlength="10"
+                                                placeholder="5551234567" maxlength="10"
                                                 (keypress)="allowOnlyNumbers($event)">
                                             <span class="sleek-line"></span>
                                         </div>
@@ -146,164 +148,7 @@
                                         <div class="input-sleek">
                                             <i class="fas fa-envelope"></i>
                                             <input type="email" class="sleek-control" formControlName="correo"
-                                                placeholder="contacto@ejemplo.com">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 mt-4">
-                                    <div
-                                        class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div>
-                                                <h5 class="title-title">Dirección</h5>
-                                                <p class="title-subtitle">Captura la ubicación del cliente.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Estado</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-map-marker-alt"></i>
-                                            <input type="text" class="sleek-control" formControlName="estado"
-                                                placeholder="Ciudad de México">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Municipio</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-map"></i>
-                                            <input type="text" class="sleek-control" formControlName="municipio"
-                                                placeholder="Benito Juárez">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Colonia</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-city"></i>
-                                            <input type="text" class="sleek-control" formControlName="colonia"
-                                                placeholder="Del Valle">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Calle</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-road"></i>
-                                            <input type="text" class="sleek-control" formControlName="calle"
-                                                placeholder="Av. Insurgentes Sur">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Entre Calles</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-random"></i>
-                                            <input type="text" class="sleek-control" formControlName="entreCalles"
-                                                placeholder="Xola y Eugenia">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Código Postal</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-mail-bulk"></i>
-                                            <input pattern="[0-9]*" maxlength="5" (keypress)="allowOnlyNumbers($event)"
-                                                class="sleek-control" formControlName="cp" placeholder="03100">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Número Exterior</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-hashtag"></i>
-                                            <input type="text" class="sleek-control" formControlName="numeroExterior"
-                                                placeholder="123">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Número Interior</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-door-open"></i>
-                                            <input type="text" class="sleek-control" formControlName="numeroInterior"
-                                                placeholder="2B">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 mt-4">
-                                    <div
-                                        class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div>
-                                                <h5 class="title-title">Datos del Encargado</h5>
-                                                <p class="title-subtitle">Información de contacto responsable.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Nombre Encargado</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-user-tie"></i>
-                                            <input type="text" class="sleek-control" formControlName="nombreEncargado"
-                                                placeholder="Luis Hernández">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Teléfono Encargado</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-phone"></i>
-                                            <input maxlength="10" (keypress)="allowOnlyNumbers($event)"
-                                                class="sleek-control" formControlName="telefonoEncargado"
-                                                placeholder="5566778899">
-                                            <span class="sleek-line"></span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="field">
-                                        <span class="field-label text-white">Correo Electrónico Encargado</span>
-                                        <div class="input-sleek">
-                                            <i class="fas fa-envelope"></i>
-                                            <input type="email" class="sleek-control" formControlName="correoEncargado"
-                                                placeholder="luis.hdz@ejemplo.com">
+                                                placeholder="cliente@correo.com">
                                             <span class="sleek-line"></span>
                                         </div>
                                     </label>
@@ -315,239 +160,17 @@
                                         <div class="input-sleek">
                                             <i class="fas fa-globe"></i>
                                             <input type="text" class="sleek-control" formControlName="sitioWeb"
-                                                placeholder="devse.com">
+                                                placeholder="https://miempresa.com">
                                             <span class="sleek-line"></span>
                                         </div>
                                     </label>
                                 </div>
 
-                                <div class="col-12 mt-4">
-                                    <div
-                                        class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div>
-                                                <h5 class="title-title">Archivos</h5>
-                                                <p class="title-subtitle">Adjunta documentos y logotipo del cliente.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4 mt-2">
-                                    <div class="pf-uploader" [class.has-file]="logoPreviewUrl || logoFileName"
-                                        [class.dragging]="logoDragging" (click)="openLogoFilePicker()"
-                                        (dragover)="onLogoDragOver($event)" (dragleave)="onLogoDragLeave($event)"
-                                        (drop)="onLogoDrop($event)">
-
-                                        <div class="pf-top">
-                                            <div class="pf-title">
-                                                <i class="fas fa-image"></i>
-                                                <span>Logotipo</span>
-                                            </div>
-                                            <div class="pf-badge">3 MB</div>
-                                        </div>
-
-                                        <div class="pf-mid" *ngIf="logoPreviewUrl || logoFileName; else pfLogoEmpty">
-                                            <div class="pf-hero" *ngIf="logoPreviewUrl">
-                                                <img [src]="logoPreviewUrl" alt="Logotipo" />
-                                            </div>
-                                            <div class="file-name" *ngIf="logoFileName">{{ logoFileName }}</div>
-                                            <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                <button type="button" class="pf-btn pf-btn--primary"
-                                                    (click)="openLogoFilePicker()">
-                                                    <i class="fas fa-sync-alt"></i>
-                                                    <span>Reemplazar</span>
-                                                </button>
-                                                <button type="button" class="pf-btn pf-btn--ghost"
-                                                    (click)="clearLogoImage($event)">
-                                                    <i class="fas fa-trash"></i>
-                                                    <span>Eliminar</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <ng-template #pfLogoEmpty>
-                                            <div class="pf-empty">
-                                                <div class="pf-orb">
-                                                    <i class="fas fa-cloud-upload-alt"></i>
-                                                </div>
-                                                <div class="pf-copy">
-                                                    <div class="pf-main">Subir logotipo</div>
-                                                    <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP/PDF/DOC/XLS
-                                                    </div>
-                                                </div>
-                                                <div class="pf-cta">
-                                                    <span>Seleccionar</span>
-                                                    <i class="fas fa-arrow-right"></i>
-                                                </div>
-                                            </div>
-                                        </ng-template>
-
-                                        <input type="file" #logoFileInput
-                                            accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx" hidden
-                                            (change)="onLogoFileSelected($event)" />
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4 mt-2">
-                                    <div class="pf-uploader" [class.has-file]="csfPreviewUrl || csfFileName"
-                                        [class.dragging]="csfDragging" (click)="openCsfFilePicker()"
-                                        (dragover)="onCsfDragOver($event)" (dragleave)="onCsfDragLeave($event)"
-                                        (drop)="onCsfDrop($event)">
-
-                                        <div class="pf-top">
-                                            <div class="pf-title">
-                                                <i class="fas fa-file-invoice"></i>
-                                                <span>Constancia de Situación Fiscal</span>
-                                            </div>
-                                            <div class="pf-badge">PDF</div>
-                                        </div>
-
-                                        <div class="pf-mid" *ngIf="csfPreviewUrl || csfFileName; else pfCsfEmpty">
-                                            <div class="pf-hero" *ngIf="csfPreviewUrl">
-                                                <img [src]="csfPreviewUrl" alt="Constancia" />
-                                            </div>
-                                            <div class="file-name" *ngIf="csfFileName">{{ csfFileName }}</div>
-                                            <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                <button type="button" class="pf-btn pf-btn--primary"
-                                                    (click)="openCsfFilePicker()">
-                                                    <i class="fas fa-sync-alt"></i>
-                                                    <span>Reemplazar</span>
-                                                </button>
-                                                <button type="button" class="pf-btn pf-btn--ghost"
-                                                    (click)="clearCsfFile($event)">
-                                                    <i class="fas fa-trash"></i>
-                                                    <span>Eliminar</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <ng-template #pfCsfEmpty>
-                                            <div class="pf-empty">
-                                                <div class="pf-orb">
-                                                    <i class="fas fa-cloud-upload-alt"></i>
-                                                </div>
-                                                <div class="pf-copy">
-                                                    <div class="pf-main">Subir constancia</div>
-                                                    <div class="pf-sub">Arrastra o haz clic · PDF</div>
-                                                </div>
-                                                <div class="pf-cta">
-                                                    <span>Seleccionar</span>
-                                                    <i class="fas fa-arrow-right"></i>
-                                                </div>
-                                            </div>
-                                        </ng-template>
-
-                                        <input type="file" #csfFileInput accept=".pdf" hidden
-                                            (change)="onCsfFileSelected($event)" />
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4 mt-2">
-                                    <div class="pf-uploader" [class.has-file]="compDomPreviewUrl || compDomFileName"
-                                        [class.dragging]="compDomDragging" (click)="openCompDomFilePicker()"
-                                        (dragover)="onCompDomDragOver($event)" (dragleave)="onCompDomDragLeave($event)"
-                                        (drop)="onCompDomDrop($event)">
-
-                                        <div class="pf-top">
-                                            <div class="pf-title">
-                                                <i class="fas fa-home"></i>
-                                                <span>Comprobante de Domicilio</span>
-                                            </div>
-                                            <div class="pf-badge">PDF</div>
-                                        </div>
-                                        <div class="pf-mid"
-                                            *ngIf="compDomPreviewUrl || compDomFileName; else pfCompDomEmpty">
-                                            <div class="pf-hero" *ngIf="compDomPreviewUrl">
-                                                <img [src]="compDomPreviewUrl" alt="Comprobante de Domicilio" />
-                                            </div>
-                                            <div class="file-name" *ngIf="compDomFileName">{{ compDomFileName }}</div>
-                                            <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                <button type="button" class="pf-btn pf-btn--primary"
-                                                    (click)="openCompDomFilePicker()">
-                                                    <i class="fas fa-sync-alt"></i>
-                                                    <span>Reemplazar</span>
-                                                </button>
-                                                <button type="button" class="pf-btn pf-btn--ghost"
-                                                    (click)="clearCompDomFile($event)">
-                                                    <i class="fas fa-trash"></i>
-                                                    <span>Eliminar</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <ng-template #pfCompDomEmpty>
-                                            <div class="pf-empty">
-                                                <div class="pf-orb">
-                                                    <i class="fas fa-cloud-upload-alt"></i>
-                                                </div>
-                                                <div class="pf-copy">
-                                                    <div class="pf-main">Subir comprobante</div>
-                                                    <div class="pf-sub">Arrastra o haz clic · PDF</div>
-                                                </div>
-                                                <div class="pf-cta">
-                                                    <span>Seleccionar</span>
-                                                    <i class="fas fa-arrow-right"></i>
-                                                </div>
-                                            </div>
-                                        </ng-template>
-                                        <input type="file" #compDomFileInput accept=".pdf" hidden
-                                            (change)="onCompDomFileSelected($event)" />
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-4 mt-2">
-                                    <div class="pf-uploader" [class.has-file]="actaPreviewUrl || actaFileName"
-                                        [class.dragging]="actaDragging" (click)="openActaFilePicker()"
-                                        (dragover)="onActaDragOver($event)" (dragleave)="onActaDragLeave($event)"
-                                        (drop)="onActaDrop($event)">
-
-                                        <div class="pf-top">
-                                            <div class="pf-title">
-                                                <i class="fas fa-file-contract"></i>
-                                                <span>Acta Constitutiva</span>
-                                            </div>
-                                            <div class="pf-badge">PDF</div>
-                                        </div>
-                                        <div class="pf-mid" *ngIf="actaPreviewUrl || actaFileName; else pfActaEmpty">
-                                            <div class="pf-hero" *ngIf="actaPreviewUrl">
-                                                <img [src]="actaPreviewUrl" alt="Acta Constitutiva" />
-                                            </div>
-                                            <div class="file-name" *ngIf="actaFileName">{{ actaFileName }}</div>
-                                            <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                <button type="button" class="pf-btn pf-btn--primary"
-                                                    (click)="openActaFilePicker()">
-                                                    <i class="fas fa-sync-alt"></i>
-                                                    <span>Reemplazar</span>
-                                                </button>
-                                                <button type="button" class="pf-btn pf-btn--ghost"
-                                                    (click)="clearActaFile($event)">
-                                                    <i class="fas fa-trash"></i>
-                                                    <span>Eliminar</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <ng-template #pfActaEmpty>
-                                            <div class="pf-empty">
-                                                <div class="pf-orb">
-                                                    <i class="fas fa-cloud-upload-alt"></i>
-                                                </div>
-                                                <div class="pf-copy">
-                                                    <div class="pf-main">Subir acta</div>
-                                                    <div class="pf-sub">Arrastra o haz clic · PDF</div>
-                                                </div>
-                                                <div class="pf-cta">
-                                                    <span>Seleccionar</span>
-                                                    <i class="fas fa-arrow-right"></i>
-                                                </div>
-                                            </div>
-                                        </ng-template>
-                                        <input type="file" #actaFileInput accept=".pdf" hidden
-                                            (change)="onActaFileSelected($event)" />
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </form>
                 </div>
+
                 <div class="row mt-4">
                     <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
                         <button (click)="submit()" type="button" class="btn-alt btn-alt--success">
@@ -560,6 +183,7 @@
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
