@@ -139,7 +139,7 @@ export class AgregarRolComponent implements OnInit {
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: `Ocurrió un error al agregar el rol.`,
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
@@ -212,7 +212,7 @@ export class AgregarRolComponent implements OnInit {
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: `Ocurrió un error al actualizar el rol.`,
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',

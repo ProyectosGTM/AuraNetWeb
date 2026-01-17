@@ -26,6 +26,14 @@ export class AgregarClienteComponent implements OnInit {
   previewUrl: string | ArrayBuffer | null = null;
   clienteDisplayExpr = (c: any) => c ? `${c.nombre || ''} ${c.apellidoPaterno || ''} ${c.apellidoMaterno || ''}`.trim() : '';
   tipoPersonaItems = [{ id: 1, text: 'Física' }, { id: 2, text: 'Moral' }];
+  // public showRol: any;
+
+  // Custom select properties
+  isCuentaPadreOpen = false;
+  cuentaPadreLabel = '';
+
+  isTipoPersonaOpen = false;
+  tipoPersonaLabel = '';
 
   constructor(
     private fb: FormBuilder,
@@ -35,7 +43,14 @@ export class AgregarClienteComponent implements OnInit {
     private route: Router,
     private usuaService: UsuariosService,
     private users: AuthenticationService,
-  ) { }
+  ) {
+    // const user = this.users.getUser();
+    // if(user.rol.nombre == 'SA' ){
+    //   this.showRol = true;
+    // } else {
+    //   this.showRol = false;
+    // }
+  }
 
   ngOnInit(): void {
     this.obtenerClientes();
@@ -49,84 +64,93 @@ export class AgregarClienteComponent implements OnInit {
     });
   }
 
-  isTipoPersonaOpen = false;
-  tipoPersonaLabel = '';
-  private _pendingTipoPersona: number | null = null;
-
-
-  isCuentaPadreOpen = false;
-  cuentaPadreLabel = '';
-  private _pendingIdPadre: number | null = null;
-
   obtenerClientes() {
     this.clieService.obtenerClientes().subscribe((response) => {
-      const raw = (response as any)?.data ?? response ?? [];
-
-      this.listaClientes = (raw || []).map((c: any) => ({
+      this.listaClientes = (response.data || []).map((c: any) => ({
         ...c,
         id: Number(c.id),
       }));
-
-      // ✅ igual que los demás: si ya tenía idPadre, ahora pinta label
-      const id = this._pendingIdPadre ?? Number(this.clienteForm?.get('idPadre')?.value ?? 0);
-      if (id) {
-        const padre = this.listaClientes.find((x: any) => x.id === Number(id));
-        if (padre) {
-          this.cuentaPadreLabel = this.clienteDisplayExpr(padre);
-          this._pendingIdPadre = null;
-        }
-      }
     });
   }
-
 
   obtenerClienteID() {
     this.clieService.obtenerCliente(this.idCliente).subscribe((response: any) => {
       const d = response?.data ?? {};
-      const tipoNum = d?.tipoPersona != null && d?.tipoPersona !== '' ? Number(d.tipoPersona) : null;
 
       this.clienteForm.patchValue({
         idPadre: Number(d.idPadre ?? 0),
         rfc: d.rfc ?? '',
         tipoPersona: d.tipoPersona ?? null,
         estatus: d.estatus ?? 1,
-        // logotipo: d.logotipo ?? null,
+        logotipo: d.logotipo ?? null,
         nombre: d.nombre ?? '',
         apellidoPaterno: d.apellidoPaterno ?? null,
         apellidoMaterno: d.apellidoMaterno ?? null,
         telefono: d.telefono ?? '',
         correo: d.correo ?? '',
-        // estado: d.estado ?? '',
-        // municipio: d.municipio ?? '',
-        // colonia: d.colonia ?? '',
-        // calle: d.calle ?? '',
-        // entreCalles: d.entreCalles ?? '',
-        // numeroExterior: d.numeroExterior ?? '',
-        // numeroInterior: d.numeroInterior ?? '',
-        // cp: d.cp ?? '',
-        // nombreEncargado: d.nombreEncargado ?? '',
-        // telefonoEncargado: d.telefonoEncargado ?? '',
-        // correoEncargado: d.correoEncargado ?? '',
+        estado: d.estado ?? '',
+        municipio: d.municipio ?? '',
+        colonia: d.colonia ?? '',
+        calle: d.calle ?? '',
+        entreCalles: d.entreCalles ?? '',
+        numeroExterior: d.numeroExterior ?? '',
+        numeroInterior: d.numeroInterior ?? '',
+        cp: d.cp ?? '',
+        nombreEncargado: d.nombreEncargado ?? '',
+        telefonoEncargado: d.telefonoEncargado ?? '',
+        correoEncargado: d.correoEncargado ?? '',
         sitioWeb: d.sitioWeb ?? '',
-        // constanciaSituacionFiscal: d.constanciaSituacionFiscal ?? null,
-        // comprobanteDomicilio: d.comprobanteDomicilio ?? null,
-        // actaConstitutiva: d.actaConstitutiva ?? null,
+        constanciaSituacionFiscal: d.constanciaSituacionFiscal ?? null,
+        comprobanteDomicilio: d.comprobanteDomicilio ?? null,
+        actaConstitutiva: d.actaConstitutiva ?? null,
       });
-      const found = (this.tipoPersonaItems || []).find(t => Number(t.id) === Number(tipoNum));
-    this.tipoPersonaLabel = found ? found.text : '';
+      this.originalDocs = {
+        logotipo: (d.logotipo && String(d.logotipo).trim()) ? d.logotipo : '',
+        constanciaSituacionFiscal: d.constanciaSituacionFiscal ?? '',
+        comprobanteDomicilio: d.comprobanteDomicilio ?? '',
+        actaConstitutiva: d.actaConstitutiva ?? '',
+      };
 
-    this.clienteForm.get('tipoPersona')?.updateValueAndValidity({ emitEvent: false });
+      // Cargar previews de imágenes si existen
+      if (d.logotipo && this.isImageUrl(String(d.logotipo))) {
+        this.logoPreviewUrl = d.logotipo;
+      }
+      if (d.constanciaSituacionFiscal && this.isImageUrl(String(d.constanciaSituacionFiscal))) {
+        this.csfPreviewUrl = d.constanciaSituacionFiscal;
+      }
+      if (d.comprobanteDomicilio && this.isImageUrl(String(d.comprobanteDomicilio))) {
+        this.compDomPreviewUrl = d.comprobanteDomicilio;
+      }
+      if (d.actaConstitutiva && this.isImageUrl(String(d.actaConstitutiva))) {
+        this.actaPreviewUrl = d.actaConstitutiva;
+      }
+
+      // Establecer labels para selects personalizados
+      const idPadre = Number(d.idPadre ?? 0);
+      if (idPadre && this.listaClientes?.length > 0) {
+        const found = this.listaClientes.find((c: any) => Number(c.id) === idPadre);
+        if (found) {
+          this.cuentaPadreLabel = this.clienteDisplayExpr(found);
+        }
+      }
+
+      const tipoPersona = Number(d.tipoPersona ?? 0);
+      if (tipoPersona) {
+        const found = this.tipoPersonaItems.find((t: any) => t.id === tipoPersona);
+        if (found) {
+          this.tipoPersonaLabel = found.text;
+        }
+      }
     });
   }
-
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
       this.selectedFileName = file.name;
-      this.clienteForm.patchValue({ Logotipo: file });
-      this.clienteForm.get('Logotipo')?.markAsTouched();
-      this.clienteForm.get('Logotipo')?.updateValueAndValidity();
+      this.clienteForm.patchValue({ logotipo: file });
+      this.clienteForm.get('logotipo')?.markAsTouched();
+      this.clienteForm.get('logotipo')?.updateValueAndValidity();
 
       const reader = new FileReader();
       reader.onload = () => {
@@ -145,12 +169,58 @@ export class AgregarClienteComponent implements OnInit {
     });
   }
 
+  // Custom select methods
+  @HostListener('document:mousedown', ['$event'])
+  onDocClickCloseSelects(event: MouseEvent) {
+    if (!(event.target as HTMLElement).closest('.select-sleek')) {
+      this.closeAllSelects();
+    }
+  }
+
+  closeAllSelects() {
+    this.isCuentaPadreOpen = false;
+    this.isTipoPersonaOpen = false;
+  }
+
+  toggleCuentaPadre(event: MouseEvent) {
+    event.preventDefault();
+    this.closeAllSelects();
+    this.isCuentaPadreOpen = !this.isCuentaPadreOpen;
+  }
+
+  setCuentaPadre(id: any, label: string, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.clienteForm.patchValue({ idPadre: id });
+    this.cuentaPadreLabel = label;
+    this.isCuentaPadreOpen = false;
+  }
+
+  toggleTipoPersona(event: MouseEvent) {
+    event.preventDefault();
+    this.closeAllSelects();
+    this.isTipoPersonaOpen = !this.isTipoPersonaOpen;
+  }
+
+  setTipoPersona(id: any, text: string, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.clienteForm.patchValue({ tipoPersona: id });
+    this.tipoPersonaLabel = text;
+    this.isTipoPersonaOpen = false;
+    this.onTipoPersonaChange(null);
+  }
+
   onTipoPersonaChange(_event: any) {
     const value: number | null = this.clienteForm.get('tipoPersona')!.value;
 
     if (value === 1) {
-      this.clienteForm.get('apellidoPaterno')?.setValidators([Validators.required]);
-      this.clienteForm.get('apellidoMaterno')?.setValidators([Validators.required]);
+      this.clienteForm
+        .get('apellidoPaterno')
+        ?.setValidators([Validators.required]);
+      this.clienteForm
+        .get('apellidoMaterno')
+        ?.setValidators([Validators.required]);
     } else if (value === 2) {
       this.clienteForm.get('apellidoPaterno')?.clearValidators();
       this.clienteForm.get('apellidoMaterno')?.clearValidators();
@@ -168,7 +238,9 @@ export class AgregarClienteComponent implements OnInit {
     const inputElement = event.target as HTMLInputElement;
     const sanitizedValue = inputElement.value.replace(/[^A-Za-z0-9]/g, '');
     inputElement.value = sanitizedValue.slice(0, 13);
-    this.clienteForm.get('RFC')?.setValue(inputElement.value, { emitEvent: false });
+    this.clienteForm
+      .get('rfc')
+      ?.setValue(inputElement.value, { emitEvent: false });
   }
 
   allowOnlyNumbers(event: KeyboardEvent): void {
@@ -187,30 +259,29 @@ export class AgregarClienteComponent implements OnInit {
       rfc: ['', Validators.required],
       tipoPersona: [null, Validators.required],
       estatus: [1, Validators.required],
-      // logotipo: [this.DEFAULT_LOGO_URL],
-      // constanciaSituacionFiscal: [null, Validators.required],
-      // comprobanteDomicilio: [null, Validators.required],
-      // actaConstitutiva: [null, Validators.required],
+      logotipo: [this.DEFAULT_LOGO_URL],
+      constanciaSituacionFiscal: [null, Validators.required],
+      comprobanteDomicilio: [null, Validators.required],
+      actaConstitutiva: [null, Validators.required],
       nombre: ['', Validators.required],
       apellidoPaterno: ['', Validators.required],
       apellidoMaterno: ['', Validators.required],
       telefono: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
-      // estado: ['', Validators.required],
-      // municipio: ['', Validators.required],
-      // colonia: ['', Validators.required],
-      // calle: ['', Validators.required],
-      // entreCalles: [null],
-      // numeroExterior: ['', Validators.required],
-      // numeroInterior: [null],
-      // cp: ['', Validators.required],
-      // nombreEncargado: ['', Validators.required],
-      // telefonoEncargado: ['', Validators.required],
-      // correoEncargado: ['', [Validators.required, Validators.email]],
+      estado: ['', Validators.required],
+      municipio: ['', Validators.required],
+      colonia: ['', Validators.required],
+      calle: ['', Validators.required],
+      entreCalles: [null],
+      numeroExterior: ['', Validators.required],
+      numeroInterior: [null],
+      cp: ['', Validators.required],
+      nombreEncargado: ['', Validators.required],
+      telefonoEncargado: ['', Validators.required],
+      correoEncargado: ['', [Validators.required, Validators.email]],
       sitioWeb: [null],
     });
   }
-
 
   submit() {
     this.submitButton = 'Cargando...';
@@ -220,125 +291,6 @@ export class AgregarClienteComponent implements OnInit {
     } else {
       this.agregar();
     }
-  }
-
-
-
-  private getLogotipoPadre(): string | null {
-    const id = this.clienteForm.get('idPadre')?.value;
-    if (!id) return null;
-    const padre = this.listaClientes.find(c => c.id === Number(id));
-    return padre?.logotipo || null;
-  }
-
-
-  actualizar() {
-    this.submitButton = 'Cargando...';
-    this.loading = true;
-
-    const tipo = Number(this.clienteForm.get('tipoPersona')?.value ?? null);
-    if (tipo === 1) {
-      this.clienteForm.get('apellidoPaterno')?.setValidators([Validators.required]);
-      this.clienteForm.get('apellidoMaterno')?.setValidators([Validators.required]);
-    } else if (tipo === 2) {
-      this.clienteForm.get('apellidoPaterno')?.clearValidators();
-      this.clienteForm.get('apellidoMaterno')?.clearValidators();
-      this.clienteForm.patchValue({ apellidoPaterno: null, apellidoMaterno: null });
-    }
-    this.clienteForm.get('apellidoPaterno')?.updateValueAndValidity({ emitEvent: false });
-    this.clienteForm.get('apellidoMaterno')?.updateValueAndValidity({ emitEvent: false });
-
-    if (this.clienteForm.invalid) {
-      this.submitButton = 'Actualizar';
-      this.loading = false;
-
-      const etiquetas: any = {
-        rfc: 'RFC',
-        tipoPersona: 'Tipo de Persona',
-        estatus: 'Estatus',
-        nombre: 'Nombre / Razón Social',
-        apellidoPaterno: 'Apellido Paterno',
-        apellidoMaterno: 'Apellido Materno',
-        telefono: 'Teléfono',
-        correo: 'Correo Electrónico',
-      };
-
-      const camposFaltantes: string[] = [];
-      Object.keys(this.clienteForm.controls).forEach((key) => {
-        const control = this.clienteForm.get(key);
-        if (control?.invalid && control.errors?.['required']) {
-          camposFaltantes.push(etiquetas[key] || key);
-        }
-      });
-
-      const lista = camposFaltantes
-        .map(
-          (campo, index) => `
-        <div style="padding:8px 12px;border-left:4px solid #d9534f;background:#caa8a8;text-align:center;margin-bottom:8px;border-radius:4px;">
-          <strong style="color:#b02a37;">${index + 1}. ${campo}</strong>
-        </div>`
-        )
-        .join('');
-
-      Swal.fire({
-        title: '¡Faltan campos obligatorios!',
-        background: '#0d121d',
-        html: `
-        <p style="text-align:center;font-size:15px;margin-bottom:16px;color:white">
-          Los siguientes <strong>campos obligatorios</strong> están vacíos.<br>
-          Por favor complétalos antes de continuar:
-        </p>
-        <div style="max-height:350px;overflow-y:auto;">${lista}</div>
-      `,
-        icon: 'error',
-        confirmButtonText: 'Entendido',
-        customClass: { popup: 'swal2-padding swal2-border' },
-      });
-      return;
-    }
-
-    const v = this.clienteForm.value;
-
-    const payload: any = {
-      idPadre: v.idPadre != null && v.idPadre !== '' ? Number(v.idPadre) : null,
-      rfc: v.rfc ?? '',
-      tipoPersona: v.tipoPersona != null ? Number(v.tipoPersona) : null,
-      nombre: v.nombre ?? '',
-      apellidoPaterno: v.apellidoPaterno ?? null,
-      apellidoMaterno: v.apellidoMaterno ?? null,
-      telefono: v.telefono ?? '',
-      correo: v.correo ?? '',
-      sitioWeb: v.sitioWeb ?? null,
-      estatus: v.estatus ?? 1,
-    };
-
-    this.clieService.actualizarCliente(this.idCliente, payload).subscribe(
-      () => {
-        this.submitButton = 'Actualizar';
-        this.loading = false;
-        Swal.fire({
-          title: '¡Operación Exitosa!',
-          background: '#0d121d',
-          text: 'Los datos del cliente se actualizaron correctamente.',
-          icon: 'success',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-        this.regresar();
-      },
-      () => {
-        this.submitButton = 'Actualizar';
-        this.loading = false;
-        Swal.fire({
-          title: '¡Ops!',
-          background: '#0d121d',
-          text: 'Ocurrió un error al actualizar el cliente.',
-          icon: 'error',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-      }
-    );
   }
 
   agregar() {
@@ -365,11 +317,24 @@ export class AgregarClienteComponent implements OnInit {
         rfc: 'RFC',
         tipoPersona: 'Tipo de Persona',
         estatus: 'Estatus',
+        constanciaSituacionFiscal: 'Constancia de Situación Fiscal',
+        comprobanteDomicilio: 'Comprobante de Domicilio',
+        actaConstitutiva: 'Acta Constitutiva',
         nombre: 'Nombre / Razón Social',
         apellidoPaterno: 'Apellido Paterno',
         apellidoMaterno: 'Apellido Materno',
         telefono: 'Teléfono',
         correo: 'Correo Electrónico',
+        estado: 'Estado',
+        municipio: 'Municipio',
+        colonia: 'Colonia',
+        calle: 'Calle',
+        entreCalles: 'Entre Calles',
+        numeroExterior: 'Número Exterior',
+        cp: 'Código Postal',
+        nombreEncargado: 'Nombre del Encargado',
+        telefonoEncargado: 'Teléfono del Encargado',
+        correoEncargado: 'Email del Encargado',
       };
 
       const camposFaltantes: string[] = [];
@@ -409,19 +374,16 @@ export class AgregarClienteComponent implements OnInit {
 
     if (this.clienteForm.contains('id')) this.clienteForm.removeControl('id');
     const v = this.clienteForm.value;
+    const logoFormRaw = typeof v.logotipo === 'string' ? v.logotipo.trim() : '';
+    const logoForm = logoFormRaw && logoFormRaw !== this.DEFAULT_LOGO_URL ? logoFormRaw : '';
+    const logoPadre = this.getLogotipoPadre();
 
-    const payload: any = {
-      idPadre: v.idPadre != null && v.idPadre !== '' ? Number(v.idPadre) : null,
-      rfc: v.rfc ?? '',
+    const payload = {
+      ...v,
       tipoPersona: v.tipoPersona != null ? Number(v.tipoPersona) : null,
-      nombre: v.nombre ?? '',
-      apellidoPaterno: v.apellidoPaterno ?? null,
-      apellidoMaterno: v.apellidoMaterno ?? null,
-      telefono: v.telefono ?? '',
-      correo: v.correo ?? '',
-      sitioWeb: v.sitioWeb ?? null,
-      estatus: v.estatus ?? 1,
+      logotipo: logoForm || logoPadre || null,
     };
+
 
     this.clieService.agregarCliente(payload).subscribe(
       () => {
@@ -452,6 +414,160 @@ export class AgregarClienteComponent implements OnInit {
     );
   }
 
+  private getLogotipoPadre(): string | null {
+    const id = this.clienteForm.get('idPadre')?.value;
+    if (!id) return null;
+    const padre = this.listaClientes.find(c => c.id === Number(id));
+    return padre?.logotipo || null;
+  }
+
+
+  actualizar() {
+    this.submitButton = 'Cargando...';
+    this.loading = true;
+
+    const tipo = Number(this.clienteForm.get('tipoPersona')?.value ?? null);
+    if (tipo === 1) {
+      this.clienteForm.get('apellidoPaterno')?.setValidators([Validators.required]);
+      this.clienteForm.get('apellidoMaterno')?.setValidators([Validators.required]);
+    } else if (tipo === 2) {
+      this.clienteForm.get('apellidoPaterno')?.clearValidators();
+      this.clienteForm.get('apellidoMaterno')?.clearValidators();
+      this.clienteForm.patchValue({ apellidoPaterno: null, apellidoMaterno: null });
+    }
+    this.clienteForm.get('apellidoPaterno')?.updateValueAndValidity({ emitEvent: false });
+    this.clienteForm.get('apellidoMaterno')?.updateValueAndValidity({ emitEvent: false });
+
+    if (this.clienteForm.invalid) {
+      this.submitButton = 'Actualizar';
+      this.loading = false;
+
+      const etiquetas: any = {
+        rfc: 'RFC',
+        tipoPersona: 'Tipo de Persona',
+        estatus: 'Estatus',
+        constanciaSituacionFiscal: 'Constancia de Situación Fiscal',
+        comprobanteDomicilio: 'Comprobante de Domicilio',
+        actaConstitutiva: 'Acta Constitutiva',
+        nombre: 'Nombre / Razón Social',
+        apellidoPaterno: 'Apellido Paterno',
+        apellidoMaterno: 'Apellido Materno',
+        telefono: 'Teléfono',
+        correo: 'Correo Electrónico',
+        estado: 'Estado',
+        municipio: 'Municipio',
+        colonia: 'Colonia',
+        calle: 'Calle',
+        entreCalles: 'Entre Calles',
+        numeroExterior: 'Número Exterior',
+        cp: 'Código Postal',
+        nombreEncargado: 'Nombre del Encargado',
+        telefonoEncargado: 'Teléfono del Encargado',
+        correoEncargado: 'Email del Encargado',
+      };
+
+      const camposFaltantes: string[] = [];
+      Object.keys(this.clienteForm.controls).forEach((key) => {
+        const control = this.clienteForm.get(key);
+        if (control?.invalid && control.errors?.['required']) {
+          camposFaltantes.push(etiquetas[key] || key);
+        }
+      });
+
+      const lista = camposFaltantes
+        .map(
+          (campo, index) => `
+        <div style="padding:8px 12px;border-left:4px solid #d9534f;background:#caa8a8;text-align:center;margin-bottom:8px;border-radius:4px;">
+          <strong style="color:#b02a37;">${index + 1}. ${campo}</strong>
+        </div>`
+        )
+        .join('');
+
+      Swal.fire({
+        title: '¡Faltan campos obligatorios!',
+        background: '#0d121d',
+        html: `
+        <p style="text-align:center;font-size:15px;margin-bottom:16px;color:white">
+          Los siguientes <strong>campos obligatorios</strong> están vacíos.<br>
+          Por favor complétalos antes de continuar:
+        </p>
+        <div style="max-height:350px;overflow-y:auto;">${lista}</div>
+      `,
+        icon: 'error',
+        confirmButtonText: 'Entendido',
+        customClass: { popup: 'swal2-padding swal2-border' },
+      });
+      return;
+    }
+
+    const v = this.clienteForm.value;
+
+    const urls$ = forkJoin({
+      logotipo: this.resolveUrlForField('logotipo', v.logotipo),
+      constanciaSituacionFiscal: this.resolveUrlForField('constanciaSituacionFiscal', v.constanciaSituacionFiscal),
+      comprobanteDomicilio: this.resolveUrlForField('comprobanteDomicilio', v.comprobanteDomicilio),
+      actaConstitutiva: this.resolveUrlForField('actaConstitutiva', v.actaConstitutiva),
+    });
+
+    urls$
+      .pipe(finalize(() => { }))
+      .subscribe({
+        next: (u) => {
+          const logoUploadRaw = u.logotipo && String(u.logotipo).trim() ? String(u.logotipo).trim() : '';
+          const logoUpload = logoUploadRaw && logoUploadRaw !== this.DEFAULT_LOGO_URL ? logoUploadRaw : '';
+          const logoPadre = this.getLogotipoPadre();
+
+          const payload = {
+            ...v,
+            tipoPersona: v.tipoPersona != null ? Number(v.tipoPersona) : null,
+            logotipo: logoUpload || logoPadre || null,
+            constanciaSituacionFiscal: u.constanciaSituacionFiscal,
+            comprobanteDomicilio: u.comprobanteDomicilio,
+            actaConstitutiva: u.actaConstitutiva,
+          };
+
+          this.clieService.actualizarCliente(this.idCliente, payload).subscribe(
+            () => {
+              this.submitButton = 'Actualizar';
+              this.loading = false;
+              Swal.fire({
+                title: '¡Operación Exitosa!',
+                background: '#0d121d',
+                text: 'Los datos del cliente se actualizaron correctamente.',
+                icon: 'success',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+              this.regresar();
+            },
+            (error) => {
+              this.submitButton = 'Actualizar';
+              this.loading = false;
+              Swal.fire({
+                title: '¡Ops!',
+                background: '#0d121d',
+                text: error.error,
+                icon: 'error',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            }
+          );
+        },
+        error: () => {
+          this.submitButton = 'Actualizar';
+          this.loading = false;
+          Swal.fire({
+            title: '¡Ops!',
+            background: '#0d121d',
+            text: 'No fue posible preparar los documentos para actualizar.',
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Confirmar',
+          });
+        },
+      });
+  }
 
   regresar() {
     this.route.navigateByUrl('/clientes');
@@ -471,7 +587,7 @@ export class AgregarClienteComponent implements OnInit {
   private readonly MAX_LOGO_MB = 5;
 
   private readonly DEFAULT_LOGO_URL =
-    'https://transmovi.s3.us-east-2.amazonaws.com/logos/Logo_TransMovi_2x1-removebg-preview.png';
+    'https://transmovi.s3.us-east-2.amazonaws.com/logos/Logo_QMT_final.png';
 
   @ViewChild('logoFileInput') logoFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('csfFileInput') csfFileInput!: ElementRef<HTMLInputElement>;
@@ -553,13 +669,13 @@ export class AgregarClienteComponent implements OnInit {
   }
 
   private isAllowedLogo(file: File): boolean {
-    const okType = this.isImage(file) || this.isPdf(file) || this.isOffice(file);
+    const okType = this.isImage(file) || this.isPdf(file);
     const okSize = file.size <= this.MAX_LOGO_MB * 1024 * 1024;
     return okType && okSize;
   }
 
   private isAllowedDoc(file: File): boolean {
-    const okType = this.isPdf(file);
+    const okType = this.isImage(file) || this.isPdf(file);
     const okSize = file.size <= this.MAX_MB * 1024 * 1024;
     return okType && okSize;
   }
@@ -691,7 +807,7 @@ export class AgregarClienteComponent implements OnInit {
     this.csfPreviewUrl = null;
     this.csfFileName = null;
     this.csfFileInput.nativeElement.value = '';
-    this.clienteForm.patchValue({ constanciaSituacionFiscal: this.DEFAULT_AVATAR_URL });
+    this.clienteForm.patchValue({ constanciaSituacionFiscal: this.originalDocs.constanciaSituacionFiscal || null });
     this.clienteForm.get('constanciaSituacionFiscal')?.setErrors(null);
   }
   private handleCsfFile(file: File) {
@@ -761,7 +877,7 @@ export class AgregarClienteComponent implements OnInit {
     this.compDomPreviewUrl = null;
     this.compDomFileName = null;
     this.compDomFileInput.nativeElement.value = '';
-    this.clienteForm.patchValue({ comprobanteDomicilio: this.DEFAULT_AVATAR_URL });
+    this.clienteForm.patchValue({ comprobanteDomicilio: this.originalDocs.comprobanteDomicilio || null });
     this.clienteForm.get('comprobanteDomicilio')?.setErrors(null);
   }
   private handleCompDomFile(file: File) {
@@ -831,7 +947,7 @@ export class AgregarClienteComponent implements OnInit {
     this.actaPreviewUrl = null;
     this.actaFileName = null;
     this.actaFileInput.nativeElement.value = '';
-    this.clienteForm.patchValue({ actaConstitutiva: this.DEFAULT_AVATAR_URL });
+    this.clienteForm.patchValue({ actaConstitutiva: this.originalDocs.actaConstitutiva || null });
     this.clienteForm.get('actaConstitutiva')?.setErrors(null);
   }
   private handleActaFile(file: File) {
@@ -905,50 +1021,4 @@ export class AgregarClienteComponent implements OnInit {
     if (typeof value === 'string' && value.trim()) return of(value.trim());
     return of(this.originalDocs[field] || '');
   }
-
-  toggleCuentaPadre(e: MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.isCuentaPadreOpen = !this.isCuentaPadreOpen;
-  }
-
-  setCuentaPadre(id: any, label: string, e: MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.clienteForm.patchValue({ idPadre: Number(id) });
-    this.cuentaPadreLabel = label;
-    this.isCuentaPadreOpen = false;
-  }
-
-  toggleTipoPersona(e: MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.isTipoPersonaOpen = !this.isTipoPersonaOpen;
-    this.isCuentaPadreOpen = false; // si quieres que solo uno esté abierto
-  }
-
-  setTipoPersona(id: any, label: string, e: MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.clienteForm.patchValue({ tipoPersona: Number(id) });
-    this.tipoPersonaLabel = label;
-    this.isTipoPersonaOpen = false;
-  }
-
-
-  private closeSelects = () => {
-    this.isCuentaPadreOpen = false;
-    this.isTipoPersonaOpen = false;
-  };
-
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-
-    // si el click NO fue dentro de un select custom, cierra todos
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
-  }
-
 }

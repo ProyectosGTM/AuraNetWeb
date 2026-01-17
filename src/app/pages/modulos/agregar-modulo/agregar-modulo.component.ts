@@ -141,7 +141,7 @@ export class AgregarModuloComponent implements OnInit {
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: `Ocurrió un error al agregar el módulo.`,
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
@@ -215,7 +215,7 @@ export class AgregarModuloComponent implements OnInit {
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: `Ocurrió un error al actualizar el módulo.`,
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',

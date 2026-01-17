@@ -1,0 +1,89 @@
+<div class="container-fluid" [@fadeInRight]>
+    <div class="row">
+        <div class="col-12">
+            <div class="title-banner-card shadow-sm">
+                <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="title-icon">
+                            <i class="fas fa-cash-register"></i>
+                        </div>
+                        <div>
+                            <h4 class="title-title">Administración de Cajas</h4>
+                            <p class="title-subtitle">
+                                Control y configuración de los registros de cajas
+                            </p>
+                        </div>
+                    </div>
+                    <div class="title-actions">
+                        <div class="title-tagline">
+                            <span class="line"></span>
+                            <span class="text">Control y configuración centralizada</span>
+                        </div>
+                        <div class="title-buttons">
+                            <button type="button" (click)="agregar()" class="btn-title btn-title--primary">
+                                <i class="fas fa-plus"></i>
+                                <span>Nuevo</span>
+                            </button>
+                            <button (click)="toggleExpandGroups()" type="button" class="btn-title btn-title--ghost">
+                                <i class="fas fa-expand"></i>
+                                <span>Contraer Grid</span>
+                            </button>
+                            <button (click)="limpiarCampos()" type="button" class="btn-title btn-title--danger">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Restablecer</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3 gy-4">
+                    <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
+                        [showColumnLines]="true" [dataSource]="listaCajas" [showRowLines]="true" [rowAlternationEnabled]="'true'"[keyExpr]="'id'" [width]="'100%'"
+                        [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
+                        [pager]="{ 
+                            showPageSizeSelector: true, 
+                            allowedPageSizes: [50], 
+                            showInfo: true,
+                            infoText: 'Página {0} de {1}', 
+                            visible: true 
+                        }" (onPageIndexChanged)=" onPageIndexChanged($event)" (onOptionChanged)="onGridOptionChanged($event)">
+                        <dxo-search-panel [visible]="true" [width]="200" placeholder="Buscar..."></dxo-search-panel>
+                        <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]" [showInfo]="true"></dxo-pager>
+                        <dxo-group-panel [emptyPanelText]="mensajeAgrupar" [visible]="true"></dxo-group-panel>
+                        <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
+                        <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
+                        <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="180"></dxi-column>
+                        <dxi-column dataField="codigo" caption="Código" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombre" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="descripcion" caption="Descripción" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreZona" caption="Zona" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreTipoCaja" caption="Tipo Caja" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreEstatusCaja" caption="Estatus Caja" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="limiteEfectivo" caption="Límite Efectivo" alignment="center" dataType="number" [allowSearch]="true" [format]="'currency'"></dxi-column>
+                        <dxi-column dataField="requiereArqueoTexto" caption="Requiere Arqueo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxo-export [enabled]="false" [allowExportSelectedData]="true"
+                            [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
+                        </dxo-export>
+                        <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                            <div>
+                                <button valueExpr="id" id="actualizarButton" class="btnAcciones"
+                                    (click)="actualizarCaja(row.data.id)">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones" (click)="activar(row.data)">
+                                    <i class="fa fa-arrow-up"></i>
+                                </button>
+                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones" (click)="desactivar(row.data)">
+                                    <i class="fa fa-arrow-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </dx-data-grid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

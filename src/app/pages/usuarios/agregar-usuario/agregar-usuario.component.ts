@@ -811,14 +811,14 @@ if (!this.listaSalas || this.listaSalas.length === 0) {
 
         this.regresar();
       },
-      error: () => {
+      error: (error) => {
         this.submitButton = 'Actualizar';
         this.loading = false;
 
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: `Ocurrió un error al actualizar el usuario.`,
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',

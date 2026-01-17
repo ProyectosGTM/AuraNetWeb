@@ -316,7 +316,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   display: grid;
   gap: 8px;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
 }
 
 .field-label {
@@ -369,16 +372,41 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .sleek-control {
   width: 100%;
+  max-width: 100%;
   background: transparent;
   border: none;
   outline: none;
   color: #ffffff;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
 }
 
 .sleek-control::placeholder {
   color: rgba(255, 255, 255, 0.45);
+}
+
+/* Estilos específicos para inputs de fecha */
+.sleek-control[type="date"],
+.sleek-control[type="datetime-local"] {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Asegurar que el input date no sobrepase el contenedor */
+.input-sleek {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.input-sleek input[type="date"],
+.input-sleek input[type="datetime-local"] {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .input-sleek:focus-within {
@@ -430,6 +458,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .select-display {
   display: flex;
   align-items: center;
+  background: transparent;
 }
 
 .select-value {
@@ -439,10 +468,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  background: transparent;
 }
 
 .select-value.placeholder {
-  background-color: none;
+  background-color: transparent !important;
   color: white;
 }
 
@@ -511,23 +541,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   background: rgba(228, 0, 65, 0.2);
 }
 
-.select-display {
-  width: 100%;
-}
-
-.select-value {
-  display: block;
-  width: 100%;
-  min-height: 18px;
-  line-height: 18px;
-  background: transparent !important;
-  padding: 0 !important;
-  margin: 0 !important;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+// Estilos duplicados removidos - usar los definidos arriba
 
 
 
@@ -647,6 +661,21 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 }
 
+#mapButton {
+  background-color: #2a1e0d;
+  border-color: #4a3419;
+
+  i {
+    color: #f59e0b;
+  }
+
+  &:hover {
+    background-color: #1f1509;
+    border-color: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+  }
+}
+
 .btnAcciones:active {
   transform: scale(0.95);
 }
@@ -673,4 +702,13 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   background-color: #2a0a14;
   border-color: #7a1330;
   color: #ff1a5b;
+}
+
+.placeholder {
+  display: inline-block;
+  min-height: 1em;
+  vertical-align: middle;
+  cursor: wait;
+  opacity: 0.5;
+  background-color: transparent !important;
 }

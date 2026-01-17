@@ -9,9 +9,11 @@ import { LoginComponent } from './login/login.component';
 import { SignupComponent } from './signup/signup.component';
 import { AuthRoutingModule } from './auth-routing';
 import { PasswordresetComponent } from './passwordreset/passwordreset.component';
+import { VerifyComponent } from './verify/verify.component';
+import { AffiliationComponent } from './affiliation/affiliation.component';
 
 @NgModule({
-  declarations: [LoginComponent, SignupComponent, PasswordresetComponent],
+  declarations: [LoginComponent, SignupComponent, PasswordresetComponent, VerifyComponent, AffiliationComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,

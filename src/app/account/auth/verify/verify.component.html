@@ -1,0 +1,62 @@
+<div class="verify-wrapper">
+  <div class="verify-shell animate-slide-up">
+
+    <div class="verify-visual">
+      <div class="visual-glow"></div>
+
+      <div class="brand brand-center">
+        <div class="brand-avatar">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+
+        <div class="brand-text">
+          <div class="brand-title">Verificación</div>
+          <div class="brand-subtitle">Sistema de Gestión Auranet</div>
+        </div>
+      </div>
+
+      <div class="visual-image-wrap">
+        <img src="assets/images/fondo.png" alt="Fondo" class="visual-image" />
+      </div>
+    </div>
+
+    <div class="verify-panel">
+      <div class="panel-head">
+        <div class="panel-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+
+        <div class="panel-titles">
+          <h2 class="panel-title fw-bold">Verificar Código</h2>
+          <p class="panel-subtitle text-white">Ingresa tu código de verificación</p>
+        </div>
+      </div>
+
+      <form class="verify-form" [formGroup]="verifyForm" (ngSubmit)="agregar()" novalidate>
+        <label class="field">
+          <span class="field-label text-white">Código de Verificación</span>
+          <div class="field-control">
+            <i class="fas fa-key"></i>
+            <input formControlName="codigo" class="custom-input" type="text" placeholder="Ingresa tu código" />
+          </div>
+        </label>
+
+        <div class="buttons-container">
+          <button class="btn-accent btn-main" type="submit" [disabled]="verifyForm.invalid || loading">
+            <span class="loader" *ngIf="loading"></span>
+            <span class="btn-content" *ngIf="!loading">
+              <i class="fas fa-check"></i>
+              <span>{{ submitButton }}</span>
+            </span>
+            <span *ngIf="loading">Cargando...</span>
+          </button>
+        </div>
+
+        <div class="panel-foot text-white">
+          ¿Ya verificaste tu cuenta?&nbsp;
+          <a class="link-accent" routerLink="/account/login">Iniciar sesión</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

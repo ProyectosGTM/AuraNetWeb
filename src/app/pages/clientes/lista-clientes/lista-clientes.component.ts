@@ -452,4 +452,5 @@ closePreview() {
 onEsc() {
   if (this.previewModalOpen) this.closePreview();
 }
+
 }

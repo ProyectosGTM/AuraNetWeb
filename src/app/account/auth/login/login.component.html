@@ -53,7 +53,7 @@
         </label>
 
         <div class="row-actions">
-          <a class="link text-white" href="javascript:void(0)">¿Olvidaste tu contraseña?</a>
+          <a class="link text-white" [routerLink]="['/account','reset-password']">¿Olvidaste tu contraseña?</a>
         </div>
 
         <button class="btn-accent btn-main" type="submit" [disabled]="loginForm.invalid || loading">
@@ -68,8 +68,8 @@
         </div>
 
         <div class="panel-foot text-white">
-          ¿No tienes cuenta?
-          <a class="link-accent" href="javascript:void(0)">Crear cuenta</a>
+          ¿No tienes cuenta?&nbsp;
+          <a class="link-accent" [routerLink]="['/account','afiliacion']">Crear cuenta</a>
         </div>
       </form>
     </div>

@@ -1,0 +1,194 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-plus"></i>
+            </div>
+            <div>
+              <h4 class="title-title">{{ title }}</h4>
+              <p class="title-subtitle">Captura la información requerida para el registro.</p>
+            </div>
+          </div>
+          <div class="title-actions">
+            <div class="title-tagline">
+              <span class="line"></span>
+              <span class="text">Control y configuración centralizada</span>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3 gy-4">
+          <form [formGroup]="tesoreriaForm">
+            <div class="col-12">
+              <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Sala</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
+                        (mousedown)="toggleSala($event)">
+                        <i class="fas fa-building"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!tesoreriaForm.get('idSala')?.value">
+                            {{ salaLabel || 'Selecciona una sala...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isSalaOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let s of listaSalas"
+                            (mousedown)="setSala(s.id, s.nombreSala || s.nombre, $event)">
+                            {{ s.nombreSala || s.nombre }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar"></i>
+                        <input formControlName="fecha" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Fondo Inicial</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input formControlName="fondoInicial" class="sleek-control" type="text"
+                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Estatus Tesorería</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isEstatusTesoreriaOpen"
+                        (mousedown)="toggleEstatusTesoreria($event)">
+                        <i class="fas fa-toggle-on"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!tesoreriaForm.get('idEstatusTesoreria')?.value">
+                            {{ estatusTesoreriaLabel || 'Selecciona un estatus...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isEstatusTesoreriaOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let e of listaEstatusTesoreria"
+                            (mousedown)="setEstatusTesoreria(e.id, e.text, $event)">
+                            {{ e.text }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha Apertura</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar-check"></i>
+                        <input formControlName="fechaApertura" class="sleek-control" type="datetime-local" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Usuario Apertura</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isUsuarioAperturaOpen"
+                        (mousedown)="toggleUsuarioApertura($event)">
+                        <i class="fas fa-user"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!tesoreriaForm.get('idUsuarioApertura')?.value">
+                            {{ usuarioAperturaLabel || 'Selecciona un usuario...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isUsuarioAperturaOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let u of listaUsuarios"
+                            (mousedown)="setUsuarioApertura(u.id, u.nombreCompleto, $event)">
+                            {{ u.nombreCompleto }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha Cierre</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar-times"></i>
+                        <input formControlName="fechaCierre" class="sleek-control" type="datetime-local" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Usuario Cierre</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isUsuarioCierreOpen"
+                        (mousedown)="toggleUsuarioCierre($event)">
+                        <i class="fas fa-user-times"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!tesoreriaForm.get('idUsuarioCierre')?.value">
+                            {{ usuarioCierreLabel || 'Selecciona un usuario...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isUsuarioCierreOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let u of listaUsuarios"
+                            (mousedown)="setUsuarioCierre(u.id, u.nombreCompleto, $event)">
+                            {{ u.nombreCompleto }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Fondo Contado</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-coins"></i>
+                        <input formControlName="fondoContado" class="sleek-control" type="text"
+                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-9 col-lg-9 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Observaciones</span>
+                      <div class="input-sleek input-sleek--textarea">
+                        <i class="fas fa-comment-alt"></i>
+                        <textarea formControlName="observaciones" class="sleek-control sleek-control--textarea"
+                          placeholder="Ingresa las observaciones..." rows="3"></textarea>
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+              <!-- Botones de acción -->
+              <div class="row mt-4">
+                <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
+                  <button (click)="submit()" type="button" class="btn-alt btn-alt--success" [disabled]="loading">
+                    <i class="fas fa-check"></i>
+                    <span>{{ submitButton }}</span>
+                  </button>
+                  <button (click)="cancelar()" type="button" class="btn-alt btn-alt--cancel" [disabled]="loading">
+                    <i class="fas fa-times"></i>
+                    <span>Cancelar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

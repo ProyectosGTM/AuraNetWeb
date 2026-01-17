@@ -1,27 +1,14 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
+import { ClientesService } from 'src/app/shared/services/clientes.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
+import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
-
-type Tool = 'pen' | 'rect' | 'eraser';
-type Pt = { x: number; y: number };
-type Stroke = { id: number; pts: Pt[]; w: number };
-type RectShape = { id: number; x: number; y: number; w: number; h: number; sw: number };
-type Snapshot = { strokes: Stroke[]; rects: RectShape[] };
-type PenAttach = { strokeIndex: number; side: 'start' | 'end' } | null;
-
-type PlanoJsonV1 = {
-  v: 1;
-  worldW: number;
-  worldH: number;
-  strokes: Stroke[];
-  rects: RectShape[];
-};
 
 @Component({
   selector: 'app-agregar-sala',
@@ -29,71 +16,298 @@ type PlanoJsonV1 = {
   styleUrl: './agregar-sala.component.scss',
   animations: [fadeInRightAnimation],
 })
-export class AgregarSalaComponent implements OnInit, OnDestroy {
-  tool: Tool = 'pen';
-  worldW = 1320;
-  worldH = 520;
-  zoom = 1;
+export class AgregarSalaComponent implements OnInit {
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
   public idSala: number;
+  public title = 'Agregar Sala';
+  public listaClientes: any;
+  public listaTipoZona: any;
+  public listaMonedas: any;
+  public listaEstatusLic: any;
+  salaForm: FormGroup;
 
-  strokes: Stroke[] = [];
-  rects: RectShape[] = [];
+  isClienteOpen = false;
+  clienteLabel = '';
 
-  draftStroke: Stroke | null = null;
-  draftRect: RectShape | null = null;
+  toggleCliente(event: MouseEvent) {
+    event.preventDefault();
+    this.isClienteOpen = !this.isClienteOpen;
+  }
 
-  undoStack: Snapshot[] = [];
-  redoStack: Snapshot[] = [];
+  setCliente(id: any, nombre: string, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
 
-  private drawing = false;
-  private activePointerId: number | null = null;
+    this.salaForm.patchValue({ idCliente: id });
+    this.clienteLabel = nombre;
+    this.isClienteOpen = false;
+  }
 
-  private startX = 0;
-  private startY = 0;
-
-  private nextStrokeId = 1;
-  private nextRectId = 1;
-
-  private penAttach: PenAttach = null;
-  private penStart: Pt | null = null;
-
-  private erasing = false;
-  private lastEraseTs = 0;
-
-  zonaForm: FormGroup;
-
-  selectedStrokeId: number | null = null;
-  selectedRectId: number | null = null;
-
-  private draggingStrokeIndex: number | null = null;
-  private draggingRectIndex: number | null = null;
-
-  private lastDragPt: Pt | null = null;
-
-  hoveredEndpoint: { strokeIndex: number; side: 'start' | 'end' } | null = null;
-  private draggingEndpoint: { strokeIndex: number; side: 'start' | 'end' } | null = null;
-
-  constructor(private fb: FormBuilder, private route: Router, private usuaService: UsuariosService, private salasService: SalaService) { }
+  constructor(
+    private fb: FormBuilder,
+    private route: Router,
+    private activatedRoute: ActivatedRoute,
+    private usuaService: UsuariosService,
+    private salasService: SalaService,
+    private clienService: ClientesService,
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
-    document.addEventListener('mousedown', this.onDocMouseDownIds);
+    
+    this.activatedRoute.params.subscribe((params) => {
+      this.idSala = params['idSala'];
+      if (this.idSala) {
+        this.title = 'Actualizar Sala';
+        this.submitButton = 'Actualizar';
+        // Cargar todas las listas primero, luego obtener la sala
+        forkJoin({
+          clientes: this.clienService.obtenerClientes(),
+          monedas: this.salasService.obtenerMonedas(),
+          estatusLic: this.salasService.obtenerEstatusLic()
+        }).subscribe({
+          next: (responses) => {
+            // Procesar clientes
+            this.listaClientes = (responses.clientes.data || []).map((c: any) => ({
+              ...c,
+              id: Number(c.id),
+            }));
+            
+            // Procesar monedas
+            const monedas = (responses.monedas.data || []).map((c: any) => ({
+              id: Number(c.id),
+              text: c.nombre || ''
+            } as SelectItem));
+            this.listaMonedas = monedas;
+            this.setIdMonedaItems(monedas);
+            
+            // Procesar estatus licencia
+            const estatusLic = (responses.estatusLic.data || []).map((c: any) => ({
+              id: Number(c.id),
+              text: c.nombre || ''
+            } as SelectItem));
+            this.listaEstatusLic = estatusLic;
+            this.setIdEstatusLicItems(estatusLic);
+            
+            // Ahora obtener la sala con todas las listas cargadas
+            this.obtenerSala();
+          },
+          error: (error) => {
+            console.error('Error al cargar listas:', error);
+            // Aun así intentar cargar las listas individualmente
+            this.obtenerClientes();
+            this.obtenerMonedas();
+            this.obtenerEstatusLic();
+            this.obtenerSala();
+          }
+        });
+      } else {
+        this.title = 'Agregar Sala';
+        this.submitButton = 'Guardar';
+        // Para agregar, cargar las listas normalmente
+        this.obtenerClientes();
+        this.obtenerMonedas();
+        this.obtenerEstatusLic();
+      }
+    });
   }
 
-  ngOnDestroy(): void {
-    document.removeEventListener('mousedown', this.onDocMouseDownIds);
+  obtenerMonedas() {
+    this.salasService.obtenerMonedas().subscribe((response) => {
+      const monedas = (response.data || []).map((c: any) => ({
+        id: Number(c.id),
+        text: c.nombre || ''
+      } as SelectItem));
+      this.listaMonedas = monedas;
+      this.setIdMonedaItems(monedas);
+      
+      // Establecer label si ya hay un valor en el formulario
+      const currentId = Number(this.salaForm.get('idMonedaPrincipal')?.value ?? 0);
+      if (currentId) {
+        const found = monedas.find((x: SelectItem) => x.id === currentId);
+        if (found) {
+          this.idMonedaLabel = found.text;
+        }
+      }
+    });
+  }
+
+  obtenerEstatusLic() {
+    this.salasService.obtenerEstatusLic().subscribe((response) => {
+      const estatusLic = (response.data || []).map((c: any) => ({
+        id: Number(c.id),
+        text: c.nombre || ''
+      } as SelectItem));
+      this.listaEstatusLic = estatusLic;
+      this.setIdEstatusLicItems(estatusLic);
+      
+      // Establecer label si ya hay un valor en el formulario
+      const currentId = Number(this.salaForm.get('idEstatusLicencia')?.value ?? 0);
+      if (currentId) {
+        const found = estatusLic.find((x: SelectItem) => x.id === currentId);
+        if (found) {
+          this.idEstatusLicLabel = found.text;
+        }
+      }
+    });
+  }
+
+  obtenerClientes() {
+    this.clienService.obtenerClientes().subscribe((response) => {
+      this.listaClientes = (response.data || []).map((c: any) => ({
+        ...c,
+        id: Number(c.id),
+      }));
+      const currentId = Number(this.salaForm.get('idCliente')?.value ?? 0);
+      if (currentId) {
+        const found = (this.listaClientes || []).find((x: any) => Number(x.id) === currentId);
+        if (found) this.clienteLabel = found.nombre;
+      }
+    });
+  }
+
+  obtenerSala() {
+    this.salasService.obtenerSala(this.idSala).subscribe({
+      next: (response: any) => {
+        const data = response.data || {};
+        
+        // Formatear fechas si existen
+        const formatDate = (dateStr: string | null | undefined): string | null => {
+          if (!dateStr) return null;
+          try {
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return null;
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          } catch {
+            return null;
+          }
+        };
+        
+        // Mapear los campos del servicio al formulario usando los nombres correctos del JSON
+        this.salaForm.patchValue({
+          nombre: data.nombreSala ?? '',
+          nombreComercial: data.nombreComercialSala ?? '',
+          descripcion: data.descripcionSala ?? '',
+          logotipo: data.logotipoSala ?? '',
+          direccion: data.direccionSala ?? '',
+          pais: data.paisSala ?? 'México',
+          estado: data.estadoSala ?? '',
+          municipio: data.municipioSala ?? '',
+          colonia: data.coloniaSala ?? '',
+          calle: data.calleSala ?? '',
+          numeroExterior: data.numeroExteriorSala ?? '',
+          numeroInterior: data.numeroInteriorSala ?? '',
+          codigoPostal: data.codigoPostalSala ?? '',
+          referencias: data.referenciasSala ?? '',
+          latitud: Number(data.latitudSala ?? 0),
+          longitud: Number(data.longitudSala ?? 0),
+          metrosCuadrados: Number(data.metrosCuadradosSala ?? 0),
+          numeroNiveles: Number(data.numeroNivelesSala ?? 0),
+          capacidadPersonas: Number(data.capacidadPersonasSala ?? 0),
+          planoArquitectonico: data.planoArquitectonico ?? '',
+          planoDistribucion: data.planoDistribucion ?? '',
+          licenciaOperacion: data.licenciaOperacion ?? '',
+          fechaVencimientoLicencia: formatDate(data.fechaVencimientoLicencia),
+          idMonedaPrincipal: Number(data.idMonedaPrincipal ?? 0),
+          fechaInicioContrato: formatDate(data.fechaInicioContrato),
+          fechaFinContrato: formatDate(data.fechaFinContrato),
+          idEstatusLicencia: Number(data.idEstatusLicencia ?? 0),
+          idCliente: Number(data.idCliente ?? 0),
+        });
+
+        // Establecer labels para los selects usando los nombres del servicio
+        const idCliente = Number(data.idCliente ?? 0);
+        if (idCliente && this.listaClientes && this.listaClientes.length > 0) {
+          const foundCliente = this.listaClientes.find((x: any) => Number(x.id) === idCliente);
+          if (foundCliente) {
+            // Construir el nombre completo del cliente
+            const nombreCompleto = [
+              data.nombreCliente,
+              data.apellidoPaternoCliente,
+              data.apellidoMaternoCliente
+            ].filter(Boolean).join(' ').trim();
+            this.clienteLabel = nombreCompleto || foundCliente.nombre || 'Cliente';
+          }
+        }
+
+        // Establecer label de moneda usando nombreMoneda del servicio
+        const idMoneda = Number(data.idMonedaPrincipal ?? 0);
+        if (idMoneda) {
+          this.idMonedaLabel = data.nombreMoneda || '';
+          // Si no viene en el servicio, buscar en la lista
+          if (!this.idMonedaLabel && this.idMonedaItems && this.idMonedaItems.length > 0) {
+            const foundMoneda = this.idMonedaItems.find((x: SelectItem) => x.id === idMoneda);
+            if (foundMoneda) {
+              this.idMonedaLabel = foundMoneda.text;
+            }
+          }
+        }
+
+        // Establecer label de estatus licencia usando nombreEstatusLicencia del servicio
+        const idEstatusLic = Number(data.idEstatusLicencia ?? 0);
+        if (idEstatusLic) {
+          this.idEstatusLicLabel = data.nombreEstatusLicencia || '';
+          // Si no viene en el servicio, buscar en la lista
+          if (!this.idEstatusLicLabel && this.idEstatusLicItems && this.idEstatusLicItems.length > 0) {
+            const foundEstatus = this.idEstatusLicItems.find((x: SelectItem) => x.id === idEstatusLic);
+            if (foundEstatus) {
+              this.idEstatusLicLabel = foundEstatus.text;
+            }
+          }
+        }
+
+        // Cargar imágenes si existen
+        if (data.logotipoSala) {
+          this.logotipoPreviewUrl = data.logotipoSala;
+        }
+        if (data.licenciaOperacion) {
+          if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(data.licenciaOperacion)) {
+            this.licenciaPreviewUrl = data.licenciaOperacion;
+          }
+        }
+        if (data.planoArquitectonico) {
+          if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(data.planoArquitectonico)) {
+            this.planoPreviewUrl = data.planoArquitectonico;
+          }
+        }
+        if (data.planoDistribucion) {
+          if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(data.planoDistribucion)) {
+            this.planoDistribucionPreviewUrl = data.planoDistribucion;
+          }
+        }
+
+        // Establecer coordenadas para el mapa si existen
+        if (data.latitudSala && data.longitudSala) {
+          this.selectedLat = Number(data.latitudSala);
+          this.selectedLng = Number(data.longitudSala);
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener sala:', error);
+        Swal.fire({
+          title: '¡Error!',
+          text: 'No se pudo cargar la información de la sala.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
   }
 
   initForm(): void {
-    this.zonaForm = this.fb.group({
+    this.salaForm = this.fb.group({
       nombre: [''],
       nombreComercial: [''],
       descripcion: [''],
       logotipo: [''],
       direccion: [''],
-      pais: [''],
+      pais: ['México'],
       estado: [''],
       municipio: [''],
       colonia: [''],
@@ -104,662 +318,19 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
       referencias: [''],
       latitud: [0],
       longitud: [0],
-      geocercaJSON: [{}],
-      rfcFacturacion: [''],
-      razonSocialFacturacion: [''],
-      regimenFiscal: [''],
-      usoCFDI: [''],
-      lugarExpedicion: [''],
-      metrosCuadrados: [0],
-      numeroNiveles: [0],
-      capacidadPersonas: [0],
-      estructuraJSON: [{}],
+      metrosCuadrados: [null],
+      numeroNiveles: [null],
+      capacidadPersonas: [null],
       planoArquitectonico: [''],
       planoDistribucion: [''],
       licenciaOperacion: [''],
       fechaVencimientoLicencia: [null],
-      idMonedaPrincipal: [0],
+      idMonedaPrincipal: [null],
       fechaInicioContrato: [null],
       fechaFinContrato: [null],
-      idEstatusLicencia: [0],
-      motivoSuspension: [''],
-      idCliente: [0],
+      idEstatusLicencia: [null],
+      idCliente: [null],
     });
-  }
-
-  get toolLabel(): string {
-    if (this.tool === 'pen') return 'Pluma';
-    if (this.tool === 'rect') return 'Rect';
-    return 'Borrar';
-  }
-
-  setTool(t: Tool): void {
-    this.tool = t;
-    this.selectedStrokeId = null;
-    this.selectedRectId = null;
-    this.cancelDraft();
-  }
-
-  clearSelection(): void {
-    this.selectedStrokeId = null;
-    this.selectedRectId = null;
-  }
-
-  strokePath(s: Stroke): string {
-    const p = s.pts;
-    if (!p.length) return '';
-    let d = `M ${p[0].x} ${p[0].y}`;
-    for (let i = 1; i < p.length; i++) d += ` L ${p[i].x} ${p[i].y}`;
-    return d;
-  }
-
-  zoomIn(): void {
-    this.zoom = Math.min(2.4, this.round2(this.zoom + 0.1));
-  }
-
-  zoomOut(): void {
-    this.zoom = Math.max(0.35, this.round2(this.zoom - 0.1));
-  }
-
-  resetZoom(): void {
-    this.zoom = 1;
-  }
-
-  onCanvasWheel(e: WheelEvent): void {
-    e.preventDefault();
-    const delta = Math.sign(e.deltaY);
-    if (delta > 0) this.zoomOut();
-    else this.zoomIn();
-  }
-
-  private hitStroke(p: Pt, tol: number): number | null {
-    const t2 = tol * tol;
-
-    for (let i = this.strokes.length - 1; i >= 0; i--) {
-      const s = this.strokes[i];
-      const pts = s.pts;
-      if (pts.length < 2) continue;
-
-      for (let j = 0; j < pts.length - 1; j++) {
-        const d2 = this.pointSegDist2(p, pts[j], pts[j + 1]);
-        if (d2 <= t2) return i;
-      }
-    }
-
-    return null;
-  }
-
-  private hitRect(p: Pt, tol: number): number | null {
-    for (let i = this.rects.length - 1; i >= 0; i--) {
-      const r = this.rects[i];
-      const x1 = r.x - tol;
-      const y1 = r.y - tol;
-      const x2 = r.x + r.w + tol;
-      const y2 = r.y + r.h + tol;
-
-      if (p.x >= x1 && p.x <= x2 && p.y >= y1 && p.y <= y2) return i;
-    }
-    return null;
-  }
-
-  private pointSegDist2(p: Pt, a: Pt, b: Pt): number {
-    const abx = b.x - a.x;
-    const aby = b.y - a.y;
-    const apx = p.x - a.x;
-    const apy = p.y - a.y;
-
-    const ab2 = abx * abx + aby * aby;
-    if (ab2 === 0) return this.dist2(p, a);
-
-    let t = (apx * abx + apy * aby) / ab2;
-    t = Math.max(0, Math.min(1, t));
-
-    const cx = a.x + t * abx;
-    const cy = a.y + t * aby;
-
-    const dx = p.x - cx;
-    const dy = p.y - cy;
-    return dx * dx + dy * dy;
-  }
-
-  // reemplaza COMPLETO tu onCanvasPointerDown por este (mantiene tu lógica y agrega mover rect en cualquier herramienta salvo eraser)
-  onCanvasPointerDown(e: PointerEvent): void {
-    const stage = e.currentTarget as HTMLElement;
-    stage.setPointerCapture(e.pointerId);
-    this.activePointerId = e.pointerId;
-
-    const pos = this.toWorld(e);
-    this.drawing = true;
-
-    if (this.tool !== 'eraser') {
-      const hitR = this.hitRect(pos, 10);
-      if (hitR !== null) {
-        this.pushUndo();
-        this.redoStack = [];
-        this.selectedRectId = this.rects[hitR].id;
-        this.selectedStrokeId = null;
-        this.draggingRectIndex = hitR;
-        this.lastDragPt = pos;
-        return;
-      }
-    }
-
-    if (this.tool === 'pen') {
-      const ep = this.hitEndpoint(pos, 14);
-      if (ep) {
-        this.pushUndo();
-        this.redoStack = [];
-        this.selectedStrokeId = this.strokes[ep.strokeIndex].id;
-        this.selectedRectId = null;
-        this.draggingEndpoint = { strokeIndex: ep.strokeIndex, side: ep.side };
-        return;
-      }
-
-      const hit = this.hitStroke(pos, 10);
-      if (hit !== null) {
-        this.pushUndo();
-        this.redoStack = [];
-        this.selectedStrokeId = this.strokes[hit].id;
-        this.selectedRectId = null;
-        this.draggingStrokeIndex = hit;
-        this.lastDragPt = pos;
-        return;
-      }
-
-      this.pushUndo();
-      this.redoStack = [];
-      this.selectedStrokeId = null;
-      this.selectedRectId = null;
-
-      const snap = this.findNearestEndpoint(pos, 14);
-      if (snap) {
-        this.penAttach = { strokeIndex: snap.strokeIndex, side: snap.side };
-        this.penStart = { x: snap.pt.x, y: snap.pt.y };
-      } else {
-        this.penAttach = null;
-        this.penStart = { x: pos.x, y: pos.y };
-      }
-
-      this.draftStroke = {
-        id: -1,
-        w: 4,
-        pts: [
-          { x: this.penStart.x, y: this.penStart.y },
-          { x: this.penStart.x, y: this.penStart.y },
-        ],
-      };
-      return;
-    }
-
-    this.startX = pos.x;
-    this.startY = pos.y;
-
-    if (this.tool === 'rect') {
-      this.pushUndo();
-      this.redoStack = [];
-      this.draftRect = { id: this.nextRectId++, x: pos.x, y: pos.y, w: 0, h: 0, sw: 2 };
-      this.selectedStrokeId = null;
-      this.selectedRectId = null;
-      return;
-    }
-
-    if (this.tool === 'eraser') {
-      this.pushUndo();
-      this.redoStack = [];
-      this.erasing = true;
-      this.eraseAt(pos.x, pos.y);
-      this.lastEraseTs = performance.now();
-      this.selectedStrokeId = null;
-      this.selectedRectId = null;
-      return;
-    }
-  }
-
-  // reemplaza COMPLETO tu onCanvasPointerMove por este (mantiene tu lógica y agrega hover + cursor)
-  onCanvasPointerMove(e: PointerEvent): void {
-    if (this.activePointerId !== null && this.drawing && e.pointerId !== this.activePointerId) return;
-
-    const pos = this.toWorld(e);
-
-    if (!this.drawing) {
-      this.hoveredRectIndex = this.tool !== 'eraser' ? this.hitRect(pos, 10) : null;
-      return;
-    }
-
-    if (this.draggingEndpoint) {
-      const idx = this.draggingEndpoint.strokeIndex;
-      const side = this.draggingEndpoint.side;
-      const s = this.strokes[idx];
-
-      if (s && s.pts.length) {
-        const pts = s.pts.map(p => ({ x: p.x, y: p.y }));
-        if (side === 'start') pts[0] = { x: pos.x, y: pos.y };
-        else pts[pts.length - 1] = { x: pos.x, y: pos.y };
-        this.strokes = this.strokes.map((x, i) => (i === idx ? { ...x, pts } : x));
-      }
-      return;
-    }
-
-    if (this.draggingStrokeIndex !== null && this.lastDragPt) {
-      const dx = pos.x - this.lastDragPt.x;
-      const dy = pos.y - this.lastDragPt.y;
-
-      const idx = this.draggingStrokeIndex;
-      const s = this.strokes[idx];
-      if (s) {
-        const pts = s.pts.map(p => ({ x: p.x + dx, y: p.y + dy }));
-        this.strokes = this.strokes.map((x, i) => (i === idx ? { ...x, pts } : x));
-      }
-
-      this.lastDragPt = pos;
-      return;
-    }
-
-    if (this.draggingRectIndex !== null && this.lastDragPt) {
-      const dx = pos.x - this.lastDragPt.x;
-      const dy = pos.y - this.lastDragPt.y;
-
-      const idx = this.draggingRectIndex;
-      const r = this.rects[idx];
-      if (r) {
-        const x = this.clamp(r.x + dx, 0, this.worldW - r.w);
-        const y = this.clamp(r.y + dy, 0, this.worldH - r.h);
-        this.rects = this.rects.map((rr, i) => (i === idx ? { ...rr, x, y } : rr));
-      }
-
-      this.lastDragPt = pos;
-      return;
-    }
-
-    if (this.tool === 'pen' && this.draftStroke && this.penStart) {
-      this.draftStroke = {
-        ...this.draftStroke,
-        pts: [{ x: this.penStart.x, y: this.penStart.y }, { x: pos.x, y: pos.y }],
-      };
-      return;
-    }
-
-    if (this.tool === 'rect' && this.draftRect) {
-      const x1 = this.startX;
-      const y1 = this.startY;
-      const x2 = pos.x;
-      const y2 = pos.y;
-      const x = Math.min(x1, x2);
-      const y = Math.min(y1, y2);
-      const w = Math.abs(x2 - x1);
-      const h = Math.abs(y2 - y1);
-      this.draftRect = { ...this.draftRect, x, y, w, h };
-      return;
-    }
-
-    if (this.tool === 'eraser' && this.erasing) {
-      const now = performance.now();
-      if (now - this.lastEraseTs < 12) return;
-      this.lastEraseTs = now;
-      this.eraseAt(pos.x, pos.y);
-      return;
-    }
-  }
-
-
-  onCanvasPointerUp(e: PointerEvent): void {
-    if (!this.drawing) return;
-    if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
-    this.hoveredRectIndex = null;
-
-    this.drawing = false;
-    this.activePointerId = null;
-
-    if (this.draggingEndpoint) {
-      this.draggingEndpoint = null;
-      this.hoveredEndpoint = null;
-      this.syncPlanoToForm();
-      return;
-    }
-
-    if (this.draggingStrokeIndex !== null) {
-      this.draggingStrokeIndex = null;
-      this.lastDragPt = null;
-      this.syncPlanoToForm();
-      return;
-    }
-
-    if (this.draggingRectIndex !== null) {
-      this.draggingRectIndex = null;
-      this.lastDragPt = null;
-      this.syncPlanoToForm();
-      return;
-    }
-
-    if (this.tool === 'pen' && this.draftStroke && this.penStart) {
-      const a = { x: this.penStart.x, y: this.penStart.y };
-      const b = this.draftStroke.pts[1];
-
-      if (this.dist2(a, b) >= 16) {
-        this.commitPenSegment(a, b, this.draftStroke.w);
-        this.syncPlanoToForm();
-      }
-
-      this.draftStroke = null;
-      this.penStart = null;
-      this.penAttach = null;
-      return;
-    }
-
-    if (this.tool === 'rect' && this.draftRect) {
-      if (this.draftRect.w >= 6 && this.draftRect.h >= 6) {
-        this.rects = [...this.rects, this.draftRect];
-        this.syncPlanoToForm();
-      }
-      this.draftRect = null;
-      return;
-    }
-
-    if (this.tool === 'eraser') {
-      this.erasing = false;
-      this.syncPlanoToForm();
-      return;
-    }
-  }
-
-  onCanvasPointerCancel(e: PointerEvent): void {
-    if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
-    this.cancelDraft();
-  }
-
-  undo(): void {
-    if (!this.undoStack.length) return;
-    const prev = this.undoStack.pop() as Snapshot;
-    this.redoStack.push(this.snapshot());
-    this.strokes = prev.strokes;
-    this.rects = prev.rects;
-    this.cancelDraft();
-    this.syncPlanoToForm();
-  }
-
-  redo(): void {
-    if (!this.redoStack.length) return;
-    const next = this.redoStack.pop() as Snapshot;
-    this.undoStack.push(this.snapshot());
-    this.strokes = next.strokes;
-    this.rects = next.rects;
-    this.cancelDraft();
-    this.syncPlanoToForm();
-  }
-
-  clearPlan(): void {
-    if (!this.strokes.length && !this.rects.length && !this.draftStroke && !this.draftRect) return;
-    this.pushUndo();
-    this.redoStack = [];
-    this.strokes = [];
-    this.rects = [];
-    this.cancelDraft();
-    this.syncPlanoToForm();
-  }
-
-  verPlanoJson(): void {
-    const json = this.getPlanoJsonString();
-    console.log('PLANO JSON:', json);
-  }
-
-  private commitPenSegment(a: Pt, b: Pt, w: number): void {
-    if (this.penAttach) {
-      const i = this.penAttach.strokeIndex;
-      const s = this.strokes[i];
-      if (!s || !s.pts.length) {
-        this.strokes = [...this.strokes, { id: this.nextStrokeId++, pts: [a, b], w }];
-        return;
-      }
-
-      if (this.penAttach.side === 'end') {
-        const last = s.pts[s.pts.length - 1];
-        const pts = this.dist2(last, a) <= 1 ? [...s.pts, b] : [...s.pts, a, b];
-        this.strokes = this.strokes.map((x, idx) => (idx === i ? { ...x, pts, w } : x));
-        return;
-      }
-
-      if (this.penAttach.side === 'start') {
-        const first = s.pts[0];
-        const pts = this.dist2(first, a) <= 1 ? [b, ...s.pts] : [b, a, ...s.pts];
-        this.strokes = this.strokes.map((x, idx) => (idx === i ? { ...x, pts, w } : x));
-        return;
-      }
-    }
-
-    this.strokes = [...this.strokes, { id: this.nextStrokeId++, pts: [a, b], w }];
-  }
-
-  private findNearestEndpoint(p: Pt, tol: number): { strokeIndex: number; side: 'start' | 'end'; pt: Pt } | null {
-    const t2 = tol * tol;
-    let bestStroke = -1;
-    let bestSide: 'start' | 'end' = 'end';
-    let bestPt: Pt | null = null;
-    let bestD2 = Infinity;
-
-    for (let i = 0; i < this.strokes.length; i++) {
-      const s = this.strokes[i];
-      if (!s.pts.length) continue;
-
-      const a = s.pts[0];
-      const b = s.pts[s.pts.length - 1];
-
-      const d2a = this.dist2(p, a);
-      if (d2a <= t2 && d2a < bestD2) {
-        bestD2 = d2a;
-        bestStroke = i;
-        bestSide = 'start';
-        bestPt = a;
-      }
-
-      const d2b = this.dist2(p, b);
-      if (d2b <= t2 && d2b < bestD2) {
-        bestD2 = d2b;
-        bestStroke = i;
-        bestSide = 'end';
-        bestPt = b;
-      }
-    }
-
-    if (bestStroke === -1 || !bestPt) return null;
-    return { strokeIndex: bestStroke, side: bestSide, pt: bestPt };
-  }
-
-  private eraseAt(x: number, y: number): void {
-    const r = 18;
-    const r2 = r * r;
-
-    if (this.strokes.length) {
-      const keep: Stroke[] = [];
-      for (const s of this.strokes) {
-        let hit = false;
-        for (const p of s.pts) {
-          const dx = p.x - x;
-          const dy = p.y - y;
-          if (dx * dx + dy * dy <= r2) {
-            hit = true;
-            break;
-          }
-        }
-        if (!hit) keep.push(s);
-      }
-      this.strokes = keep;
-    }
-
-    if (this.rects.length) {
-      const keepR: RectShape[] = [];
-      for (const rr of this.rects) {
-        const inside = x >= rr.x - r && x <= rr.x + rr.w + r && y >= rr.y - r && y <= rr.y + rr.h + r;
-        if (!inside) keepR.push(rr);
-      }
-      this.rects = keepR;
-    }
-  }
-
-  private pushUndo(): void {
-    this.undoStack.push(this.snapshot());
-    if (this.undoStack.length > 60) this.undoStack.shift();
-  }
-
-  private snapshot(): Snapshot {
-    return {
-      strokes: this.strokes.map(s => ({
-        id: s.id,
-        w: s.w,
-        pts: s.pts.map(p => ({ x: p.x, y: p.y })),
-      })),
-      rects: this.rects.map(r => ({
-        id: r.id,
-        x: r.x,
-        y: r.y,
-        w: r.w,
-        h: r.h,
-        sw: r.sw,
-      })),
-    };
-  }
-
-  private cancelDraft(): void {
-    this.drawing = false;
-    this.activePointerId = null;
-
-    this.draftStroke = null;
-    this.draftRect = null;
-
-    this.penStart = null;
-    this.penAttach = null;
-
-    this.erasing = false;
-    this.hoveredRectIndex = null;
-
-    this.draggingStrokeIndex = null;
-    this.draggingRectIndex = null;
-    this.lastDragPt = null;
-
-    this.draggingEndpoint = null;
-    this.hoveredEndpoint = null;
-  }
-
-  private toWorld(e: PointerEvent): Pt {
-    const stage = e.currentTarget as HTMLElement;
-    const rect = stage.getBoundingClientRect();
-    const px = e.clientX - rect.left;
-    const py = e.clientY - rect.top;
-    const x = this.clamp(px / this.zoom, 0, this.worldW);
-    const y = this.clamp(py / this.zoom, 0, this.worldH);
-    return { x, y };
-  }
-
-  private dist2(a: Pt, b: Pt): number {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-    return dx * dx + dy * dy;
-  }
-
-  private clamp(v: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, v));
-  }
-
-  private round2(v: number): number {
-    return Math.round(v * 100) / 100;
-  }
-
-  private hitEndpoint(p: Pt, tol: number): { strokeIndex: number; side: 'start' | 'end' } | null {
-    const t2 = tol * tol;
-
-    for (let i = this.strokes.length - 1; i >= 0; i--) {
-      const s = this.strokes[i];
-      if (!s.pts.length) continue;
-
-      const a = s.pts[0];
-      const b = s.pts[s.pts.length - 1];
-
-      if (this.dist2(p, a) <= t2) return { strokeIndex: i, side: 'start' };
-      if (this.dist2(p, b) <= t2) return { strokeIndex: i, side: 'end' };
-    }
-
-    return null;
-  }
-
-  onEndpointEnter(strokeIndex: number, side: 'start' | 'end'): void {
-    this.hoveredEndpoint = { strokeIndex, side };
-  }
-
-  onEndpointLeave(strokeIndex: number, side: 'start' | 'end'): void {
-    if (!this.hoveredEndpoint) return;
-    if (this.hoveredEndpoint.strokeIndex === strokeIndex && this.hoveredEndpoint.side === side) {
-      this.hoveredEndpoint = null;
-    }
-  }
-
-  buildPlanoJson(): PlanoJsonV1 {
-    return {
-      v: 1,
-      worldW: this.worldW,
-      worldH: this.worldH,
-      strokes: this.strokes.map(s => ({
-        id: s.id,
-        w: s.w,
-        pts: s.pts.map(p => ({ x: p.x, y: p.y })),
-      })),
-      rects: this.rects.map(r => ({
-        id: r.id,
-        x: r.x,
-        y: r.y,
-        w: r.w,
-        h: r.h,
-        sw: r.sw,
-      })),
-    };
-  }
-
-  getPlanoJsonString(): string {
-    return JSON.stringify(this.buildPlanoJson());
-  }
-
-  loadPlanoFromJson(json: string): void {
-    if (!json) return;
-
-    const parsed = JSON.parse(json) as PlanoJsonV1;
-
-    if (!parsed || parsed.v !== 1) return;
-    if (!Array.isArray(parsed.strokes) || !Array.isArray(parsed.rects)) return;
-
-    this.worldW = Number(parsed.worldW) || this.worldW;
-    this.worldH = Number(parsed.worldH) || this.worldH;
-
-    this.strokes = parsed.strokes
-      .map(s => ({
-        id: Number(s.id),
-        w: Number(s.w) || 4,
-        pts: Array.isArray(s.pts) ? s.pts.map(p => ({ x: Number(p.x), y: Number(p.y) })) : [],
-      }))
-      .filter(s => s.pts.length >= 2);
-
-    this.rects = parsed.rects
-      .map(r => ({
-        id: Number(r.id),
-        x: Number(r.x),
-        y: Number(r.y),
-        w: Number(r.w),
-        h: Number(r.h),
-        sw: Number(r.sw) || 2,
-      }))
-      .filter(r => r.w >= 0 && r.h >= 0);
-
-    this.nextStrokeId = this.strokes.reduce((m, s) => Math.max(m, s.id), 0) + 1;
-    this.nextRectId = this.rects.reduce((m, r) => Math.max(m, r.id), 0) + 1;
-
-    this.undoStack = [];
-    this.redoStack = [];
-    this.cancelDraft();
-    this.syncPlanoToForm();
-  }
-
-  syncPlanoToForm(): void {
-    if (!this.zonaForm) return;
-    const json = this.getPlanoJsonString();
-    const ctrl = this.zonaForm.get('planoJson');
-    if (ctrl) ctrl.setValue(json);
   }
 
   @ViewChild('logotipoFileInput') logotipoFileInput!: ElementRef<HTMLInputElement>;
@@ -815,7 +386,7 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         const url = res?.url ?? res?.Location ?? res?.data?.url ?? '';
         if (url) {
-          this.zonaForm.patchValue({ logotipo: url });
+          this.salaForm.patchValue({ logotipo: url });
           if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(url)) {
             this.logotipoPreviewUrl = url;
           }
@@ -835,7 +406,7 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         const url = res?.url ?? res?.Location ?? res?.data?.url ?? '';
         if (url) {
-          this.zonaForm.patchValue({ licenciaOperacion: url });
+          this.salaForm.patchValue({ licenciaOperacion: url });
           if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(url)) {
             this.licenciaPreviewUrl = url;
           } else {
@@ -880,21 +451,21 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
     this.logotipoFileName = null;
     this.logotipoFileInput.nativeElement.value = '';
     this.logotipoFile = null;
-    this.zonaForm.patchValue({ logotipo: '' });
-    this.zonaForm.get('logotipo')?.setErrors(null);
+    this.salaForm.patchValue({ logotipo: '' });
+    this.salaForm.get('logotipo')?.setErrors(null);
   }
 
   private handleLogotipoFile(file: File) {
     if (!this.isAllowedLogotipo(file)) {
-      this.zonaForm.get('logotipo')?.setErrors({ invalid: true });
+      this.salaForm.get('logotipo')?.setErrors({ invalid: true });
       return;
     }
 
     this.logotipoFileName = file.name;
     this.loadPreview(file, (url) => (this.logotipoPreviewUrl = url));
     this.logotipoFile = file;
-    this.zonaForm.patchValue({ logotipo: file });
-    this.zonaForm.get('logotipo')?.setErrors(null);
+    this.salaForm.patchValue({ logotipo: file });
+    this.salaForm.get('logotipo')?.setErrors(null);
     this.uploadLogotipoAuto();
   }
 
@@ -931,22 +502,250 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
     this.licenciaFileName = null;
     this.licenciaFileInput.nativeElement.value = '';
     this.licenciaFile = null;
-    this.zonaForm.patchValue({ licenciaOperacion: '' });
-    this.zonaForm.get('licenciaOperacion')?.setErrors(null);
+    this.salaForm.patchValue({ licenciaOperacion: '' });
+    this.salaForm.get('licenciaOperacion')?.setErrors(null);
   }
 
   private handleLicenciaFile(file: File) {
     if (!this.isAllowedLicencia(file)) {
-      this.zonaForm.get('licenciaOperacion')?.setErrors({ invalid: true });
+      this.salaForm.get('licenciaOperacion')?.setErrors({ invalid: true });
       return;
     }
 
     this.licenciaFileName = file.name;
     this.loadPreview(file, (url) => (this.licenciaPreviewUrl = url));
     this.licenciaFile = file;
-    this.zonaForm.patchValue({ licenciaOperacion: file });
-    this.zonaForm.get('licenciaOperacion')?.setErrors(null);
+    this.salaForm.patchValue({ licenciaOperacion: file });
+    this.salaForm.get('licenciaOperacion')?.setErrors(null);
     this.uploadLicenciaAuto();
+  }
+
+  @ViewChild('planoFileInput') planoFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('planoDistribucionFileInput') planoDistribucionFileInput!: ElementRef<HTMLInputElement>;
+
+  planoPreviewUrl: string | ArrayBuffer | null = null;
+  planoDragging = false;
+  planoFileName: string | null = null;
+
+  private planoFile: File | null = null;
+
+  planoDistribucionPreviewUrl: string | ArrayBuffer | null = null;
+  planoDistribucionDragging = false;
+  planoDistribucionFileName: string | null = null;
+
+  private planoDistribucionFile: File | null = null;
+
+  private readonly DEFAULT_PLANO_URL = '';
+  private readonly MAX_MB = 3;
+
+  private isPlanoImage(file: File) {
+    return /^image\/(png|jpe?g|webp)$/i.test(file.type);
+  }
+
+  private isPlanoAllowed(file: File) {
+    const okImg = this.isPlanoImage(file);
+    const okPdf = /pdf/i.test(file.type);
+    return (okImg || okPdf) && file.size <= this.MAX_MB * 1024 * 1024;
+  }
+
+  private loadPlanoPreview(file: File, setter: (url: string | ArrayBuffer | null) => void) {
+    if (!this.isPlanoImage(file)) {
+      setter(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setter(reader.result);
+    reader.readAsDataURL(file);
+  }
+
+  private uploadPlanoAuto(): void {
+    const fd = new FormData();
+
+    if (this.planoFile) {
+      fd.append('file', this.planoFile, this.planoFile.name);
+    } else {
+      fd.append('file', this.DEFAULT_PLANO_URL);
+    }
+
+    fd.append('folder', 'usuarios');
+    fd.append('idModule', '2');
+
+    this.usuaService.uploadFile(fd).subscribe({
+      next: (res: any) => {
+        const url = res?.url ?? res?.Location ?? res?.data?.url ?? '';
+        if (url) {
+          this.salaForm.patchValue({ planoArquitectonico: url });
+
+          if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(url)) {
+            this.planoPreviewUrl = url;
+          } else {
+            this.planoPreviewUrl = null;
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error al subir plano', err);
+      },
+    });
+  }
+
+  openPlanoFilePicker() {
+    this.planoFileInput.nativeElement.click();
+  }
+
+  onPlanoDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.planoDragging = true;
+  }
+
+  onPlanoDragLeave(_e: DragEvent) {
+    this.planoDragging = false;
+  }
+
+  onPlanoDrop(e: DragEvent) {
+    e.preventDefault();
+    this.planoDragging = false;
+    const f = e.dataTransfer?.files?.[0];
+    if (f) this.handlePlanoFile(f);
+  }
+
+  onPlanoFileSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0] || null;
+    if (f) this.handlePlanoFile(f);
+    if (input) input.value = '';
+  }
+
+  clearPlanoFile(e: Event) {
+    e.stopPropagation();
+    this.planoPreviewUrl = null;
+    this.planoFileName = null;
+    this.planoFileInput.nativeElement.value = '';
+    this.planoFile = null;
+
+    this.salaForm.patchValue({ planoArquitectonico: this.DEFAULT_PLANO_URL });
+    this.salaForm.get('planoArquitectonico')?.setErrors(null);
+
+    this.uploadPlanoAuto();
+  }
+
+  private handlePlanoFile(file: File) {
+    if (!this.isPlanoAllowed(file)) {
+      this.salaForm.get('planoArquitectonico')?.setErrors({ invalid: true });
+      return;
+    }
+
+    this.planoFileName = file.name;
+
+    this.loadPlanoPreview(file, (url) => (this.planoPreviewUrl = url));
+    this.planoFile = file;
+
+    this.salaForm.patchValue({ planoArquitectonico: file });
+    this.salaForm.get('planoArquitectonico')?.setErrors(null);
+
+    this.uploadPlanoAuto();
+  }
+
+  private uploadPlanoDistribucionAuto(): void {
+    const fd = new FormData();
+
+    if (this.planoDistribucionFile) {
+      fd.append('file', this.planoDistribucionFile, this.planoDistribucionFile.name);
+    } else {
+      fd.append('file', this.DEFAULT_PLANO_URL);
+    }
+
+    fd.append('folder', 'usuarios');
+    fd.append('idModule', '2');
+
+    this.usuaService.uploadFile(fd).subscribe({
+      next: (res: any) => {
+        const url = res?.url ?? res?.Location ?? res?.data?.url ?? '';
+        if (url) {
+          this.salaForm.patchValue({ planoDistribucion: url });
+
+          if (/\.(png|jpe?g|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(url)) {
+            this.planoDistribucionPreviewUrl = url;
+          } else {
+            this.planoDistribucionPreviewUrl = null;
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error al subir plano distribución', err);
+      },
+    });
+  }
+
+  openPlanoDistribucionFilePicker() {
+    this.planoDistribucionFileInput.nativeElement.click();
+  }
+
+  onPlanoDistribucionDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.planoDistribucionDragging = true;
+  }
+
+  onPlanoDistribucionDragLeave(_e: DragEvent) {
+    this.planoDistribucionDragging = false;
+  }
+
+  onPlanoDistribucionDrop(e: DragEvent) {
+    e.preventDefault();
+    this.planoDistribucionDragging = false;
+    const f = e.dataTransfer?.files?.[0];
+    if (f) this.handlePlanoDistribucionFile(f);
+  }
+
+  onPlanoDistribucionFileSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0] || null;
+    if (f) this.handlePlanoDistribucionFile(f);
+    if (input) input.value = '';
+  }
+
+  clearPlanoDistribucionFile(e: Event) {
+    e.stopPropagation();
+    this.planoDistribucionPreviewUrl = null;
+    this.planoDistribucionFileName = null;
+    this.planoDistribucionFileInput.nativeElement.value = '';
+    this.planoDistribucionFile = null;
+
+    this.salaForm.patchValue({ planoDistribucion: this.DEFAULT_PLANO_URL });
+    this.salaForm.get('planoDistribucion')?.setErrors(null);
+
+    this.uploadPlanoDistribucionAuto();
+  }
+
+  private handlePlanoDistribucionFile(file: File) {
+    if (!this.isPlanoAllowed(file)) {
+      this.salaForm.get('planoDistribucion')?.setErrors({ invalid: true });
+      return;
+    }
+
+    this.planoDistribucionFileName = file.name;
+
+    this.loadPlanoPreview(file, (url) => (this.planoDistribucionPreviewUrl = url));
+    this.planoDistribucionFile = file;
+
+    this.salaForm.patchValue({ planoDistribucion: file });
+    this.salaForm.get('planoDistribucion')?.setErrors(null);
+
+    this.uploadPlanoDistribucionAuto();
+  }
+
+  allowOnlyNumbers(event: KeyboardEvent): void {
+    const charCode = event.keyCode ? event.keyCode : event.which;
+    const key = event.key;
+    // Permitir números (48-57), punto decimal (190 o 110), coma (188), backspace (8), delete (46), tab (9), enter (13), flechas (37-40)
+    const allowedKeys = [8, 9, 13, 37, 38, 39, 40, 46]; // backspace, tab, enter, flechas, delete
+    const isNumber = (charCode >= 48 && charCode <= 57) || (charCode >= 96 && charCode <= 105);
+    const isDecimal = key === '.' || key === ',' || charCode === 190 || charCode === 188 || charCode === 110;
+    const isAllowedKey = allowedKeys.includes(charCode);
+    
+    if (!isNumber && !isAllowedKey && !isDecimal) {
+      event.preventDefault();
+    }
   }
 
   isIdClienteOpen = false;
@@ -974,7 +773,7 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
   setIdCliente(id: number, text: string, e: MouseEvent): void {
     e.preventDefault();
     e.stopPropagation();
-    this.zonaForm.patchValue({ idCliente: id });
+    this.salaForm.patchValue({ idCliente: id });
     this.idClienteLabel = text;
     this.isIdClienteOpen = false;
   }
@@ -992,7 +791,7 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
   setIdMoneda(id: number, text: string, e: MouseEvent): void {
     e.preventDefault();
     e.stopPropagation();
-    this.zonaForm.patchValue({ idMonedaPrincipal: id });
+    this.salaForm.patchValue({ idMonedaPrincipal: id });
     this.idMonedaLabel = text;
     this.isIdMonedaOpen = false;
   }
@@ -1010,40 +809,29 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
   setIdEstatusLic(id: number, text: string, e: MouseEvent): void {
     e.preventDefault();
     e.stopPropagation();
-    this.zonaForm.patchValue({ idEstatusLicencia: id });
+    this.salaForm.patchValue({ idEstatusLicencia: id });
     this.idEstatusLicLabel = text;
     this.isIdEstatusLicOpen = false;
   }
 
-  private onDocMouseDownIds = (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-
-    if (target.closest('.select-sleek') || target.closest('.plano-btn') || target.closest('.mini')) {
-      return;
-    }
-
-    this.isIdClienteOpen = false;
-    this.isIdMonedaOpen = false;
-    this.isIdEstatusLicOpen = false;
-  };
 
   setIdClienteItems(items: SelectItem[]): void {
     this.idClienteItems = items || [];
-    const current = this.zonaForm.get('idCliente')?.value;
+    const current = this.salaForm.get('idCliente')?.value;
     const found = this.idClienteItems.find(x => x.id === current);
     this.idClienteLabel = found ? found.text : '';
   }
 
   setIdMonedaItems(items: SelectItem[]): void {
     this.idMonedaItems = items || [];
-    const current = this.zonaForm.get('idMonedaPrincipal')?.value;
+    const current = this.salaForm.get('idMonedaPrincipal')?.value;
     const found = this.idMonedaItems.find(x => x.id === current);
     this.idMonedaLabel = found ? found.text : '';
   }
 
   setIdEstatusLicItems(items: SelectItem[]): void {
     this.idEstatusLicItems = items || [];
-    const current = this.zonaForm.get('idEstatusLicencia')?.value;
+    const current = this.salaForm.get('idEstatusLicencia')?.value;
     const found = this.idEstatusLicItems.find(x => x.id === current);
     this.idEstatusLicLabel = found ? found.text : '';
   }
@@ -1058,22 +846,9 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
     this.isIdEstatusLicOpen = false;
   }
 
-  // agrega estas props (junto a selectedStrokeId / dragging...)
-  hoveredRectIndex: number | null = null;
-
-  get canvasCursor(): string {
-    if (this.draggingRectIndex !== null) return 'grabbing';
-    if (this.hoveredRectIndex !== null) return 'grab';
-    return 'crosshair';
-  }
 
   submit(): void {
-    this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
-    this.loading = true;
-
-    if (this.zonaForm.invalid) {
-      this.submitButton = this.idSala ? 'Actualizar' : 'Guardar';
-      this.loading = false;
+    if (this.salaForm.invalid) {
 
       const etiquetas: any = {
         nombre: 'Nombre',
@@ -1087,19 +862,14 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
         calle: 'Calle',
         numeroExterior: 'Número Exterior',
         codigoPostal: 'Código Postal',
-        rfcFacturacion: 'RFC Facturación',
-        razonSocialFacturacion: 'Razón Social',
-        regimenFiscal: 'Régimen Fiscal',
-        usoCFDI: 'Uso CFDI',
-        lugarExpedicion: 'Lugar Expedición',
         idMonedaPrincipal: 'Moneda Principal',
         idEstatusLicencia: 'Estatus Licencia',
         idCliente: 'Cliente',
       };
 
       const camposFaltantes: string[] = [];
-      Object.keys(this.zonaForm.controls).forEach((key) => {
-        const control = this.zonaForm.get(key);
+      Object.keys(this.salaForm.controls).forEach((key) => {
+        const control = this.salaForm.get(key);
         if (control?.invalid && control.errors?.['required']) {
           camposFaltantes.push(etiquetas[key] || key);
         }
@@ -1135,13 +905,326 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Si estamos editando (idSala existe), preguntar si quiere cambiar la ubicación
+    if (this.idSala) {
+      const latitudActual = Number(this.salaForm.get('latitud')?.value);
+      const longitudActual = Number(this.salaForm.get('longitud')?.value);
+      
+      // Si ya tiene coordenadas, preguntar si quiere cambiarlas
+      if (latitudActual && longitudActual) {
+        Swal.fire({
+          title: '<div style="display: flex; align-items: center; gap: 12px; justify-content: center; flex-wrap: wrap;"><i class="fas fa-map-marker-alt" style="color: #f59e0b; font-size: 24px;"></i><span style="color: #fff; font-size: 18px; font-weight: 500;">¿Cambiar ubicación?</span></div>',
+          html: '<p style="color: rgba(255, 255, 255, 0.8); text-align: center; margin: 16px 0;">Esta sala ya tiene una ubicación registrada. ¿Deseas cambiar la ubicación o mantener la actual?</p>',
+          background: '#0d121d',
+          showCancelButton: true,
+          confirmButtonColor: '#f59e0b',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: '<i class="fas fa-map-marker-alt"></i> Cambiar ubicación',
+          cancelButtonText: '<i class="fas fa-check"></i> Mantener actual',
+          customClass: {
+            popup: 'map-modal-popup',
+            title: 'map-modal-title',
+            htmlContainer: 'map-modal-html'
+          }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Usuario quiere cambiar la ubicación - abrir mapa
+            this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
+            this.loading = true;
+            this.abrirModalUbicacion();
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // Usuario quiere mantener la ubicación actual - enviar directamente
+            this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
+            this.loading = true;
+            if (this.idSala) {
+              this.actualizarSala();
+            } else {
+              this.agregarSala();
+            }
+          } else {
+            // Usuario cerró el modal sin seleccionar
+            this.submitButton = this.idSala ? 'Actualizar' : 'Guardar';
+            this.loading = false;
+          }
+        });
+      } else {
+        // No tiene coordenadas, abrir mapa directamente
+        this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
+        this.loading = true;
+        this.abrirModalUbicacion();
+      }
+    } else {
+      // Es nueva sala, abrir mapa directamente
+      this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
+      this.loading = true;
+      this.abrirModalUbicacion();
+    }
+  }
+
+  private abrirModalUbicacion(): void {
+    const modalHtml = `
+      <div class="map-modal-container">
+        <div id="map-modal" style="width: 100%; height: 450px; border-radius: 12px; overflow: hidden; margin: 16px 0;"></div>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+          <button id="btn-guardar-ubicacion" type="button" class="btn-alt btn-alt--success" style="display: none;">
+            <i class="fas fa-check"></i>
+            <span>Guardar</span>
+          </button>
+          <button id="btn-cancelar-ubicacion" type="button" class="btn-alt btn-alt--cancel">
+            <i class="fas fa-times"></i>
+            <span>Cancelar</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    Swal.fire({
+      title: '<div style="display: flex; align-items: center; gap: 12px; justify-content: center; flex-wrap: wrap;"><i class="fas fa-map-marker-alt" style="color: #ff1a5b; font-size: 24px;"></i><span style="color: #fff; font-size: 18px; font-weight: 500;">Selecciona la ubicación del lugar</span></div>',
+      html: modalHtml,
+      width: '90%',
+      background: '#0d121d',
+      showConfirmButton: false,
+      showCancelButton: false,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        this.initMapInModal();
+        this.attachModalButtons();
+      },
+      customClass: {
+        popup: 'map-modal-popup',
+        htmlContainer: 'map-modal-html',
+        title: 'map-modal-title'
+      }
+    } as any);
+  }
+
+  private initMapInModal(): void {
+    // Esperar a que Google Maps esté cargado
+    const waitForGoogle = () => {
+      if (typeof window.google !== 'undefined' && window.google.maps) {
+        this.createMap();
+      } else {
+        setTimeout(waitForGoogle, 100);
+      }
+    };
+    waitForGoogle();
+  }
+
+  private mapInstance: google.maps.Map | null = null;
+  private markerInstance: google.maps.Marker | null = null;
+  private selectedLat: number = 0;
+  private selectedLng: number = 0;
+
+  private createMap(): void {
+    const mapElement = document.getElementById('map-modal');
+    if (!mapElement) return;
+
+    // Usar ubicación actual del formulario o centro de México
+    const currentLat = Number(this.salaForm.get('latitud')?.value) || 19.4326;
+    const currentLng = Number(this.salaForm.get('longitud')?.value) || -99.1332;
+
+    this.mapInstance = new window.google.maps.Map(mapElement, {
+      center: { lat: currentLat, lng: currentLng },
+      zoom: 13,
+      disableDefaultUI: false,
+      zoomControl: true,
+      mapTypeControl: true,
+      scaleControl: true,
+      streetViewControl: true,
+      rotateControl: true,
+      fullscreenControl: true,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        },
+        {
+          featureType: 'poi.business',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        },
+        {
+          featureType: 'poi.place_of_worship',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        },
+        {
+          featureType: 'poi.school',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        },
+        {
+          featureType: 'poi.sports_complex',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
+    });
+
+    // Si ya hay coordenadas, poner el marker inicial
+    if (currentLat !== 19.4326 || currentLng !== -99.1332) {
+      this.addMarker(currentLat, currentLng);
+      this.selectedLat = currentLat;
+      this.selectedLng = currentLng;
+      setTimeout(() => this.enableSaveButton(), 300);
+    }
+
+    // Agregar listener para clicks en el mapa
+    this.mapInstance.addListener('click', (event: google.maps.MapMouseEvent) => {
+      if (event.latLng) {
+        const lat = event.latLng.lat();
+        const lng = event.latLng.lng();
+        this.addMarker(lat, lng);
+        this.selectedLat = lat;
+        this.selectedLng = lng;
+        this.enableSaveButton();
+      }
+    });
+  }
+
+  private addMarker(lat: number, lng: number): void {
+    if (!this.mapInstance) return;
+
+    // Eliminar marker anterior si existe
+    if (this.markerInstance) {
+      this.markerInstance.setMap(null);
+    }
+
+    // Crear marker atractivo personalizado
+    const markerIcon = {
+      url: 'data:image/svg+xml;base64,' + btoa(`
+        <svg width="48" height="64" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+            </filter>
+          </defs>
+          <path d="M24 0C10.745 0 0 10.745 0 24c0 14.25 24 40 24 40s24-25.75 24-40C48 10.745 37.255 0 24 0z" fill="#ff1a5b" filter="url(#shadow)"/>
+          <circle cx="24" cy="24" r="12" fill="#fff"/>
+          <circle cx="24" cy="24" r="6" fill="#ff1a5b"/>
+        </svg>
+      `),
+      scaledSize: new window.google.maps.Size(48, 64),
+      anchor: new window.google.maps.Point(24, 64)
+    };
+
+    this.markerInstance = new window.google.maps.Marker({
+      position: { lat, lng },
+      map: this.mapInstance,
+      icon: markerIcon,
+      animation: window.google.maps.Animation.DROP,
+      draggable: true
+    });
+
+    // Listener para cuando se arrastra el marker
+    this.markerInstance.addListener('dragend', (event: google.maps.MapMouseEvent) => {
+      if (event.latLng) {
+        this.selectedLat = event.latLng.lat();
+        this.selectedLng = event.latLng.lng();
+        this.mapInstance?.panTo({ lat: this.selectedLat, lng: this.selectedLng });
+      }
+    });
+
+    // Centrar el mapa en la nueva posición
+    this.mapInstance.panTo({ lat, lng });
+  }
+
+  private enableSaveButton(): void {
+    const btnGuardar = document.getElementById('btn-guardar-ubicacion');
+    if (btnGuardar) {
+      btnGuardar.style.display = 'inline-flex';
+    }
+  }
+
+  private attachModalButtons(): void {
+    setTimeout(() => {
+      const btnGuardar = document.getElementById('btn-guardar-ubicacion');
+      const btnCancelar = document.getElementById('btn-cancelar-ubicacion');
+
+      if (btnGuardar) {
+        btnGuardar.addEventListener('click', () => {
+          this.confirmarUbicacion();
+        });
+      }
+
+      if (btnCancelar) {
+        btnCancelar.addEventListener('click', () => {
+          this.cancelarUbicacion();
+        });
+      }
+    }, 300);
+  }
+
+  private confirmarUbicacion(): void {
+    if (this.selectedLat && this.selectedLng) {
+      this.salaForm.patchValue({
+        latitud: this.selectedLat,
+        longitud: this.selectedLng
+      });
+    }
+
+    Swal.close();
+
+    // Ejecutar el servicio
     if (this.idSala) this.actualizarSala();
     else this.agregarSala();
   }
 
-  private buildSalaPayload() {
-    const v = this.zonaForm.getRawValue();
+  private cancelarUbicacion(): void {
+    Swal.close();
+    // Restaurar estado del botón y loading
+    this.submitButton = this.idSala ? 'Actualizar' : 'Guardar';
+    this.loading = false;
+    // NO limpiar el formulario si estamos editando
+    if (!this.idSala) {
+      this.limpiarFormulario();
+    }
+  }
 
+  private limpiarFormulario(): void {
+    this.salaForm.reset();
+    this.salaForm.patchValue({
+      pais: 'México',
+      latitud: 0,
+      longitud: 0,
+      metrosCuadrados: 0,
+      numeroNiveles: 0,
+      capacidadPersonas: 0,
+      idMonedaPrincipal: 0,
+      idEstatusLicencia: 0,
+      idCliente: 0
+    });
+    
+    // Limpiar previews de imágenes
+    this.logotipoPreviewUrl = null;
+    this.logotipoFileName = null;
+    this.logotipoFile = null;
+    this.licenciaPreviewUrl = null;
+    this.licenciaFileName = null;
+    this.licenciaFile = null;
+    this.planoPreviewUrl = null;
+    this.planoFileName = null;
+    this.planoFile = null;
+    this.planoDistribucionPreviewUrl = null;
+    this.planoDistribucionFileName = null;
+    this.planoDistribucionFile = null;
+    
+    // Limpiar labels
+    this.clienteLabel = '';
+    this.idMonedaLabel = '';
+    this.idEstatusLicLabel = '';
+    
+    // Resetear estados
+    this.selectedLat = 0;
+    this.selectedLng = 0;
+    this.markerInstance = null;
+    this.mapInstance = null;
+  }
+
+  private buildPayloadSala(): any {
+    const v = this.salaForm.getRawValue();
     return {
       nombre: v.nombre ?? '',
       nombreComercial: v.nombreComercial ?? '',
@@ -1159,16 +1242,9 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
       referencias: v.referencias ?? '',
       latitud: Number(v.latitud) || 0,
       longitud: Number(v.longitud) || 0,
-      geocercaJSON: v.geocercaJSON ?? {},
-      rfcFacturacion: v.rfcFacturacion ?? '',
-      razonSocialFacturacion: v.razonSocialFacturacion ?? '',
-      regimenFiscal: v.regimenFiscal ?? '',
-      usoCFDI: v.usoCFDI ?? '',
-      lugarExpedicion: v.lugarExpedicion ?? '',
       metrosCuadrados: Number(v.metrosCuadrados) || 0,
       numeroNiveles: Number(v.numeroNiveles) || 0,
       capacidadPersonas: Number(v.capacidadPersonas) || 0,
-      estructuraJSON: v.estructuraJSON ?? {},
       planoArquitectonico: v.planoArquitectonico ?? '',
       planoDistribucion: v.planoDistribucion ?? '',
       licenciaOperacion: v.licenciaOperacion ?? '',
@@ -1177,16 +1253,7 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
       fechaInicioContrato: v.fechaInicioContrato ?? null,
       fechaFinContrato: v.fechaFinContrato ?? null,
       idEstatusLicencia: Number(v.idEstatusLicencia) || 0,
-      motivoSuspension: v.motivoSuspension ?? '',
-      idCliente: Number(v.idCliente) || 0,
     };
-  }
-  private buildPayloadSala(): any {
-    const payload = { ...this.zonaForm.getRawValue() };
-
-    delete payload.planoJson;
-
-    return payload;
   }
 
 
@@ -1209,14 +1276,14 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
 
         this.regresar();
       },
-      error: () => {
+      error: (error) => {
         this.submitButton = 'Guardar';
         this.loading = false;
 
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: 'Ocurrió un error al agregar la sala.',
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
@@ -1244,14 +1311,14 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
 
         this.regresar();
       },
-      error: () => {
+      error: (error) => {
         this.submitButton = 'Actualizar';
         this.loading = false;
 
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: 'Ocurrió un error al actualizar la sala.',
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
@@ -1262,14 +1329,5 @@ export class AgregarSalaComponent implements OnInit, OnDestroy {
 
   public regresar() {
     this.route.navigateByUrl('/salas')
-  }
-
-  verPayloadSala(): void {
-    const payload = {
-      ...this.zonaForm.getRawValue(),
-      estructuraJSON: this.buildPlanoJson()
-    };
-
-    console.log(payload);
   }
 }

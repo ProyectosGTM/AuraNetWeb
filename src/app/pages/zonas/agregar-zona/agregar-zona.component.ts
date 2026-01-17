@@ -2,7 +2,8 @@ import { Component, OnInit, ElementRef, ViewChild, HostListener } from '@angular
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
-import { ModulosService } from 'src/app/shared/services/modulos.service';
+import { SalaService } from 'src/app/shared/services/salas.service';
+import { ZonaService } from 'src/app/shared/services/zona.service';
 import Swal from 'sweetalert2';
 type MachineType = 'Tragamonedas' | 'Ruleta' | 'Blackjack' | 'Poker';
 type ZoneType = 'VIP' | 'Caja' | 'Baños' | 'Sala';
@@ -49,8 +50,8 @@ export class AgregarZonaComponent implements OnInit {
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
   public zonaForm: FormGroup;
-  public idModulo: number;
-  public title = 'Agregar Sala';
+  public idZona: number;
+  public title = 'Agregar Zona';
   public listaClientes: any[] = [];
   selectedFileName: string = '';
   previewUrl: string | ArrayBuffer | null = null;
@@ -66,6 +67,7 @@ export class AgregarZonaComponent implements OnInit {
   private draggingMachineId: number | null = null;
   private draggingZoneId: number | null = null;
   private resizingZoneId: number | null = null;
+  private resizingMachineId: number | null = null;
   private dragOffsetX = 0;
   private dragOffsetY = 0;
   private pointerActive = false;
@@ -91,22 +93,125 @@ export class AgregarZonaComponent implements OnInit {
   private rotateDir = 1;
   private rotateDoorTarget: DoorType | null = null;
   private rotateMachineTarget = false;
+  public listaTipoZona: any;
+  public listaSalas: any;
+
+  isTipoZonaOpen = false;
+  tipoZonaLabel = '';
+
+  isSalaOpen = false;
+  salaLabel = '';
+
+  isMaquinaOpen = false;
+  maquinaLabel = '';
+  listaTiposMaquina = [
+    { id: 'Tragamonedas', nombre: 'Tragamonedas' },
+    { id: 'Ruleta', nombre: 'Ruleta' },
+    { id: 'Blackjack', nombre: 'Blackjack' },
+    { id: 'Poker', nombre: 'Poker' }
+  ];
+
+  toggleTipoZona(event: MouseEvent) {
+    event.preventDefault();
+    this.isTipoZonaOpen = !this.isTipoZonaOpen;
+    if (this.isTipoZonaOpen) {
+      this.isSalaOpen = false;
+      this.isMaquinaOpen = false;
+    }
+  }
+
+  toggleMaquina(event: MouseEvent) {
+    event.preventDefault();
+    this.isMaquinaOpen = !this.isMaquinaOpen;
+    if (this.isMaquinaOpen) {
+      this.isSalaOpen = false;
+      this.isTipoZonaOpen = false;
+    }
+  }
+
+  setMaquina(tipo: string, nombre: string, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.maquinaLabel = nombre;
+    this.isMaquinaOpen = false;
+    this.addMachine(tipo);
+  }
+
+  allowOnlyNumbers(event: KeyboardEvent): void {
+    const charCode = event.keyCode ? event.keyCode : event.which;
+    const key = event.key;
+    // Permitir números (48-57), punto decimal (190 o 110), coma (188), backspace (8), delete (46), tab (9), enter (13), flechas (37-40)
+    const allowedKeys = [8, 9, 13, 37, 38, 39, 40, 46]; // backspace, tab, enter, flechas, delete
+    const isNumber = (charCode >= 48 && charCode <= 57) || (charCode >= 96 && charCode <= 105);
+    const isDecimal = key === '.' || key === ',' || charCode === 190 || charCode === 188 || charCode === 110;
+    const isAllowedKey = allowedKeys.includes(charCode);
+    
+    if (!isNumber && !isAllowedKey && !isDecimal) {
+      event.preventDefault();
+    }
+  }
+
+  setTipoZona(id: any, nombre: string, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.zonaForm.patchValue({ idTipoZona: id });
+    this.tipoZonaLabel = nombre;
+    this.isTipoZonaOpen = false;
+  }
+
+  setTipoZonaAndAddZone(id: any, nombre: string, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.zonaForm.patchValue({ idTipoZona: id });
+    this.tipoZonaLabel = nombre;
+    this.isTipoZonaOpen = false;
+    this.addZone();
+  }
+
+  toggleSala(event: MouseEvent) {
+    event.preventDefault();
+    this.isSalaOpen = !this.isSalaOpen;
+    if (this.isSalaOpen) {
+      this.isTipoZonaOpen = false;
+    }
+  }
+
+  setSala(id: any, nombre: string, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.zonaForm.patchValue({ idSala: id });
+    this.salaLabel = nombre;
+    this.isSalaOpen = false;
+  }
 
   constructor(
     private fb: FormBuilder,
-    private moduService: ModulosService,
     private activatedRouted: ActivatedRoute,
     private route: Router,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private zonaService: ZonaService,
+    private salaService: SalaService
   ) { }
 
   ngOnInit(): void {
     this.initForm();
     this.activatedRouted.params.subscribe((params) => {
-      this.idModulo = params['idModulo'];
-      if (this.idModulo) {
-        this.title = 'Actualizar Módulo';
-        this.obtenerModulo();
+      this.idZona = params['idZona'];
+      if (this.idZona) {
+        this.title = 'Actualizar Zona';
+        this.submitButton = 'Actualizar';
+      } else {
+        this.title = 'Agregar Zona';
+        this.submitButton = 'Guardar';
+      }
+      // Cargar listas siempre
+      this.obtenerTipoZona();
+      this.obtenerSalas();
+      // Si hay idZona, cargar la zona después de un breve delay para que las listas se carguen primero
+      if (this.idZona) {
+        setTimeout(() => {
+          this.obtenerZona();
+        }, 200);
       }
     });
   }
@@ -115,35 +220,109 @@ export class AgregarZonaComponent implements OnInit {
     this.zonaForm = this.formBuilder.group({
       nombre: [''],
       descripcion: [''],
-      idTipoZona: [0],
+      idTipoZona: [null],
       nivel: [''],
-      nivelNumerico: [0],
-      anchoMetros: [0],
-      altoMetros: [0],
-      areaMetrosCuadrados: [0],
+      nivelNumerico: [null],
+      anchoMetros: [null],
+      altoMetros: [null],
+      areaMetrosCuadrados: [null],
       areaPoligonoJSON: [{}],
-      capacidadMaximaPersonas: [0],
-      capacidadMaximaMaquinas: [0],
-      idSala: [0]
+      capacidadMaximaPersonas: [null],
+      capacidadMaximaMaquinas: [null],
+      idSala: [null]
     });
   }
 
+  obtenerTipoZona() {
+    this.zonaService.obtenerTipoZona().subscribe((response) => {
+      this.listaTipoZona = (response.data || []).map((c: any) => ({
+        ...c,
+        id: Number(c.id),
+      }));
+      // Actualizar label si ya hay un valor en el formulario
+      const currentId = Number(this.zonaForm.get('idTipoZona')?.value ?? 0);
+      if (currentId && this.listaTipoZona && this.listaTipoZona.length > 0) {
+        const found = this.listaTipoZona.find((x: any) => Number(x.id) === currentId);
+        if (found) {
+          this.tipoZonaLabel = found.nombre;
+        }
+      }
+    });
+  }
 
-  obtenerModulo() {
-    this.moduService.obtenerModulo(this.idModulo).subscribe(
+  obtenerSalas() {
+    this.salaService.obtenerSalas().subscribe((response) => {
+      this.listaSalas = (response.data || []).map((c: any) => ({
+        ...c,
+        idSala: Number(c.idSala),
+      }));
+      // Actualizar label si ya hay un valor en el formulario
+      const currentId = Number(this.zonaForm.get('idSala')?.value ?? 0);
+      if (currentId && this.listaSalas && this.listaSalas.length > 0) {
+        const found = this.listaSalas.find((x: any) => Number(x.idSala) === currentId);
+        if (found) {
+          this.salaLabel = found.nombreSala;
+        }
+      }
+    });
+  }
+
+  obtenerZona() {
+    this.zonaService.obtenerZona(this.idZona).subscribe(
       (response: any) => {
+        const data = response.data || {};
+        
+        // Mapear los campos del servicio a los del formulario
         this.zonaForm.patchValue({
-          nombre: response.data.nombre,
-          descripcion: response.data.descripcion,
-          idModulo: response.data.idModulo,
+          nombre: data.nombreZona ?? data.nombre ?? '',
+          descripcion: data.descripcionZona ?? data.descripcion ?? '',
+          idTipoZona: data.idTipoZona ?? 0,
+          nivel: data.nivelZona ?? data.nivel ?? '',
+          nivelNumerico: data.nivelNumericoZona ?? data.nivelNumerico ?? 0,
+          anchoMetros: data.anchoMetrosZona ?? data.anchoMetros ?? 0,
+          altoMetros: data.altoMetrosZona ?? data.altoMetros ?? 0,
+          areaMetrosCuadrados: data.areaMetrosCuadradosZona ?? data.areaMetrosCuadrados ?? 0,
+          areaPoligonoJSON: data.areaPoligonoJSON ?? {},
+          capacidadMaximaPersonas: data.capacidadMaximaPersonas ?? 0,
+          capacidadMaximaMaquinas: data.capacidadMaximaMaquinas ?? 0,
+          idSala: data.idSala ?? 0,
         });
 
-        this.loadPlano(
-          response.data?.plano,
-          response.data?.zonas,
-          response.data?.entrada,
-          response.data?.salida
-        );
+        // Establecer labels después de que las listas estén cargadas
+        const idTipoZona = Number(data.idTipoZona ?? 0);
+        if (idTipoZona) {
+          if (this.listaTipoZona && this.listaTipoZona.length > 0) {
+            const foundTipoZona = this.listaTipoZona.find((x: any) => Number(x.id) === idTipoZona);
+            if (foundTipoZona) {
+              this.tipoZonaLabel = foundTipoZona.nombre;
+            } else {
+              // Si no se encuentra en la lista, usar el nombre del servicio
+              this.tipoZonaLabel = data.nombreTipoZona ?? '';
+            }
+          } else {
+            // Si la lista aún no está cargada, usar el nombre del servicio
+            this.tipoZonaLabel = data.nombreTipoZona ?? '';
+          }
+        }
+
+        const idSala = Number(data.idSala ?? 0);
+        if (idSala) {
+          if (this.listaSalas && this.listaSalas.length > 0) {
+            const foundSala = this.listaSalas.find((x: any) => Number(x.idSala) === idSala);
+            if (foundSala) {
+              this.salaLabel = foundSala.nombreSala;
+            } else {
+              // Si no se encuentra en la lista, usar el nombre del servicio
+              this.salaLabel = data.nombreSala ?? '';
+            }
+          } else {
+            // Si la lista aún no está cargada, usar el nombre del servicio
+            this.salaLabel = data.nombreSala ?? '';
+          }
+        }
+
+        // Cargar el plano
+        this.loadPlanoFromAreaPoligono(data.areaPoligonoJSON);
       }, (error: any) => {
         console.log(error.error);
       }
@@ -154,28 +333,9 @@ export class AgregarZonaComponent implements OnInit {
     this.submitButton = 'Cargando...';
     this.loading = true;
 
-    if (!this.entrada || !this.salida) {
-      this.submitButton = this.idModulo ? 'Actualizar' : 'Guardar';
-      this.loading = false;
-
-      Swal.fire({
-        title: '¡Faltan campos obligatorios!',
-        background: '#0d121d',
-        html: `
-          <p style="text-align:center; font-size:15px; margin-bottom:16px; color:white">
-            Debes colocar <strong>Entrada</strong> y <strong>Salida</strong> dentro del plano antes de continuar.
-          </p>
-        `,
-        icon: 'error',
-        confirmButtonText: 'Entendido',
-        customClass: { popup: 'swal2-padding swal2-border' }
-      });
-      return;
-    }
-
     this.persistPlanoToForm();
 
-    if (this.idModulo) {
+    if (this.idZona) {
       this.actualizar();
     } else {
       this.agregar();
@@ -193,7 +353,6 @@ export class AgregarZonaComponent implements OnInit {
       const etiquetas: any = {
         nombre: 'Nombre',
         descripcion: 'Descripción',
-        idModulo: 'Módulo',
       };
 
       const camposFaltantes: string[] = [];
@@ -231,28 +390,28 @@ export class AgregarZonaComponent implements OnInit {
       return;
     }
 
-    this.zonaForm.removeControl('id');
-    this.moduService.agregarModulo(this.zonaForm.value).subscribe(
+    const payload = this.buildPayloadZona();
+    this.zonaService.agregarZona(payload).subscribe(
       () => {
         this.submitButton = 'Guardar';
         this.loading = false;
         Swal.fire({
           title: '¡Operación Exitosa!',
           background: '#0d121d',
-          text: `Se agregó un nuevo módulo de manera exitosa.`,
+          text: `Se agregó una nueva zona de manera exitosa.`,
           icon: 'success',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
         });
         this.regresar();
       },
-      () => {
+      (error) => {
         this.submitButton = 'Guardar';
         this.loading = false;
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: `Ocurrió un error al agregar el módulo.`,
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
@@ -272,7 +431,6 @@ export class AgregarZonaComponent implements OnInit {
       const etiquetas: any = {
         nombre: 'Nombre',
         descripcion: 'Descripción',
-        idModulo: 'Módulo',
       };
 
       const camposFaltantes: string[] = [];
@@ -310,27 +468,28 @@ export class AgregarZonaComponent implements OnInit {
       return;
     }
 
-    this.moduService.actualizarModulo(this.idModulo, this.zonaForm.value).subscribe(
+    const payload = this.buildPayloadZona();
+    this.zonaService.actualizarZona(this.idZona, payload).subscribe(
       () => {
         this.submitButton = 'Actualizar';
         this.loading = false;
         Swal.fire({
           title: '¡Operación Exitosa!',
           background: '#0d121d',
-          text: `Los datos del módulo se actualizaron correctamente.`,
+          text: `Los datos de la zona se actualizaron correctamente.`,
           icon: 'success',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
         });
         this.regresar();
       },
-      () => {
+      (error) => {
         this.submitButton = 'Actualizar';
         this.loading = false;
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: `Ocurrió un error al actualizar el módulo.`,
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
@@ -339,8 +498,36 @@ export class AgregarZonaComponent implements OnInit {
     );
   }
 
+  private buildPayloadZona(): any {
+    const v = this.zonaForm.getRawValue();
+    return {
+      nombre: v.nombre ?? '',
+      descripcion: v.descripcion ?? '',
+      idTipoZona: Number(v.idTipoZona) || 0,
+      nivel: v.nivel ?? '',
+      nivelNumerico: Number(v.nivelNumerico) || 0,
+      anchoMetros: Number(v.anchoMetros) || 0,
+      altoMetros: Number(v.altoMetros) || 0,
+      areaMetrosCuadrados: Number(v.areaMetrosCuadrados) || 0,
+      areaPoligonoJSON: v.areaPoligonoJSON ?? {},
+      capacidadMaximaPersonas: Number(v.capacidadMaximaPersonas) || 0,
+      capacidadMaximaMaquinas: Number(v.capacidadMaximaMaquinas) || 0,
+      idSala: Number(v.idSala) || 0,
+    };
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocClickCloseSelects(e: MouseEvent): void {
+    const target = e.target as HTMLElement;
+    if (target.closest('.select-sleek')) return;
+
+    this.isTipoZonaOpen = false;
+    this.isSalaOpen = false;
+    this.isMaquinaOpen = false;
+  }
+
   regresar() {
-    this.route.navigateByUrl('/modulos');
+    this.route.navigateByUrl('/zonas');
   }
 
   addMachine(type: any) {
@@ -371,13 +558,15 @@ export class AgregarZonaComponent implements OnInit {
     this.persistPlanoToForm();
   }
 
-  addZone(type: any) {
-    if (!type) return;
-    const t = type as ZoneType;
+  addZone() {
+    const idTipoZona = this.zonaForm.get('idTipoZona')?.value;
+    if (!idTipoZona) return;
+    const tipoZona = this.listaTipoZona?.find((tz: any) => Number(tz.id) === Number(idTipoZona));
+    if (!tipoZona) return;
     const id = this.nextId(this.zones.map(x => x.id));
     const z: ZoneItem = {
       id,
-      type: t,
+      type: tipoZona.nombre as ZoneType,
       x: 40 + (id % 8) * 80,
       y: 40 + (id % 5) * 60,
       w: 260,
@@ -388,6 +577,11 @@ export class AgregarZonaComponent implements OnInit {
     this.selectedMachineId = null;
     this.placingDoor = null;
     this.persistPlanoToForm();
+  }
+
+  getTipoZonaNombre(id: number): string {
+    const tipoZona = this.listaTipoZona?.find((tz: any) => Number(tz.id) === Number(id));
+    return tipoZona?.nombre || '';
   }
 
   removeSelectedZone() {
@@ -709,15 +903,31 @@ export class AgregarZonaComponent implements OnInit {
   }
 
   private persistPlanoToForm() {
+    const planoData = {
+      machines: this.machines ?? [],
+      zones: this.zones ?? [],
+      entrada: this.entrada ?? null,
+      salida: this.salida ?? null
+    };
     this.zonaForm.patchValue({
-      plano: JSON.stringify(this.machines ?? []),
-      zonas: JSON.stringify(this.zones ?? []),
-      entrada: this.entrada ? JSON.stringify(this.entrada) : '',
-      salida: this.salida ? JSON.stringify(this.salida) : ''
+      areaPoligonoJSON: planoData
     }, { emitEvent: false });
   }
 
-  loadPlano(rawPlano: any, rawZonas: any, rawEntrada: any, rawSalida: any) {
+  loadPlanoFromAreaPoligono(areaPoligonoJSON: any) {
+    if (!areaPoligonoJSON) {
+      this.machines = [];
+      this.zones = [];
+      this.entrada = null;
+      this.salida = null;
+      return;
+    }
+
+    const rawPlano = areaPoligonoJSON.machines ?? [];
+    const rawZonas = areaPoligonoJSON.zones ?? [];
+    const rawEntrada = areaPoligonoJSON.entrada ?? null;
+    const rawSalida = areaPoligonoJSON.salida ?? null;
+
     const ms = this.safeParseArray(rawPlano).map((p: any, i: number) => {
       const type = (p.type as MachineType) ?? 'Tragamonedas';
       const id = Number(p.id ?? (i + 1));

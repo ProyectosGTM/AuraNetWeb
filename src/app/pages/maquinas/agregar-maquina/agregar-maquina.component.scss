@@ -1,0 +1,263 @@
+// Estilos para secciones del formulario
+.form-section {
+  margin-bottom: 32px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(228, 0, 65, 0.2) 0%, rgba(228, 0, 65, 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  i {
+    color: #ff1a5b;
+    font-size: 18px;
+  }
+}
+
+.section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.section-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 26, 91, 0.3) 0%, transparent 100%);
+  border-radius: 1px;
+}
+
+// Estilos para uploader (copiados de agregar-sala)
+.pf-uploader {
+  width: 100%;
+  border-radius: 18px;
+  padding: 14px;
+  cursor: pointer;
+  background: radial-gradient(1200px 200px at 20% 0%, rgba(228, 0, 65, 0.20), rgba(13, 18, 29, 0.35) 60%),
+    rgba(13, 18, 29, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+  min-height: 182px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pf-uploader:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 26, 91, 0.35);
+  box-shadow: 0 0 0 3px rgba(255, 26, 91, 0.10), 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.pf-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pf-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  min-width: 0;
+}
+
+.pf-title i {
+  color: #ff1a5b;
+  font-size: 16px;
+}
+
+.pf-badge {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.pf-mid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pf-hero {
+  height: 104px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.pf-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pf-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.pf-btn {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.pf-btn--primary {
+  background: rgba(228, 0, 65, 0.18);
+  border-color: rgba(228, 0, 65, 0.45);
+  color: #ffffff;
+}
+
+.pf-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(228, 0, 65, 0.18);
+  border-color: rgba(228, 0, 65, 0.70);
+}
+
+.pf-btn--ghost {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.pf-btn--ghost:hover {
+  transform: translateY(-1px);
+  border-color: rgba(106, 140, 255, 0.45);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.25);
+}
+
+.pf-empty {
+  flex: 1;
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.pf-orb {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 26, 91, 0.12);
+}
+
+.pf-orb i {
+  color: #ff1a5b;
+  font-size: 18px;
+}
+
+.pf-copy {
+  min-width: 0;
+}
+
+.pf-main {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.2;
+}
+
+.pf-sub {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.60);
+  line-height: 1.2;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pf-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.90);
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  flex-shrink: 0;
+}
+
+.pf-cta i {
+  color: #ff1a5b;
+}
+
+@media (max-width: 768px) {
+  .pf-uploader {
+    min-height: 170px;
+  }
+
+  .pf-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pf-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pf-empty {
+    grid-template-columns: 46px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .pf-cta {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+}

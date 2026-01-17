@@ -5,6 +5,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import { lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { ModulosService } from 'src/app/shared/services/modulos.service';
+import { ZonaService } from 'src/app/shared/services/zona.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -35,7 +36,7 @@ export class ListaZonasComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private moduloService: ModulosService,
+    private zonaService: ZonaService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -43,23 +44,13 @@ export class ListaZonasComponent implements OnInit {
 
   ngOnInit() {
     this.setupDataSource();
-    // this.obtenerlistaZonas();
-  }
-
-
-  obtenerlistaZonas() {
-    this.loading = true;
-    this.moduloService.obtenerModulos().subscribe((response: any[]) => {
-      this.loading = false;
-      this.listaZonas = response;
-    });
   }
 
   agregar() {
     this.router.navigateByUrl('/zonas/agregar-zona');
   }
 
-  actualizarZona(idSala: Number) {
+  actualizarZona(idSala: number) {
     this.router.navigateByUrl('/zonas/editar-zona/' + idSala);
   }
 
@@ -76,7 +67,7 @@ export class ListaZonasComponent implements OnInit {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.moduloService.updateEstatus(rowData.id, 1).subscribe(
+        this.zonaService.updateEstatus(rowData.id, 1).subscribe(
           (response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',
@@ -119,7 +110,7 @@ export class ListaZonasComponent implements OnInit {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.moduloService.updateEstatus(rowData.id, 0).subscribe(
+        this.zonaService.updateEstatus(rowData.id, 0).subscribe(
           (response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',
@@ -167,7 +158,7 @@ export class ListaZonasComponent implements OnInit {
 
         try {
           const resp: any = await lastValueFrom(
-            this.moduloService.obtenerModuloData(page, take)
+            this.zonaService.obtenerZonasData(page, take)
           );
           this.loading = false;
           const rows: any[] = Array.isArray(resp?.data) ? resp.data : [];
@@ -283,6 +274,7 @@ export class ListaZonasComponent implements OnInit {
   }
 
   limpiarCampos() {
+    this.setupDataSource();
     this.dataGrid.instance.clearGrouping();
     this.dataGrid.instance.pageIndex(0);
     this.dataGrid.instance.refresh();

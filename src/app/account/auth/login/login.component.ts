@@ -96,7 +96,7 @@ export class LoginComponent implements OnInit {
           background: '#0d121d',
           icon: 'error',
           title: '¡Ops!',
-          text: error?.error,
+          text: error.error,
           confirmButtonText: 'Entendido',
           allowOutsideClick: false,
           allowEscapeKey: false

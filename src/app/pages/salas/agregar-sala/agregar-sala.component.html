@@ -8,7 +8,7 @@
               <i class="fas fa-plus"></i>
             </div>
             <div>
-              <h4 class="title-title">Agregar Sala</h4>
+              <h4 class="title-title">{{ title }}</h4>
               <p class="title-subtitle">Captura la información requerida para el registro.</p>
             </div>
           </div>
@@ -20,78 +20,99 @@
           </div>
         </div>
         <div class="row mt-3 gy-4">
-          <form [formGroup]="zonaForm">
+          <form [formGroup]="salaForm">
             <div class="col-12">
-              <div class="row g-3">
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Nombre</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-user"></i>
-                      <input formControlName="nombre" class="sleek-control" type="text" placeholder="Nombre completo" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
+              <!-- Sección: Información General -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-info-circle"></i>
+                  </div>
+                  <h5 class="section-title">Información General</h5>
+                  <div class="section-line"></div>
                 </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Nombre Comercial</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-store"></i>
-                      <input formControlName="nombreComercial" class="sleek-control" type="text"
-                        placeholder="Nombre comercial" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-md-6 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Cliente</span>
-
-                    <div class="input-sleek select-sleek" [class.is-open]="isIdClienteOpen"
-                      (mousedown)="toggleIdCliente($event)">
-                      <i class="fas fa-id-badge"></i>
-
-                      <div class="sleek-control select-display">
-                        <span class="select-value" [class.placeholder]="zonaForm.get('idCliente')?.value == null">
-                          {{ idClienteLabel || 'Seleccione un cliente' }}
-                        </span>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Nombre</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-user"></i>
+                        <input formControlName="nombre" class="sleek-control" type="text"
+                          placeholder="Nombre completo" />
+                        <span class="sleek-line"></span>
                       </div>
-
-                      <span class="sleek-line"></span>
-
-                      <div class="select-panel" *ngIf="isIdClienteOpen" (mousedown)="$event.stopPropagation()">
-                        <button type="button" class="select-option" *ngFor="let it of idClienteItems"
-                          (mousedown)="setIdCliente(it.id, it.text, $event)">
-                          {{ it.text }}
-                        </button>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Nombre Comercial</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-store"></i>
+                        <input formControlName="nombreComercial" class="sleek-control" type="text"
+                          placeholder="Nombre comercial" />
+                        <span class="sleek-line"></span>
                       </div>
-                    </div>
-                  </label>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Cliente</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isClienteOpen"
+                        (mousedown)="toggleCliente($event)">
+                        <i class="fas fa-building"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!salaForm.get('idCliente')?.value">
+                            {{ clienteLabel || 'Selecciona un cliente...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isClienteOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let c of listaClientes"
+                            (mousedown)="setCliente(c.id, c.nombre, $event)">
+                            {{ c.nombre }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Descripción</span>
+                      <div class="input-sleek input-sleek--textarea">
+                        <i class="fas fa-align-left"></i>
+                        <textarea formControlName="descripcion" class="sleek-control sleek-control--textarea" rows="4"
+                          placeholder="Escribe una breve descripción..."></textarea>
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Descripción</span>
-                    <div class="input-sleek input-sleek--textarea">
-                      <i class="fas fa-align-left"></i>
-                      <textarea formControlName="descripcion" class="sleek-control sleek-control--textarea" rows="4"
-                        placeholder="Escribe una breve descripción..."></textarea>
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
+              </div>
+
+              <!-- Sección: Dirección -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </div>
+                  <h5 class="section-title">Dirección del Lugar</h5>
+                  <div class="section-line"></div>
                 </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Dirección</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-map-marker-alt"></i>
-                      <input formControlName="direccion" class="sleek-control" type="text"
-                        placeholder="Dirección completa" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Dirección</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input formControlName="direccion" class="sleek-control" type="text"
+                          placeholder="Dirección completa" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <!-- 
+                Comentado por el momento
+                <div class="col-12 col-lg-3">
                   <label class="field">
                     <span class="field-label text-white">País</span>
                     <div class="input-sleek">
@@ -101,174 +122,135 @@
                     </div>
                   </label>
                 </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Estado</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-map"></i>
-                      <input formControlName="estado" class="sleek-control" type="text" placeholder="Estado" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
+                  -->
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Estado</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-map"></i>
+                        <input formControlName="estado" class="sleek-control" type="text" placeholder="Estado" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Municipio</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-city"></i>
+                        <input formControlName="municipio" class="sleek-control" type="text" placeholder="Municipio" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Colonia</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-road"></i>
+                        <input formControlName="colonia" class="sleek-control" type="text" placeholder="Colonia" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Calle</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-road"></i>
+                        <input formControlName="calle" class="sleek-control" type="text" placeholder="Calle" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Número Exterior</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-hashtag"></i>
+                        <input formControlName="numeroExterior" class="sleek-control" type="text"
+                          placeholder="No. exterior" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Número Interior</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-hashtag"></i>
+                        <input formControlName="numeroInterior" class="sleek-control" type="text"
+                          placeholder="No. interior" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Código Postal</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-mail-bulk"></i>
+                        <input maxlength="5" (keypress)="allowOnlyNumbers($event)" formControlName="codigoPostal"
+                          class="sleek-control" type="text" placeholder="Código postal" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Referencias</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-info-circle"></i>
+                        <input formControlName="referencias" class="sleek-control" type="text"
+                          placeholder="Referencias" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Municipio</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-city"></i>
-                      <input formControlName="municipio" class="sleek-control" type="text" placeholder="Municipio" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
+              </div>
+
+              <!-- Sección: Datos del Lugar -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-building"></i>
+                  </div>
+                  <h5 class="section-title">Datos del Lugar</h5>
+                  <div class="section-line"></div>
                 </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Colonia</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-road"></i>
-                      <input formControlName="colonia" class="sleek-control" type="text" placeholder="Colonia" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Calle</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-road"></i>
-                      <input formControlName="calle" class="sleek-control" type="text" placeholder="Calle" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Número Exterior</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-hashtag"></i>
-                      <input formControlName="numeroExterior" class="sleek-control" type="text"
-                        placeholder="No. exterior" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Número Interior</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-hashtag"></i>
-                      <input formControlName="numeroInterior" class="sleek-control" type="text"
-                        placeholder="No. interior" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Código Postal</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-mail-bulk"></i>
-                      <input formControlName="codigoPostal" class="sleek-control" type="text"
-                        placeholder="Código postal" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Referencias</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-info-circle"></i>
-                      <input formControlName="referencias" class="sleek-control" type="text"
-                        placeholder="Referencias" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">RFC Facturación</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-id-card"></i>
-                      <input formControlName="rfcFacturacion" class="sleek-control" type="text" placeholder="RFC" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Razón Social Facturación</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-building"></i>
-                      <input formControlName="razonSocialFacturacion" class="sleek-control" type="text"
-                        placeholder="Razón social" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Régimen Fiscal</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-file-invoice"></i>
-                      <input formControlName="regimenFiscal" class="sleek-control" type="text"
-                        placeholder="Régimen fiscal" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Uso CFDI</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-receipt"></i>
-                      <input formControlName="usoCFDI" class="sleek-control" type="text" placeholder="Uso CFDI" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Lugar Expedición</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-map-pin"></i>
-                      <input formControlName="lugarExpedicion" class="sleek-control" type="text"
-                        placeholder="Lugar expedición" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Metros Cuadrados</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-ruler-combined"></i>
-                      <input formControlName="metrosCuadrados" class="sleek-control" type="number" placeholder="0" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Número Niveles</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-layer-group"></i>
-                      <input formControlName="numeroNiveles" class="sleek-control" type="number" placeholder="0" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Capacidad Personas</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-users"></i>
-                      <input formControlName="capacidadPersonas" class="sleek-control" type="number" placeholder="0" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Metros Cuadrados</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-ruler-combined"></i>
+                        <input formControlName="metrosCuadrados" class="sleek-control" type="text" placeholder="0" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Número Niveles</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-layer-group"></i>
+                        <input formControlName="numeroNiveles" class="sleek-control" type="text" placeholder="0" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Capacidad Personas</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-users"></i>
+                        <input formControlName="capacidadPersonas" class="sleek-control" type="text" placeholder="0" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <!-- <div class="col-12 col-lg-3">
                   <label class="field">
                     <span class="field-label text-white">Plano Arquitectónico</span>
                     <div class="input-sleek">
@@ -279,7 +261,7 @@
                     </div>
                   </label>
                 </div>
-                <div class="col-12 col-lg-4">
+                <div class="col-12 col-lg-3">
                   <label class="field">
                     <span class="field-label text-white">Plano Distribución</span>
                     <div class="input-sleek">
@@ -289,101 +271,109 @@
                       <span class="sleek-line"></span>
                     </div>
                   </label>
+                </div> -->
                 </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Fecha Vencimiento Licencia</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-calendar-alt"></i>
-                      <input formControlName="fechaVencimientoLicencia" class="sleek-control" type="datetime-local" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
+              </div>
+
+              <!-- Sección: Licencia y Contrato -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-file-contract"></i>
+                  </div>
+                  <h5 class="section-title">Licencia y Contrato</h5>
+                  <div class="section-line"></div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Moneda Principal</span>
-
-                    <div class="input-sleek select-sleek" [class.is-open]="isIdMonedaOpen"
-                      (mousedown)="toggleIdMoneda($event)">
-                      <i class="fas fa-coins"></i>
-
-                      <div class="sleek-control select-display">
-                        <span class="select-value"
-                          [class.placeholder]="zonaForm.get('idMonedaPrincipal')?.value == null">
-                          {{ idMonedaLabel || 'Seleccione una moneda' }}
-                        </span>
+                <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha Vencimiento Licencia</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input formControlName="fechaVencimientoLicencia" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
                       </div>
-
-                      <span class="sleek-line"></span>
-
-                      <div class="select-panel" *ngIf="isIdMonedaOpen" (mousedown)="$event.stopPropagation()">
-                        <button type="button" class="select-option" *ngFor="let it of idMonedaItems"
-                          (mousedown)="setIdMoneda(it.id, it.text, $event)">
-                          {{ it.text }}
-                        </button>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Moneda Principal</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isIdMonedaOpen"
+                        (mousedown)="toggleIdMoneda($event)">
+                        <i class="fas fa-coins"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value"
+                            [class.placeholder]="salaForm.get('idMonedaPrincipal')?.value == null">
+                            {{ idMonedaLabel || 'Seleccione una moneda' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isIdMonedaOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let it of idMonedaItems"
+                            (mousedown)="setIdMoneda(it.id, it.text, $event)">
+                            {{ it.text }}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Fecha Inicio Contrato</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-calendar-check"></i>
-                      <input formControlName="fechaInicioContrato" class="sleek-control" type="datetime-local" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Fecha Fin Contrato</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-calendar-times"></i>
-                      <input formControlName="fechaFinContrato" class="sleek-control" type="datetime-local" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
-                </div>
-                <div class="col-12 col-md-6 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Estatus Licencia</span>
-
-                    <div class="input-sleek select-sleek" [class.is-open]="isIdEstatusLicOpen"
-                      (mousedown)="toggleIdEstatusLic($event)">
-                      <i class="fas fa-toggle-on"></i>
-
-                      <div class="sleek-control select-display">
-                        <span class="select-value"
-                          [class.placeholder]="zonaForm.get('idEstatusLicencia')?.value == null">
-                          {{ idEstatusLicLabel || 'Seleccione un estatus' }}
-                        </span>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Estatus Licencia</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isIdEstatusLicOpen"
+                        (mousedown)="toggleIdEstatusLic($event)">
+                        <i class="fas fa-toggle-on"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value"
+                            [class.placeholder]="salaForm.get('idEstatusLicencia')?.value == null">
+                            {{ idEstatusLicLabel || 'Seleccione un estatus' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isIdEstatusLicOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let it of idEstatusLicItems"
+                            (mousedown)="setIdEstatusLic(it.id, it.text, $event)">
+                            {{ it.text }}
+                          </button>
+                        </div>
                       </div>
-
-                      <span class="sleek-line"></span>
-
-                      <div class="select-panel" *ngIf="isIdEstatusLicOpen" (mousedown)="$event.stopPropagation()">
-                        <button type="button" class="select-option" *ngFor="let it of idEstatusLicItems"
-                          (mousedown)="setIdEstatusLic(it.id, it.text, $event)">
-                          {{ it.text }}
-                        </button>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha Inicio Contrato</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar-check"></i>
+                        <input formControlName="fechaInicioContrato" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
                       </div>
-                    </div>
-                  </label>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha Fin Contrato</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar-times"></i>
+                        <input formControlName="fechaFinContrato" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
-                <div class="col-12 col-lg-4">
-                  <label class="field">
-                    <span class="field-label text-white">Motivo Suspensión</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-exclamation-triangle"></i>
-                      <input formControlName="motivoSuspension" class="sleek-control" type="text"
-                        placeholder="Motivo suspensión" />
-                      <span class="sleek-line"></span>
-                    </div>
-                  </label>
+              </div>
+            </div>
+
+            <!-- Sección: Documentos -->
+            <div class="form-section mt-5">
+              <div class="section-header">
+                <div class="section-icon">
+                  <i class="fas fa-folder-open"></i>
                 </div>
-                <div class="col-12 col-md-6 col-lg-4 mt-2">
+                <h5 class="section-title">Documentos</h5>
+                <div class="section-line"></div>
+              </div>
+              <div class="row g-3 mt-0">
+                <div class="col-12 col-md-6 col-lg-3 mt-2">
                   <div class="pf-uploader" [class.has-file]="logotipoPreviewUrl || logotipoFileName"
                     [class.dragging]="logotipoDragging" (click)="openLogotipoFilePicker()"
                     (dragover)="onLogotipoDragOver($event)" (dragleave)="onLogotipoDragLeave($event)"
@@ -430,7 +420,7 @@
                       (change)="onLogotipoSelected($event)" />
                   </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-4 mt-2">
+                <div class="col-12 col-md-6 col-lg-3 mt-2">
                   <div class="pf-uploader" [class.has-file]="licenciaPreviewUrl || licenciaFileName"
                     [class.dragging]="licenciaDragging" (click)="openLicenciaFilePicker()"
                     (dragover)="onLicenciaDragOver($event)" (dragleave)="onLicenciaDragLeave($event)"
@@ -477,111 +467,114 @@
                       (change)="onLicenciaSelected($event)" />
                   </div>
                 </div>
-              </div>
-              <div class="col-12 mt-4">
-                <div class="plano-card">
-                  <div class="plano-wrap">
-                    <div class="plano-stage-wrap">
-                      <!-- en tu div .plano-stage agrega el cursor -->
-                      <div class="plano-stage plano-stage--wide" #stage [style.cursor]="canvasCursor"
-                        (pointerdown)="onCanvasPointerDown($event)" (pointermove)="onCanvasPointerMove($event)"
-                        (pointerup)="onCanvasPointerUp($event)" (pointercancel)="onCanvasPointerUp($event)"
-                        (pointerleave)="onCanvasPointerUp($event)" (wheel)="onCanvasWheel($event)"
-                        (click)="clearSelection()">
+                <div class="col-12 col-md-6 col-lg-3 mt-2">
+                  <div class="pf-uploader" [class.has-file]="planoPreviewUrl || planoFileName"
+                    [class.dragging]="planoDragging" (click)="openPlanoFilePicker()"
+                    (dragover)="onPlanoDragOver($event)" (dragleave)="onPlanoDragLeave($event)"
+                    (drop)="onPlanoDrop($event)">
 
-                        <div class="plano-content" [style.transform]="'scale(' + zoom + ')'"
-                          [style.transformOrigin]="'0 0'">
-                          <svg class="plano-canvas" [attr.width]="worldW" [attr.height]="worldH"
-                            [attr.viewBox]="'0 0 ' + worldW + ' ' + worldH" xmlns="http://www.w3.org/2000/svg">
-                            <g *ngFor="let r of rects">
-                              <rect [attr.x]="r.x" [attr.y]="r.y" [attr.width]="r.w" [attr.height]="r.h"
-                                fill="rgba(0, 209, 255, .10)" stroke="rgba(0, 209, 255, .85)" [attr.stroke-width]="r.sw"
-                                rx="6" ry="6"></rect>
-                            </g>
-
-                            <rect *ngIf="draftRect" [attr.x]="draftRect.x" [attr.y]="draftRect.y"
-                              [attr.width]="draftRect.w" [attr.height]="draftRect.h" fill="rgba(0, 209, 255, .06)"
-                              stroke="rgba(0, 209, 255, .95)" [attr.stroke-width]="draftRect.sw" stroke-dasharray="8 6"
-                              rx="6" ry="6"></rect>
-
-                            <g *ngFor="let s of strokes; let i = index">
-                              <path [attr.d]="strokePath(s)" fill="none" stroke="rgba(0, 209, 255, .85)"
-                                [attr.stroke-width]="s.w" stroke-linecap="round" stroke-linejoin="round"
-                                [class.is-selected]="selectedStrokeId === s.id"
-                                [class.is-dragging]="draggingStrokeIndex !== null && selectedStrokeId === s.id">
-                              </path>
-                              <circle *ngIf="s.pts.length" class="stroke-handle-hit" [attr.cx]="s.pts[0].x"
-                                [attr.cy]="s.pts[0].y" [attr.r]="14" (pointerenter)="onEndpointEnter(i, 'start')"
-                                (pointerleave)="onEndpointLeave(i, 'start')">
-                              </circle>
-                              <circle *ngIf="s.pts.length" class="stroke-handle"
-                                [class.is-visible]="(hoveredEndpoint?.strokeIndex === i && hoveredEndpoint?.side === 'start') || (draggingEndpoint?.strokeIndex === i && draggingEndpoint?.side === 'start')"
-                                [attr.cx]="s.pts[0].x" [attr.cy]="s.pts[0].y" [attr.r]="8">
-                              </circle>
-                              <circle *ngIf="s.pts.length" class="stroke-handle-hit"
-                                [attr.cx]="s.pts[s.pts.length - 1].x" [attr.cy]="s.pts[s.pts.length - 1].y"
-                                [attr.r]="14" (pointerenter)="onEndpointEnter(i, 'end')"
-                                (pointerleave)="onEndpointLeave(i, 'end')">
-                              </circle>
-                              <circle *ngIf="s.pts.length" class="stroke-handle"
-                                [class.is-visible]="(hoveredEndpoint?.strokeIndex === i && hoveredEndpoint?.side === 'end') || (draggingEndpoint?.strokeIndex === i && draggingEndpoint?.side === 'end')"
-                                [attr.cx]="s.pts[s.pts.length - 1].x" [attr.cy]="s.pts[s.pts.length - 1].y"
-                                [attr.r]="8">
-                              </circle>
-                            </g>
-                          </svg>
-                        </div>
+                    <div class="pf-top">
+                      <div class="pf-title">
+                        <i class="fas fa-drafting-compass"></i>
+                        <span>Plano arquitectónico</span>
                       </div>
-                      <div class="mini">
-                        <div class="mini-title">Herramientas</div>
-                        <div class="mini-tools">
-                          <div class="mini-tools-row">
-                            <button type="button" class="plano-btn plano-btn--ghost" [class.is-tool]="tool === 'pen'"
-                              (click)="setTool('pen')">
-                              <i class="fas fa-pen"></i><span>Pluma</span>
-                            </button>
-                            <button type="button" class="plano-btn plano-btn--ghost" [class.is-tool]="tool === 'rect'"
-                              (click)="setTool('rect')">
-                              <i class="fas fa-vector-square"></i><span>Rect</span>
-                            </button>
-                            <!-- <button type="button" class="plano-btn plano-btn--ghost" [class.is-tool]="tool === 'eraser'"
-                              (click)="setTool('eraser')">
-                              <i class="fas fa-eraser"></i><span>Borrar</span>
-                            </button> -->
-                          </div>
-                          <div class="mini-tools-row">
-                            <button type="button" class="plano-btn" (click)="undo()"
-                              [disabled]="undoStack.length === 0">
-                              <i class="fas fa-undo"></i><span>Undo</span>
-                            </button>
-                            <button type="button" class="plano-btn" (click)="redo()"
-                              [disabled]="redoStack.length === 0">
-                              <i class="fas fa-redo"></i><span>Redo</span>
-                            </button>
-                            <button type="button" class="plano-btn plano-btn--danger" (click)="clearPlan()"
-                              [disabled]="strokes.length === 0 && rects.length === 0">
-                              <i class="fas fa-broom"></i><span>Limpiar</span>
-                            </button>
-                          </div>
-                          <div class="mini-tools-row mini-tools-row--zoom">
-                            <div class="zoom-box">
-                              <button type="button" class="plano-btn plano-btn--ghost" (click)="zoomOut()"><i
-                                  class="fas fa-minus"></i></button>
-                              <span class="zoom-val">{{ (zoom * 100) | number:'1.0-0' }}%</span>
-                              <button type="button" class="plano-btn plano-btn--ghost" (click)="zoomIn()"><i
-                                  class="fas fa-plus"></i></button>
-                              <button type="button" class="plano-btn plano-btn--ghost" (click)="resetZoom()"><i
-                                  class="fas fa-crosshairs"></i></button>
-                            </div>
-                          </div>
-                          <div class="mini-info">
-                            <div class="mi"><span>Trazos</span><b>{{ strokes.length }}</b></div>
-                            <div class="mi"><span>Rect</span><b>{{ rects.length }}</b></div>
-                            <div class="mi"><span>Herr</span><b>{{ toolLabel }}</b></div>
-                          </div>
-                        </div>
+                      <div class="pf-badge">3 MB</div>
+                    </div>
+
+                    <div class="pf-mid" *ngIf="planoPreviewUrl || planoFileName; else planoEmpty">
+                      <div class="pf-hero" *ngIf="planoPreviewUrl">
+                        <img [src]="planoPreviewUrl" alt="Plano arquitectónico" />
+                      </div>
+
+                      <div class="file-name" *ngIf="planoFileName">{{ planoFileName }}</div>
+
+                      <div class="pf-actions" (click)="$event.stopPropagation()">
+                        <button type="button" class="pf-btn pf-btn--primary" (click)="openPlanoFilePicker()">
+                          <i class="fas fa-sync-alt"></i>
+                          <span>Reemplazar</span>
+                        </button>
+
+                        <button type="button" class="pf-btn pf-btn--ghost" (click)="clearPlanoFile($event)">
+                          <i class="fas fa-trash"></i>
+                          <span>Eliminar</span>
+                        </button>
                       </div>
                     </div>
+
+                    <ng-template #planoEmpty>
+                      <div class="pf-empty">
+                        <div class="pf-orb">
+                          <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="pf-copy">
+                          <div class="pf-main">Subir plano</div>
+                          <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP/PDF</div>
+                        </div>
+                        <div class="pf-cta">
+                          <span>Seleccionar</span>
+                          <i class="fas fa-arrow-right"></i>
+                        </div>
+                      </div>
+                    </ng-template>
+
+                    <input type="file" #planoFileInput accept=".jpg,.jpeg,.png,.webp,.pdf" hidden
+                      (change)="onPlanoFileSelected($event)" />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 mt-2">
+                  <div class="pf-uploader" [class.has-file]="planoDistribucionPreviewUrl || planoDistribucionFileName"
+                    [class.dragging]="planoDistribucionDragging" (click)="openPlanoDistribucionFilePicker()"
+                    (dragover)="onPlanoDistribucionDragOver($event)" (dragleave)="onPlanoDistribucionDragLeave($event)"
+                    (drop)="onPlanoDistribucionDrop($event)">
+
+                    <div class="pf-top">
+                      <div class="pf-title">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>Plano distribución</span>
+                      </div>
+                      <div class="pf-badge">3 MB</div>
+                    </div>
+
+                    <div class="pf-mid"
+                      *ngIf="planoDistribucionPreviewUrl || planoDistribucionFileName; else planoDistribucionEmpty">
+                      <div class="pf-hero" *ngIf="planoDistribucionPreviewUrl">
+                        <img [src]="planoDistribucionPreviewUrl" alt="Plano distribución" />
+                      </div>
+
+                      <div class="file-name" *ngIf="planoDistribucionFileName">{{ planoDistribucionFileName }}</div>
+
+                      <div class="pf-actions" (click)="$event.stopPropagation()">
+                        <button type="button" class="pf-btn pf-btn--primary"
+                          (click)="openPlanoDistribucionFilePicker()">
+                          <i class="fas fa-sync-alt"></i>
+                          <span>Reemplazar</span>
+                        </button>
+
+                        <button type="button" class="pf-btn pf-btn--ghost" (click)="clearPlanoDistribucionFile($event)">
+                          <i class="fas fa-trash"></i>
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <ng-template #planoDistribucionEmpty>
+                      <div class="pf-empty">
+                        <div class="pf-orb">
+                          <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="pf-copy">
+                          <div class="pf-main">Subir plano distribución</div>
+                          <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP/PDF</div>
+                        </div>
+                        <div class="pf-cta">
+                          <span>Seleccionar</span>
+                          <i class="fas fa-arrow-right"></i>
+                        </div>
+                      </div>
+                    </ng-template>
+
+                    <input type="file" #planoDistribucionFileInput accept=".jpg,.jpeg,.png,.webp,.pdf" hidden
+                      (change)="onPlanoDistribucionFileSelected($event)" />
                   </div>
                 </div>
               </div>
@@ -591,11 +584,11 @@
 
         <div class="row mt-4">
           <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
-            <button type="button" class="btn-alt btn-alt--info" (click)="verPayloadSala()">
-              <i class="fas fa-code"></i>
-              <span>Ver JSON</span>
+            <button (click)="submit()" type="button" class="btn-alt btn-alt--success" [disabled]="loading">
+              <i class="fas fa-check"></i>
+              <span>{{ submitButton }}</span>
             </button>
-            <button type="button" class="btn-alt btn-alt--cancel">
+            <button (click)="regresar()" type="button" class="btn-alt btn-alt--cancel" [disabled]="loading">
               <i class="fas fa-times"></i>
               <span>Cancelar</span>
             </button>

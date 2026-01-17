@@ -6,6 +6,7 @@ import { NgxPermissionsService } from 'ngx-permissions';
 import { forkJoin, lastValueFrom, map, of, switchMap } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { ModulosService } from 'src/app/shared/services/modulos.service';
+import { SalaService } from 'src/app/shared/services/salas.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -35,7 +36,7 @@ export class ListaSalasComponent {
 
   constructor(
     private router: Router,
-    private moduloService: ModulosService,
+    private salasService: SalaService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -49,7 +50,7 @@ export class ListaSalasComponent {
 
   obtenerlistaSalas() {
     this.loading = true;
-    this.moduloService.obtenerModulos().subscribe((response: any[]) => {
+    this.salasService.obtenerSalas().subscribe((response: any[]) => {
       this.loading = false;
       this.listaSalas = response;
     });
@@ -59,14 +60,14 @@ export class ListaSalasComponent {
     this.router.navigateByUrl('/salas/agregar-sala');
   }
 
-  actualizarSala(idSala: Number) {
-    this.router.navigateByUrl('/salas/editar-sala/' + idSala);
+  actualizarSala(id: Number) {
+    this.router.navigateByUrl('/salas/editar-sala/' + id);
   }
 
   activar(rowData: any) {
     Swal.fire({
       title: '¡Activar!',
-      html: `¿Está seguro que requiere activar el módulo: <strong>${rowData.nombre}</strong>?`,
+      html: `¿Está seguro que requiere activar la sala: <strong>${rowData.nombreSala || rowData.nombre}</strong>?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -76,11 +77,11 @@ export class ListaSalasComponent {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.moduloService.updateEstatus(rowData.id, 1).subscribe(
+        this.salasService.updateEstatus(rowData.id, 1).subscribe(
           (response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',
-              html: `El módulo ha sido activado.`,
+              html: `La sala ha sido activada.`,
               icon: 'success',
               background: '#0d121d',
               confirmButtonColor: '#3085d6',
@@ -109,7 +110,7 @@ export class ListaSalasComponent {
   desactivar(rowData: any) {
     Swal.fire({
       title: '¡Desactivar!',
-      html: `¿Está seguro que requiere desactivar el módulo: <strong>${rowData.nombre}</strong>?`,
+      html: `¿Está seguro que requiere desactivar la sala: <strong>${rowData.nombreSala || rowData.nombre}</strong>?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -119,11 +120,11 @@ export class ListaSalasComponent {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.moduloService.updateEstatus(rowData.id, 0).subscribe(
+        this.salasService.updateEstatus(rowData.id, 0).subscribe(
           (response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',
-              html: `El módulo ha sido desactivado.`,
+              html: `La sala ha sido desactivada.`,
               icon: 'success',
               background: '#0d121d',
               confirmButtonColor: '#3085d6',
@@ -167,7 +168,7 @@ export class ListaSalasComponent {
 
         try {
           const resp: any = await lastValueFrom(
-            this.moduloService.obtenerModuloData(page, take)
+            this.salasService.obtenerSalasData(page, take)
           );
           this.loading = false;
           const rows: any[] = Array.isArray(resp?.data) ? resp.data : [];
@@ -287,5 +288,139 @@ export class ListaSalasComponent {
     this.dataGrid.instance.pageIndex(0);
     this.dataGrid.instance.refresh();
     this.isGrouped = false;
+  }
+
+  mostrarUbicacion(sala: any): void {
+    const lat = Number(sala.latitudSala) || 19.4326;
+    const lng = Number(sala.longitudSala) || -99.1332;
+    const nombreSala = sala.nombreSala || 'Sala';
+
+    const modalHtml = `
+      <div class="map-modal-container">
+        <div id="map-modal-view" style="width: 100%; height: 450px; border-radius: 12px; overflow: hidden; margin: 16px 0;"></div>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+          <button id="btn-cerrar-ubicacion" type="button" class="btn-alt btn-alt--cancel">
+            <i class="fas fa-times"></i>
+            <span>Cerrar</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    Swal.fire({
+      title: `<div style="display: flex; align-items: center; gap: 12px; justify-content: center; flex-wrap: wrap;"><i class="fas fa-map-marker-alt" style="color: #ff1a5b; font-size: 24px;"></i><span style="color: #fff; font-size: 18px; font-weight: 500;">Ubicación: ${nombreSala}</span></div>`,
+      html: modalHtml,
+      width: '90%',
+      background: '#0d121d',
+      showConfirmButton: false,
+      showCancelButton: false,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        this.initMapView(lat, lng);
+        this.attachCloseButton();
+      },
+      customClass: {
+        popup: 'map-modal-popup',
+        htmlContainer: 'map-modal-html',
+        title: 'map-modal-title'
+      }
+    } as any);
+  }
+
+  private mapViewInstance: google.maps.Map | null = null;
+  private markerViewInstance: google.maps.Marker | null = null;
+
+  private initMapView(lat: number, lng: number): void {
+    const waitForGoogle = () => {
+      if (typeof window.google !== 'undefined' && window.google.maps) {
+        this.createMapView(lat, lng);
+      } else {
+        setTimeout(waitForGoogle, 100);
+      }
+    };
+    waitForGoogle();
+  }
+
+  private createMapView(lat: number, lng: number): void {
+    const mapElement = document.getElementById('map-modal-view');
+    if (!mapElement) return;
+
+    this.mapViewInstance = new window.google.maps.Map(mapElement, {
+      center: { lat, lng },
+      zoom: 15,
+      disableDefaultUI: false,
+      zoomControl: true,
+      mapTypeControl: true,
+      scaleControl: true,
+      streetViewControl: true,
+      rotateControl: true,
+      fullscreenControl: true,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        },
+        {
+          featureType: 'poi.business',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        },
+        {
+          featureType: 'poi.place_of_worship',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        },
+        {
+          featureType: 'poi.school',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        },
+        {
+          featureType: 'poi.sports_complex',
+          elementType: 'all',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
+    });
+
+    // Crear marker atractivo
+    const markerIcon = {
+      url: 'data:image/svg+xml;base64,' + btoa(`
+        <svg width="48" height="64" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+            </filter>
+          </defs>
+          <path d="M24 0C10.745 0 0 10.745 0 24c0 14.25 24 40 24 40s24-25.75 24-40C48 10.745 37.255 0 24 0z" fill="#ff1a5b" filter="url(#shadow)"/>
+          <circle cx="24" cy="24" r="12" fill="#fff"/>
+          <circle cx="24" cy="24" r="6" fill="#ff1a5b"/>
+        </svg>
+      `),
+      scaledSize: new window.google.maps.Size(48, 64),
+      anchor: new window.google.maps.Point(24, 64)
+    };
+
+    this.markerViewInstance = new window.google.maps.Marker({
+      position: { lat, lng },
+      map: this.mapViewInstance,
+      icon: markerIcon,
+      animation: window.google.maps.Animation.DROP
+    });
+  }
+
+  private attachCloseButton(): void {
+    setTimeout(() => {
+      const btnCerrar = document.getElementById('btn-cerrar-ubicacion');
+      if (btnCerrar) {
+        btnCerrar.addEventListener('click', () => {
+          Swal.close();
+          this.mapViewInstance = null;
+          this.markerViewInstance = null;
+        });
+      }
+    }, 300);
   }
 }

@@ -1,0 +1,445 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <div>
+              <h4 class="title-title">{{ title }}</h4>
+              <p class="title-subtitle">Captura la información requerida para el registro.</p>
+            </div>
+          </div>
+          <div class="title-actions">
+            <div class="title-tagline">
+              <span class="line"></span>
+              <span class="text">Control y configuración centralizada</span>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3 gy-4">
+          <form [formGroup]="maquinaForm">
+            <div class="col-12">
+              <!-- Sección: Información General -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-info-circle"></i>
+                  </div>
+                  <h5 class="section-title">Información General</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Número de Serie</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-barcode"></i>
+                        <input formControlName="numeroSerie" class="sleek-control" type="text"
+                          placeholder="Número de serie" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Nombre</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-tag"></i>
+                        <input formControlName="nombre" class="sleek-control" type="text"
+                          placeholder="Nombre de la máquina" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Marca</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-industry"></i>
+                        <input formControlName="marca" class="sleek-control" type="text"
+                          placeholder="Marca" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3">
+                    <label class="field">
+                      <span class="field-label text-white">Modelo</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-cube"></i>
+                        <input formControlName="modelo" class="sleek-control" type="text"
+                          placeholder="Modelo" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sección: Ubicación -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </div>
+                  <h5 class="section-title">Ubicación</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Cliente</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isClienteOpen"
+                        (mousedown)="toggleCliente($event)">
+                        <i class="fas fa-building"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idCliente')?.value">
+                            {{ clienteLabel || 'Selecciona un cliente...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isClienteOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let c of listaClientes"
+                            (mousedown)="setCliente(c.id, c.nombre, $event)">
+                            {{ c.nombre }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Sala</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
+                        (mousedown)="toggleSala($event)">
+                        <i class="fas fa-door-open"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idSala')?.value">
+                            {{ salaLabel || 'Selecciona una sala...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isSalaOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let s of listaSalas"
+                            (mousedown)="setSala(s.id, s.nombre, $event)">
+                            {{ s.nombre }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Zona</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isZonaOpen"
+                        (mousedown)="toggleZona($event)">
+                        <i class="fas fa-th"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idZona')?.value">
+                            {{ zonaLabel || 'Selecciona una zona...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isZonaOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let z of listaZonas"
+                            (mousedown)="setZona(z.id, z.nombre, $event)">
+                            {{ z.nombre }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sección: Clasificación -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-tags"></i>
+                  </div>
+                  <h5 class="section-title">Clasificación</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Tipo de Máquina</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isTipoMaquinaOpen"
+                        (mousedown)="toggleTipoMaquina($event)">
+                        <i class="fas fa-list"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idTipoMaquina')?.value">
+                            {{ tipoMaquinaLabel || 'Selecciona un tipo...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isTipoMaquinaOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let t of listaTipoMaquina"
+                            (mousedown)="setTipoMaquina(t.id, t.text, $event)">
+                            {{ t.text }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Fabricante</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isFabricanteOpen"
+                        (mousedown)="toggleFabricante($event)">
+                        <i class="fas fa-industry"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idFabricante')?.value">
+                            {{ fabricanteLabel || 'Selecciona un fabricante...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isFabricanteOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let f of listaFabricantes"
+                            (mousedown)="setFabricante(f.id, f.text, $event)">
+                            {{ f.text }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Estatus</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isEstatusMaquinaOpen"
+                        (mousedown)="toggleEstatusMaquina($event)">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idEstatusMaquina')?.value">
+                            {{ estatusMaquinaLabel || 'Selecciona un estatus...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isEstatusMaquinaOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let e of listaEstatusMaquina"
+                            (mousedown)="setEstatusMaquina(e.id, e.text, $event)">
+                            {{ e.text }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sección: Fechas y Costos -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                  </div>
+                  <h5 class="section-title">Fechas y Costos</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Año de Fabricación</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar"></i>
+                        <input formControlName="anioFabricacion" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha de Adquisición</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-shopping-cart"></i>
+                        <input formControlName="fechaAdquisicion" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Costo de Adquisición</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input formControlName="costoAdquisicion" class="sleek-control" type="text"
+                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sección: Dimensiones -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-ruler-combined"></i>
+                  </div>
+                  <h5 class="section-title">Dimensiones</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Ancho (metros)</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-arrows-alt-h"></i>
+                        <input formControlName="anchoMetros" class="sleek-control" type="text"
+                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Alto (metros)</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-arrows-alt-v"></i>
+                        <input formControlName="altoMetros" class="sleek-control" type="text"
+                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Profundidad (metros)</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-cube"></i>
+                        <input formControlName="profundidadMetros" class="sleek-control" type="text"
+                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sección: Imágenes -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-images"></i>
+                  </div>
+                  <h5 class="section-title">Imágenes</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-6">
+                    <label class="field">
+                      <span class="field-label text-white">Imagen de la Máquina</span>
+                      <div class="pf-uploader" (click)="openImagenFilePicker()">
+                        <div class="pf-top">
+                          <div class="pf-title">
+                            <i class="fas fa-image"></i>
+                            <span>Imagen de la Máquina</span>
+                          </div>
+                          <div class="pf-badge" *ngIf="imagenFileName">{{ imagenFileName }}</div>
+                        </div>
+                        <div class="pf-mid">
+                          <div class="pf-hero" *ngIf="imagenPreviewUrl">
+                            <img [src]="imagenPreviewUrl" alt="Imagen" />
+                          </div>
+                          <div class="pf-empty" *ngIf="!imagenPreviewUrl">
+                            <div class="pf-orb">
+                              <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="pf-copy">
+                              <div class="pf-main">Subir imagen</div>
+                              <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP</div>
+                            </div>
+                            <div class="pf-cta">
+                              <span>Seleccionar</span>
+                              <i class="fas fa-arrow-right"></i>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="pf-actions" *ngIf="imagenPreviewUrl" (click)="$event.stopPropagation()">
+                          <button type="button" class="pf-btn pf-btn--primary"
+                            (click)="openImagenFilePicker()">
+                            <i class="fas fa-sync"></i>
+                            <span>Reemplazar</span>
+                          </button>
+                          <button type="button" class="pf-btn pf-btn--ghost" (click)="clearImagen($event)">
+                            <i class="fas fa-trash"></i>
+                            <span>Eliminar</span>
+                          </button>
+                        </div>
+                      </div>
+                      <input type="file" #imagenFileInput accept=".jpg,.jpeg,.png,.webp" hidden
+                        (change)="onImagenSelected($event)" />
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-6">
+                    <label class="field">
+                      <span class="field-label text-white">Icono de la Máquina</span>
+                      <div class="pf-uploader" (click)="openIconoFilePicker()">
+                        <div class="pf-top">
+                          <div class="pf-title">
+                            <i class="fas fa-icons"></i>
+                            <span>Icono de la Máquina</span>
+                          </div>
+                          <div class="pf-badge" *ngIf="iconoFileName">{{ iconoFileName }}</div>
+                        </div>
+                        <div class="pf-mid">
+                          <div class="pf-hero" *ngIf="iconoPreviewUrl">
+                            <img [src]="iconoPreviewUrl" alt="Icono" />
+                          </div>
+                          <div class="pf-empty" *ngIf="!iconoPreviewUrl">
+                            <div class="pf-orb">
+                              <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="pf-copy">
+                              <div class="pf-main">Subir icono</div>
+                              <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP</div>
+                            </div>
+                            <div class="pf-cta">
+                              <span>Seleccionar</span>
+                              <i class="fas fa-arrow-right"></i>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="pf-actions" *ngIf="iconoPreviewUrl" (click)="$event.stopPropagation()">
+                          <button type="button" class="pf-btn pf-btn--primary"
+                            (click)="openIconoFilePicker()">
+                            <i class="fas fa-sync"></i>
+                            <span>Reemplazar</span>
+                          </button>
+                          <button type="button" class="pf-btn pf-btn--ghost" (click)="clearIcono($event)">
+                            <i class="fas fa-trash"></i>
+                            <span>Eliminar</span>
+                          </button>
+                        </div>
+                      </div>
+                      <input type="file" #iconoFileInput accept=".jpg,.jpeg,.png,.webp" hidden
+                        (change)="onIconoSelected($event)" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
+            <button (click)="submit()" type="button" class="btn-alt btn-alt--success" [disabled]="loading">
+              <i class="fas fa-check"></i>
+              <span>{{ submitButton }}</span>
+            </button>
+            <button (click)="regresar()" type="button" class="btn-alt btn-alt--cancel" [disabled]="loading">
+              <i class="fas fa-times"></i>
+              <span>Cancelar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

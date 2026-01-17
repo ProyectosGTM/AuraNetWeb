@@ -1,3 +1,51 @@
+// Estilos para secciones del formulario
+.form-section {
+  margin-bottom: 32px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(228, 0, 65, 0.2) 0%, rgba(228, 0, 65, 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  i {
+    color: #ff1a5b;
+    font-size: 18px;
+  }
+}
+
+.section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.section-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 26, 91, 0.3) 0%, transparent 100%);
+  border-radius: 1px;
+}
+
 .input-sleek {
   position: relative;
 }
@@ -340,6 +388,19 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.file-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  text-align: center;
+  word-break: break-word;
 }
 
 .pf-actions {

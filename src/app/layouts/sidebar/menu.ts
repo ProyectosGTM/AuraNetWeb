@@ -37,16 +37,15 @@ export const MENU: MenuItem[] = [
         subItems: [
             { id: 3, label: 'Clientes', link: '/clientes' },
             { id: 5, label: 'Salas', link: '/salas' },
+            { id: 6, label: 'Maquinas', link: '/maquinas' },
             { id: 4, label: 'Zonas', link: '/zonas' },
-            { id: 6, label: 'Maquinas', link: '/maquinas' }
         ]
-    },
-
-    // --- AGRUPADO: Tablero / POS / Perfil
-    
+    },    
 
     // --- NO AGRUPADOS (se quedan solos)
     { id: 11, label: 'Monederos', icon: 'uil-moneybag-alt', link: '/monederos' },
+    { id: 36, label: 'Tesoreria', icon: 'uil-wallet', link: '/tesoreria' },
+    { id: 37, label: 'Cajas', icon: 'uil-money-stack', link: '/cajas' },
 
     // --- AGRUPADO: Saldo no debitado / Premios entregados / Venta Acumulada / Promociones
     {

@@ -1,0 +1,188 @@
+<div class="affiliation-wrapper">
+  <div class="affiliation-shell animate-slide-up">
+
+    <div class="affiliation-visual">
+      <div class="visual-glow"></div>
+
+      <div class="brand brand-center">
+        <div class="brand-avatar">
+          <i class="fas fa-user-plus"></i>
+        </div>
+
+        <div class="brand-text">
+          <div class="brand-title">Afiliación</div>
+          <div class="brand-subtitle">Sistema de Gestión Auranet</div>
+        </div>
+      </div>
+
+      <div class="visual-image-wrap">
+        <img src="assets/images/fondo.png" alt="Fondo" class="visual-image" />
+      </div>
+    </div>
+
+    <div class="affiliation-panel">
+      <div class="panel-head">
+        <div class="panel-icon">
+          <i class="fas fa-id-card"></i>
+        </div>
+
+        <div class="panel-titles">
+          <h2 class="panel-title fw-bold">Registro de Pasajero</h2>
+          <p class="panel-subtitle text-white">Completa tus datos para afiliarte</p>
+        </div>
+      </div>
+
+      <form class="affiliation-form" [formGroup]="afiliacionPasajero" (ngSubmit)="agregar()" novalidate>
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <label class="field">
+              <span class="field-label text-white">Nombre</span>
+              <div class="field-control">
+                <i class="fas fa-user"></i>
+                <input formControlName="nombre" class="custom-input" type="text" placeholder="Ingresa tu nombre" />
+              </div>
+            </label>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="field">
+              <span class="field-label text-white">Apellido Paterno</span>
+              <div class="field-control">
+                <i class="fas fa-user"></i>
+                <input formControlName="apellidoPaterno" class="custom-input" type="text"
+                  placeholder="Ingresa tu apellido paterno" />
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <label class="field">
+              <span class="field-label text-white">Apellido Materno</span>
+              <div class="field-control">
+                <i class="fas fa-user"></i>
+                <input formControlName="apellidoMaterno" class="custom-input" type="text"
+                  placeholder="Ingresa tu apellido materno (opcional)" />
+              </div>
+            </label>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="field">
+              <span class="field-label text-white">Fecha de Nacimiento</span>
+              <div class="field-control">
+                <i class="fas fa-calendar"></i>
+                <input formControlName="fechaNacimiento" class="custom-input" type="date" />
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <label class="field">
+              <span class="field-label text-white">Teléfono</span>
+              <div class="field-control">
+                <i class="fas fa-phone"></i>
+                <input formControlName="telefono" class="custom-input" type="text" placeholder="10 dígitos"
+                  (keypress)="allowOnlyNumbers($event)" maxlength="10" />
+              </div>
+            </label>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="field">
+              <span class="field-label text-white">Correo Electrónico</span>
+              <div class="field-control">
+                <i class="fas fa-envelope"></i>
+                <input formControlName="correo" class="custom-input" type="email" placeholder="correo@dominio.com" />
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-md-12">
+            <label class="field" [class.field-focused]="pwFocused">
+              <span class="field-label text-white">Contraseña</span>
+              <div class="field-control">
+                <i class="fas fa-key"></i>
+                <input formControlName="passwordHash" class="custom-input" [type]="type"
+                  placeholder="Mínimo 7 caracteres" (focus)="pwFocused = true" (blur)="pwFocused = false" />
+                <button type="button" class="icon-btn" aria-label="Mostrar contraseña"
+                  (click)="myFunctionPasswordCurrent()">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div class="password-hint" *ngIf="showPwHint" [@fadeOnChange]="pwGuideKey">
+                <div class="hint-item" [class.valid]="pwAllOk">
+                  <i [class]="pwAllOk ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                  <span>{{ pwGuideText }}</span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="buttons-container">
+              <button class="btn-accent btn-main" type="submit" [disabled]="afiliacionPasajero.invalid || loading">
+                <span class="loader" *ngIf="loading"></span>
+                <span class="btn-content" *ngIf="!loading">
+                  <i class="fas fa-save"></i>
+                  <span>{{ submitButton }}</span>
+                </span>
+                <span *ngIf="loading">Cargando...</span>
+              </button>
+
+              <button class="btn-cancel btn-secondary" type="button" (click)="cancelar()" [disabled]="loading">
+                <i class="fas fa-times"></i>&nbsp;
+                <span>Cancelar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            <div class="panel-foot text-white">
+              ¿Ya tienes cuenta?&nbsp;
+              <a class="link-accent" routerLink="/account/login">Iniciar sesión</a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Verificación OTP -->
+<ng-template #largeDataModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Verificación de Código</h4>
+  </div>
+  <div class="modal-body">
+    <p class="text-white">Ingresa el código de verificación que recibiste en tu correo electrónico.</p>
+
+    <form [formGroup]="verifyForm" (ngSubmit)="onVerify()" novalidate>
+      <div class="otp-inputs">
+        <input *ngFor="let item of [0,1,2,3]; let i = index" #otpInput type="text" class="otp-box" maxlength="1"
+          [value]="otp[i]" (input)="onOtpInput($event, i)" (keydown)="onOtpKeydown($event, i)" pattern="[0-9]" />
+      </div>
+
+      <div class="resend-section">
+        <button type="button" class="btn-resend" (click)="onResend()" [disabled]="resendDisabled">
+          <span *ngIf="resendDisabled">Reenviar en {{ resendSeconds }}s</span>
+          <span *ngIf="!resendDisabled">Reenviar código</span>
+        </button>
+      </div>
+
+      <button class="btn-accent btn-main btn-modal-submit" type="submit" [disabled]="verifyForm.invalid || isVerifying">
+        <span class="loader" *ngIf="isVerifying"></span>
+        <span *ngIf="!isVerifying">Verificar</span>
+        <span style="margin-left: 5px;" *ngIf="isVerifying">Verificando...</span>
+      </button>
+    </form>
+  </div>
+</ng-template>

@@ -1,113 +1,128 @@
-<div class="account-pages my-5 pt-sm-5">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="text-center">
-          <a href="/" class="mb-5 d-block auth-logo">
-            <img src="assets/images/logo-dark.png" alt="" height="22" class="logo logo-dark">
-            <img src="assets/images/logo-light.png" alt="" height="22" class="logo logo-light">
-          </a>
+<div class="signup-wrapper">
+  <div class="signup-shell animate-slide-up">
+
+    <div class="signup-visual">
+      <div class="visual-glow"></div>
+
+      <div class="brand brand-center">
+        <div class="brand-avatar">
+          <i class="fas fa-user-plus"></i>
+        </div>
+
+        <div class="brand-text">
+          <div class="brand-title">Registro</div>
+          <div class="brand-subtitle">Sistema de Gestión Auranet</div>
         </div>
       </div>
+
+      <div class="visual-image-wrap">
+        <img src="assets/images/fondo.png" alt="Fondo" class="visual-image" />
+      </div>
     </div>
-    <div class="row align-items-center justify-content-center">
-      <div class="col-md-8 col-lg-6 col-xl-5">
-        <div class="card">
 
-          <div class="card-body p-4">
+    <div class="signup-panel">
+      <div class="panel-head">
+        <div class="panel-icon">
+          <i class="fas fa-key"></i>
+        </div>
 
-            <div class="text-center mt-2">
-              <h5 class="text-primary">Register Account</h5>
-              <p class="text-muted">Get your free Minible account now.</p>
-            </div>
-            <div class="p-2 mt-4">
-              <form name="signupForm" [formGroup]="signupForm" (ngSubmit)="onSubmit()" novalidate>
-                @if(successmsg){
-                <ngb-alert type="success" [dismissible]="false">Registeration successfull.
-                </ngb-alert>
-                }
+        <div class="panel-titles">
+          <h2 class="panel-title fw-bold">Cambiar Contraseña</h2>
+          <p class="panel-subtitle text-white">Ingresa tu nueva contraseña</p>
+        </div>
+      </div>
 
-                <div class="mb-3">
-                  <label for="username">Email</label>
-                  <input type="email" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.email.errors }" id="email" placeholder="Email" />
-                  @if(submitted && f.email.errors){
-                  <div class="invalid-feedback">
-                    @if(f.email.errors.required){
-                    <div>Email is required</div>}
-                    @if(f.email.errors.email){
-                    <div>Email must be a valid email address</div>}
-                  </div>}
-                </div>
-
-                <div class="mb-3">
-                  <label for="username">Username</label>
-                  <input type="text" formControlName="username" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.username.errors }" id="username" placeholder="Enter username" />
-                  @if(submitted && f.username.errors){
-                  <div class="invalid-feedback">
-                    @if(f.username.errors.required){
-                    <div>Userame is required</div>}
-                  </div>}
-                </div>
-
-                <div class="mb-3">
-                  <label for="userpassword">Password</label>
-                  <!-- <input type="password" class="form-control" id="userpassword" placeholder="Enter password">         -->
-                  <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" id="password" placeholder="Password" />
-                  @if(submitted && f.password.errors){
-                  <div class="invalid-feedback">
-                    @if(f.password.errors.required){
-                    <div>Password is required</div>}
-                  </div>}
-                </div>
-
-                <div class="form-check">
-                  <input type="checkbox" class="form-check-input" id="auth-terms-condition-check">
-                  <label class="form-check-label" for="auth-terms-condition-check">I accept <a href="javascript: void(0);" class="text-reset">Terms and Conditions</a></label>
-                </div>
-
-                <div class="mt-3 text-end">
-                  <button class="btn btn-primary w-sm waves-effect waves-light" type="submit">Register</button>
-                </div>
-
-                <div class="mt-4 text-center">
-                  <div class="signin-other-title">
-                    <h5 class="font-size-14 mb-3 title">Sign up using</h5>
-                  </div>
-                  <ul class="list-inline">
-                    <li class="list-inline-item">
-                      <a href="javascript:void()" class="social-list-item bg-primary text-white border-primary">
-                        <i class="mdi mdi-facebook"></i>
-                      </a>
-                    </li>
-                    <li class="list-inline-item">
-                      <a href="javascript:void()" class="social-list-item bg-info text-white border-info">
-                        <i class="mdi mdi-twitter"></i>
-                      </a>
-                    </li>
-                    <li class="list-inline-item">
-                      <a href="javascript:void()" class="social-list-item bg-danger text-white border-danger">
-                        <i class="mdi mdi-google"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-
-                <div class="mt-4 text-center">
-                  <p class="text-muted mb-0">Already have an account ? <a href="/account/login" class="fw-medium text-primary"> Login</a></p>
-                </div>
-              </form>
-            </div>
-
+      <form class="signup-form" [formGroup]="signupForm" (ngSubmit)="agregar()" novalidate>
+        <div class="row">
+          <div class="col-12">
+            <label class="field">
+              <span class="field-label text-white">Correo Electrónico</span>
+              <div class="field-control">
+                <i class="fas fa-envelope"></i>
+                <input formControlName="userName" class="custom-input" type="email" placeholder="correo@dominio.com" />
+              </div>
+            </label>
           </div>
         </div>
-        <div class="mt-5 text-center">
-          <p>© {{year}} Minible. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <label class="field" [class.field-focused]="showPwHint">
+              <span class="field-label text-white">Contraseña</span>
+              <div class="field-control">
+                <i class="fas fa-key"></i>
+                <input 
+                  formControlName="password" 
+                  class="custom-input" 
+                  [type]="type" 
+                  placeholder="Mínimo 7 caracteres"
+                  (focus)="showPwHint" />
+                <button type="button" class="icon-btn" aria-label="Mostrar contraseña" (click)="myFunctionPasswordCurrent()">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div class="password-hint" *ngIf="showPwHint" [@fadeOnChange]="pwGuideKey">
+                <div class="hint-item" [class.valid]="pwAllOk">
+                  <i [class]="pwAllOk ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                  <span>{{ pwGuideText }}</span>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="field" [class.field-focused]="showMatchHint">
+              <span class="field-label text-white">Confirmar Contraseña</span>
+              <div class="field-control">
+                <i class="fas fa-key"></i>
+                <input 
+                  formControlName="confirmPassword" 
+                  class="custom-input" 
+                  [type]="type" 
+                  placeholder="Repite tu contraseña" />
+                <button type="button" class="icon-btn" aria-label="Mostrar contraseña" (click)="myFunctionPasswordCurrent()">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div class="password-hint" *ngIf="showMatchHint" [@fadeOnChange]="matchKey">
+                <div class="hint-item" [class.valid]="passwordsMatch">
+                  <i [class]="passwordsMatch ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                  <span>{{ matchText }}</span>
+                </div>
+              </div>
+            </label>
+          </div>
         </div>
 
-      </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="buttons-container">
+              <button class="btn-accent btn-main" type="submit" [disabled]="signupForm.invalid || loading || !pwAllOk || !passwordsMatch">
+                <span class="loader" *ngIf="loading"></span>
+                <span class="btn-content" *ngIf="!loading">
+                  <i class="fas fa-save"></i>
+                  <span>Guardar</span>
+                </span>
+                <span *ngIf="loading">Cargando...</span>
+              </button>
+
+              <button class="btn-cancel btn-secondary" type="button" (click)="cancelar()" [disabled]="loading">
+                <i class="fas fa-times"></i>&nbsp;
+                <span>Cancelar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            <div class="panel-foot text-white">
+              ¿Ya tienes cuenta?&nbsp;
+              <a class="link-accent" routerLink="/account/login">Iniciar sesión</a>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
-    <!-- end row -->
   </div>
-  <!-- end container -->
 </div>
-<!-- end page -->

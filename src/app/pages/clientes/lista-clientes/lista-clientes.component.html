@@ -60,40 +60,47 @@
                                 </ng-template>
                             </dxi-column> -->
                         <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" [width]="150"></dxi-column>
-                        <!-- <dxi-column dataField="logotipo" caption="Imagen" cellTemplate="imagen" [width]="200" alignment="center">
-                            <dxo-header-filter [allowSearch]="true"></dxo-header-filter>
-                        </dxi-column> -->
-                        <div *dxTemplate="let data of 'imagen'" style="text-align: center;">
-                            <img *ngIf="data.value" style="max-width: 100px;" [src]="data.value" />
-                            <img *ngIf="data.value == null" style="max-width: 100px;"
-                                src="https://analitica-video.s3.us-east-1.amazonaws.com/Usuarios/user.png" />
-                        </div>
-                        <!-- <dxi-column caption="Acta Constitutiva" [width]="150" alignment="center" [allowSorting]="false"
-                            [allowFiltering]="false" cellTemplate="actConts">
-                        </dxi-column> -->
-                        <div *dxTemplate="let f of 'actConts'">
-                            <button type="button" class="btn btn-primary btn-sm" style="border-radius: 5px;"
-                                (click)="previsualizar(f?.data?.actaConstitutiva, 'Acta Constitutiva', f?.data)">
-                                <i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;Observar
-                            </button>
-                        </div>
-                        <!-- <dxi-column caption="Comprobante de Domicilio" [width]="150" alignment="center"
+                        <dxi-column caption="Constancia Situación Fiscal" [width]="180" alignment="center" [allowSorting]="false"
+                            [allowFiltering]="false" cellTemplate="concesip">
+                        </dxi-column>
+                        <dxi-column caption="Comprobante de Domicilio" [width]="200" alignment="center"
                             [allowSorting]="false" [allowFiltering]="false" cellTemplate="poliz">
-                        </dxi-column> -->
-                        <div *dxTemplate="let f of 'poliz'">
-                            <button type="button" class="btn btn-success btn-sm" style="border-radius: 5px;"
-                                (click)="previsualizar(f?.data?.comprobanteDomicilio, 'Comprobante de Domicilio', f?.data)">
-                                <i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;Observar
-                            </button>
-                        </div>
-                        <!-- <dxi-column caption="Constancia Situación Fiscal" [width]="150" alignment="center"
-                            [allowSorting]="false" [allowFiltering]="false" cellTemplate="concesip">
-                        </dxi-column> -->
+                        </dxi-column>
+                        <dxi-column caption="Acta Constitutiva" [width]="180" alignment="center" [allowSorting]="false"
+                            [allowFiltering]="false" cellTemplate="actConts">
+                        </dxi-column>
                         <div *dxTemplate="let f of 'concesip'">
-                            <button type="button" class="btn btn-warning btn-sm" style="border-radius: 5px;"
+                            <button *ngIf="f?.data?.constanciaSituacionFiscal && f?.data?.constanciaSituacionFiscal !== ''" 
+                                type="button" class="btn btn-warning btn-sm" style="border-radius: 5px;"
                                 (click)="previsualizar(f?.data?.constanciaSituacionFiscal, 'Constancia Situación Fiscal', f?.data)">
-                                <i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;Observar
+                                <i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;Ver Documento
                             </button>
+                            <span *ngIf="!f?.data?.constanciaSituacionFiscal || f?.data?.constanciaSituacionFiscal === ''" 
+                                style="color: rgba(255, 255, 255, 0.5); font-size: 12px;">
+                                Sin documentos
+                            </span>
+                        </div>
+                        <div *dxTemplate="let f of 'poliz'">
+                            <button *ngIf="f?.data?.comprobanteDomicilio && f?.data?.comprobanteDomicilio !== ''" 
+                                type="button" class="btn btn-success btn-sm" style="border-radius: 5px;"
+                                (click)="previsualizar(f?.data?.comprobanteDomicilio, 'Comprobante de Domicilio', f?.data)">
+                                <i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;Ver Documento
+                            </button>
+                            <span *ngIf="!f?.data?.comprobanteDomicilio || f?.data?.comprobanteDomicilio === ''" 
+                                style="color: rgba(255, 255, 255, 0.5); font-size: 12px;">
+                                Sin documentos
+                            </span>
+                        </div>
+                        <div *dxTemplate="let f of 'actConts'">
+                            <button *ngIf="f?.data?.actaConstitutiva && f?.data?.actaConstitutiva !== ''" 
+                                type="button" class="btn btn-primary btn-sm" style="border-radius: 5px;"
+                                (click)="previsualizar(f?.data?.actaConstitutiva, 'Acta Constitutiva', f?.data)">
+                                <i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;Ver Documento
+                            </button>
+                            <span *ngIf="!f?.data?.actaConstitutiva || f?.data?.actaConstitutiva === ''" 
+                                style="color: rgba(255, 255, 255, 0.5); font-size: 12px;">
+                                Sin documentos
+                            </span>
                         </div>
                         <dxi-column dataField="NombreCompleto" caption="Nombre" alignment="center"
                             dataType="string"></dxi-column>

@@ -31,7 +31,7 @@ export class SalaService {
   }
 
   actualizarSala(idSala: number, saveForm: any): Observable<any> {
-    return this.http.put(`${environment.API_SECURITY}/salas/` + idSala, saveForm);
+    return this.http.patch(`${environment.API_SECURITY}/salas/` + idSala, saveForm);
   }
 
   private apiUrl = `${environment.API_SECURITY}/salas`;
@@ -41,5 +41,13 @@ export class SalaService {
     return this.http.patch(url, body, { responseType: 'text' }).pipe(
       catchError(error => throwError(() => error))
     );
+  }
+
+  obtenerMonedas(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/catmonedas/list`);
+  }
+
+  obtenerEstatusLic(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/catestatuslicencia/list`);
   }
 }

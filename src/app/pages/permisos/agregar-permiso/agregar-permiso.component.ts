@@ -209,7 +209,7 @@ export class AgregarPermisoComponent implements OnInit {
         Swal.fire({
           title: '¡Ops!',
           background: '#0d121d',
-          text: `Ocurrió un error al agregar el permiso.`,
+          text: error.error,
           icon: 'error',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
@@ -293,7 +293,7 @@ export class AgregarPermisoComponent implements OnInit {
           Swal.fire({
             title: '¡Ops!',
             background: '#0d121d',
-            text: `Ocurrió un error al actualizar el permiso.`,
+            text: error.error,
             icon: 'error',
             confirmButtonColor: '#3085d6',
             confirmButtonText: 'Confirmar',
