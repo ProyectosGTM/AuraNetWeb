@@ -1,0 +1,755 @@
+// Estilos para lista monederos (usando los estilos globales del sistema)
+
+.action-buttons-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 0;
+}
+
+.action-buttons-header {
+  margin-bottom: 16px;
+  
+  .action-buttons-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i {
+      color: #50a5f1;
+    }
+  }
+}
+
+.action-buttons-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.btn-action-large {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .btn-action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    .btn-action-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .btn-action-desc {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  }
+
+  &.btn-action-large-success {
+    &:hover {
+      background: rgba(52, 195, 143, 0.1);
+      border-color: rgba(52, 195, 143, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+    }
+  }
+
+  &.btn-action-large-warning {
+    &:hover {
+      background: rgba(241, 180, 76, 0.1);
+      border-color: rgba(241, 180, 76, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    }
+  }
+
+  &.btn-action-large-info {
+    &:hover {
+      background: rgba(80, 165, 241, 0.1);
+      border-color: rgba(80, 165, 241, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .action-buttons-content {
+    flex-direction: column;
+  }
+
+  .btn-action-large {
+    min-width: 100%;
+  }
+}
+
+::ng-deep {
+  .modal-cargar-monedero,
+  .modal-descargar-monedero,
+  .modal-consultar-saldo {
+    .modal-content {
+      background: #0d121d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px 24px;
+    }
+
+    .btn-close {
+      filter: invert(1);
+      opacity: 0.8;
+      margin: 0;
+      padding: 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      
+      &::before {
+        display: none;
+      }
+
+      i {
+        display: block;
+        font-size: 1.25rem;
+      }
+    }
+
+    .btn-close:hover {
+      opacity: 1;
+    }
+  }
+
+  .modal-header-cargar-monedero {
+    background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(52, 195, 143, 0.25);
+    margin: 0;
+    border: none;
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 22px;
+      }
+    }
+  }
+
+  .modal-header-descargar-monedero {
+    background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(241, 180, 76, 0.25);
+    margin: 0;
+    border: none;
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 22px;
+      }
+    }
+  }
+
+  .modal-header-consultar-saldo {
+    background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(80, 165, 241, 0.25);
+    margin: 0;
+    border: none;
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 22px;
+      }
+    }
+  }
+
+  .action-modal-content {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .action-icon-wrapper {
+    margin-bottom: 24px;
+  }
+
+  .action-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 36px;
+    color: #fff;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+
+    &.action-icon-success {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+    }
+
+    &.action-icon-warning {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    }
+
+    &.action-icon-info {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    }
+  }
+
+  .action-title {
+    font-size: 24px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .action-description {
+    font-size: 14px;
+    color: #9ca3af;
+    margin-bottom: 32px;
+  }
+
+  .action-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .form-placeholder {
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    color: #9ca3af;
+
+    i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+      opacity: 0.5;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+
+  .btn-action {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    &.btn-action-primary {
+      background: linear-gradient(135deg, #5b73e8 0%, #4a62d6 100%);
+      color: #fff;
+
+      &:hover {
+        background: linear-gradient(135deg, #4a62d6 0%, #3a51c4 100%);
+      }
+    }
+
+    &.btn-action-success {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+      color: #fff;
+
+      &:hover {
+        background: linear-gradient(135deg, #2aa876 0%, #1e8d5f 100%);
+      }
+    }
+
+    &.btn-action-warning {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+      color: #fff;
+
+      &:hover {
+        background: linear-gradient(135deg, #e0a038 0%, #cc8e2c 100%);
+      }
+    }
+
+    &.btn-action-info {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+      color: #fff;
+
+      &:hover {
+        background: linear-gradient(135deg, #3d8bd9 0%, #2e7ac7 100%);
+      }
+    }
+
+    &.btn-action-danger {
+      background: linear-gradient(135deg, #f46a6a 0%, #e85555 100%);
+      color: #fff;
+
+      &:hover {
+        background: linear-gradient(135deg, #e85555 0%, #dc4040 100%);
+      }
+    }
+  }
+
+  // Estilos para la vista de resultados del saldo
+  .saldo-result-content {
+    padding: 20px 0;
+  }
+
+  .saldo-section {
+    margin-bottom: 30px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .saldo-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(80, 165, 241, 0.3);
+
+      i {
+        color: #50a5f1;
+        font-size: 20px;
+      }
+    }
+  }
+
+  .saldo-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .saldo-info-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(80, 165, 241, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .saldo-info-label {
+      font-size: 12px;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .saldo-info-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      word-break: break-word;
+    }
+  }
+
+  .saldo-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .saldo-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      opacity: 0.8;
+    }
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .saldo-card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .saldo-card-content {
+      flex: 1;
+      min-width: 0;
+
+      .saldo-card-label {
+        font-size: 12px;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+
+      .saldo-card-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        word-break: break-word;
+      }
+    }
+
+    &.saldo-card-efectivo {
+      &::before {
+        background: linear-gradient(90deg, #34c38f, #2aa876);
+      }
+
+      .saldo-card-icon {
+        background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+      }
+    }
+
+    &.saldo-card-promocional {
+      &::before {
+        background: linear-gradient(90deg, #50a5f1, #3d8bd9);
+      }
+
+      .saldo-card-icon {
+        background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+      }
+    }
+
+    &.saldo-card-puntos {
+      &::before {
+        background: linear-gradient(90deg, #f1b44c, #e0a038);
+      }
+
+      .saldo-card-icon {
+        background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+      }
+    }
+
+    &.saldo-card-total {
+      &::before {
+        background: linear-gradient(90deg, #5b73e8, #4a62d6);
+      }
+
+      .saldo-card-icon {
+        background: linear-gradient(135deg, #5b73e8 0%, #4a62d6 100%);
+      }
+    }
+
+    &.saldo-card-redimible {
+      &::before {
+        background: linear-gradient(90deg, #f46a6a, #e85555);
+      }
+
+      .saldo-card-icon {
+        background: linear-gradient(135deg, #f46a6a 0%, #e85555 100%);
+      }
+    }
+  }
+
+  .estatus-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    &.estatus-activo-badge {
+      background-color: #0f2e22;
+      border: 1px solid #1f5c45;
+      color: #34d399;
+    }
+
+    &.estatus-inactivo-badge {
+      background-color: #2a0a14;
+      border: 1px solid #7a1330;
+      color: #ff1a5b;
+    }
+  }
+
+  .promociones-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .promocion-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(241, 180, 76, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(241, 180, 76, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .promocion-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .promocion-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 18px;
+      }
+
+      .promocion-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        flex: 1;
+      }
+    }
+
+    .promocion-body {
+      .promocion-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .promocion-label {
+          font-size: 14px;
+          color: #9ca3af;
+        }
+
+        .promocion-value {
+          font-size: 14px;
+          font-weight: 600;
+          color: #fff;
+        }
+      }
+
+      .promocion-progress {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+        .promocion-progress-label {
+          font-size: 12px;
+          color: #9ca3af;
+          margin-bottom: 8px;
+          font-weight: 600;
+        }
+
+        .promocion-progress-bar {
+          width: 100%;
+          height: 8px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+          overflow: hidden;
+
+          .promocion-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f1b44c, #e0a038);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+          }
+        }
+      }
+    }
+  }
+
+  .empty-promociones {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af;
+
+    i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+      opacity: 0.5;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .modal-header-cargar-monedero,
+    .modal-header-descargar-monedero,
+    .modal-header-consultar-saldo {
+      padding: 16px 20px;
+
+      .modal-title {
+        font-size: 18px;
+
+        i {
+          font-size: 20px;
+        }
+      }
+    }
+
+    .action-icon {
+      width: 60px;
+      height: 60px;
+      font-size: 28px;
+    }
+
+    .action-title {
+      font-size: 20px;
+    }
+
+    .btn-action {
+      width: 32px;
+      height: 32px;
+      font-size: 12px;
+    }
+
+    .saldo-cards-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .saldo-info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

@@ -8,6 +8,7 @@ import { UIModule } from 'src/app/shared/ui/ui.module';
 import { CdkStepperModule } from '@angular/cdk/stepper';
 import { NgStepperModule } from 'angular-ng-stepper';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { NgSelectModule } from '@ng-select/ng-select';
     UIModule, 
     CdkStepperModule, 
     NgStepperModule,
-    NgSelectModule
+    NgSelectModule,
+    SharedModule
   ]
 })
 export class RecargaModule { }

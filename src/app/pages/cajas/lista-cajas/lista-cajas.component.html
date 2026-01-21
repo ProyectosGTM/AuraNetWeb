@@ -62,6 +62,16 @@
                         <dxi-column dataField="nombreEstatusCaja" caption="Estatus Caja" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="limiteEfectivo" caption="Límite Efectivo" alignment="center" dataType="number" [allowSearch]="true" [format]="'currency'"></dxi-column>
                         <dxi-column dataField="requiereArqueoTexto" caption="Requiere Arqueo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string">
+                            <div *dxTemplate="let f of 'est'">
+                                <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
+                                    Activo
+                                </span>
+                                <span *ngIf="f.data.estatus !== 1" class="estatus estatus-inactivo">
+                                    Inactivo
+                                </span>
+                            </div>
+                        </dxi-column>
                         <dxo-export [enabled]="false" [allowExportSelectedData]="true"
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>

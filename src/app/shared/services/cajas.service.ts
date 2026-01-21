@@ -44,10 +44,14 @@ export class CajasService {
   }
 
   obtenerTiposCaja(): Observable<any> {
-    return this.http.get(`${environment.API_SECURITY}/catiposcaja/list`);
+    return this.http.get(`${environment.API_SECURITY}/cattiposcaja/list`);
   }
 
   obtenerEstatusCaja(): Observable<any> {
-    return this.http.get(`${environment.API_SECURITY}/catesatuscaja/list`);
+    return this.http.get(`${environment.API_SECURITY}/catestatuscaja/list`);
+  }
+
+  obtenerEstatusAfiliado(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/catestatusafiliado/list`);
   }
 }

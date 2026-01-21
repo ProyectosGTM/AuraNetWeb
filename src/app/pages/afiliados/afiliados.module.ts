@@ -1,25 +1,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { TesoreriaRoutingModule } from './tesoreria-routing.module';
-import { ListaTesoreriaComponent } from './lista-tesoreria/lista-tesoreria.component';
-import { AgregarTesoreriaComponent } from './agregar-tesoreria/agregar-tesoreria.component';
+import { AfiliadosRoutingModule } from './afiliados-routing.module';
+import { ListaAfiliadosComponent } from './lista-afiliados/lista-afiliados.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { AgregarAfiliadoComponent } from './agregar-afiliado/agregar-afiliado.component';
 
 @NgModule({
-  declarations: [
-    ListaTesoreriaComponent,
-    AgregarTesoreriaComponent
-  ],
+  declarations: [ListaAfiliadosComponent, AgregarAfiliadoComponent],
   imports: [
     CommonModule,
-    TesoreriaRoutingModule,
+    AfiliadosRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    NgbModalModule,
     DxDataGridModule,
     DxLoadPanelModule,
     DxPopupModule,
@@ -27,4 +22,4 @@ import { SharedModule } from 'src/app/shared/shared.module';
     DxSelectBoxModule
   ]
 })
-export class TesoreriaModule { }
+export class AfiliadosModule { }

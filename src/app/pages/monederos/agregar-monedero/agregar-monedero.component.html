@@ -1,0 +1,145 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-plus"></i>
+            </div>
+            <div>
+              <h4 class="title-title">{{ title }}</h4>
+              <p class="title-subtitle">Captura la información requerida para el registro.</p>
+            </div>
+          </div>
+          <div class="title-actions">
+            <div class="title-tagline">
+              <span class="line"></span>
+              <span class="text">Control y configuración centralizada</span>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3 gy-4">
+          <form [formGroup]="monederoForm">
+            <div class="col-12">
+              <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Afiliado</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isAfiliadoOpen"
+                        (mousedown)="toggleAfiliado($event)">
+                        <i class="fas fa-user"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!monederoForm.get('idAfiliado')?.value">
+                            {{ afiliadoLabel || 'Selecciona un afiliado...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isAfiliadoOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let a of listaAfiliados"
+                            (mousedown)="setAfiliado(a.id, a.nombreCompleto, $event)">
+                            {{ a.nombreCompleto }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Número Monedero</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-hashtag"></i>
+                        <input formControlName="numeroMonedero" class="sleek-control" type="text"
+                          placeholder="MON-2024-001234" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Código RFID</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-qrcode"></i>
+                        <input formControlName="codigoRFID" class="sleek-control" type="text"
+                          placeholder="RFID-ABC123456789" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Es Principal</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isEsPrincipalOpen"
+                        (mousedown)="toggleEsPrincipal($event)">
+                        <i class="fas fa-star"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value">
+                            {{ monederoForm.get('esPrincipal')?.value === 1 ? 'Sí' : 'No' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isEsPrincipalOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" (mousedown)="setEsPrincipal(1, $event)">
+                            Sí
+                          </button>
+                          <button type="button" class="select-option" (mousedown)="setEsPrincipal(0, $event)">
+                            No
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Alias</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-tag"></i>
+                        <input formControlName="alias" class="sleek-control" type="text"
+                          placeholder="Monedero Principal" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Estatus Monedero</span>
+                      <div class="input-sleek select-sleek" [class.is-open]="isEstatusMonederoOpen"
+                        (mousedown)="toggleEstatusMonedero($event)">
+                        <i class="fas fa-toggle-on"></i>
+                        <div class="sleek-control select-display">
+                          <span class="select-value" [class.placeholder]="!monederoForm.get('idEstatusMonedero')?.value">
+                            {{ estatusMonederoLabel || 'Selecciona un estatus...' }}
+                          </span>
+                        </div>
+                        <span class="sleek-line"></span>
+                        <div class="select-panel" *ngIf="isEstatusMonederoOpen" (mousedown)="$event.stopPropagation()">
+                          <button type="button" class="select-option" *ngFor="let e of listaEstatusMonedero"
+                            (mousedown)="setEstatusMonedero(e.id, e.text, $event)">
+                            {{ e.text }}
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+              <!-- Botones de acción -->
+              <div class="row mt-4">
+                <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
+                  <button (click)="submit()" type="button" class="btn-alt btn-alt--success" [disabled]="loading">
+                    <i class="fas fa-check"></i>
+                    <span>{{ submitButton }}</span>
+                  </button>
+                  <button (click)="cancelar()" type="button" class="btn-alt btn-alt--cancel" [disabled]="loading">
+                    <i class="fas fa-times"></i>
+                    <span>Cancelar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -612,10 +612,18 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   i {
     font-size: 13px;
     color: #cfd8e3;
+    transition: none;
+    transform: none;
+    animation: none;
   }
 
   &:hover {
     transform: translateY(-1px);
+    
+    i {
+      transform: none;
+      animation: none;
+    }
   }
 }
 
@@ -676,8 +684,55 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 }
 
+#resumenButton {
+  background-color: #1e1b29;
+  border-color: #3d3652;
+
+  i {
+    color: #8b5cf6;
+  }
+
+  &:hover {
+    background-color: #15121e;
+    border-color: #8b5cf6;
+  }
+}
+
+#historialButton {
+  background-color: #1a2332;
+  border-color: #2d3f56;
+
+  i {
+    color: #3b82f6;
+  }
+
+  &:hover {
+    background-color: #0f1720;
+    border-color: #3b82f6;
+  }
+}
+
 .btnAcciones:active {
-  transform: scale(0.95);
+  transform: scale(0.95) translateY(0);
+  
+  i {
+    transform: none;
+    animation: none;
+  }
+}
+
+#detallesButton {
+  background-color: #1a1f2e;
+  border-color: #2d3a4f;
+
+  i {
+    color: #50a5f1;
+  }
+
+  &:hover {
+    background-color: #0f1419;
+    border-color: #50a5f1;
+  }
 }
 
 .estatus {

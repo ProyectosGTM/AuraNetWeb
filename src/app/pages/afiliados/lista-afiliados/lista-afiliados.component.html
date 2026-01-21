@@ -8,9 +8,9 @@
                             <i class="fas fa-users"></i>
                         </div>
                         <div>
-                            <h4 class="title-title">Administración de Usuarios</h4>
+                            <h4 class="title-title">Gestión de Afiliados</h4>
                             <p class="title-subtitle">
-                                Controla el acceso y los datos de cada usuario
+                                Administra los afiliados (jugadores) del sistema
                             </p>
                         </div>
                     </div>
@@ -36,10 +36,10 @@
                     </div>
                 </div>
                 <div class="row mt-3 gy-4">
-                    <dx-data-grid id="gridContainer" [columnHidingEnabled]="true" [showBorders]="true"
-                        [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="true"
-                        [dataSource]="listaUsuarios" [keyExpr]="'Id'" [remoteOperations]="{ paging: true }"
-                        [width]="'100%'" [paging]="{ pageSize: pageSize }" [pager]="{ 
+                    <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
+                        [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="'true'"
+                        [dataSource]="listaAfiliados" [keyExpr]="'id'" [width]="'100%'"
+                        [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" [pager]="{ 
                                 showPageSizeSelector: true, 
                                 allowedPageSizes: [50], 
                                 showInfo: true,
@@ -54,44 +54,30 @@
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
                         <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]"
                             [showInfo]="true"></dxo-pager>
-                        <!-- <dxi-column dataField="Logotipo" caption="Logotipo" alignment="center" cellTemplate="cellTemplate">
-                                <ng-template *dxTemplate="let d of 'cellTemplate'">
-                                    <img [src]="d.data.Logotipo" alt="Logo" width="50">
-                                </ng-template>
-                            </dxi-column> -->
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" [width]="150"></dxi-column>
-                        <dxi-column dataField="FotoPerfil" caption="Imagen" cellTemplate="imagen" [width]="200" alignment="center">
-                            <dxo-header-filter [allowSearch]="true"></dxo-header-filter>
-                        </dxi-column>
-                        <dxi-column dataField="NombreCompleto" caption="Nombre" alignment="center" dataType="string"></dxi-column>
-                        <dxi-column dataField="Telefono" caption="Teléfono" alignment="center" dataType="string"></dxi-column>
-                        <dxi-column dataField="UserName" caption="Correo Electrónico" alignment="center" dataType="string"></dxi-column>
-                        <dxi-column caption="Cliente" alignment="center" cellTemplate="clien" [visible]="showCliente">
-                            <div *dxTemplate="let f of 'clien'">
-                                {{ f.data.clienteNombre || ' ' }}
-                                {{ f.data.clienteApellidoPaterno || ' ' }}
-                                {{ f.data.clienteApellidoMaterno || ' ' }}
-                            </div>
-                        </dxi-column>
-                        <dxi-column dataField="RolNombre" caption="Rol" alignment="center" dataType="string"></dxi-column>
-                        <div *dxTemplate="let data of 'imagen'" style="text-align: center;">
-                            <img *ngIf="data.value" style="max-width: 100px;" [src]="data.value" />
-                            <img *ngIf="data.value == null" style="max-width: 100px;" src="https://auranet.s3.us-east-2.amazonaws.com/general/user_default.png" />
-                        </div>
-                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" dataType="string" cellTemplate="est">
-                            <div *dxTemplate="let f of 'est'">
-                                <span *ngIf="toNum(f.data.estatus) === 1" class="estatus estatus-activo">
-                                    Activo
-                                </span>
-                                <span *ngIf="toNum(f.data.estatus) !== 1" class="estatus estatus-inactivo">
-                                    Inactivo
-                                </span>
-                            </div>
-                        </dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="180"></dxi-column>
+                        <dxi-column dataField="nombreCompleto" caption="Nombre Completo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="numeroIdentificacion" caption="Número Identificación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="email" caption="Email" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="telefonoCelular" caption="Teléfono" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="sexoTexto" caption="Sexo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="fechaNacimientoFormateada" caption="Fecha Nacimiento" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreTipoIdentificacion" caption="Tipo Identificación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreEstatusAfiliado" caption="Estatus Afiliado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string" [width]="100"></dxi-column>
+                        <dxi-column dataField="fechaCreacionFormateada" caption="Fecha Creación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="fechaActualizacionFormateada" caption="Fecha Actualización" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        
+                        <!-- Columnas ocultas para búsqueda -->
+                        <dxi-column dataField="nombre" caption="Nombre" dataType="string" [visible]="false"></dxi-column>
+                        <dxi-column dataField="apellidoPaterno" caption="Apellido Paterno" dataType="string" [visible]="false"></dxi-column>
+                        <dxi-column dataField="apellidoMaterno" caption="Apellido Materno" dataType="string" [visible]="false"></dxi-column>
+                        <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala" dataType="string" [visible]="false"></dxi-column>
+
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
-                                    (click)="actualizarUsuario(row.data.id)">
+                                    (click)="actualizarAfiliado(row.data.id)">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
@@ -106,9 +92,15 @@
                                 </button>
                             </div>
                         </div>
-                        <dxo-export [enabled]="false" [allowExportSelectedData]="true"
-                            [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
-                        </dxo-export>
+
+                        <div *dxTemplate="let f of 'est'">
+                            <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
+                                Activo
+                            </span>
+                            <span *ngIf="f.data.estatus !== 1" class="estatus estatus-inactivo">
+                                Inactivo
+                            </span>
+                        </div>
                     </dx-data-grid>
                 </div>
             </div>

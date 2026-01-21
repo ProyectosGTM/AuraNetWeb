@@ -38,6 +38,10 @@ const routes: Routes = [
   { path: 'maquinas', loadChildren: () => import('./maquinas/maquinas.module').then(m => m.MaquinasModule)},
   { path: 'tesoreria', loadChildren: () => import('./tesoreria/tesoreria.module').then(m => m.TesoreriaModule)},
   { path: 'cajas', loadChildren: () => import('./cajas/cajas.module').then(m => m.CajasModule)},
+  { path: 'monederos', loadChildren: () => import('./monederos/monederos.module').then(m => m.MonederosModule)},
+  { path: 'turnos', loadChildren: () => import('./turnos/turnos.module').then(m => m.TurnosModule)},
+  { path: 'afiliados', loadChildren: () => import('./afiliados/afiliados.module').then(m => m.AfiliadosModule)},
+  { path: 'transacciones', loadChildren: () => import('./transacciones/transacciones.module').then(m => m.TransaccionesModule)},
 ];
 
 @NgModule({

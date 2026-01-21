@@ -1,0 +1,550 @@
+<div class="container-fluid" [@fadeInRight]>
+    <div class="row">
+        <div class="col-12">
+            <div class="title-banner-card shadow-sm">
+                <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="title-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div>
+                            <h4 class="title-title">Administración de Monederos</h4>
+                            <p class="title-subtitle">
+                                Control y configuración de los registros de monederos
+                            </p>
+                        </div>
+                    </div>
+                    <div class="title-actions">
+                        <div class="title-tagline">
+                            <span class="line"></span>
+                            <span class="text">Control y configuración centralizada</span>
+                        </div>
+                        <div class="title-buttons">
+                            <button type="button" (click)="agregar()" class="btn-title btn-title--primary">
+                                <i class="fas fa-plus"></i>
+                                <span>Nuevo</span>
+                            </button>
+                            <button (click)="toggleExpandGroups()" type="button" class="btn-title btn-title--ghost">
+                                <i class="fas fa-expand"></i>
+                                <span>Contraer Grid</span>
+                            </button>
+                            <button (click)="limpiarCampos()" type="button" class="btn-title btn-title--danger">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Restablecer</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sección de Acciones POST -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="action-buttons-card">
+                            <div class="action-buttons-header">
+                                <h5 class="action-buttons-title">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Acciones Rápidas</span>
+                                </h5>
+                            </div>
+                            <div class="action-buttons-content">
+                                <button (click)="cargarMonedero()" type="button" class="btn-action-large btn-action-large-success">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Cargar Efectivo</span>
+                                        <span class="btn-action-desc">Agregar saldo a monedero</span>
+                                    </div>
+                                </button>
+                                <button (click)="descargarMonedero()" type="button" class="btn-action-large btn-action-large-warning">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Descargar Efectivo</span>
+                                        <span class="btn-action-desc">Retirar saldo de monedero</span>
+                                    </div>
+                                </button>
+                                <button (click)="consultarSaldo()" type="button" class="btn-action-large btn-action-large-info">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-search-dollar"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Consultar Saldo</span>
+                                        <span class="btn-action-desc">Ver saldo por número</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3 gy-4">
+                    <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
+                        [showColumnLines]="true" [dataSource]="listaMonederos" [showRowLines]="true" [rowAlternationEnabled]="'true'"[keyExpr]="'id'" [width]="'100%'"
+                        [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
+                        [pager]="{ 
+                            showPageSizeSelector: true, 
+                            allowedPageSizes: [50], 
+                            showInfo: true,
+                            infoText: 'Página {0} de {1}', 
+                            visible: true 
+                        }" (onPageIndexChanged)=" onPageIndexChanged($event)" (onOptionChanged)="onGridOptionChanged($event)">
+                        <dxo-search-panel [visible]="true" [width]="200" placeholder="Buscar..."></dxo-search-panel>
+                        <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]" [showInfo]="true"></dxo-pager>
+                        <dxo-group-panel [emptyPanelText]="mensajeAgrupar" [visible]="true"></dxo-group-panel>
+                        <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
+                        <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
+                        <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="180"></dxi-column>
+                        <dxi-column dataField="numeroMonedero" caption="Número Monedero" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="codigoRFID" caption="Código RFID" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="alias" caption="Alias" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreCompletoAfiliado" caption="Afiliado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="esPrincipalTexto" caption="Es Principal" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Estatus Monedero" cellTemplate="EstatusMonedero" alignment="center" dataType="string" [width]="150"></dxi-column>
+                        <dxi-column dataField="idEstatusMonedero" caption="ID Estatus Monedero" alignment="center" dataType="number" [visible]="false" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreEstatusMonedero" caption="Nombre Estatus Monedero" alignment="center" dataType="string" [visible]="false" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string">
+                            <div *dxTemplate="let f of 'est'">
+                                <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
+                                    Activo
+                                </span>
+                                <span *ngIf="f.data.estatus !== 1" class="estatus estatus-inactivo">
+                                    Inactivo
+                                </span>
+                            </div>
+                        </dxi-column>
+                        <div *dxTemplate="let row of 'EstatusMonedero'">
+                            <span class="estatus" [style.background-color]="row.data.estatusMonederoColor" [style.color]="'#fff'" [style.border-color]="row.data.estatusMonederoColor">
+                                {{ row.data.estatusMonederoTexto }}
+                            </span>
+                        </div>
+                        <dxo-export [enabled]="false" [allowExportSelectedData]="true"
+                            [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
+                        </dxo-export>
+                        <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                            <div>
+                                <button valueExpr="id" id="actualizarButton" class="btnAcciones"
+                                    (click)="actualizarMonedero(row.data.id)">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
+                                    (click)="activar(row.data)">
+                                    <i class="fa fa-arrow-up"></i>
+                                </button>
+                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
+                                    (click)="desactivar(row.data)">
+                                    <i class="fa fa-arrow-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </dx-data-grid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cargar Monedero -->
+<ng-template #modalCargarMonedero let-modal>
+    <div class="modal-header modal-header-cargar-monedero">
+        <h5 class="modal-title">
+            <i class="fas fa-arrow-up"></i>
+            <span>Cargar Efectivo a Monedero</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-cargar-monedero">
+        <div class="action-modal-content">
+            <div class="action-icon-wrapper">
+                <div class="action-icon action-icon-success">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+            <h4 class="action-title">Cargar Efectivo</h4>
+            <p class="action-description">Complete los siguientes campos para cargar efectivo al monedero</p>
+            <div class="action-form">
+                <form [formGroup]="cargarMonederoForm">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Turno de Caja *</span>
+                                <div class="input-sleek select-sleek" [class.is-open]="isTurnoCajaOpen"
+                                    (mousedown)="toggleTurnoCaja($event)">
+                                    <i class="fas fa-cash-register"></i>
+                                    <div class="sleek-control select-display">
+                                        <span class="select-value" [class.placeholder]="!cargarMonederoForm.get('idTurnoCaja')?.value">
+                                            {{ turnoCajaLabel || 'Selecciona un turno...' }}
+                                        </span>
+                                    </div>
+                                    <span class="sleek-line"></span>
+                                    <div class="select-panel" *ngIf="isTurnoCajaOpen" (mousedown)="$event.stopPropagation()">
+                                        <button type="button" class="select-option" *ngFor="let t of listaTurnos"
+                                            (mousedown)="setTurnoCaja(t.id, t.text, $event)">
+                                            {{ t.text }}
+                                        </button>
+                                        <div *ngIf="listaTurnos.length === 0" class="select-option select-option-disabled">
+                                            No hay turnos disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Monedero *</span>
+                                <div class="input-sleek select-sleek" [class.is-open]="isMonederoOpen"
+                                    (mousedown)="toggleMonedero($event)">
+                                    <i class="fas fa-wallet"></i>
+                                    <div class="sleek-control select-display">
+                                        <span class="select-value" [class.placeholder]="!cargarMonederoForm.get('idMonedero')?.value">
+                                            {{ monederoLabel || 'Selecciona un monedero...' }}
+                                        </span>
+                                    </div>
+                                    <span class="sleek-line"></span>
+                                    <div class="select-panel" *ngIf="isMonederoOpen" (mousedown)="$event.stopPropagation()">
+                                        <button type="button" class="select-option" *ngFor="let m of listaMonederosDisponibles"
+                                            (mousedown)="setMonedero(m.id, m.text, $event)">
+                                            {{ m.text }}
+                                        </button>
+                                        <div *ngIf="listaMonederosDisponibles.length === 0" class="select-option select-option-disabled">
+                                            No hay monederos disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <div class="col-12 col-md-6">
+                                <label class="field">
+                                    <span class="field-label text-white">Monto *</span>
+                                    <div class="input-sleek">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                                        <span class="sleek-line"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-cargar-monedero">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-success" (click)="guardarCargarMonedero()">
+            <i class="fas fa-check"></i> Cargar
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Descargar Monedero -->
+<ng-template #modalDescargarMonedero let-modal>
+    <div class="modal-header modal-header-descargar-monedero">
+        <h5 class="modal-title">
+            <i class="fas fa-arrow-down"></i>
+            <span>Descargar Efectivo de Monedero</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-descargar-monedero">
+        <div class="action-modal-content">
+            <div class="action-icon-wrapper">
+                <div class="action-icon action-icon-warning">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            </div>
+            <h4 class="action-title">Descargar Efectivo</h4>
+            <p class="action-description">Complete los siguientes campos para descargar efectivo del monedero</p>
+            <div class="action-form">
+                <form [formGroup]="descargarMonederoForm">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Turno de Caja *</span>
+                                <div class="input-sleek select-sleek" [class.is-open]="isTurnoCajaDescargarOpen"
+                                    (mousedown)="toggleTurnoCajaDescargar($event)">
+                                    <i class="fas fa-cash-register"></i>
+                                    <div class="sleek-control select-display">
+                                        <span class="select-value" [class.placeholder]="!descargarMonederoForm.get('idTurnoCaja')?.value">
+                                            {{ turnoCajaDescargarLabel || 'Selecciona un turno...' }}
+                                        </span>
+                                    </div>
+                                    <span class="sleek-line"></span>
+                                    <div class="select-panel" *ngIf="isTurnoCajaDescargarOpen" (mousedown)="$event.stopPropagation()">
+                                        <button type="button" class="select-option" *ngFor="let t of listaTurnosDescargar"
+                                            (mousedown)="setTurnoCajaDescargar(t.id, t.text, $event)">
+                                            {{ t.text }}
+                                        </button>
+                                        <div *ngIf="listaTurnosDescargar.length === 0" class="select-option select-option-disabled">
+                                            No hay turnos disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Monedero *</span>
+                                <div class="input-sleek select-sleek" [class.is-open]="isMonederoDescargarOpen"
+                                    (mousedown)="toggleMonederoDescargar($event)">
+                                    <i class="fas fa-wallet"></i>
+                                    <div class="sleek-control select-display">
+                                        <span class="select-value" [class.placeholder]="!descargarMonederoForm.get('idMonedero')?.value">
+                                            {{ monederoDescargarLabel || 'Selecciona un monedero...' }}
+                                        </span>
+                                    </div>
+                                    <span class="sleek-line"></span>
+                                    <div class="select-panel" *ngIf="isMonederoDescargarOpen" (mousedown)="$event.stopPropagation()">
+                                        <button type="button" class="select-option" *ngFor="let m of listaMonederosDisponiblesDescargar"
+                                            (mousedown)="setMonederoDescargar(m.id, m.text, $event)">
+                                            {{ m.text }}
+                                        </button>
+                                        <div *ngIf="listaMonederosDisponiblesDescargar.length === 0" class="select-option select-option-disabled">
+                                            No hay monederos disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <div class="col-12 col-md-6">
+                                <label class="field">
+                                    <span class="field-label text-white">Monto *</span>
+                                    <div class="input-sleek">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                                        <span class="sleek-line"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-descargar-monedero">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-warning" (click)="guardarDescargarMonedero()">
+            <i class="fas fa-check"></i> Descargar
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Consultar Saldo -->
+<ng-template #modalConsultarSaldo let-modal>
+    <div class="modal-header modal-header-consultar-saldo">
+        <h5 class="modal-title">
+            <i class="fas fa-search-dollar"></i>
+            <span>Consultar Saldo de Monedero</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-consultar-saldo">
+        <!-- Formulario de búsqueda -->
+        <div *ngIf="!saldoData" class="action-modal-content">
+            <div class="action-icon-wrapper">
+                <div class="action-icon action-icon-info">
+                    <i class="fas fa-search-dollar"></i>
+                </div>
+            </div>
+            <h4 class="action-title">Consultar Saldo</h4>
+            <p class="action-description">Ingrese el número de monedero para consultar su saldo actual</p>
+            <div class="action-form">
+                <form [formGroup]="consultarSaldoForm">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="field">
+                                <span class="field-label text-white">Número de Monedero *</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-credit-card"></i>
+                                    <input formControlName="numero" class="sleek-control" type="text" placeholder="MON-555" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Vista de resultados -->
+        <div *ngIf="saldoData" class="saldo-result-content">
+            <!-- Información del Monedero -->
+            <div class="saldo-section">
+                <h5 class="saldo-section-title">
+                    <i class="fas fa-wallet"></i>
+                    <span>Información del Monedero</span>
+                </h5>
+                <div class="saldo-info-grid">
+                    <div class="saldo-info-item">
+                        <div class="saldo-info-label">Número</div>
+                        <div class="saldo-info-value">{{ saldoData.monedero?.numero || 'Sin registro' }}</div>
+                    </div>
+                    <div class="saldo-info-item">
+                        <div class="saldo-info-label">Estatus</div>
+                        <div class="saldo-info-value">
+                            <span class="estatus-badge" [ngClass]="saldoData.monedero?.estatus === 'Activo' ? 'estatus-activo-badge' : 'estatus-inactivo-badge'">
+                                {{ saldoData.monedero?.estatus || 'Sin registro' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="saldo-info-item">
+                        <div class="saldo-info-label">Principal</div>
+                        <div class="saldo-info-value">
+                            <span class="estatus-badge" [ngClass]="saldoData.monedero?.esPrincipal ? 'estatus-activo-badge' : 'estatus-inactivo-badge'">
+                                {{ saldoData.monedero?.esPrincipal ? 'Sí' : 'No' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Afiliado -->
+            <div class="saldo-section" *ngIf="saldoData.afiliado">
+                <h5 class="saldo-section-title">
+                    <i class="fas fa-user"></i>
+                    <span>Información del Afiliado</span>
+                </h5>
+                <div class="saldo-info-grid">
+                    <div class="saldo-info-item">
+                        <div class="saldo-info-label">Nombre</div>
+                        <div class="saldo-info-value">{{ saldoData.afiliado?.nombre || 'Sin registro' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saldos -->
+            <div class="saldo-section" *ngIf="saldoData.saldos">
+                <h5 class="saldo-section-title">
+                    <i class="fas fa-coins"></i>
+                    <span>Saldos</span>
+                </h5>
+                <div class="saldo-cards-grid">
+                    <div class="saldo-card saldo-card-efectivo">
+                        <div class="saldo-card-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Efectivo</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(saldoData.saldos?.efectivo) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-promocional">
+                        <div class="saldo-card-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Promocional</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(saldoData.saldos?.promocional) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-puntos">
+                        <div class="saldo-card-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Puntos</div>
+                            <div class="saldo-card-value">{{ saldoData.saldos?.puntos?.toLocaleString('es-MX') || '0' }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-total">
+                        <div class="saldo-card-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Total Jugable</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(saldoData.saldos?.totalJugable) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-redimible">
+                        <div class="saldo-card-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Redimible</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(saldoData.saldos?.redimible) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Promociones Activas -->
+            <div class="saldo-section" *ngIf="saldoData.promocionesActivas && saldoData.promocionesActivas.length > 0">
+                <h5 class="saldo-section-title">
+                    <i class="fas fa-tags"></i>
+                    <span>Promociones Activas</span>
+                </h5>
+                <div class="promociones-list">
+                    <div class="promocion-item" *ngFor="let promocion of saldoData.promocionesActivas">
+                        <div class="promocion-header">
+                            <div class="promocion-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="promocion-title">{{ promocion.nombre }}</div>
+                        </div>
+                        <div class="promocion-body">
+                            <div class="promocion-info-row">
+                                <span class="promocion-label">Monto del Bono:</span>
+                                <span class="promocion-value">{{ formatearMoneda(promocion.montoBono) }}</span>
+                            </div>
+                            <div class="promocion-info-row">
+                                <span class="promocion-label">Rollover Requerido:</span>
+                                <span class="promocion-value">{{ formatearMoneda(promocion.rolloverRequerido) }}</span>
+                            </div>
+                            <div class="promocion-info-row">
+                                <span class="promocion-label">Rollover Acumulado:</span>
+                                <span class="promocion-value">{{ formatearMoneda(promocion.rolloverAcumulado) }}</span>
+                            </div>
+                            <div class="promocion-progress">
+                                <div class="promocion-progress-label">
+                                    <span>Progreso: {{ promocion.porcentajeCompletado || 0 }}%</span>
+                                </div>
+                                <div class="promocion-progress-bar">
+                                    <div class="promocion-progress-fill" [style.width.%]="promocion.porcentajeCompletado || 0"></div>
+                                </div>
+                            </div>
+                            <div class="promocion-info-row">
+                                <span class="promocion-label">Fecha de Vencimiento:</span>
+                                <span class="promocion-value">{{ formatearFechaHoraCompleta(promocion.fechaVencimiento) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje si no hay promociones -->
+            <div class="saldo-section" *ngIf="saldoData.promocionesActivas && saldoData.promocionesActivas.length === 0">
+                <div class="empty-promociones">
+                    <i class="fas fa-inbox"></i>
+                    <p>No hay promociones activas para este monedero</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-consultar-saldo">
+        <button type="button" class="btn btn-secondary" (click)="saldoData ? saldoData = null : cerrarModal()">
+            <i class="fas fa-arrow-left" *ngIf="saldoData"></i>
+            <i class="fas fa-times" *ngIf="!saldoData"></i> 
+            {{ saldoData ? 'Nueva Consulta' : 'Cerrar' }}
+        </button>
+        <button *ngIf="!saldoData" type="button" class="btn btn-info" (click)="buscarSaldo()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo">
+            <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i>
+            <i class="fas fa-search" *ngIf="!consultandoSaldo"></i> 
+            {{ consultandoSaldo ? 'Consultando...' : 'Consultar' }}
+        </button>
+    </div>
+</ng-template>

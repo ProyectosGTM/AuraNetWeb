@@ -397,8 +397,8 @@ export class AgregarCajaComponent implements OnInit {
       next: (response) => {
         this.loading = false;
         Swal.fire({
-          title: '¡Éxito!',
-          text: 'La caja ha sido agregada correctamente.',
+          title: '¡Operación Exitosa!',
+          text: 'Se ha agregado la caja de manera exitosa.',
           icon: 'success',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -427,8 +427,8 @@ export class AgregarCajaComponent implements OnInit {
       next: (response) => {
         this.loading = false;
         Swal.fire({
-          title: '¡Éxito!',
-          text: 'La caja ha sido actualizada correctamente.',
+          title: '¡Operación Exitosa!',
+          text: 'Se ha actualizado la caja de manera exitosa.',
           icon: 'success',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',

@@ -1,193 +1,291 @@
 <div class="container-fluid recarga-page" [@fadeInRight]>
-  <div class="row justify-content-center">
-    <div class="col-12 col-xxl-11">
-      <div class="recarga-banner-card shadow-sm">
-
-        <div class="recarga-header">
-          <div class="recarga-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-            <div class="d-flex align-items-center gap-3">
-              <div class="recarga-icon">
-                <i class="fas fa-money"></i>
-              </div>
-              <div>
-                <h4 class="recarga-title">Módulo de Recarga</h4>
-                <p class="recarga-subtitle">
-                  Realiza operaciones de saldo y visualiza tus movimientos fácilmente
-                </p>
-              </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-wallet"></i>
             </div>
-            <div class="recarga-tagline">
+            <div>
+              <h4 class="title-title">Módulo de Recarga</h4>
+              <p class="title-subtitle">
+                Realiza operaciones de carga de efectivo a monederos
+              </p>
+            </div>
+          </div>
+          <div class="title-actions">
+            <div class="title-tagline">
               <span class="line"></span>
-              <span class="text">Accede a tu recarga en segundos</span>
+              <span class="text">Carga rápida y segura</span>
             </div>
-          </div>
-
-        </div>
-
-        <div class="recarga-body">
-          <div class="row g-4">
-            <div class="col-12 col-lg-6">
-              <div class="recarga-panel">
-                <div class="recarga-panel-title">
-                  <h5 class="section-title mb-0">
-                    <i class="fas fa-wallet me-2 text-accent"></i> Monedero
-                  </h5>
-                </div>
-
-                <div class="recarga-panel-content">
-                  <div class="mb-3">
-                    <label class="form-label">Número de Serie</label>
-                    <input type="text" class="form-control custom-input" placeholder="Ej. 1234567890"
-                      inputmode="numeric" pattern="^[0-9]{6,20}$" maxlength="20" />
-                  </div>
-
-                  <div class="row g-3">
-                    <div class="col-12 col-sm-6">
-                      <label class="form-label">Tipo</label>
-                      <input type="text" class="form-control custom-input" placeholder="Ej. Virtual"
-                        maxlength="30" pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,30}$" />
-                    </div>
-                    <div class="col-12 col-sm-6">
-                      <label class="form-label">Estado</label>
-                      <input type="text" class="form-control custom-input" placeholder="Ej. Activo"
-                        maxlength="20" pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,20}$" />
-                    </div>
-                  </div>
-
-                  <div class="mt-3">
-                    <label class="form-label">Venta Acumulada</label>
-                    <input type="text" class="form-control custom-input" placeholder="$0.00"
-                      inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,2})?$" maxlength="12" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-lg-6">
-              <div class="recarga-panel">
-                <div class="recarga-panel-title">
-                  <h5 class="section-title mb-0">
-                    <i class="fas fa-coins me-2 text-accent"></i> Saldo
-                  </h5>
-                </div>
-
-                <div class="recarga-panel-content">
-                  <div class="mb-3">
-                    <label class="form-label">Efectivo</label>
-                    <input type="text" class="form-control custom-input" placeholder="$0.00"
-                      inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,2})?$" maxlength="12" />
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Promociones</label>
-                    <input type="text" class="form-control custom-input" placeholder="$0.00"
-                      inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,2})?$" maxlength="12" />
-                  </div>
-                  <div class="mb-0">
-                    <label class="form-label">Lealtad</label>
-                    <input type="text" class="form-control custom-input" placeholder="$0.00"
-                      inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,2})?$" maxlength="12" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="recarga-panel">
-                <div class="recarga-panel-title">
-                  <h5 class="section-title mb-0">
-                    <i class="fas fa-user me-2 text-accent"></i> Cliente
-                  </h5>
-                </div>
-
-                <div class="recarga-panel-content">
-                  <div class="row g-3">
-                    <div class="col-12 col-lg-6">
-                      <label class="form-label">Nombre</label>
-                      <input type="text" class="form-control custom-input"
-                        maxlength="80" pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' ]{2,80}$" />
-                    </div>
-                    <div class="col-12 col-sm-6 col-lg-3">
-                      <label class="form-label">Tipo de Identificación</label>
-                      <input type="text" class="form-control custom-input"
-                        maxlength="30" pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,30}$" />
-                    </div>
-                    <div class="col-12 col-sm-6 col-lg-3">
-                      <label class="form-label">Número de Identificación</label>
-                      <input type="text" class="form-control custom-input"
-                        inputmode="numeric" maxlength="18" pattern="^[A-Za-z0-9-]{4,18}$" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="recarga-panel recarga-panel--calc">
-                <div class="recarga-panel-title">
-                  <h5 class="section-title mb-0">
-                    <i class="fas fa-calculator me-2 text-accent"></i> Calcular
-                  </h5>
-                </div>
-
-                <div class="recarga-panel-content">
-                  <div class="row g-4 align-items-start">
-                    <div class="col-12 col-lg-6 col-xl-5">
-                      <div class="keypad">
-                        <ng-container *ngFor="let key of [1,2,3,4,5,6,7,8,9,0]">
-                          <button class="btn keypad-btn w-100" type="button">{{ key }}</button>
-                        </ng-container>
-                        <button class="btn quick-btn w-100" type="button">50</button>
-                        <button class="btn quick-btn w-100" type="button">100</button>
-                        <button class="btn quick-btn w-100" type="button">200</button>
-                        <button class="btn quick-btn w-100" type="button">500</button>
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-lg-6 col-xl-4">
-                      <div class="row g-3">
-                        <div class="col-12">
-                          <label class="form-label">Moneda</label>
-                          <input type="text" class="form-control custom-input"
-                            maxlength="5" pattern="^[A-Za-z]{2,5}$" placeholder="MXN" />
-                        </div>
-
-                        <div class="col-12">
-                          <label class="form-label">Importe</label>
-                          <input type="text" class="form-control custom-input"
-                            inputmode="decimal" maxlength="12" pattern="^[0-9]+(\.[0-9]{1,2})?$" placeholder="0.00" />
-                        </div>
-
-                        <div class="col-12">
-                          <label class="form-label">Cantidad Recibida</label>
-                          <input type="text" class="form-control custom-input"
-                            inputmode="decimal" maxlength="12" pattern="^[0-9]+(\.[0-9]{1,2})?$" placeholder="0.00" />
-                        </div>
-
-                        <div class="col-12">
-                          <label class="form-label">Cambio</label>
-                          <input type="text" class="form-control custom-input"
-                            inputmode="decimal" maxlength="12" pattern="^[0-9]+(\.[0-9]{1,2})?$" placeholder="0.00" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-xl-3">
-                      <div class="action-stack">
-                        <button class="btn action-btn action-btn--info w-100" type="button">Borrar</button>
-                        <button class="btn action-btn action-btn--info w-100" type="button">Calcular</button>
-                        <button class="btn action-btn action-btn--success w-100" type="button">Aceptar</button>
-                        <button class="btn action-btn action-btn--danger w-100" type="button">Cancelar</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
           </div>
         </div>
 
+        <div class="row mt-2">
+          <div class="col-12">
+            <div class="recarga-main-card">
+              <form [formGroup]="recargaForm">
+                <div class="row g-3">
+                  <!-- Información del Turno -->
+                  <div class="col-12 col-lg-6">
+                    <div class="info-card info-card-turno">
+                      <div class="info-card-header">
+                        <div class="info-card-icon icon-turno">
+                          <i class="fas fa-cash-register"></i>
+                        </div>
+                        <div>
+                          <h5 class="info-card-title">Turno de Caja</h5>
+                          <p class="info-card-subtitle">Selecciona el turno activo</p>
+                        </div>
+                      </div>
+                      <div class="info-card-body">
+                        <label class="field">
+                          <span class="field-label text-white">Turno *</span>
+                          <div class="input-sleek select-sleek" [class.is-open]="isTurnoCajaOpen"
+                            (mousedown)="toggleTurnoCaja($event)">
+                            <i class="fas fa-cash-register"></i>
+                            <div class="sleek-control select-display">
+                              <span class="select-value" [class.placeholder]="!recargaForm.get('idTurnoCaja')?.value">
+                                {{ turnoCajaLabel || 'Selecciona un turno...' }}
+                              </span>
+                            </div>
+                            <span class="sleek-line"></span>
+                            <div class="select-panel" *ngIf="isTurnoCajaOpen" (mousedown)="$event.stopPropagation()">
+                              <button type="button" class="select-option" *ngFor="let t of listaTurnos"
+                                (mousedown)="setTurnoCaja(t.id, t.text, $event)">
+                                {{ t.text }}
+                              </button>
+                              <div *ngIf="listaTurnos.length === 0" class="select-option select-option-disabled">
+                                No hay turnos disponibles
+                              </div>
+                            </div>
+                          </div>
+                        </label>
+                        <div class="info-display" *ngIf="turnoSeleccionado">
+                          <div class="info-row">
+                            <span class="info-label">
+                              <i class="fas fa-building"></i>
+                              Sala:
+                            </span>
+                            <span class="info-value">{{ turnoSeleccionado.nombreSala || 'Sin registro' }}</span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">
+                              <i class="fas fa-calendar-alt"></i>
+                              Fecha Apertura:
+                            </span>
+                            <span class="info-value">{{ formatearFechaHora(turnoSeleccionado.fechaApertura) }}</span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">
+                              <i class="fas fa-dollar-sign"></i>
+                              Fondo Inicial:
+                            </span>
+                            <span class="info-value">{{ formatearMoneda(turnoSeleccionado.fondoInicial) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Información del Monedero -->
+                  <div class="col-12 col-lg-6">
+                    <div class="info-card info-card-monedero">
+                      <div class="info-card-header">
+                        <div class="info-card-icon icon-monedero">
+                          <i class="fas fa-wallet"></i>
+                        </div>
+                        <div>
+                          <h5 class="info-card-title">Monedero</h5>
+                          <p class="info-card-subtitle">Selecciona el monedero a recargar</p>
+                        </div>
+                      </div>
+                      <div class="info-card-body">
+                        <label class="field">
+                          <span class="field-label text-white">Monedero *</span>
+                          <div class="input-sleek select-sleek" [class.is-open]="isMonederoOpen"
+                            (mousedown)="toggleMonedero($event)">
+                            <i class="fas fa-wallet"></i>
+                            <div class="sleek-control select-display">
+                              <span class="select-value" [class.placeholder]="!recargaForm.get('idMonedero')?.value">
+                                {{ monederoLabel || 'Selecciona un monedero...' }}
+                              </span>
+                            </div>
+                            <span class="sleek-line"></span>
+                            <div class="select-panel" *ngIf="isMonederoOpen" (mousedown)="$event.stopPropagation()">
+                              <button type="button" class="select-option" *ngFor="let m of listaMonederos"
+                                (mousedown)="setMonedero(m.id, m.text, $event)">
+                                {{ m.text }}
+                              </button>
+                              <div *ngIf="listaMonederos.length === 0" class="select-option select-option-disabled">
+                                No hay monederos disponibles
+                              </div>
+                            </div>
+                          </div>
+                        </label>
+                        <div class="info-display" *ngIf="monederoSeleccionado">
+                          <div class="info-row">
+                            <span class="info-label">
+                              <i class="fas fa-barcode"></i>
+                              Número:
+                            </span>
+                            <span class="info-value">{{ monederoSeleccionado.numeroMonedero || 'Sin registro' }}</span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">
+                              <i class="fas fa-tag"></i>
+                              Alias:
+                            </span>
+                            <span class="info-value">{{ monederoSeleccionado.alias || 'Sin registro' }}</span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">
+                              <i class="fas fa-user"></i>
+                              Afiliado:
+                            </span>
+                            <span class="info-value">{{ monederoSeleccionado.nombreCompletoAfiliado || 'Sin registro' }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Monto a Recargar -->
+                  <div class="col-12">
+                    <div class="info-card info-card-monto">
+                      <div class="info-card-header">
+                        <div class="info-card-icon icon-monto">
+                          <i class="fas fa-coins"></i>
+                        </div>
+                        <div>
+                          <h5 class="info-card-title">Monto a Recargar</h5>
+                          <p class="info-card-subtitle">Ingresa el monto que deseas cargar al monedero</p>
+                        </div>
+                      </div>
+                      <div class="info-card-body">
+                        <div class="row g-3" style="display: flex; align-items: center; justify-content: center;">
+                          <div class="col-12 col-md-6 col-lg-4">
+                            <label class="field">
+                              <span class="field-label text-white">Monto *</span>
+                              <div class="input-sleek input-monto-large">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input formControlName="monto" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                                <span class="sleek-line"></span>
+                              </div>
+                            </label>
+                          </div>
+                          <div class="col-12 col-md-6 col-lg-8">
+                            <div class="quick-amounts">
+                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(100)">
+                                <span class="quick-amount-icon">
+                                  <i class="fas fa-hand-holding-usd"></i>
+                                </span>
+                                <span class="quick-amount-value">$100</span>
+                              </button>
+                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(500)">
+                                <span class="quick-amount-icon">
+                                  <i class="fas fa-hand-holding-usd"></i>
+                                </span>
+                                <span class="quick-amount-value">$500</span>
+                              </button>
+                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(1000)">
+                                <span class="quick-amount-icon">
+                                  <i class="fas fa-hand-holding-usd"></i>
+                                </span>
+                                <span class="quick-amount-value">$1,000</span>
+                              </button>
+                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(2000)">
+                                <span class="quick-amount-icon">
+                                  <i class="fas fa-hand-holding-usd"></i>
+                                </span>
+                                <span class="quick-amount-value">$2,000</span>
+                              </button>
+                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(5000)">
+                                <span class="quick-amount-icon">
+                                  <i class="fas fa-hand-holding-usd"></i>
+                                </span>
+                                <span class="quick-amount-value">$5,000</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="monto-display" *ngIf="recargaForm.get('monto')?.value">
+                          <div class="monto-display-card">
+                            <div class="monto-display-icon">
+                              <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="monto-display-content">
+                              <div class="monto-display-label">Monto Total a Recargar</div>
+                              <div class="monto-display-value">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Resumen de la Transacción -->
+                  <div class="col-12" *ngIf="turnoSeleccionado && monederoSeleccionado && recargaForm.get('monto')?.value">
+                    <div class="info-card info-card-resumen">
+                      <div class="info-card-header">
+                        <div class="info-card-icon icon-resumen">
+                          <i class="fas fa-receipt"></i>
+                        </div>
+                        <div>
+                          <h5 class="info-card-title">Resumen de Transacción</h5>
+                          <p class="info-card-subtitle">Revisa los detalles antes de confirmar</p>
+                        </div>
+                      </div>
+                      <div class="info-card-body">
+                        <div class="resumen-grid">
+                          <div class="resumen-item">
+                            <div class="resumen-item-header">
+                              <i class="fas fa-cash-register"></i>
+                              <span>Turno</span>
+                            </div>
+                            <div class="resumen-item-value">{{ turnoSeleccionado.codigoCaja || 'Sin registro' }}</div>
+                            <div class="resumen-item-detail">{{ turnoSeleccionado.nombreCaja || 'Sin registro' }}</div>
+                          </div>
+                          <div class="resumen-item">
+                            <div class="resumen-item-header">
+                              <i class="fas fa-wallet"></i>
+                              <span>Monedero</span>
+                            </div>
+                            <div class="resumen-item-value">{{ monederoSeleccionado.numeroMonedero || 'Sin registro' }}</div>
+                            <div class="resumen-item-detail">{{ monederoSeleccionado.alias || 'Sin registro' }}</div>
+                          </div>
+                          <div class="resumen-item resumen-item-highlight">
+                            <div class="resumen-item-header">
+                              <i class="fas fa-coins"></i>
+                              <span>Monto</span>
+                            </div>
+                            <div class="resumen-item-value-large">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Botones de Acción -->
+                  <div class="col-12">
+                    <div class="action-buttons-container">
+                      <button type="button" class="btn-action-recarga btn-action-recarga-secondary" (click)="limpiarFormulario()">
+                        <i class="fas fa-times"></i>
+                        <span>Cancelar</span>
+                      </button>
+                      <button type="button" class="btn-action-recarga btn-action-recarga-primary" (click)="procesarRecarga()" [disabled]="recargaForm.invalid || procesando">
+                        <i class="fas fa-check" *ngIf="!procesando"></i>
+                        <i class="fas fa-spinner fa-spin" *ngIf="procesando"></i>
+                        <span>{{ procesando ? 'Procesando...' : 'Confirmar Recarga' }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -23,9 +23,9 @@
           <form [formGroup]="tesoreriaForm">
             <div class="col-12">
               <div class="row mt-0">
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                  <div class="col-12 col-md-6 col-lg-3">
                     <label class="field">
-                      <span class="field-label text-white">Sala</span>
+                      <span class="field-label text-white">Sala *</span>
                       <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
                         (mousedown)="toggleSala($event)">
                         <i class="fas fa-building"></i>
@@ -44,9 +44,9 @@
                       </div>
                     </label>
                   </div>
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                  <div class="col-12 col-md-6 col-lg-3">
                     <label class="field">
-                      <span class="field-label text-white">Fecha</span>
+                      <span class="field-label text-white">Fecha *</span>
                       <div class="input-sleek">
                         <i class="fas fa-calendar"></i>
                         <input formControlName="fecha" class="sleek-control" type="date" />
@@ -54,20 +54,20 @@
                       </div>
                     </label>
                   </div>
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                  <div class="col-12 col-md-6 col-lg-3">
                     <label class="field">
-                      <span class="field-label text-white">Fondo Inicial</span>
+                      <span class="field-label text-white">Fondo Inicial *</span>
                       <div class="input-sleek">
                         <i class="fas fa-dollar-sign"></i>
                         <input formControlName="fondoInicial" class="sleek-control" type="text"
-                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
+                          placeholder="500000.00" (keypress)="allowOnlyNumbers($event)" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
                   </div>
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
+                  <div class="col-12 col-md-6 col-lg-3">
                     <label class="field">
-                      <span class="field-label text-white">Estatus Tesorería</span>
+                      <span class="field-label text-white">Estatus Tesorería *</span>
                       <div class="input-sleek select-sleek" [class.is-open]="isEstatusTesoreriaOpen"
                         (mousedown)="toggleEstatusTesoreria($event)">
                         <i class="fas fa-toggle-on"></i>
@@ -83,90 +83,6 @@
                             {{ e.text }}
                           </button>
                         </div>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Fecha Apertura</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-check"></i>
-                        <input formControlName="fechaApertura" class="sleek-control" type="datetime-local" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Usuario Apertura</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isUsuarioAperturaOpen"
-                        (mousedown)="toggleUsuarioApertura($event)">
-                        <i class="fas fa-user"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!tesoreriaForm.get('idUsuarioApertura')?.value">
-                            {{ usuarioAperturaLabel || 'Selecciona un usuario...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isUsuarioAperturaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let u of listaUsuarios"
-                            (mousedown)="setUsuarioApertura(u.id, u.nombreCompleto, $event)">
-                            {{ u.nombreCompleto }}
-                          </button>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Fecha Cierre</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-times"></i>
-                        <input formControlName="fechaCierre" class="sleek-control" type="datetime-local" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Usuario Cierre</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isUsuarioCierreOpen"
-                        (mousedown)="toggleUsuarioCierre($event)">
-                        <i class="fas fa-user-times"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!tesoreriaForm.get('idUsuarioCierre')?.value">
-                            {{ usuarioCierreLabel || 'Selecciona un usuario...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isUsuarioCierreOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let u of listaUsuarios"
-                            (mousedown)="setUsuarioCierre(u.id, u.nombreCompleto, $event)">
-                            {{ u.nombreCompleto }}
-                          </button>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Fondo Contado</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-coins"></i>
-                        <input formControlName="fondoContado" class="sleek-control" type="text"
-                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-9 col-lg-9 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Observaciones</span>
-                      <div class="input-sleek input-sleek--textarea">
-                        <i class="fas fa-comment-alt"></i>
-                        <textarea formControlName="observaciones" class="sleek-control sleek-control--textarea"
-                          placeholder="Ingresa las observaciones..." rows="3"></textarea>
-                        <span class="sleek-line"></span>
                       </div>
                     </label>
                   </div>

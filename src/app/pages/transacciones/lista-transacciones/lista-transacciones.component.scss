@@ -1,0 +1,582 @@
+// Estilos para lista transacciones (usando los estilos globales del sistema)
+
+.action-buttons-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 0;
+}
+
+.action-buttons-header {
+  margin-bottom: 16px;
+  
+  .action-buttons-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i {
+      color: #50a5f1;
+    }
+  }
+}
+
+.action-buttons-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.btn-action-large {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .btn-action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    .btn-action-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .btn-action-desc {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  }
+
+  &.btn-action-large-success {
+    &:hover {
+      background: rgba(52, 195, 143, 0.1);
+      border-color: rgba(52, 195, 143, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+    }
+  }
+
+  &.btn-action-large-info {
+    &:hover {
+      background: rgba(80, 165, 241, 0.1);
+      border-color: rgba(80, 165, 241, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #50a5f1 0%, #3b8fd4 100%);
+    }
+  }
+
+  &.btn-action-large-warning {
+    &:hover {
+      background: rgba(241, 180, 76, 0.1);
+      border-color: rgba(241, 180, 76, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #f1b44c 0%, #e5a430 100%);
+    }
+  }
+}
+
+::ng-deep {
+  .modal-consultar-saldo,
+  .modal-historial-monedero {
+    .modal-content {
+      background: #0d121d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px 24px;
+    }
+
+    .btn-close {
+      filter: invert(1);
+      opacity: 0.8;
+      margin: 0;
+      padding: 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      
+      &::before {
+        display: none;
+      }
+
+      i {
+        display: block;
+        font-size: 1.25rem;
+      }
+    }
+
+    .btn-close:hover {
+      opacity: 1;
+    }
+  }
+
+  .modal-header-consultar-saldo {
+    background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(80, 165, 241, 0.25);
+    margin: 0;
+    border: none;
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 22px;
+      }
+    }
+  }
+
+  .modal-header-historial-monedero {
+    background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(80, 165, 241, 0.25);
+    margin: 0;
+    border: none;
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 22px;
+      }
+    }
+  }
+
+  .action-modal-content {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .action-icon-wrapper {
+    margin-bottom: 24px;
+  }
+
+  .action-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 36px;
+    color: #fff;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+
+    &.action-icon-success {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+    }
+
+    &.action-icon-warning {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    }
+
+    &.action-icon-info {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    }
+  }
+
+  .action-title {
+    font-size: 24px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .action-description {
+    font-size: 14px;
+    color: #9ca3af;
+    margin-bottom: 32px;
+  }
+
+  .action-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .saldo-result-content {
+    padding: 20px 0;
+  }
+
+  .saldo-section {
+    margin-bottom: 30px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .saldo-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(80, 165, 241, 0.3);
+
+      i {
+        color: #50a5f1;
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+.saldo-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.saldo-info-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+
+  .saldo-info-label {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .saldo-info-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+  }
+}
+
+.historial-list {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.historial-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .historial-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .historial-fecha {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .historial-monto {
+      font-size: 18px;
+      font-weight: 600;
+
+      &.positivo {
+        color: #34c38f;
+      }
+
+      &.negativo {
+        color: #f46a6a;
+      }
+    }
+  }
+
+  .historial-item-body {
+    .historial-concepto {
+      font-size: 16px;
+      color: #fff;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .historial-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 14px;
+      color: #9ca3af;
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+  }
+}
+
+.input-sleek {
+  position: relative;
+
+  i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    z-index: 1;
+  }
+
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+
+    i {
+      position: static;
+      transform: none;
+      color: #50a5f1;
+    }
+  }
+
+  .sleek-control {
+    padding-left: 48px;
+
+    &:focus {
+      border-color: #50a5f1;
+      box-shadow: 0 0 0 0.2rem rgba(80, 165, 241, 0.25);
+    }
+  }
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px 24px;
+  margin-top: 24px;
+}
+
+// Los estilos de #historialButton están en styles.scss global
+
+// Centrar contenido de los templates de celdas y permitir ajuste de texto
+::ng-deep {
+  .dx-datagrid .dx-data-row td {
+    text-align: center !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    vertical-align: middle !important;
+    padding: 12px 8px !important;
+  }
+  
+  .dx-datagrid-headers .dx-header-row td {
+    text-align: center !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+  }
+
+  // Permitir que las celdas se expandan verticalmente
+  .dx-datagrid .dx-row {
+    min-height: auto !important;
+  }
+
+  // Ajustar altura de filas según contenido
+  .dx-datagrid .dx-row > td {
+    height: auto !important;
+    min-height: 40px !important;
+  }
+
+  // Estilos para textos largos en celdas
+  .dx-datagrid .dx-data-row .cell-content {
+    display: block;
+    width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
+    overflow: visible;
+  }
+}
+
+// Estilos para el contenido de las celdas
+.cell-content {
+  display: block;
+  width: 100%;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
+  overflow: visible;
+  line-height: 1.4;
+  padding: 4px 0;
+}
+
+// Estilos para la celda de monto destacada
+.monto-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .monto-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .monto-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    .monto-value {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .monto-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      opacity: 0.8;
+    }
+  }
+
+  &.monto-positivo {
+    background: linear-gradient(135deg, rgba(52, 195, 143, 0.15) 0%, rgba(42, 168, 118, 0.1) 100%);
+    border-color: rgba(52, 195, 143, 0.3);
+
+    .monto-icon {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+      color: #fff;
+    }
+
+    .monto-value {
+      color: #34c38f;
+    }
+
+    .monto-label {
+      color: #2aa876;
+    }
+  }
+
+  &.monto-negativo {
+    background: linear-gradient(135deg, rgba(244, 106, 106, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+    border-color: rgba(244, 106, 106, 0.3);
+
+    .monto-icon {
+      background: linear-gradient(135deg, #f46a6a 0%, #dc2626 100%);
+      color: #fff;
+    }
+
+    .monto-value {
+      color: #f46a6a;
+    }
+
+    .monto-label {
+      color: #dc2626;
+    }
+  }
+}

@@ -35,6 +35,57 @@
                         </div>
                     </div>
                 </div>
+                <!-- Sección de Acciones POST -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="action-buttons-card">
+                            <div class="action-buttons-header">
+                                <h5 class="action-buttons-title">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Acciones Rápidas</span>
+                                </h5>
+                            </div>
+                            <div class="action-buttons-content">
+                                <button (click)="abrirTesoreria()" type="button" class="btn-action-large btn-action-large-success">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-door-open"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Abrir Tesorería</span>
+                                        <span class="btn-action-desc">Abrir tesorería del día</span>
+                                    </div>
+                                </button>
+                                <button (click)="cerrarTesoreria()" type="button" class="btn-action-large btn-action-large-danger">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-door-closed"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Cerrar Tesorería</span>
+                                        <span class="btn-action-desc">Cerrar tesorería del día</span>
+                                    </div>
+                                </button>
+                                <button (click)="reponerTesoreria()" type="button" class="btn-action-large btn-action-large-success">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Reponer Efectivo</span>
+                                        <span class="btn-action-desc">Reponer efectivo a la tesorería</span>
+                                    </div>
+                                </button>
+                                <button (click)="retirarTesoreria()" type="button" class="btn-action-large btn-action-large-warning">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Retirar Efectivo</span>
+                                        <span class="btn-action-desc">Retirar efectivo de la tesorería</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row mt-3 gy-4">
                     <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
                         [showColumnLines]="true" [dataSource]="listaTesoreria" [showRowLines]="true" [rowAlternationEnabled]="'true'"[keyExpr]="'id'" [width]="'100%'"
@@ -52,28 +103,47 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="180"></dxi-column>
-                        <dxi-column dataField="nombreCompletoCliente" caption="Cliente" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="rfcCliente" caption="RFC Cliente" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="240" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
                         <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="fecha" caption="Fecha" alignment="center" dataType="date" [allowSearch]="true" [format]="'dd/MM/yyyy'"></dxi-column>
-                        <dxi-column dataField="fechaApertura" caption="Fecha Apertura" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'"></dxi-column>
-                        <dxi-column dataField="fondoInicial" caption="Fondo Inicial" alignment="center" dataType="number" [allowSearch]="true" [format]="'currency'"></dxi-column>
-                        <dxi-column dataField="fechaCierre" caption="Fecha Cierre" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'"></dxi-column>
-                        <dxi-column dataField="fondoContado" caption="Fondo Contado" alignment="center" dataType="number" [allowSearch]="true" [format]="'currency'"></dxi-column>
-                        <dxi-column dataField="observaciones" caption="Observaciones" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="codigoEstatusTesoreria" caption="Código Estatus Tesorería" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreEstatusTesoreria" caption="Estatus Tesorería" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="fechaFormateada" caption="Fecha" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="fondoInicialFormateado" caption="Fondo Inicial" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Estatus Tesorería" cellTemplate="EstatusTesoreria" alignment="center" dataType="string"></dxi-column>
+                        <dxi-column dataField="fondoContadoFormateado" caption="Fondo Contado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="fechaAperturaFormateada" caption="Fecha Apertura" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreCompletoUsuarioApertura" caption="Usuario Apertura" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="fechaCierreFormateada" caption="Fecha Cierre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreCompletoUsuarioCierre" caption="Usuario Cierre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="fechaCreacion" caption="Fecha Creación" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'"></dxi-column>
-                        <dxi-column dataField="fechaActualizacion" caption="Fecha Actualización" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'"></dxi-column>
-                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string">
+                            <div *dxTemplate="let f of 'est'">
+                                <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
+                                    Activo
+                                </span>
+                                <span *ngIf="f.data.estatus !== 1" class="estatus estatus-inactivo">
+                                    Inactivo
+                                </span>
+                            </div>
+                        </dxi-column>
+                        <dxi-column dataField="nombreCompletoCliente" caption="Cliente" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column dataField="rfcCliente" caption="RFC Cliente" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column dataField="observaciones" caption="Observaciones" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column dataField="codigoEstatusTesoreria" caption="Código Estatus Tesorería" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column dataField="fechaCreacion" caption="Fecha Creación" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'" [visible]="false"></dxi-column>
+                        <dxi-column dataField="fechaActualizacion" caption="Fecha Actualización" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'" [visible]="false"></dxi-column>
                         <dxo-export [enabled]="false" [allowExportSelectedData]="true"
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                            <div>
+                                <button type="button" id="resumenButton" class="btnAcciones" (click)="verResumen(row.data.id)" title="Ver Resumen">
+                                    <i class="fa fa-chart-line"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="historialButton" class="btnAcciones" (click)="verHistorial(row.data.id)" title="Ver Historial">
+                                    <i class="fa fa-history"></i>
+                                </button>
+                            </div>
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarTesoreria(row.data.id)">
@@ -81,13 +151,20 @@
                                 </button>
                             </div>
                             <div>
-                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones" (click)="activar(row.data)">
+                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
+                                    (click)="activar(row.data)">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
-                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones" (click)="desactivar(row.data)">
+                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
+                                    (click)="desactivar(row.data)">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </div>
+                        </div>
+                        <div *dxTemplate="let row of 'EstatusTesoreria'">
+                            <span class="estatus" [style.background-color]="row.data.estatusTesoreriaColor" [style.color]="'#fff'" [style.border-color]="row.data.estatusTesoreriaColor">
+                                {{ row.data.estatusTesoreriaTexto }}
+                            </span>
                         </div>
                     </dx-data-grid>
                 </div>
@@ -95,3 +172,468 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Resumen -->
+<ng-template #modalResumen let-modal>
+    <div class="modal-header modal-header-resumen">
+        <h5 class="modal-title">
+            <i class="fas fa-chart-line"></i>
+            <span>Resumen de Tesorería</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarResumen()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body modal-body-resumen" *ngIf="resumenData">
+        <div class="modal-content-grid">
+            <div class="info-item">
+                <div class="info-item-top">
+                    <div class="info-icon icon-bg-purple">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="info-label">Sala</div>
+                </div>
+                <div class="info-value">{{ resumenData.nombreSala || 'Sin registro' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-item-top">
+                    <div class="info-icon icon-bg-pink">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="info-label">Fecha</div>
+                </div>
+                <div class="info-value">{{ formatearFecha(resumenData.fecha) }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-item-top">
+                    <div class="info-icon icon-bg-green">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="info-label">Fondo Contado</div>
+                </div>
+                <div class="info-value">{{ formatearMoneda(resumenData.fondoContado) }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-item-top">
+                    <div class="info-icon" [style.background]="resumenData?.colorEstatusTesoreria || '#6c757d'">
+                        <i class="fas fa-toggle-on"></i>
+                    </div>
+                    <div class="info-label">Estatus</div>
+                </div>
+                <div class="info-value">
+                    <span class="estatus-badge" [style.background-color]="resumenData?.colorEstatusTesoreria || '#6c757d'">
+                        {{ resumenData.nombreEstatusTesoreria || 'Sin registro' }}
+                    </span>
+                </div>
+            </div>
+            <div class="info-item info-item-full">
+                <div class="info-item-top">
+                    <div class="info-icon icon-bg-blue">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="info-label">Fondo Inicial</div>
+                </div>
+                <div class="info-value">{{ formatearMoneda(resumenData.fondoInicial) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-resumen">
+        <button type="button" class="btn btn-primary" (click)="cerrarResumen()">
+            <i class="fas fa-times"></i> Cerrar
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Historial -->
+<ng-template #modalHistorial let-modal>
+    <div class="modal-header modal-header-historial">
+        <div class="modal-header-left">
+            <h5 class="modal-title">
+                <i class="fas fa-history"></i>
+                <span>Historial de Movimientos</span>
+            </h5>
+        </div>
+        <div class="header-badge">{{ historialData.length }} movimiento{{ historialData.length !== 1 ? 's' : '' }}</div>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarHistorial()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body modal-body-historial">
+        <div *ngIf="historialData.length === 0" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="empty-text">No hay movimientos registrados para esta tesorería.</div>
+        </div>
+        <div *ngIf="historialData.length > 0" class="movimientos-list">
+            <div class="movimiento-item" *ngFor="let m of historialData">
+                <div class="movimiento-icon" [ngClass]="getIconoMovimiento(m.tipoMovimiento).class">
+                    <i class="fas" [ngClass]="getIconoMovimiento(m.tipoMovimiento).icon"></i>
+                </div>
+                <div class="movimiento-content">
+                    <div class="movimiento-tipo">{{ m.tipoMovimiento || 'Sin registro' }}</div>
+                    <div class="movimiento-fecha">
+                        <i class="fas fa-clock"></i>
+                        {{ formatearFechaHora(m.fecha) }}
+                    </div>
+                </div>
+                <div class="movimiento-monto">{{ formatearMoneda(m.monto) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-historial">
+        <button type="button" class="btn btn-primary" (click)="cerrarHistorial()">
+            <i class="fas fa-times"></i> Cerrar
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Abrir Tesorería -->
+<ng-template #modalAbrirTesoreria let-modal>
+    <div class="modal-header modal-header-abrir-tesoreria">
+        <h5 class="modal-title">
+            <i class="fas fa-door-open"></i>
+            <span>Abrir Tesorería del Día</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-abrir-tesoreria">
+        <div class="action-modal-content">
+            <div class="action-icon-wrapper">
+                <div class="action-icon action-icon-success">
+                    <i class="fas fa-door-open"></i>
+                </div>
+            </div>
+            <h4 class="action-title">Abrir Tesorería</h4>
+            <p class="action-description">Complete los siguientes campos para abrir la tesorería del día. <strong>Recuerde:</strong> Solo puede existir UNA tesorería abierta por sala por día y debe abrirse ANTES de que los cajeros abran sus turnos.</p>
+            <div class="action-form">
+                <form [formGroup]="abrirTesoreriaForm">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="field">
+                                <span class="field-label text-white">Sala *</span>
+                                <div class="input-sleek select-sleek" [class.is-open]="isSalaAbrirOpen"
+                                    (mousedown)="toggleSalaAbrir($event)">
+                                    <i class="fas fa-building"></i>
+                                    <div class="sleek-control select-display">
+                                        <span class="select-value" [class.placeholder]="!abrirTesoreriaForm.get('idSala')?.value">
+                                            {{ salaAbrirLabel || 'Selecciona una sala...' }}
+                                        </span>
+                                    </div>
+                                    <span class="sleek-line"></span>
+                                    <div class="select-panel" *ngIf="isSalaAbrirOpen" (mousedown)="$event.stopPropagation()">
+                                        <button type="button" class="select-option" *ngFor="let s of listaSalas"
+                                            (mousedown)="setSalaAbrir(s.id, s.text, $event)">
+                                            {{ s.text }}
+                                        </button>
+                                        <div *ngIf="listaSalas.length === 0" class="select-option select-option-disabled">
+                                            No hay salas disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Fondo Inicial *</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <input formControlName="fondoInicial" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                                <small class="form-text text-muted">Representa el efectivo físico en bóveda</small>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Observaciones</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-comment-alt"></i>
+                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-abrir-tesoreria">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-success" (click)="guardarAbrirTesoreria()" [disabled]="abrirTesoreriaForm.invalid">
+            <i class="fas fa-check"></i> Abrir Tesorería
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Cerrar Tesorería -->
+<ng-template #modalCerrarTesoreria let-modal>
+    <div class="modal-header modal-header-cerrar-tesoreria">
+        <h5 class="modal-title">
+            <i class="fas fa-door-closed"></i>
+            <span>Cerrar Tesorería del Día</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-cerrar-tesoreria">
+        <div class="action-modal-content">
+            <div class="action-icon-wrapper">
+                <div class="action-icon action-icon-danger">
+                    <i class="fas fa-door-closed"></i>
+                </div>
+            </div>
+            <h4 class="action-title">Cerrar Tesorería</h4>
+            <p class="action-description">Complete los siguientes campos para cerrar la tesorería del día. <strong>Recuerde:</strong> NO se puede cerrar si hay turnos de caja abiertos. El fondo contado se comparará con el saldo calculado del sistema para determinar si está CUADRADO O DESCUADRADO.</p>
+            <div class="action-form">
+                <form [formGroup]="cerrarTesoreriaForm">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="field">
+                                <span class="field-label text-white">Tesorería *</span>
+                                <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaCerrarOpen"
+                                    (mousedown)="toggleTesoreriaCerrar($event)">
+                                    <i class="fas fa-wallet"></i>
+                                    <div class="sleek-control select-display">
+                                        <span class="select-value" [class.placeholder]="!cerrarTesoreriaForm.get('idTesoreria')?.value">
+                                            {{ tesoreriaCerrarLabel || 'Selecciona una tesorería abierta...' }}
+                                        </span>
+                                    </div>
+                                    <span class="sleek-line"></span>
+                                    <div class="select-panel" *ngIf="isTesoreriaCerrarOpen" (mousedown)="$event.stopPropagation()">
+                                        <button type="button" class="select-option" *ngFor="let t of listaTesoreriaAbierta"
+                                            (mousedown)="setTesoreriaCerrar(t.id, t.text, $event)">
+                                            {{ t.text }}
+                                        </button>
+                                        <div *ngIf="listaTesoreriaAbierta.length === 0" class="select-option select-option-disabled">
+                                            No hay tesorerías abiertas disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Fondo Contado *</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <input formControlName="fondoContado" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                                <small class="form-text text-muted">Se comparará con el saldo calculado del sistema</small>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Observaciones</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-comment-alt"></i>
+                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-cerrar-tesoreria">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="guardarCerrarTesoreria()" [disabled]="cerrarTesoreriaForm.invalid">
+            <i class="fas fa-check"></i> Cerrar Tesorería
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Reponer Tesorería -->
+<ng-template #modalReponerTesoreria let-modal>
+    <div class="modal-header modal-header-reponer-tesoreria">
+        <h5 class="modal-title">
+            <i class="fas fa-arrow-up"></i>
+            <span>Reponer Efectivo a la Tesorería</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-reponer-tesoreria">
+        <div class="action-modal-content">
+            <div class="action-icon-wrapper">
+                <div class="action-icon action-icon-success">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+            <h4 class="action-title">Reponer Efectivo</h4>
+            <p class="action-description">Complete los siguientes campos para reponer efectivo a la tesorería. Útil cuando llega camión de valores o transferencia de otra sala.</p>
+            <div class="action-form">
+                <form [formGroup]="reponerTesoreriaForm">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="field">
+                                <span class="field-label text-white">Tesorería *</span>
+                                <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaReponerOpen"
+                                    (mousedown)="toggleTesoreriaReponer($event)">
+                                    <i class="fas fa-wallet"></i>
+                                    <div class="sleek-control select-display">
+                                        <span class="select-value" [class.placeholder]="!reponerTesoreriaForm.get('idTesoreria')?.value">
+                                            {{ tesoreriaReponerLabel || 'Selecciona una tesorería...' }}
+                                        </span>
+                                    </div>
+                                    <span class="sleek-line"></span>
+                                    <div class="select-panel" *ngIf="isTesoreriaReponerOpen" (mousedown)="$event.stopPropagation()">
+                                        <button type="button" class="select-option" *ngFor="let t of listaTesoreriaReponer"
+                                            (mousedown)="setTesoreriaReponer(t.id, t.text, $event)">
+                                            {{ t.text }}
+                                        </button>
+                                        <div *ngIf="listaTesoreriaReponer.length === 0" class="select-option select-option-disabled">
+                                            No hay tesorerías disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Monto *</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Referencia</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-tag"></i>
+                                    <input formControlName="referencia" class="sleek-control" type="text" placeholder="Ej: REMESA-2024-001234" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12">
+                            <label class="field">
+                                <span class="field-label text-white">Observaciones</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-comment-alt"></i>
+                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-reponer-tesoreria">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-success" (click)="guardarReponerTesoreria()" [disabled]="reponerTesoreriaForm.invalid">
+            <i class="fas fa-check"></i> Reponer Efectivo
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Retirar Tesorería -->
+<ng-template #modalRetirarTesoreria let-modal>
+    <div class="modal-header modal-header-retirar-tesoreria">
+        <h5 class="modal-title">
+            <i class="fas fa-arrow-down"></i>
+            <span>Retirar Efectivo de la Tesorería</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-retirar-tesoreria">
+        <div class="action-modal-content">
+            <div class="action-icon-wrapper">
+                <div class="action-icon action-icon-warning">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            </div>
+            <h4 class="action-title">Retirar Efectivo</h4>
+            <p class="action-description">Complete los siguientes campos para retirar efectivo de la tesorería. Útil para depósitos bancarios o envío a otras sucursales.</p>
+            <div class="action-form">
+                <form [formGroup]="retirarTesoreriaForm">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="field">
+                                <span class="field-label text-white">Tesorería *</span>
+                                <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaRetirarOpen"
+                                    (mousedown)="toggleTesoreriaRetirar($event)">
+                                    <i class="fas fa-wallet"></i>
+                                    <div class="sleek-control select-display">
+                                        <span class="select-value" [class.placeholder]="!retirarTesoreriaForm.get('idTesoreria')?.value">
+                                            {{ tesoreriaRetirarLabel || 'Selecciona una tesorería...' }}
+                                        </span>
+                                    </div>
+                                    <span class="sleek-line"></span>
+                                    <div class="select-panel" *ngIf="isTesoreriaRetirarOpen" (mousedown)="$event.stopPropagation()">
+                                        <button type="button" class="select-option" *ngFor="let t of listaTesoreriaRetirar"
+                                            (mousedown)="setTesoreriaRetirar(t.id, t.text, $event)">
+                                            {{ t.text }}
+                                        </button>
+                                        <div *ngIf="listaTesoreriaRetirar.length === 0" class="select-option select-option-disabled">
+                                            No hay tesorerías disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Monto *</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field">
+                                <span class="field-label text-white">Referencia</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-tag"></i>
+                                    <input formControlName="referencia" class="sleek-control" type="text" placeholder="Ej: DEP-BANCO-001234" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-12">
+                            <label class="field">
+                                <span class="field-label text-white">Observaciones</span>
+                                <div class="input-sleek">
+                                    <i class="fas fa-comment-alt"></i>
+                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-retirar-tesoreria">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-warning" (click)="guardarRetirarTesoreria()" [disabled]="retirarTesoreriaForm.invalid">
+            <i class="fas fa-check"></i> Retirar Efectivo
+        </button>
+    </div>
+</ng-template>

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -10,33 +10,23 @@ export class TransaccionesService {
 
   constructor(private http: HttpClient) { }
 
-  obtenerTransaccionesData(body: {
-    page: number;
-    limit: number;
-    fechaInicio?: string | null;
-    fechaFin?: string | null;
-  }): Observable<any> {
-    return this.http.post(
-      `${environment.API_SECURITY}/transacciones/paginado`,
-      body
-    );
+  obtenerMovimientosPaginados(page: number, limit: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/ledger/${page}/${limit}`);
   }
 
+  // obtenerHistorialMonedero(id: number): Observable<any> {
+  //   return this.http.get(`${environment.API_SECURITY}/ledger/movimientos/monedero/${id}`);
+  // }
 
-  obtenerTransaccion(): Observable<any> {
-    return this.http.get(`${environment.API_SECURITY}/transacciones/list`);
-  }
+  // obtenerSaldoMonedero(id: number): Observable<any> {
+  //   return this.http.get(`${environment.API_SECURITY}/ledger/saldo/monedero/${id}`);
+  // }
 
-  agregarTransaccion(data: any) {
-    return this.http.post(environment.API_SECURITY + '/transacciones', data);
-  }
+  // obtenerSaldoCaja(id: number): Observable<any> {
+  //   return this.http.get(`${environment.API_SECURITY}/ledger/saldo/caja/${id}`);
+  // }
 
-  recargaTransaccion(data: any) {
-    return this.http.post(environment.API_SECURITY + '/transacciones/recarga', data);
-  }
-
-  debitoTransaccion(data: any) {
-    return this.http.post(environment.API_SECURITY + '/transacciones/debito', data);
-  }
-
+  // obtenerSaldoTesoreria(id: number): Observable<any> {
+  //   return this.http.get(`${environment.API_SECURITY}/ledger/saldo/tesoreria/${id}`);
+  // }
 }

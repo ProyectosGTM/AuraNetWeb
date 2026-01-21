@@ -50,4 +50,32 @@ export class TesoreriaService {
   obtenerEstatusTesoreria(): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/catestatustesoreria/list`);
   }
+
+  obtenerTesoreriaAbiertaPorSala(idSala: number): Observable<any> {
+    return this.http.get<any>(`${environment.API_SECURITY}/tesorerias/abierta/creada/sala/${idSala}`);
+  }
+
+  obtenerResumenCompletoTesoreria(idTesoreria: number): Observable<any> {
+    return this.http.get<any>(`${environment.API_SECURITY}/tesorerias/resumen/completo/${idTesoreria}`);
+  }
+
+  obtenerHistorialMovimientosTesoreria(idTesoreria: number): Observable<any> {
+    return this.http.get<any>(`${environment.API_SECURITY}/tesorerias/movimientos/historial/${idTesoreria}`);
+  }
+
+  abrirTesoreria(data: any): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/tesorerias/abrir`, data);
+  }
+
+  cerrarTesoreria(data: any): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/tesorerias/cerrar`, data);
+  }
+
+  reponerTesoreria(data: any): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/tesorerias/reponer`, data);
+  }
+
+  retirarTesoreria(data: any): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/tesorerias/retirar`, data);
+  }
 }

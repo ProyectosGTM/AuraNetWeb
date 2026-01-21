@@ -18,12 +18,8 @@ export class MonederosServices {
     return this.http.get(`${environment.API_SECURITY}/monederos/list`);
   }
 
-  agregarMonedero(data: FormData) {
+  agregarMonedero(data: any) {
     return this.http.post(environment.API_SECURITY + '/monederos', data);
-  }
-
-  agregarTransacciones(data: FormData) {
-    return this.http.post(environment.API_SECURITY + '/transacciones', data);
   }
 
   eliminarMonedero(idMonedero: Number) {
@@ -35,11 +31,7 @@ export class MonederosServices {
   }
 
   actualizarMonedero(idMonedero: number, saveForm: any): Observable<any> {
-    return this.http.put(`${environment.API_SECURITY}/monederos/${idMonedero}`, saveForm);
-  }
-
-  actualizarMonederoForm(saveForm: any): Observable<any> {
-    return this.http.put(`${environment.API_SECURITY}/monederos/`, saveForm);
+    return this.http.patch(`${environment.API_SECURITY}/monederos/${idMonedero}`, saveForm);
   }
 
   private apiUrl = `${environment.API_SECURITY}/monederos`;
@@ -51,17 +43,23 @@ export class MonederosServices {
     );
   }
 
-  reporteExtravio(correo: string, numeroSerie: string): Observable<any> {
-    const body = { correo, numeroSerie };
-    return this.http.post(`${environment.API_SECURITY}/monederos/reporte/extravio`, body);
+  obtenerAfiliados(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/afiliados/list`);
   }
 
-  updateTipoPasajero(idMonedero: number, idTipoPasajero: number): Observable<string> {
-    const url = `${this.apiUrl}/tipo/pasajero/${idMonedero}`;
-    const body = { idTipoPasajero };
-    return this.http.patch(url, body, { responseType: 'text' }).pipe(
-      catchError(error => throwError(() => error))
-    );
+  obtenerEstatusMonedero(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/catestatusmonedero/list`);
   }
 
+  cargarMonedero(data: any): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/pos/monederos/cargar`, data);
+  }
+
+  descargarMonedero(data: any): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/pos/monederos/descargar`, data);
+  }
+
+  consultarSaldoMonedero(numero: string): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/pos/monederos/${numero}`);
+  }
 }

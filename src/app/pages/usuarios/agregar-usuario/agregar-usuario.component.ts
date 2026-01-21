@@ -441,7 +441,7 @@ if (!this.listaSalas || this.listaSalas.length === 0) {
   private logoFile: File | null = null;
 
   private readonly DEFAULT_AVATAR_URL =
-    'https://transmovi.s3.us-east-2.amazonaws.com/imagenes/user_default.png';
+    'https://auranet.s3.us-east-2.amazonaws.com/general/user_default.png';
   private readonly MAX_MB = 3;
 
   private isImage(file: File) {
@@ -643,7 +643,7 @@ if (!this.listaSalas || this.listaSalas.length === 0) {
     payload.fotoPerfil =
       typeof fotoValue === 'string' && fotoValue.trim()
         ? fotoValue
-        : 'https://transmovi.s3.us-east-2.amazonaws.com/imagenes/user_default.png';
+        : 'https://auranet.s3.us-east-2.amazonaws.com/general/user_default.png';
 
     if (!payload.permisosIds || payload.permisosIds.length === 0) {
       this.submitButton = 'Guardar';

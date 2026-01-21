@@ -1,22 +1,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { TesoreriaRoutingModule } from './tesoreria-routing.module';
-import { ListaTesoreriaComponent } from './lista-tesoreria/lista-tesoreria.component';
-import { AgregarTesoreriaComponent } from './agregar-tesoreria/agregar-tesoreria.component';
+import { TransaccionesRoutingModule } from './transacciones-routing.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { ListaTransaccionesComponent } from './lista-transacciones/lista-transacciones.component';
 
 @NgModule({
   declarations: [
-    ListaTesoreriaComponent,
-    AgregarTesoreriaComponent
+    ListaTransaccionesComponent
   ],
   imports: [
     CommonModule,
-    TesoreriaRoutingModule,
+    TransaccionesRoutingModule,
     FormsModule,
     ReactiveFormsModule,
     NgbModalModule,
@@ -27,4 +25,4 @@ import { SharedModule } from 'src/app/shared/shared.module';
     DxSelectBoxModule
   ]
 })
-export class TesoreriaModule { }
+export class TransaccionesModule { }

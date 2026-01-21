@@ -1,9 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { TesoreriaRoutingModule } from './tesoreria-routing.module';
-import { ListaTesoreriaComponent } from './lista-tesoreria/lista-tesoreria.component';
-import { AgregarTesoreriaComponent } from './agregar-tesoreria/agregar-tesoreria.component';
+import { TurnosRoutingModule } from './turnos-routing.module';
+import { ListaTurnosComponent } from './lista-turnos/lista-turnos.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
@@ -11,12 +10,11 @@ import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
   declarations: [
-    ListaTesoreriaComponent,
-    AgregarTesoreriaComponent
+    ListaTurnosComponent
   ],
   imports: [
     CommonModule,
-    TesoreriaRoutingModule,
+    TurnosRoutingModule,
     FormsModule,
     ReactiveFormsModule,
     NgbModalModule,
@@ -27,4 +25,4 @@ import { SharedModule } from 'src/app/shared/shared.module';
     DxSelectBoxModule
   ]
 })
-export class TesoreriaModule { }
+export class TurnosModule { }

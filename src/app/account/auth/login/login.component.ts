@@ -112,20 +112,17 @@ export class LoginComponent implements OnInit {
         confirmButtonText: 'Continuar',
         allowOutsideClick: false,
         allowEscapeKey: false
-      }).then(() => {
-        setTimeout(() => {
-          const permisosIds = (result?.permisos ?? []).map((p: any) => String(p.idPermiso));
-          result.permisos = permisosIds;
+      })
+      const permisosIds = (result?.permisos ?? []).map((p: any) => String(p.idPermiso));
+        result.permisos = permisosIds;
 
-          this.auth.setData(result);
+        this.auth.setData(result);
 
-          let target = '/dashboard';
+        let target = '/dashboard';
 
-          this.router.navigate([target]);
-          this.loading = false;
-          this.textLogin = 'Iniciar Sesión';
-        }, 700);
-      });
+        this.router.navigate([target]);
+        this.loading = false;
+        this.textLogin = 'Iniciar Sesión';
     });
 
   }
