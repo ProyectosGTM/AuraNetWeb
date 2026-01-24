@@ -149,7 +149,7 @@ body[data-sidebar-size="sm"] {
 }
 
 .page-content {
-    padding: calc(#{$header-height} + #{$grid-gutter-width}) calc(#{$grid-gutter-width} / 2) $footer-height
+    padding: calc(#{$header-height} + #{$grid-gutter-width}) calc(#{$grid-gutter-width} / 2) calc(#{$footer-height} + 30px)
         calc(#{$grid-gutter-width} / 2);
 }
 
@@ -332,7 +332,7 @@ body[data-sidebar="dark"] {
 body[data-layout="horizontal"] {
     .page-content {
         margin-top: $header-height;
-        padding: calc(80px + #{$grid-gutter-width}) calc(#{$grid-gutter-width} / 2) $footer-height
+        padding: calc(80px + #{$grid-gutter-width}) calc(#{$grid-gutter-width} / 2) calc(#{$footer-height} + 30px)
             calc(#{$grid-gutter-width} / 2);
 
         @media (max-width: 991.98px) {

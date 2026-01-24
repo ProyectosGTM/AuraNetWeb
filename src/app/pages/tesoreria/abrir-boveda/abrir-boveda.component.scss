@@ -1,0 +1,226 @@
+// Estilos mejorados para abrir boveda
+
+.turnos-section {
+  background: linear-gradient(135deg, rgba(80, 165, 241, 0.08) 0%, rgba(52, 195, 143, 0.05) 100%);
+  border: 2px solid rgba(80, 165, 241, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #50a5f1 0%, #34c38f 100%);
+  }
+}
+
+.turnos-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.turnos-header-content {
+  flex: 1;
+  min-width: 250px;
+}
+
+.turnos-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  i {
+    color: #50a5f1;
+    font-size: 20px;
+    background: rgba(80, 165, 241, 0.2);
+    padding: 8px;
+    border-radius: 8px;
+  }
+}
+
+.turnos-subtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.btn-add-turno {
+  background: linear-gradient(135deg, #50a5f1 0%, #34c38f 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(80, 165, 241, 0.3);
+  white-space: nowrap;
+
+  i {
+    font-size: 16px;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(80, 165, 241, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.turnos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.turno-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+
+  &:hover {
+    border-color: rgba(80, 165, 241, 0.5);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #50a5f1 0%, #34c38f 100%);
+    border-radius: 12px 0 0 12px;
+  }
+}
+
+.turno-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.15);
+}
+
+.turno-number {
+  font-size: 15px;
+  font-weight: 700;
+  color: #50a5f1;
+  background: rgba(80, 165, 241, 0.15);
+  padding: 6px 14px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.turno-item .btn-danger {
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.form-placeholder {
+  background: rgba(241, 196, 15, 0.1);
+  border: 2px dashed rgba(241, 196, 15, 0.4);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  color: #f1c40f;
+  margin-top: 20px;
+  animation: pulse 2s ease-in-out infinite;
+
+  i {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
+    color: #f1c40f;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 500;
+
+    strong {
+      color: #fff;
+      font-weight: 700;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-form {
+    padding: 24px 16px;
+  }
+
+  .action-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+
+  .action-title {
+    font-size: 20px;
+  }
+
+  .card-form-footer {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

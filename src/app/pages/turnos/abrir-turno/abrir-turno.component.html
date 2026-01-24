@@ -1,0 +1,147 @@
+<div class="container-fluid" [@fadeInRight]>
+    <div class="row">
+        <div class="col-12">
+            <div class="title-banner-card shadow-sm">
+                <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="title-icon">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div>
+                            <h4 class="title-title">Abrir Turno de Caja</h4>
+                            <p class="title-subtitle">
+                                Complete los campos para abrir un nuevo turno
+                            </p>
+                        </div>
+                    </div>
+                    <div class="title-actions">
+                        <div class="title-buttons">
+                            <button type="button" (click)="cancelar()" class="btn-title btn-title--secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Volver</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3 gy-4">
+                <div class="col-12">
+                    <div class="card-form">
+                        <div class="card-form-header">
+                            <div class="action-icon-wrapper">
+                                <div class="action-icon action-icon-success">
+                                    <i class="fas fa-door-open"></i>
+                                </div>
+                            </div>
+                            <h4 class="action-title">Abrir Nuevo Turno</h4>
+                            <p class="action-description">Llena los campos para abrir el turno.</p>
+                        </div>
+                        <div class="card-form-body">
+                            <form [formGroup]="abrirTurnoForm">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="field">
+                                            <span class="field-label text-white">
+                                                <i class="fas fa-cash-register"></i>
+                                                Caja *
+                                            </span>
+                                            <div class="input-sleek select-sleek" [class.is-open]="isCajaOpen"
+                                                (mousedown)="toggleCaja($event)">
+                                                <i class="fas fa-cash-register"></i>
+                                                <div class="sleek-control select-display">
+                                                    <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idCaja')?.value">
+                                                        {{ cajaLabel || 'Selecciona una caja...' }}
+                                                    </span>
+                                                </div>
+                                                <span class="sleek-line"></span>
+                                                <div class="select-panel" *ngIf="isCajaOpen" (mousedown)="$event.stopPropagation()">
+                                                    <button type="button" class="select-option" *ngFor="let c of listaCajas"
+                                                        (mousedown)="setCaja(c.id, c.text, $event)">
+                                                        {{ c.text }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text-hint">Elige la caja donde vas a trabajar</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="field">
+                                            <span class="field-label text-white">
+                                                <i class="fas fa-toggle-on"></i>
+                                                Estatus Turno *
+                                            </span>
+                                            <div class="input-sleek select-sleek" [class.is-open]="isEstatusTurnoOpen"
+                                                (mousedown)="toggleEstatusTurno($event)">
+                                                <i class="fas fa-toggle-on"></i>
+                                                <div class="sleek-control select-display">
+                                                    <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idEstatusTurno')?.value">
+                                                        {{ estatusTurnoLabel || 'Selecciona un estatus...' }}
+                                                    </span>
+                                                </div>
+                                                <span class="sleek-line"></span>
+                                                <div class="select-panel" *ngIf="isEstatusTurnoOpen" (mousedown)="$event.stopPropagation()">
+                                                    <button type="button" class="select-option" *ngFor="let e of listaEstatusTurno"
+                                                        (mousedown)="setEstatusTurno(e.id, e.text, $event)">
+                                                        {{ e.text }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text-hint">Tipo de turno que vas a abrir</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="field">
+                                            <span class="field-label text-white">
+                                                <i class="fas fa-wallet"></i>
+                                                Tesorería *
+                                            </span>
+                                            <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaOpen"
+                                                (mousedown)="toggleTesoreria($event)">
+                                                <i class="fas fa-building"></i>
+                                                <div class="sleek-control select-display">
+                                                    <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idTesoreria')?.value">
+                                                        {{ tesoreriaLabel || 'Selecciona una tesorería...' }}
+                                                    </span>
+                                                </div>
+                                                <span class="sleek-line"></span>
+                                                <div class="select-panel" *ngIf="isTesoreriaOpen" (mousedown)="$event.stopPropagation()">
+                                                    <button type="button" class="select-option" *ngFor="let t of listaTesoreria"
+                                                        (mousedown)="setTesoreria(t.id, t.text, $event)">
+                                                        {{ t.text }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text-hint">Tesorería asociada a esta caja</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="field">
+                                            <span class="field-label text-white">
+                                                <i class="fas fa-money-bill-wave"></i>
+                                                Fondo Inicial *
+                                            </span>
+                                            <div class="input-sleek">
+                                                <i class="fas fa-dollar-sign"></i>
+                                                <input formControlName="fondoInicial" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                                                <span class="sleek-line"></span>
+                                            </div>
+                                            <small class="form-text-hint">Dinero inicial que tiene la caja</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-form-footer">
+                            <button type="button" class="btn btn-secondary" (click)="cancelar()">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button type="button" class="btn btn-success" (click)="guardarAbrirTurno()" [disabled]="abrirTurnoForm.invalid">
+                                <i class="fas fa-check"></i> Abrir Turno
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

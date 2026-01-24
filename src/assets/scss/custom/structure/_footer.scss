@@ -7,8 +7,8 @@
     padding: 20px calc(#{$grid-gutter-width} / 2);
     position: absolute;
     right: 0;
+    left: 0;
     color: $footer-color;
-    left: 250px;
     height: $footer-height;
     box-shadow: 0 0px 4px rgba(15,34,58,.12);
 }
@@ -22,7 +22,7 @@
 // Enlarge menu
 body[data-sidebar-size="sm"] {
     .footer {
-        left: $sidebar-collapsed-width;
+        left: 0;
     }
 }
 

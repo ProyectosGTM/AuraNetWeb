@@ -580,3 +580,87 @@
     }
   }
 }
+
+// Badges para Contexto, Origen, Destino, Usuario, Tipo Movimiento, Tipo Saldo
+.tx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.3;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  max-width: 100%;
+
+  i {
+    font-size: 11px;
+    opacity: 0.9;
+    flex-shrink: 0;
+  }
+}
+
+.tx-badge-contexto {
+  background: linear-gradient(135deg, rgba(80, 165, 241, 0.2) 0%, rgba(59, 143, 212, 0.15) 100%);
+  border-color: rgba(80, 165, 241, 0.4);
+  color: #5eb8ff;
+
+  i {
+    color: #50a5f1;
+  }
+}
+
+.tx-badge-origen {
+  background: linear-gradient(135deg, rgba(241, 180, 76, 0.2) 0%, rgba(224, 160, 56, 0.15) 100%);
+  border-color: rgba(241, 180, 76, 0.4);
+  color: #f5c875;
+
+  i {
+    color: #f1b44c;
+  }
+}
+
+.tx-badge-destino {
+  background: linear-gradient(135deg, rgba(52, 195, 143, 0.2) 0%, rgba(42, 168, 118, 0.15) 100%);
+  border-color: rgba(52, 195, 143, 0.4);
+  color: #4dd4a8;
+
+  i {
+    color: #34c38f;
+  }
+}
+
+.tx-badge-usuario {
+  background: linear-gradient(135deg, rgba(153, 102, 255, 0.2) 0%, rgba(128, 90, 213, 0.15) 100%);
+  border-color: rgba(153, 102, 255, 0.4);
+  color: #b38cff;
+
+  i {
+    color: #9966ff;
+  }
+}
+
+.tx-badge-tipo-movimiento {
+  background: linear-gradient(135deg, rgba(0, 207, 232, 0.2) 0%, rgba(0, 180, 205, 0.15) 100%);
+  border-color: rgba(0, 207, 232, 0.4);
+  color: #5dd9ed;
+
+  i {
+    color: #00cfe8;
+  }
+}
+
+.tx-badge-tipo-saldo {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(230, 174, 6, 0.15) 100%);
+  border-color: rgba(255, 193, 7, 0.4);
+  color: #ffda6a;
+
+  i {
+    color: #ffc107;
+  }
+}

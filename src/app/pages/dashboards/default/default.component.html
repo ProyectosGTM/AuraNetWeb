@@ -1,75 +1,415 @@
-<div class="container-fluid" [@fadeInRight]>
+<div class="container-fluid dashboard-page" [@fadeInRight]>
   <div class="row">
     <div class="col-12">
-      <div class="recarga-banner-card shadow-sm">
-        <div class="recarga-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
           <div class="d-flex align-items-center gap-3">
-            <div class="recarga-icon">
-              <i class="fas fa-chart-pie"></i>
+            <div class="title-icon">
+              <i class="fas fa-tachometer-alt"></i>
             </div>
             <div>
-              <h4 class="recarga-title">Tablero de Control</h4>
-              <p class="recarga-subtitle">
-                Visualiza el resumen operativo de tu sistema en tiempo real. Consulta métricas clave como clientes, salas, monederos y más.
+              <h4 class="title-title">Panel de Control Operativo</h4>
+              <p class="title-subtitle">
+                Monitoreo en tiempo real de todas las operaciones del sistema
               </p>
             </div>
           </div>
-          <div class="recarga-tagline">
-            <span class="line"></span>
-            <span class="text">Información siempre actualizada</span>
+          <div class="title-actions">
+            <div class="title-tagline">
+              <span class="line"></span>
+              <span class="text">Actualizado hace 2 minutos</span>
+            </div>
           </div>
         </div>
 
-        <div class="row mt-3 gy-4">
-          <div class="col-md-12">
-            <div class="dashboard-row">
-          <div class="dashboard-item bg-a">
-            <i class="fas fa-industry"></i>
-            <span class="label">Cadenas</span>
-            <span class="value">10</span>
+        <!-- Resumen Principal -->
+        <div class="row mt-3 gy-3">
+          <!-- Tarjeta de Afiliados -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="metric-card metric-card-primary">
+              <div class="metric-content">
+                <div class="metric-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="metric-info">
+                  <div class="metric-label-row">
+                    <span class="metric-label">Afiliados</span>
+                    <span class="metric-badge">
+                      <span class="badge-value">{{ calcularPorcentaje(resumenOperativo.afiliadosActivos, resumenOperativo.totalAfiliados) }}%</span>
+                    </span>
+                  </div>
+                  <div class="metric-value">{{ formatearNumero(resumenOperativo.totalAfiliados) }}</div>
+                  <div class="metric-detail">
+                    <span class="detail-item detail-success">
+                      <i class="fas fa-check-circle"></i>
+                      {{ formatearNumero(resumenOperativo.afiliadosActivos) }} activos
+                    </span>
+                    <span class="detail-item detail-muted">
+                      <i class="fas fa-times-circle"></i>
+                      {{ formatearNumero(resumenOperativo.afiliadosInactivos) }} inactivos
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="dashboard-item bg-b">
-            <i class="fas fa-store"></i>
-            <span class="label">Salas</span>
-            <span class="value">67</span>
+
+          <!-- Tarjeta de Salas -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="metric-card metric-card-success">
+              <div class="metric-content">
+                <div class="metric-icon">
+                  <i class="fas fa-building"></i>
+                </div>
+                <div class="metric-info">
+                  <div class="metric-label-row">
+                    <span class="metric-label">Salas</span>
+                    <span class="metric-badge">
+                      <span class="badge-value">{{ calcularPorcentaje(resumenOperativo.salasOperativas, resumenOperativo.totalSalas) }}%</span>
+                    </span>
+                  </div>
+                  <div class="metric-value">{{ formatearNumero(resumenOperativo.totalSalas) }}</div>
+                  <div class="metric-detail">
+                    <span class="detail-item detail-success">
+                      <i class="fas fa-check-circle"></i>
+                      {{ formatearNumero(resumenOperativo.salasOperativas) }} operativas
+                    </span>
+                    <span class="detail-item detail-warning">
+                      <i class="fas fa-tools"></i>
+                      {{ formatearNumero(resumenOperativo.salasMantenimiento) }} mantenimiento
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="dashboard-item bg-c">
-            <i class="fas fa-gamepad"></i>
-            <span class="label">Máquinas</span>
-            <span class="value">9800</span>
+
+          <!-- Tarjeta de Máquinas -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="metric-card metric-card-warning">
+              <div class="metric-content">
+                <div class="metric-icon">
+                  <i class="fas fa-gamepad"></i>
+                </div>
+                <div class="metric-info">
+                  <div class="metric-label-row">
+                    <span class="metric-label">Máquinas</span>
+                    <span class="metric-badge">
+                      <span class="badge-value">{{ calcularPorcentaje(resumenOperativo.maquinasOperativas, resumenOperativo.totalMaquinas) }}%</span>
+                    </span>
+                  </div>
+                  <div class="metric-value">{{ formatearNumero(resumenOperativo.totalMaquinas) }}</div>
+                  <div class="metric-detail">
+                    <span class="detail-item detail-success">
+                      <i class="fas fa-check-circle"></i>
+                      {{ formatearNumero(resumenOperativo.maquinasOperativas) }} operativas
+                    </span>
+                    <span class="detail-item detail-danger">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      {{ formatearNumero(resumenOperativo.maquinasFueraServicio) }} fuera servicio
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="dashboard-item bg-d">
-            <i class="fas fa-users"></i>
-            <span class="label">Usuarios</span>
-            <span class="value">35</span>
+
+          <!-- Tarjeta de Transacciones -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="metric-card metric-card-danger">
+              <div class="metric-content">
+                <div class="metric-icon">
+                  <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div class="metric-info">
+                  <div class="metric-label-row">
+                    <span class="metric-label">Transacciones Hoy</span>
+                    <span class="metric-badge">
+                      <span class="badge-value">+12%</span>
+                    </span>
+                  </div>
+                  <div class="metric-value">{{ formatearNumero(resumenOperativo.transaccionesHoy) }}</div>
+                  <div class="metric-detail">
+                    <span class="detail-item detail-info">
+                      <i class="fas fa-calendar-day"></i>
+                      Total: {{ formatearNumero(resumenOperativo.totalTransacciones) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="dashboard-row">
-          <div class="dashboard-item bg-e">
-            <i class="fas fa-user"></i>
-            <span class="label">Clientes</span>
-            <span class="value">1900</span>
+        <!-- Segunda Fila de Métricas -->
+        <div class="row mt-3 gy-3">
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="metric-card metric-card-info">
+              <div class="metric-content">
+                <div class="metric-icon">
+                  <i class="fas fa-wallet"></i>
+                </div>
+                <div class="metric-info">
+                  <div class="metric-label-row">
+                    <span class="metric-label">Monederos</span>
+                  </div>
+                  <div class="metric-value">{{ formatearNumero(resumenOperativo.totalMonederos) }}</div>
+                  <div class="metric-detail">
+                    <span class="detail-item detail-success">{{ formatearNumero(resumenOperativo.monederosActivos) }} activos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="dashboard-item bg-f">
-            <i class="fas fa-credit-card"></i>
-            <span class="label">Monederos</span>
-            <span class="value">2500</span>
+
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="metric-card metric-card-primary">
+              <div class="metric-content">
+                <div class="metric-icon">
+                  <i class="fas fa-cash-register"></i>
+                </div>
+                <div class="metric-info">
+                  <div class="metric-label-row">
+                    <span class="metric-label">Cajas</span>
+                  </div>
+                  <div class="metric-value">{{ formatearNumero(resumenOperativo.totalCajas) }}</div>
+                  <div class="metric-detail">
+                    <span class="detail-item detail-success">{{ formatearNumero(resumenOperativo.cajasAbiertas) }} abiertas</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="dashboard-item bg-g">
-            <i class="fas fa-wallet"></i>
-            <span class="label">Saldo no debitado</span>
-            <span class="value">$180000.0</span>
+
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="metric-card metric-card-success">
+              <div class="metric-content">
+                <div class="metric-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-info">
+                  <div class="metric-label-row">
+                    <span class="metric-label">Turnos</span>
+                  </div>
+                  <div class="metric-value">{{ formatearNumero(resumenOperativo.totalTurnos) }}</div>
+                  <div class="metric-detail">
+                    <span class="detail-item detail-info">{{ formatearNumero(resumenOperativo.turnosAbiertos) }} abiertos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="dashboard-item bg-h">
-            <i class="fas fa-gift"></i>
-            <span class="label">Premios entregados</span>
-            <span class="value">$23000.0</span>
+
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="metric-card metric-card-warning">
+              <div class="metric-content">
+                <div class="metric-icon">
+                  <i class="fas fa-vault"></i>
+                </div>
+                <div class="metric-info">
+                  <div class="metric-label-row">
+                    <span class="metric-label">Tesorerías</span>
+                  </div>
+                  <div class="metric-value">{{ formatearNumero(resumenOperativo.totalTesoreria) }}</div>
+                  <div class="metric-detail">
+                    <span class="detail-item detail-success">{{ formatearNumero(resumenOperativo.tesoreriaAbierta) }} abiertas</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Gráficas y Tablas -->
+        <div class="row mt-4 gy-4">
+          <!-- Gráfica de Transacciones por Tipo -->
+          <div class="col-12 col-lg-6">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h5 class="chart-title">
+                  <i class="fas fa-chart-bar"></i>
+                  Análisis de Transacciones por Categoría
+                </h5>
+              </div>
+              <div class="chart-body" style="min-height: 350px;">
+                <dx-chart
+                  [dataSource]="transaccionesPorTipo"
+                  [palette]="[colors.success, colors.primary, colors.warning, colors.danger, colors.info, '#6f42c1', '#e83e8c', '#f1734f']">
+                  <dxi-series
+                    argumentField="argument"
+                    valueField="value"
+                    type="bar">
+                    <dxo-label [visible]="true">
+                    </dxo-label>
+                  </dxi-series>
+                  <dxo-legend [visible]="false">
+                  </dxo-legend>
+                  <dxo-tooltip [enabled]="true">
+                  </dxo-tooltip>
+                  <dxo-argument-axis>
+                    <dxo-label [rotationAngle]="-45"></dxo-label>
+                  </dxo-argument-axis>
+                </dx-chart>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfica de Actividad por Hora -->
+          <div class="col-12 col-lg-6">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h5 class="chart-title">
+                  <i class="fas fa-chart-area"></i>
+                  Actividad por Hora (Hoy)
+                </h5>
+              </div>
+              <div class="chart-body">
+                <dx-chart
+                  [dataSource]="actividadPorHora"
+                  [palette]="[colors.success, colors.primary, colors.warning]">
+                  <dxi-series
+                    argumentField="argument"
+                    valueField="recargas"
+                    name="Recargas"
+                    type="splineArea"
+                    [color]="colors.success">
+                  </dxi-series>
+                  <dxi-series
+                    argumentField="argument"
+                    valueField="juegos"
+                    name="Juegos"
+                    type="splineArea"
+                    [color]="colors.primary">
+                  </dxi-series>
+                  <dxi-series
+                    argumentField="argument"
+                    valueField="premios"
+                    name="Premios"
+                    type="splineArea"
+                    [color]="colors.warning">
+                  </dxi-series>
+                  <dxo-common-series-settings>
+                    <dxo-label [visible]="false"></dxo-label>
+                  </dxo-common-series-settings>
+                  <dxo-legend
+                    [visible]="true"
+                    [horizontalAlignment]="'center'"
+                    [verticalAlignment]="'bottom'">
+                  </dxo-legend>
+                  <dxo-tooltip [enabled]="true"></dxo-tooltip>
+                  <dxo-argument-axis>
+                    <dxo-label [rotationAngle]="-45"></dxo-label>
+                  </dxo-argument-axis>
+                </dx-chart>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfica de Saldo por Sala -->
+          <div class="col-12 col-lg-8">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h5 class="chart-title">
+                  <i class="fas fa-chart-bar"></i>
+                  Saldo Total por Sala (Top 5)
+                </h5>
+              </div>
+              <div class="chart-body">
+                <dx-chart
+                  [dataSource]="saldoPorSala"
+                  [palette]="[colors.info]">
+                  <dxi-series
+                    argumentField="argument"
+                    valueField="value"
+                    type="bar"
+                    [color]="colors.info">
+                    <dxo-label [visible]="true">
+                      <dxo-format type="currency" [precision]="0" [currency]="'MXN'"></dxo-format>
+                    </dxo-label>
+                  </dxi-series>
+                  <dxo-common-series-settings>
+                    <dxo-label [visible]="true"></dxo-label>
+                  </dxo-common-series-settings>
+                  <dxo-legend [visible]="false"></dxo-legend>
+                  <dxo-tooltip [enabled]="true">
+                    <dxo-format type="currency" [precision]="0" [currency]="'MXN'"></dxo-format>
+                  </dxo-tooltip>
+                </dx-chart>
+              </div>
+            </div>
+          </div>
+
+          <!-- Movimientos Recientes -->
+          <div class="col-12 col-lg-4">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h5 class="chart-title">
+                  <i class="fas fa-history"></i>
+                  Movimientos Recientes
+                </h5>
+              </div>
+              <div class="chart-body">
+                <div class="movimientos-list">
+                  <div class="movimiento-item" *ngFor="let mov of movimientosRecientes">
+                    <div class="movimiento-icon" [style.background-color]="mov.color + '20'" [style.color]="mov.color">
+                      <i [class]="'fas ' + mov.icon"></i>
+                    </div>
+                    <div class="movimiento-content">
+                      <div class="movimiento-tipo">{{ mov.tipo }}</div>
+                      <div class="movimiento-sala">{{ mov.sala }}</div>
+                    </div>
+                    <div class="movimiento-details">
+                      <div class="movimiento-monto" [style.color]="mov.color">
+                        {{ formatearMoneda(mov.monto) }}
+                      </div>
+                      <div class="movimiento-hora">{{ mov.hora }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Salas -->
+          <div class="col-12">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h5 class="chart-title">
+                  <i class="fas fa-trophy"></i>
+                  Top 5 Salas por Actividad
+                </h5>
+              </div>
+              <div class="chart-body">
+                <div class="top-salas-grid">
+                  <div class="top-sala-item" *ngFor="let sala of topSalas; let i = index">
+                    <div class="top-sala-rank">
+                      <span class="rank-number">#{{ i + 1 }}</span>
+                    </div>
+                    <div class="top-sala-info">
+                      <div class="top-sala-name">{{ sala.nombre }}</div>
+                      <div class="top-sala-stats">
+                        <span class="stat-badge">
+                          <i class="fas fa-exchange-alt"></i>
+                          {{ formatearNumero(sala.transacciones) }} transacciones
+                        </span>
+                        <span class="stat-badge">
+                          <i class="fas fa-coins"></i>
+                          {{ formatearMoneda(sala.saldo) }}
+                        </span>
+                        <span class="stat-badge">
+                          <i class="fas fa-gamepad"></i>
+                          {{ formatearNumero(sala.maquinas) }} máquinas
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+

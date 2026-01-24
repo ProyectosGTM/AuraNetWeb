@@ -53,6 +53,8 @@
 .main-content {
     margin-left: $sidebar-width;
     overflow: hidden;
+    position: relative;
+    min-height: 100vh;
 
     .content {
         padding: 0 15px 10px 15px;
@@ -566,12 +568,14 @@ body[data-sidebar-size="small"] {
     .main-content {
         margin-left: $sidebar-width-sm;
     }
-    #page-topbar,
-    .footer {
+    #page-topbar {
         left: $sidebar-width-sm;
         @media (max-width: 991.98px) {
             left: 0;
         }
+    }
+    .footer {
+        left: 0;
     }
 
     #sidebar-menu {
@@ -634,9 +638,11 @@ body[data-sidebar-size="small"] {
                 }
             }
         }
-        #page-topbar,
-        .footer {
+        #page-topbar {
             left: $sidebar-collapsed-width;
+        }
+        .footer {
+            left: 0;
         }
     }
 }

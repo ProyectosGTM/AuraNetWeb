@@ -9,6 +9,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { NgbDropdownModule, NgbTooltipModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap'
 
 import { SimplebarAngularModule } from 'simplebar-angular';
+import { DxChartModule } from 'devextreme-angular';
 
 import { DefaultComponent } from './default/default.component';
 
@@ -24,7 +25,8 @@ import { DefaultComponent } from './default/default.component';
     NgbNavModule,
     NgApexchartsModule,
     SimplebarAngularModule,
-    UIModule
+    UIModule,
+    DxChartModule
   ],
 })
 export class DashboardsModule { }

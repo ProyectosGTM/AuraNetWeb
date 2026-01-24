@@ -315,7 +315,8 @@
 
   padding: clamp(10px, 1.2vw, 16px);
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 
   // Estilos para el header compacto
   .title-banner-card {
@@ -547,13 +548,15 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 16px;
+  overflow: visible;
+  position: relative;
 }
 
 .info-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.3s ease;
   height: 100%;
 
@@ -571,6 +574,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 1;
+  border-radius: 16px 16px 0 0;
 }
 
 .info-card-icon {
@@ -620,23 +626,255 @@
 
 .info-card-body {
   padding: 16px;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+// Asegurar que el field y el select permitan overflow
+.info-card-body .field {
+  position: relative;
+  z-index: 10;
+  overflow: visible;
+}
+
+// Estilos para DevExtreme SelectBox
+::ng-deep {
+  .dx-select-box-custom {
+    width: 100% !important;
+    min-height: 50px !important;
+    
+    .dx-textbox {
+      min-height: 50px !important;
+    }
+    
+    .dx-textbox-input {
+      background: rgba(13, 18, 29, 0.35) !important;
+      border: 1px solid rgba(108, 117, 125, 0.35) !important;
+      border-radius: 14px !important;
+      color: #ffffff !important;
+      padding: 20px 14px 17px 44px !important;
+      min-height: 50px !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 14px !important;
+      transition: all 0.25s ease !important;
+      
+      &:focus {
+        background: rgba(27, 33, 51, 0.65) !important;
+        border-color: rgba(106, 140, 255, 0.7) !important;
+        box-shadow: 0 0 0 3px rgba(106, 140, 255, 0.14), 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+      }
+      
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.45) !important;
+      }
+    }
+    
+    .dx-textbox-container {
+      position: relative;
+    }
+    
+    // Icono para caja
+    &.dx-select-box-caja .dx-textbox-container::before {
+      content: '\f1b0'; // Icono de caja registradora
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #e40041;
+      opacity: 0.95;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    // Icono para monedero
+    &.dx-select-box-monedero .dx-textbox-container::before {
+      content: '\f555'; // Icono de wallet
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #e40041;
+      opacity: 0.95;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    .dx-dropdowneditor-icon {
+      color: rgba(255, 255, 255, 0.65) !important;
+      right: 14px !important;
+    }
+    
+    &.dx-state-focused {
+      .dx-textbox-input {
+        background: rgba(27, 33, 51, 0.65) !important;
+        border-color: rgba(106, 140, 255, 0.7) !important;
+        box-shadow: 0 0 0 3px rgba(106, 140, 255, 0.14), 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+      }
+    }
+  }
+  
+  // Estilos para el dropdown de DevExtreme
+  .dx-popup-wrapper {
+    z-index: 10000 !important;
+  }
+  
+  .dx-overlay-content {
+    background: rgba(13, 18, 29, 0.96) !important;
+    border: 1px solid rgba(108, 117, 125, 0.35) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+  
+  .dx-list {
+    background: transparent !important;
+    
+    .dx-list-item {
+      color: rgba(255, 255, 255, 0.9) !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 12px !important;
+      padding: 6px 10px !important;
+      border-radius: 8px !important;
+      transition: background 0.15s ease !important;
+      
+      &:hover {
+        background: rgba(228, 0, 65, 0.2) !important;
+      }
+      
+      &.dx-state-selected {
+        background: rgba(228, 0, 65, 0.3) !important;
+      }
+    }
+  }
+  
+  .dx-scrollable-scrollbar {
+    .dx-scrollbar-scrollable {
+      .dx-scrollbar-scroll {
+        background: rgba(228, 0, 65, 0.55) !important;
+        
+        &:hover {
+          background: rgba(228, 0, 65, 0.75) !important;
+        }
+      }
+    }
+  }
+}
+
+// Asegurar que los contenedores padres no corten el select
+.recarga-page .row,
+.recarga-page .col-12,
+.recarga-page .title-banner-card,
+.recarga-page .recarga-main-card {
+  overflow: visible;
+  position: relative;
+}
+
+// Asegurar que las cards no corten el select
+.info-card {
+  position: relative;
+  overflow: visible !important;
+  isolation: isolate; // Crea un nuevo contexto de apilamiento
+}
+
+// Contenedor especial para el select que permite overflow
+.info-card-body {
+  // Asegurar que el body de la card no corte nada
+  position: relative;
+  z-index: 1;
+}
+
+// Mejorar la visualización del select cuando está abierto
+.select-sleek.is-open {
+  z-index: 10001;
+}
+
+.select-sleek.is-open .select-panel {
+  z-index: 10002 !important;
+}
+
+// Estilo para opción deshabilitada cuando no hay datos
+.select-option-disabled {
+  color: rgba(255, 255, 255, 0.5) !important;
+  cursor: not-allowed !important;
+  font-style: italic;
+  
+  &:hover {
+    background: transparent !important;
+  }
 }
 
 .info-display {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(52, 195, 143, 0.5), transparent);
+    animation: borderGlow 1s ease-out 0.3s both;
+  }
+}
+
+@keyframes borderGlow {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  transition: all 0.3s ease;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: linear-gradient(180deg, #5b73e8, #34c38f);
+    border-radius: 2px;
+    transition: height 0.4s ease 0.5s;
+  }
 
   &:last-child {
     border-bottom: none;
+  }
+  
+  &:hover {
+    padding-left: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    
+    &::before {
+      left: 0;
+      height: 60%;
+    }
   }
 }
 
@@ -646,10 +884,27 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: all 0.3s ease;
 
   i {
     font-size: 14px;
     color: #5b73e8;
+    transition: all 0.3s ease;
+    animation: iconPulse 0.6s ease-out 0.4s both;
+  }
+}
+
+@keyframes iconPulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -657,14 +912,49 @@
   font-size: 14px;
   font-weight: 500;
   color: #fff;
+  transition: all 0.3s ease;
+  animation: valueFadeIn 0.5s ease-out 0.3s both;
+}
+
+@keyframes valueFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Efecto hover en las filas
+.info-row:hover {
+  .info-label {
+    color: #ffffff;
+    transform: translateX(5px);
+    
+    i {
+      color: #34c38f;
+      transform: scale(1.1);
+    }
+  }
+  
+  .info-value {
+    color: #34c38f;
+    transform: translateX(-5px);
+    font-weight: 600;
+  }
 }
 
 .input-monto-large {
+  padding: 20px 14px 17px 44px !important;
+  min-height: 50px !important;
+  
   .sleek-control {
     font-size: 20px;
     font-weight: 600;
     text-align: center;
-    padding: 12px;
+    padding: 0 !important;
   }
 }
 

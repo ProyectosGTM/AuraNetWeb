@@ -4,10 +4,9 @@ import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
-import { forkJoin, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
-import { SalaService } from 'src/app/shared/services/salas.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -36,7 +35,6 @@ export class ListaTesoreriaComponent {
 
   @ViewChild('modalResumen', { static: false }) modalResumen!: TemplateRef<any>;
   @ViewChild('modalHistorial', { static: false }) modalHistorial!: TemplateRef<any>;
-  @ViewChild('modalAbrirTesoreria', { static: false }) modalAbrirTesoreria!: TemplateRef<any>;
   @ViewChild('modalCerrarTesoreria', { static: false }) modalCerrarTesoreria!: TemplateRef<any>;
   @ViewChild('modalReponerTesoreria', { static: false }) modalReponerTesoreria!: TemplateRef<any>;
   @ViewChild('modalRetirarTesoreria', { static: false }) modalRetirarTesoreria!: TemplateRef<any>;
@@ -44,12 +42,6 @@ export class ListaTesoreriaComponent {
   public resumenData: any = null;
   public historialData: any[] = [];
   private modalRef?: NgbModalRef;
-
-  // Formulario para abrir tesorería
-  abrirTesoreriaForm: FormGroup;
-  public listaSalas: any[] = [];
-  isSalaAbrirOpen = false;
-  salaAbrirLabel = '';
 
   // Formulario para cerrar tesorería
   cerrarTesoreriaForm: FormGroup;
@@ -74,15 +66,9 @@ export class ListaTesoreriaComponent {
     private tesoreriaService: TesoreriaService,
     private modalService: NgbModal,
     private fb: FormBuilder,
-    private salasService: SalaService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
-    this.abrirTesoreriaForm = this.fb.group({
-      idSala: [null, Validators.required],
-      fondoInicial: ['', [Validators.required, Validators.min(0.01)]],
-      observaciones: ['']
-    });
     this.cerrarTesoreriaForm = this.fb.group({
       idTesoreria: [null, Validators.required],
       fondoContado: ['', [Validators.required, Validators.min(0.01)]],
@@ -540,34 +526,7 @@ export class ListaTesoreriaComponent {
   }
 
   abrirTesoreria() {
-    // Cargar lista de salas
-    this.salasService.obtenerSalas().subscribe({
-      next: (response) => {
-        this.listaSalas = (response.data || []).map((s: any) => ({
-          ...s,
-          id: Number(s.id),
-          text: `${s.nombreSala || ''}${s.nombreComercialSala ? ' - ' + s.nombreComercialSala : ''}`.trim() || 'Sala sin nombre'
-        }));
-
-        this.modalRef = this.modalService.open(this.modalAbrirTesoreria, {
-          size: 'lg',
-          windowClass: 'modal-holder modal-abrir-tesoreria',
-          centered: true,
-          backdrop: 'static',
-          keyboard: true
-        });
-      },
-      error: (error) => {
-        Swal.fire({
-          title: '¡Error!',
-          text: 'No se pudieron cargar las salas disponibles.',
-          icon: 'error',
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-      }
-    });
+    this.router.navigate(['/tesoreria/abrir-boveda']);
   }
 
   @HostListener('document:mousedown', ['$event'])
@@ -579,67 +538,9 @@ export class ListaTesoreriaComponent {
   }
 
   private closeSelects() {
-    this.isSalaAbrirOpen = false;
     this.isTesoreriaCerrarOpen = false;
     this.isTesoreriaReponerOpen = false;
     this.isTesoreriaRetirarOpen = false;
-  }
-
-  toggleSalaAbrir(event: any) {
-    event.stopPropagation();
-    this.isSalaAbrirOpen = !this.isSalaAbrirOpen;
-  }
-
-  setSalaAbrir(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.abrirTesoreriaForm.patchValue({ idSala: id });
-    this.salaAbrirLabel = label;
-    this.isSalaAbrirOpen = false;
-  }
-
-  guardarAbrirTesoreria() {
-    if (this.abrirTesoreriaForm.invalid) {
-      Swal.fire({
-        title: '¡Atención!',
-        text: 'Por favor complete todos los campos requeridos.',
-        icon: 'warning',
-        background: '#0d121d',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'Confirmar',
-      });
-      return;
-    }
-
-    const payload = {
-      idSala: this.abrirTesoreriaForm.value.idSala,
-      fondoInicial: Number(this.abrirTesoreriaForm.value.fondoInicial),
-      observaciones: this.abrirTesoreriaForm.value.observaciones || null
-    };
-
-    this.tesoreriaService.abrirTesoreria(payload).subscribe({
-      next: (response) => {
-        Swal.fire({
-          title: '¡Operación Exitosa!',
-          text: 'Se ha abierto la tesorería de manera exitosa.',
-          icon: 'success',
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-        this.cerrarModal();
-        this.setupDataSource();
-      },
-      error: (error) => {
-        Swal.fire({
-          title: '¡Error!',
-          text: error.error || 'No se pudo abrir la tesorería.',
-          icon: 'error',
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-      }
-    });
   }
 
   cerrarTesoreria() {
@@ -931,9 +832,6 @@ export class ListaTesoreriaComponent {
   cerrarModal() {
     if (this.modalRef) {
       this.modalRef.close();
-      this.abrirTesoreriaForm.reset();
-      this.salaAbrirLabel = '';
-      this.isSalaAbrirOpen = false;
       this.cerrarTesoreriaForm.reset();
       this.tesoreriaCerrarLabel = '';
       this.isTesoreriaCerrarOpen = false;

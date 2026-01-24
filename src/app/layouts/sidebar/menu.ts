@@ -45,7 +45,7 @@ export const MENU: MenuItem[] = [
     },    
 
     // --- NO AGRUPADOS (se quedan solos)
-    { id: 36, label: 'Tesoreria', icon: 'uil-wallet', link: '/tesoreria' },
+    { id: 36, label: 'Boveda', icon: 'uil-wallet', link: '/tesoreria' },
     { id: 38, label: 'Ap. Turnos', icon: 'uil-clock', link: '/turnos' },
     { id: 11, label: 'Monederos', icon: 'uil-moneybag-alt', link: '/monederos' },
     { id: 41, label: 'Transacciones', icon: 'uil-exchange-alt', link: '/transacciones' },

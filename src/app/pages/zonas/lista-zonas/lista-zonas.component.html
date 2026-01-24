@@ -37,7 +37,7 @@
                 </div>
                 <div class="row mt-3 gy-4">
                     <dx-data-grid #gridContainer [dataSource]="listaZonas" id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
-                        [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="'true'"[keyExpr]="'idZona'" [width]="'100%'"
+                        [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="'true'"[keyExpr]="'id'" [width]="'100%'"
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
                         [pager]="{ 
                             showPageSizeSelector: true, 
@@ -55,19 +55,18 @@
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
                         <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="180"></dxi-column>
                         <dxi-column dataField="nombreZona" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="descripcionZona" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Nombre" cellTemplate="tamanos" alignment="center" dataType="string" [allowSearch]="true">
-                            <div *dxTemplate="let r of 'tamanos'">
-                                <div>
-                                    <span>{{ r.data.altoMetrosZona }} x {{ r.data.anchoMetrosZona }} mts</span>
-                                </div>
+                        <dxi-column dataField="descripcionZona" caption="Descripción" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Tamaño" cellTemplate="tamanos" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="areaMetrosCuadradosZona" caption="Área (m²)" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="capacidadMaximaPersonas" caption="Cap. Personas" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="capacidadMaximaMaquinas" caption="Cap. Máquinas" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreTipoZona" caption="Tipo Zona" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <div *dxTemplate="let r of 'tamanos'">
+                            <div>
+                                <span>{{ r.data.altoMetrosZona }} x {{ r.data.anchoMetrosZona }} mts</span>
                             </div>
-                        </dxi-column>
-                        <dxi-column dataField="areaMetrosCuadradosZona" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="capacidadMaximaPersonas" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="capacidadMaximaMaquinas" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreSala" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreTipoZona" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        </div>
                         <dxo-export [enabled]="false" [allowExportSelectedData]="true"
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
@@ -85,7 +84,7 @@
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
-                                    (click)="actualizarZona(row.data.idZona)">
+                                    (click)="actualizarZona(row.data.id)">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>

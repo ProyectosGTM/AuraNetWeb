@@ -8,9 +8,9 @@
                             <i class="fas fa-wallet"></i>
                         </div>
                         <div>
-                            <h4 class="title-title">Administración de Tesorería</h4>
+                            <h4 class="title-title">Administración de Boveda</h4>
                             <p class="title-subtitle">
-                                Control y configuración de los registros de tesorería
+                                Control y configuración de los registros de boveda
                             </p>
                         </div>
                     </div>
@@ -51,8 +51,8 @@
                                         <i class="fas fa-door-open"></i>
                                     </div>
                                     <div class="btn-action-text">
-                                        <span class="btn-action-label">Abrir Tesorería</span>
-                                        <span class="btn-action-desc">Abrir tesorería del día</span>
+                                        <span class="btn-action-label">Abrir Boveda</span>
+                                        <span class="btn-action-desc">Abrir boveda del día</span>
                                     </div>
                                 </button>
                                 <button (click)="cerrarTesoreria()" type="button" class="btn-action-large btn-action-large-danger">
@@ -60,8 +60,8 @@
                                         <i class="fas fa-door-closed"></i>
                                     </div>
                                     <div class="btn-action-text">
-                                        <span class="btn-action-label">Cerrar Tesorería</span>
-                                        <span class="btn-action-desc">Cerrar tesorería del día</span>
+                                        <span class="btn-action-label">Cerrar Boveda</span>
+                                        <span class="btn-action-desc">Cerrar boveda del día</span>
                                     </div>
                                 </button>
                                 <button (click)="reponerTesoreria()" type="button" class="btn-action-large btn-action-large-success">
@@ -70,7 +70,7 @@
                                     </div>
                                     <div class="btn-action-text">
                                         <span class="btn-action-label">Reponer Efectivo</span>
-                                        <span class="btn-action-desc">Reponer efectivo a la tesorería</span>
+                                        <span class="btn-action-desc">Reponer efectivo a la boveda</span>
                                     </div>
                                 </button>
                                 <button (click)="retirarTesoreria()" type="button" class="btn-action-large btn-action-large-warning">
@@ -79,7 +79,7 @@
                                     </div>
                                     <div class="btn-action-text">
                                         <span class="btn-action-label">Retirar Efectivo</span>
-                                        <span class="btn-action-desc">Retirar efectivo de la tesorería</span>
+                                        <span class="btn-action-desc">Retirar efectivo de la boveda</span>
                                     </div>
                                 </button>
                             </div>
@@ -107,27 +107,18 @@
                         <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fechaFormateada" caption="Fecha" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fondoInicialFormateado" caption="Fondo Inicial" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Estatus Tesorería" cellTemplate="EstatusTesoreria" alignment="center" dataType="string"></dxi-column>
+                        <dxi-column caption="Estatus Boveda" cellTemplate="EstatusTesoreria" alignment="center" dataType="string"></dxi-column>
                         <dxi-column dataField="fondoContadoFormateado" caption="Fondo Contado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fechaAperturaFormateada" caption="Fecha Apertura" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreCompletoUsuarioApertura" caption="Usuario Apertura" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fechaCierreFormateada" caption="Fecha Cierre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreCompletoUsuarioCierre" caption="Usuario Cierre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string">
-                            <div *dxTemplate="let f of 'est'">
-                                <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
-                                    Activo
-                                </span>
-                                <span *ngIf="f.data.estatus !== 1" class="estatus estatus-inactivo">
-                                    Inactivo
-                                </span>
-                            </div>
-                        </dxi-column>
+                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string"></dxi-column>
                         <dxi-column dataField="nombreCompletoCliente" caption="Cliente" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
                         <dxi-column dataField="rfcCliente" caption="RFC Cliente" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
                         <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
                         <dxi-column dataField="observaciones" caption="Observaciones" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
-                        <dxi-column dataField="codigoEstatusTesoreria" caption="Código Estatus Tesorería" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column dataField="codigoEstatusTesoreria" caption="Código Estatus Boveda" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
                         <dxi-column dataField="fechaCreacion" caption="Fecha Creación" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'" [visible]="false"></dxi-column>
                         <dxi-column dataField="fechaActualizacion" caption="Fecha Actualización" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'" [visible]="false"></dxi-column>
                         <dxo-export [enabled]="false" [allowExportSelectedData]="true"
@@ -166,6 +157,14 @@
                                 {{ row.data.estatusTesoreriaTexto }}
                             </span>
                         </div>
+                        <div *dxTemplate="let f of 'est'">
+                            <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
+                                Activo
+                            </span>
+                            <span *ngIf="f.data.estatus !== 1" class="estatus estatus-inactivo">
+                                Inactivo
+                            </span>
+                        </div>
                     </dx-data-grid>
                 </div>
             </div>
@@ -178,7 +177,7 @@
     <div class="modal-header modal-header-resumen">
         <h5 class="modal-title">
             <i class="fas fa-chart-line"></i>
-            <span>Resumen de Tesorería</span>
+            <span>Resumen de Boveda</span>
         </h5>
         <button type="button" class="btn-close" aria-label="Close" (click)="cerrarResumen()">
             <span aria-hidden="true">&times;</span>
@@ -263,7 +262,7 @@
             <div class="empty-icon">
                 <i class="fas fa-inbox"></i>
             </div>
-            <div class="empty-text">No hay movimientos registrados para esta tesorería.</div>
+            <div class="empty-text">No hay movimientos registrados para esta boveda.</div>
         </div>
         <div *ngIf="historialData.length > 0" class="movimientos-list">
             <div class="movimiento-item" *ngFor="let m of historialData">
@@ -288,95 +287,12 @@
     </div>
 </ng-template>
 
-<!-- Modal Abrir Tesorería -->
-<ng-template #modalAbrirTesoreria let-modal>
-    <div class="modal-header modal-header-abrir-tesoreria">
-        <h5 class="modal-title">
-            <i class="fas fa-door-open"></i>
-            <span>Abrir Tesorería del Día</span>
-        </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    <div class="modal-body modal-body-abrir-tesoreria">
-        <div class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-success">
-                    <i class="fas fa-door-open"></i>
-                </div>
-            </div>
-            <h4 class="action-title">Abrir Tesorería</h4>
-            <p class="action-description">Complete los siguientes campos para abrir la tesorería del día. <strong>Recuerde:</strong> Solo puede existir UNA tesorería abierta por sala por día y debe abrirse ANTES de que los cajeros abran sus turnos.</p>
-            <div class="action-form">
-                <form [formGroup]="abrirTesoreriaForm">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="field">
-                                <span class="field-label text-white">Sala *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isSalaAbrirOpen"
-                                    (mousedown)="toggleSalaAbrir($event)">
-                                    <i class="fas fa-building"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!abrirTesoreriaForm.get('idSala')?.value">
-                                            {{ salaAbrirLabel || 'Selecciona una sala...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isSalaAbrirOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let s of listaSalas"
-                                            (mousedown)="setSalaAbrir(s.id, s.text, $event)">
-                                            {{ s.text }}
-                                        </button>
-                                        <div *ngIf="listaSalas.length === 0" class="select-option select-option-disabled">
-                                            No hay salas disponibles
-                                        </div>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Fondo Inicial *</span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    <input formControlName="fondoInicial" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text text-muted">Representa el efectivo físico en bóveda</small>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Observaciones</span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-comment-alt"></i>
-                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="modal-footer modal-footer-abrir-tesoreria">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fas fa-times"></i> Cancelar
-        </button>
-        <button type="button" class="btn btn-success" (click)="guardarAbrirTesoreria()" [disabled]="abrirTesoreriaForm.invalid">
-            <i class="fas fa-check"></i> Abrir Tesorería
-        </button>
-    </div>
-</ng-template>
-
-<!-- Modal Cerrar Tesorería -->
+<!-- Modal Cerrar Boveda -->
 <ng-template #modalCerrarTesoreria let-modal>
     <div class="modal-header modal-header-cerrar-tesoreria">
         <h5 class="modal-title">
             <i class="fas fa-door-closed"></i>
-            <span>Cerrar Tesorería del Día</span>
+            <span>Cerrar Boveda del Día</span>
         </h5>
         <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
@@ -389,20 +305,23 @@
                     <i class="fas fa-door-closed"></i>
                 </div>
             </div>
-            <h4 class="action-title">Cerrar Tesorería</h4>
-            <p class="action-description">Complete los siguientes campos para cerrar la tesorería del día. <strong>Recuerde:</strong> NO se puede cerrar si hay turnos de caja abiertos. El fondo contado se comparará con el saldo calculado del sistema para determinar si está CUADRADO O DESCUADRADO.</p>
+            <h4 class="action-title">Cerrar Boveda</h4>
+            <p class="action-description">Llena los campos para cerrar la boveda. No debe haber turnos abiertos.</p>
             <div class="action-form">
                 <form [formGroup]="cerrarTesoreriaForm">
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="field">
-                                <span class="field-label text-white">Tesorería *</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-wallet"></i>
+                                    Boveda *
+                                </span>
                                 <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaCerrarOpen"
                                     (mousedown)="toggleTesoreriaCerrar($event)">
                                     <i class="fas fa-wallet"></i>
                                     <div class="sleek-control select-display">
                                         <span class="select-value" [class.placeholder]="!cerrarTesoreriaForm.get('idTesoreria')?.value">
-                                            {{ tesoreriaCerrarLabel || 'Selecciona una tesorería abierta...' }}
+                                            {{ tesoreriaCerrarLabel || 'Selecciona una boveda abierta...' }}
                                         </span>
                                     </div>
                                     <span class="sleek-line"></span>
@@ -412,31 +331,39 @@
                                             {{ t.text }}
                                         </button>
                                         <div *ngIf="listaTesoreriaAbierta.length === 0" class="select-option select-option-disabled">
-                                            No hay tesorerías abiertas disponibles
+                                            No hay bovedas abiertas disponibles
                                         </div>
                                     </div>
                                 </div>
+                                <small class="form-text-hint">Elige la boveda que quieres cerrar</small>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
-                                <span class="field-label text-white">Fondo Contado *</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-calculator"></i>
+                                    Fondo Contado *
+                                </span>
                                 <div class="input-sleek">
                                     <i class="fas fa-dollar-sign"></i>
                                     <input formControlName="fondoContado" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
                                     <span class="sleek-line"></span>
                                 </div>
-                                <small class="form-text text-muted">Se comparará con el saldo calculado del sistema</small>
+                                <small class="form-text-hint">Dinero físico que contaste al final del día</small>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
-                                <span class="field-label text-white">Observaciones</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-comment-alt"></i>
+                                    Observaciones
+                                </span>
                                 <div class="input-sleek">
                                     <i class="fas fa-comment-alt"></i>
                                     <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
                                     <span class="sleek-line"></span>
                                 </div>
+                                <small class="form-text-hint">Notas adicionales sobre el cierre (opcional)</small>
                             </label>
                         </div>
                     </div>
@@ -449,17 +376,17 @@
             <i class="fas fa-times"></i> Cancelar
         </button>
         <button type="button" class="btn btn-danger" (click)="guardarCerrarTesoreria()" [disabled]="cerrarTesoreriaForm.invalid">
-            <i class="fas fa-check"></i> Cerrar Tesorería
+            <i class="fas fa-check"></i> Cerrar Boveda
         </button>
     </div>
 </ng-template>
 
-<!-- Modal Reponer Tesorería -->
+<!-- Modal Reponer Boveda -->
 <ng-template #modalReponerTesoreria let-modal>
     <div class="modal-header modal-header-reponer-tesoreria">
         <h5 class="modal-title">
             <i class="fas fa-arrow-up"></i>
-            <span>Reponer Efectivo a la Tesorería</span>
+            <span>Reponer Efectivo a la Boveda</span>
         </h5>
         <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
@@ -473,19 +400,22 @@
                 </div>
             </div>
             <h4 class="action-title">Reponer Efectivo</h4>
-            <p class="action-description">Complete los siguientes campos para reponer efectivo a la tesorería. Útil cuando llega camión de valores o transferencia de otra sala.</p>
+            <p class="action-description">Agrega dinero a la boveda.</p>
             <div class="action-form">
                 <form [formGroup]="reponerTesoreriaForm">
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="field">
-                                <span class="field-label text-white">Tesorería *</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-wallet"></i>
+                                    Boveda *
+                                </span>
                                 <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaReponerOpen"
                                     (mousedown)="toggleTesoreriaReponer($event)">
                                     <i class="fas fa-wallet"></i>
                                     <div class="sleek-control select-display">
                                         <span class="select-value" [class.placeholder]="!reponerTesoreriaForm.get('idTesoreria')?.value">
-                                            {{ tesoreriaReponerLabel || 'Selecciona una tesorería...' }}
+                                            {{ tesoreriaReponerLabel || 'Selecciona una boveda...' }}
                                         </span>
                                     </div>
                                     <span class="sleek-line"></span>
@@ -495,40 +425,53 @@
                                             {{ t.text }}
                                         </button>
                                         <div *ngIf="listaTesoreriaReponer.length === 0" class="select-option select-option-disabled">
-                                            No hay tesorerías disponibles
+                                            No hay bovedas disponibles
                                         </div>
                                     </div>
                                 </div>
+                                <small class="form-text-hint">Elige la boveda donde vas a agregar dinero</small>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
-                                <span class="field-label text-white">Monto *</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Monto *
+                                </span>
                                 <div class="input-sleek">
                                     <i class="fas fa-dollar-sign"></i>
                                     <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
                                     <span class="sleek-line"></span>
                                 </div>
+                                <small class="form-text-hint">Cantidad de dinero que vas a agregar</small>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
-                                <span class="field-label text-white">Referencia</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-hashtag"></i>
+                                    Referencia
+                                </span>
                                 <div class="input-sleek">
                                     <i class="fas fa-tag"></i>
                                     <input formControlName="referencia" class="sleek-control" type="text" placeholder="Ej: REMESA-2024-001234" />
                                     <span class="sleek-line"></span>
                                 </div>
+                                <small class="form-text-hint">Número de referencia de la operación (opcional)</small>
                             </label>
                         </div>
                         <div class="col-12">
                             <label class="field">
-                                <span class="field-label text-white">Observaciones</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-comment-alt"></i>
+                                    Observaciones
+                                </span>
                                 <div class="input-sleek">
                                     <i class="fas fa-comment-alt"></i>
                                     <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
                                     <span class="sleek-line"></span>
                                 </div>
+                                <small class="form-text-hint">Notas adicionales sobre la reposición (opcional)</small>
                             </label>
                         </div>
                     </div>
@@ -546,12 +489,12 @@
     </div>
 </ng-template>
 
-<!-- Modal Retirar Tesorería -->
+<!-- Modal Retirar Boveda -->
 <ng-template #modalRetirarTesoreria let-modal>
     <div class="modal-header modal-header-retirar-tesoreria">
         <h5 class="modal-title">
             <i class="fas fa-arrow-down"></i>
-            <span>Retirar Efectivo de la Tesorería</span>
+            <span>Retirar Efectivo de la Boveda</span>
         </h5>
         <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
@@ -565,19 +508,22 @@
                 </div>
             </div>
             <h4 class="action-title">Retirar Efectivo</h4>
-            <p class="action-description">Complete los siguientes campos para retirar efectivo de la tesorería. Útil para depósitos bancarios o envío a otras sucursales.</p>
+            <p class="action-description">Saca dinero de la boveda.</p>
             <div class="action-form">
                 <form [formGroup]="retirarTesoreriaForm">
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="field">
-                                <span class="field-label text-white">Tesorería *</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-wallet"></i>
+                                    Boveda *
+                                </span>
                                 <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaRetirarOpen"
                                     (mousedown)="toggleTesoreriaRetirar($event)">
                                     <i class="fas fa-wallet"></i>
                                     <div class="sleek-control select-display">
                                         <span class="select-value" [class.placeholder]="!retirarTesoreriaForm.get('idTesoreria')?.value">
-                                            {{ tesoreriaRetirarLabel || 'Selecciona una tesorería...' }}
+                                            {{ tesoreriaRetirarLabel || 'Selecciona una boveda...' }}
                                         </span>
                                     </div>
                                     <span class="sleek-line"></span>
@@ -587,40 +533,53 @@
                                             {{ t.text }}
                                         </button>
                                         <div *ngIf="listaTesoreriaRetirar.length === 0" class="select-option select-option-disabled">
-                                            No hay tesorerías disponibles
+                                            No hay bovedas disponibles
                                         </div>
                                     </div>
                                 </div>
+                                <small class="form-text-hint">Elige la boveda de donde vas a retirar dinero</small>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
-                                <span class="field-label text-white">Monto *</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-minus-circle"></i>
+                                    Monto *
+                                </span>
                                 <div class="input-sleek">
                                     <i class="fas fa-dollar-sign"></i>
                                     <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
                                     <span class="sleek-line"></span>
                                 </div>
+                                <small class="form-text-hint">Cantidad de dinero que vas a retirar</small>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
-                                <span class="field-label text-white">Referencia</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-hashtag"></i>
+                                    Referencia
+                                </span>
                                 <div class="input-sleek">
                                     <i class="fas fa-tag"></i>
                                     <input formControlName="referencia" class="sleek-control" type="text" placeholder="Ej: DEP-BANCO-001234" />
                                     <span class="sleek-line"></span>
                                 </div>
+                                <small class="form-text-hint">Número de referencia de la operación (opcional)</small>
                             </label>
                         </div>
                         <div class="col-12">
                             <label class="field">
-                                <span class="field-label text-white">Observaciones</span>
+                                <span class="field-label text-white">
+                                    <i class="fas fa-comment-alt"></i>
+                                    Observaciones
+                                </span>
                                 <div class="input-sleek">
                                     <i class="fas fa-comment-alt"></i>
                                     <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
                                     <span class="sleek-line"></span>
                                 </div>
+                                <small class="form-text-hint">Notas adicionales sobre el retiro (opcional)</small>
                             </label>
                         </div>
                     </div>

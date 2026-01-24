@@ -11,7 +11,7 @@ export class TurnosService {
   constructor(private http: HttpClient) { }
 
   obtenerTurnosData(page: number, limit: number): Observable<any> {
-    return this.http.get(`${environment.API_SECURITY}/pos/turnos/${page}/${limit}`);
+    return this.http.get(`${environment.API_SECURITY}/pos/turnos/paginado/${page}/${limit}`);
   }
 
   obtenerTurnos(): Observable<any> {

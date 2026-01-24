@@ -500,9 +500,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(8px);
   z-index: 9999;
-  max-height: 118px;
+  max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
+  min-height: 40px;
 }
 
 .select-panel::-webkit-scrollbar {

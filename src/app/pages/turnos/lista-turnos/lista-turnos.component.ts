@@ -236,6 +236,7 @@ export class ListaTurnosComponent {
               fondoContadoFormateado: item?.fondoContado !== null && item?.fondoContado !== undefined 
                 ? `$${Number(item.fondoContado).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
                 : 'Sin registro',
+              diferencia: item?.diferencia !== null && item?.diferencia !== undefined ? Number(item.diferencia) : 0,
               diferenciaFormateada: item?.diferencia !== null && item?.diferencia !== undefined 
                 ? `$${Number(item.diferencia).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
                 : 'Sin registro',

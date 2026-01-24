@@ -1,0 +1,118 @@
+// Estilos para abrir turno
+
+.card-form {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 32px;
+  margin-top: 24px;
+}
+
+.card-form-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.action-icon-wrapper {
+  margin-bottom: 24px;
+}
+
+.action-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-size: 36px;
+  color: #fff;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+
+  &.action-icon-success {
+    background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+  }
+}
+
+.action-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.action-description {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 0;
+}
+
+.card-form-body {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.card-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  .btn {
+    min-width: 140px;
+  }
+}
+
+.field {
+  margin-bottom: 20px;
+
+  .form-text-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .field-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+
+    i {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .card-form {
+    padding: 24px 16px;
+  }
+
+  .action-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+
+  .action-title {
+    font-size: 20px;
+  }
+
+  .card-form-footer {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

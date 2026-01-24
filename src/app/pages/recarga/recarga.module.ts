@@ -9,6 +9,7 @@ import { CdkStepperModule } from '@angular/cdk/stepper';
 import { NgStepperModule } from 'angular-ng-stepper';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { DxSelectBoxModule } from 'devextreme-angular';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { SharedModule } from 'src/app/shared/shared.module';
     CdkStepperModule, 
     NgStepperModule,
     NgSelectModule,
-    SharedModule
+    SharedModule,
+    DxSelectBoxModule
   ]
 })
 export class RecargaModule { }

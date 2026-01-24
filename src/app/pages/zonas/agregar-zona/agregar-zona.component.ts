@@ -185,7 +185,6 @@ export class AgregarZonaComponent implements OnInit {
   }
 
   constructor(
-    private fb: FormBuilder,
     private activatedRouted: ActivatedRoute,
     private route: Router,
     private formBuilder: FormBuilder,

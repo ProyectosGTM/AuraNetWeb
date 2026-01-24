@@ -1,44 +1,42 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
+import { slideDownFadeAnimation, staggerFadeInAnimation } from 'src/app/core/slide-down-fade.animation';
 import { MonederosServices } from 'src/app/shared/services/monederos.service';
-import { TurnosService } from 'src/app/shared/services/turnos.service';
+import { CajasService } from 'src/app/shared/services/cajas.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
-
-type SelectItem = { id: number; text: string };
 
 @Component({
   selector: 'app-recarga',
   templateUrl: './recarga.component.html',
   styleUrl: './recarga.component.scss',
-  animations: [fadeInRightAnimation],
+  animations: [fadeInRightAnimation, slideDownFadeAnimation, staggerFadeInAnimation],
 })
 export class RecargaComponent implements OnInit {
 
   recargaForm: FormGroup;
-  public listaTurnos: any[] = [];
+  public listaCajas: any[] = [];
   public listaMonederos: any[] = [];
 
-  // Estados para selects
-  isTurnoCajaOpen = false;
-  turnoCajaLabel = '';
-  isMonederoOpen = false;
-  monederoLabel = '';
-
   // Datos seleccionados para mostrar información adicional
-  turnoSeleccionado: any = null;
+  cajaSeleccionada: any = null;
   monederoSeleccionado: any = null;
 
   procesando: boolean = false;
+  mostrarResumen: boolean = false;
+
+  @ViewChild('resumenElement', { static: false }) resumenElement!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
-    private turnosService: TurnosService,
-    private monederosService: MonederosServices
+    private cajasService: CajasService,
+    private monederosService: MonederosServices,
+    private router: Router
   ) {
     this.recargaForm = this.fb.group({
-      idTurnoCaja: [null, Validators.required],
+      idCaja: [null, Validators.required],
       idMonedero: [null, Validators.required],
       monto: ['', [Validators.required, Validators.min(0.01)]]
     });
@@ -48,29 +46,16 @@ export class RecargaComponent implements OnInit {
     this.cargarListas();
   }
 
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
-  }
-
-  private closeSelects() {
-    this.isTurnoCajaOpen = false;
-    this.isMonederoOpen = false;
-  }
-
   cargarListas() {
     forkJoin({
-      turnos: this.turnosService.obtenerTurnos(),
+      cajas: this.cajasService.obtenerCajas(),
       monederos: this.monederosService.obtenerMonederos()
     }).subscribe({
       next: (responses) => {
-        this.listaTurnos = (responses.turnos.data || []).map((t: any) => ({
-          ...t,
-          id: Number(t.id),
-          text: `Turno #${t.id} - ${t.codigoCaja || ''} - ${this.formatearFechaHora(t.fechaApertura) || ''}`
+        this.listaCajas = (responses.cajas.data || []).map((c: any) => ({
+          ...c,
+          id: Number(c.id),
+          text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Caja sin nombre'
         }));
 
         this.listaMonederos = (responses.monederos.data || []).map((m: any) => {
@@ -96,44 +81,76 @@ export class RecargaComponent implements OnInit {
     });
   }
 
-  toggleTurnoCaja(event: any) {
-    event.stopPropagation();
-    this.isTurnoCajaOpen = !this.isTurnoCajaOpen;
-  }
-
-  setTurnoCaja(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.recargaForm.patchValue({ idTurnoCaja: id });
-    this.turnoCajaLabel = label;
-    this.isTurnoCajaOpen = false;
-    
-    // Buscar el turno completo para mostrar información
-    const turno = this.listaTurnos.find(t => t.id === id);
-    if (turno) {
-      this.turnoSeleccionado = turno;
+  onCajaChanged(event: any) {
+    const selectedId = event.value;
+    if (selectedId) {
+      const caja = this.listaCajas.find(c => c.id === selectedId);
+      if (caja) {
+        this.cajaSeleccionada = caja;
+        this.verificarYMostrarResumen();
+      }
+    } else {
+      this.cajaSeleccionada = null;
+      this.mostrarResumen = false;
     }
   }
 
-  toggleMonedero(event: any) {
-    event.stopPropagation();
-    this.isMonederoOpen = !this.isMonederoOpen;
+  onMonederoChanged(event: any) {
+    const selectedId = event.value;
+    if (selectedId) {
+      const monedero = this.listaMonederos.find(m => m.id === selectedId);
+      if (monedero) {
+        this.monederoSeleccionado = monedero;
+        this.verificarYMostrarResumen();
+      }
+    } else {
+      this.monederoSeleccionado = null;
+      this.mostrarResumen = false;
+    }
   }
 
-  setMonedero(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.recargaForm.patchValue({ idMonedero: id });
-    this.monederoLabel = label;
-    this.isMonederoOpen = false;
-    
-    // Buscar el monedero completo para mostrar información
-    const monedero = this.listaMonederos.find(m => m.id === id);
-    if (monedero) {
-      this.monederoSeleccionado = monedero;
+  verificarYMostrarResumen() {
+    // Verificar si ambos están seleccionados y hay monto
+    if (this.cajaSeleccionada && this.monederoSeleccionado && this.recargaForm.get('monto')?.value) {
+      // Primero mostrar el resumen con animación
+      this.mostrarResumen = true;
+      
+      // Esperar a que la animación comience y luego hacer scroll
+      setTimeout(() => {
+        this.scrollToResumen();
+      }, 300); // Esperar a que la animación de entrada comience
+    } else {
+      this.mostrarResumen = false;
     }
+  }
+
+  scrollToResumen() {
+    // Esperar a que el elemento esté disponible
+    setTimeout(() => {
+      if (this.resumenElement && this.resumenElement.nativeElement) {
+        const element = this.resumenElement.nativeElement;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - 100; // 100px de offset desde arriba
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 50);
   }
 
   setMontoRapido(monto: number) {
     this.recargaForm.patchValue({ monto: monto });
+    // Verificar si ya hay caja y monedero seleccionados
+    setTimeout(() => {
+      this.verificarYMostrarResumen();
+    }, 100);
+  }
+
+  onMontoChanged() {
+    // Verificar si hay caja y monedero seleccionados
+    this.verificarYMostrarResumen();
   }
 
   formatearFechaHora(fecha: string | null): string {
@@ -171,7 +188,7 @@ export class RecargaComponent implements OnInit {
     }
 
     const payload = {
-      idTurnoCaja: this.recargaForm.value.idTurnoCaja,
+      idCaja: this.recargaForm.value.idCaja,
       idMonedero: this.recargaForm.value.idMonedero,
       monto: Number(this.recargaForm.value.monto)
     };
@@ -187,6 +204,10 @@ export class RecargaComponent implements OnInit {
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.router.navigate(['/transacciones']);
+          }
         });
         this.limpiarFormulario();
       },
@@ -206,11 +227,8 @@ export class RecargaComponent implements OnInit {
 
   limpiarFormulario() {
     this.recargaForm.reset();
-    this.turnoCajaLabel = '';
-    this.monederoLabel = '';
-    this.turnoSeleccionado = null;
+    this.cajaSeleccionada = null;
     this.monederoSeleccionado = null;
-    this.isTurnoCajaOpen = false;
-    this.isMonederoOpen = false;
+    this.mostrarResumen = false;
   }
 }

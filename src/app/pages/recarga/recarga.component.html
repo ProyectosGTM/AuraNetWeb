@@ -27,7 +27,7 @@
             <div class="recarga-main-card">
               <form [formGroup]="recargaForm">
                 <div class="row g-3">
-                  <!-- Información del Turno -->
+                  <!-- Información de la Caja -->
                   <div class="col-12 col-lg-6">
                     <div class="info-card info-card-turno">
                       <div class="info-card-header">
@@ -35,54 +35,47 @@
                           <i class="fas fa-cash-register"></i>
                         </div>
                         <div>
-                          <h5 class="info-card-title">Turno de Caja</h5>
-                          <p class="info-card-subtitle">Selecciona el turno activo</p>
+                          <h5 class="info-card-title">Caja</h5>
+                          <p class="info-card-subtitle">Selecciona la caja</p>
                         </div>
                       </div>
                       <div class="info-card-body">
                         <label class="field">
-                          <span class="field-label text-white">Turno *</span>
-                          <div class="input-sleek select-sleek" [class.is-open]="isTurnoCajaOpen"
-                            (mousedown)="toggleTurnoCaja($event)">
-                            <i class="fas fa-cash-register"></i>
-                            <div class="sleek-control select-display">
-                              <span class="select-value" [class.placeholder]="!recargaForm.get('idTurnoCaja')?.value">
-                                {{ turnoCajaLabel || 'Selecciona un turno...' }}
-                              </span>
-                            </div>
-                            <span class="sleek-line"></span>
-                            <div class="select-panel" *ngIf="isTurnoCajaOpen" (mousedown)="$event.stopPropagation()">
-                              <button type="button" class="select-option" *ngFor="let t of listaTurnos"
-                                (mousedown)="setTurnoCaja(t.id, t.text, $event)">
-                                {{ t.text }}
-                              </button>
-                              <div *ngIf="listaTurnos.length === 0" class="select-option select-option-disabled">
-                                No hay turnos disponibles
-                              </div>
-                            </div>
-                          </div>
+                          <span class="field-label text-white">Caja *</span>
+                          <dx-select-box
+                            [dataSource]="listaCajas"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            (onValueChanged)="onCajaChanged($event)"
+                            class="dx-select-box-custom dx-select-box-caja">
+                          </dx-select-box>
                         </label>
-                        <div class="info-display" *ngIf="turnoSeleccionado">
+                        <div class="info-display" *ngIf="cajaSeleccionada" [@slideDownFade] [@staggerFadeIn]>
                           <div class="info-row">
                             <span class="info-label">
                               <i class="fas fa-building"></i>
                               Sala:
                             </span>
-                            <span class="info-value">{{ turnoSeleccionado.nombreSala || 'Sin registro' }}</span>
+                            <span class="info-value">{{ cajaSeleccionada.nombreSala || 'Sin registro' }}</span>
                           </div>
                           <div class="info-row">
                             <span class="info-label">
-                              <i class="fas fa-calendar-alt"></i>
-                              Fecha Apertura:
+                              <i class="fas fa-map-marker-alt"></i>
+                              Zona:
                             </span>
-                            <span class="info-value">{{ formatearFechaHora(turnoSeleccionado.fechaApertura) }}</span>
+                            <span class="info-value">{{ cajaSeleccionada.nombreZona || 'Sin registro' }}</span>
                           </div>
                           <div class="info-row">
                             <span class="info-label">
-                              <i class="fas fa-dollar-sign"></i>
-                              Fondo Inicial:
+                              <i class="fas fa-barcode"></i>
+                              Código:
                             </span>
-                            <span class="info-value">{{ formatearMoneda(turnoSeleccionado.fondoInicial) }}</span>
+                            <span class="info-value">{{ cajaSeleccionada.codigo || 'Sin registro' }}</span>
                           </div>
                         </div>
                       </div>
@@ -104,27 +97,20 @@
                       <div class="info-card-body">
                         <label class="field">
                           <span class="field-label text-white">Monedero *</span>
-                          <div class="input-sleek select-sleek" [class.is-open]="isMonederoOpen"
-                            (mousedown)="toggleMonedero($event)">
-                            <i class="fas fa-wallet"></i>
-                            <div class="sleek-control select-display">
-                              <span class="select-value" [class.placeholder]="!recargaForm.get('idMonedero')?.value">
-                                {{ monederoLabel || 'Selecciona un monedero...' }}
-                              </span>
-                            </div>
-                            <span class="sleek-line"></span>
-                            <div class="select-panel" *ngIf="isMonederoOpen" (mousedown)="$event.stopPropagation()">
-                              <button type="button" class="select-option" *ngFor="let m of listaMonederos"
-                                (mousedown)="setMonedero(m.id, m.text, $event)">
-                                {{ m.text }}
-                              </button>
-                              <div *ngIf="listaMonederos.length === 0" class="select-option select-option-disabled">
-                                No hay monederos disponibles
-                              </div>
-                            </div>
-                          </div>
+                          <dx-select-box
+                            [dataSource]="listaMonederos"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idMonedero"
+                            placeholder="Selecciona un monedero..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            (onValueChanged)="onMonederoChanged($event)"
+                            class="dx-select-box-custom dx-select-box-monedero">
+                          </dx-select-box>
                         </label>
-                        <div class="info-display" *ngIf="monederoSeleccionado">
+                        <div class="info-display" *ngIf="monederoSeleccionado" [@slideDownFade] [@staggerFadeIn]>
                           <div class="info-row">
                             <span class="info-label">
                               <i class="fas fa-barcode"></i>
@@ -170,7 +156,7 @@
                               <span class="field-label text-white">Monto *</span>
                               <div class="input-sleek input-monto-large">
                                 <i class="fas fa-dollar-sign"></i>
-                                <input formControlName="monto" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                                <input formControlName="monto" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" (input)="onMontoChanged()" />
                                 <span class="sleek-line"></span>
                               </div>
                             </label>
@@ -210,31 +196,20 @@
                             </div>
                           </div>
                         </div>
-                        <div class="monto-display" *ngIf="recargaForm.get('monto')?.value">
-                          <div class="monto-display-card">
-                            <div class="monto-display-icon">
-                              <i class="fas fa-coins"></i>
-                            </div>
-                            <div class="monto-display-content">
-                              <div class="monto-display-label">Monto Total a Recargar</div>
-                              <div class="monto-display-value">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</div>
-                            </div>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
 
                   <!-- Resumen de la Transacción -->
-                  <div class="col-12" *ngIf="turnoSeleccionado && monederoSeleccionado && recargaForm.get('monto')?.value">
-                    <div class="info-card info-card-resumen">
+                  <div class="col-12 mt-5" #resumenElement *ngIf="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value">
+                    <div class="info-card info-card-resumen" *ngIf="mostrarResumen" [@slideDownFade] [@staggerFadeIn]>
                       <div class="info-card-header">
                         <div class="info-card-icon icon-resumen">
                           <i class="fas fa-receipt"></i>
                         </div>
                         <div>
                           <h5 class="info-card-title">Resumen de Transacción</h5>
-                          <p class="info-card-subtitle">Revisa los detalles antes de confirmar</p>
+                          <p class="info-card-subtitle"> <strong>Revisa los detalles antes de confirmar</strong></p>
                         </div>
                       </div>
                       <div class="info-card-body">
@@ -242,10 +217,10 @@
                           <div class="resumen-item">
                             <div class="resumen-item-header">
                               <i class="fas fa-cash-register"></i>
-                              <span>Turno</span>
+                              <span>Caja</span>
                             </div>
-                            <div class="resumen-item-value">{{ turnoSeleccionado.codigoCaja || 'Sin registro' }}</div>
-                            <div class="resumen-item-detail">{{ turnoSeleccionado.nombreCaja || 'Sin registro' }}</div>
+                            <div class="resumen-item-value">{{ cajaSeleccionada.codigo || 'Sin registro' }}</div>
+                            <div class="resumen-item-detail">{{ cajaSeleccionada.nombre || 'Sin registro' }}</div>
                           </div>
                           <div class="resumen-item">
                             <div class="resumen-item-header">

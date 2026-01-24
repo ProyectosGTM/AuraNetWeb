@@ -57,7 +57,7 @@ export class ListaZonasComponent implements OnInit {
   activar(rowData: any) {
     Swal.fire({
       title: '¡Activar!',
-      html: `¿Está seguro que requiere activar el módulo: <strong>${rowData.nombre}</strong>?`,
+      html: `¿Está seguro que requiere activar la zona: <strong>${rowData.nombreZona || rowData.nombre}</strong>?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -71,7 +71,7 @@ export class ListaZonasComponent implements OnInit {
           (response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',
-              html: `El módulo ha sido activado.`,
+              html: `La zona ha sido activada.`,
               icon: 'success',
               background: '#0d121d',
               confirmButtonColor: '#3085d6',
@@ -100,7 +100,7 @@ export class ListaZonasComponent implements OnInit {
   desactivar(rowData: any) {
     Swal.fire({
       title: '¡Desactivar!',
-      html: `¿Está seguro que requiere desactivar el módulo: <strong>${rowData.nombre}</strong>?`,
+      html: `¿Está seguro que requiere desactivar la zona: <strong>${rowData.nombreZona || rowData.nombre}</strong>?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -114,7 +114,7 @@ export class ListaZonasComponent implements OnInit {
           (response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',
-              html: `El módulo ha sido desactivado.`,
+              html: `La zona ha sido desactivada.`,
               icon: 'success',
               background: '#0d121d',
               confirmButtonColor: '#3085d6',

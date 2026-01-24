@@ -227,7 +227,7 @@
 
       <div class="dropdown d-inline-block" ngbDropdown>
         <button type="button" class="btn header-item waves-effect" ngbDropdownToggle id="page-header-user-dropdown">
-          <img class="rounded-circle header-profile-user"  (error)="onAvatarError($event)"
+          <img class="rounded-circle header-profile-user" [src]="'https://transmovi.s3.us-east-2.amazonaws.com/imagenes/user_default.png'" (error)="onAvatarError($event)"
             alt="Header Avatar">
 
           <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15">{{showNombre}}</span>

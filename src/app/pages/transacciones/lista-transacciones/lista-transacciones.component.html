@@ -93,33 +93,23 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <!--
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="100"></dxi-column>
-                        -->
                         <dxi-column caption="Monto" cellTemplate="monto" alignment="center" dataType="number" [allowSearch]="true" [width]="210"></dxi-column>
+                        <dxi-column caption="Contexto" cellTemplate="contextoOperacion" alignment="center" dataType="string" [width]="140" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Origen" cellTemplate="origen" alignment="center" dataType="string" [width]="160" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Destino" cellTemplate="destino" alignment="center" dataType="string" [width]="160" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Usuario" cellTemplate="usuario" alignment="center" dataType="string" [width]="140" [allowSearch]="true"></dxi-column>
                         <dxi-column caption="Fecha Movimiento" cellTemplate="fechaMovimiento" alignment="center" dataType="datetime" [width]="160" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Tipo Movimiento" cellTemplate="tipoMovimiento" alignment="center" dataType="string" [width]="180" [minWidth]="150" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Tipo Movimiento" cellTemplate="tipoMovimiento" alignment="center" dataType="string" [minWidth]="150" [allowSearch]="true"></dxi-column>
                         <dxi-column caption="Tipo Saldo" cellTemplate="tipoSaldo" alignment="center" dataType="string" [width]="140" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Contexto" cellTemplate="contextoOperacion" alignment="center" dataType="string" [width]="130" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Origen" cellTemplate="origen" alignment="center" dataType="string" [width]="150" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Destino" cellTemplate="destino" alignment="center" dataType="string" [width]="150" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Usuario" cellTemplate="usuario" alignment="center" dataType="string" [width]="130" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Fecha Movimiento" cellTemplate="fechaMovimiento" alignment="center" dataType="datetime" [width]="160" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Tipo Movimiento" cellTemplate="tipoMovimiento" alignment="center" dataType="string" [width]="180" [minWidth]="150" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Tipo Saldo" cellTemplate="tipoSaldo" alignment="center" dataType="string" [width]="140" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Contexto" cellTemplate="contextoOperacion" alignment="center" dataType="string" [width]="130" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Origen" cellTemplate="origen" alignment="center" dataType="string" [width]="150" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Destino" cellTemplate="destino" alignment="center" dataType="string" [width]="150" [allowSearch]="true"></dxi-column>
                         <dxi-column caption="Concepto" cellTemplate="concepto" alignment="center" dataType="string" [width]="200" [minWidth]="150" [allowSearch]="true"></dxi-column>
                         <dxi-column caption="UUID" cellTemplate="uuidTransaccion" alignment="center" dataType="string" [width]="300" [minWidth]="250" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="ID Turno Caja" cellTemplate="idTurnoCaja" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="ID Monedero" cellTemplate="idMonedero" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="ID Tesorería" cellTemplate="idTesoreria" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="ID Máquina" cellTemplate="idMaquina" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Referencia" cellTemplate="referencia" alignment="center" dataType="string" [width]="180" [minWidth]="150" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Requiere Autorización" cellTemplate="requirioAutorizacion" alignment="center" dataType="string" [width]="180"></dxi-column>
-                        <dxi-column caption="UUID" cellTemplate="uuidTransaccion" alignment="center" dataType="string" [width]="300" [minWidth]="250" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Dirección IP" cellTemplate="direccionIP" alignment="center" dataType="string" [width]="150" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="ID Turno Caja" cellTemplate="idTurnoCaja" alignment="center" dataType="number" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column caption="ID Monedero" cellTemplate="idMonedero" alignment="center" dataType="number" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column caption="ID Tesorería" cellTemplate="idTesoreria" alignment="center" dataType="number" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column caption="ID Máquina" cellTemplate="idMaquina" alignment="center" dataType="number" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column caption="Referencia" cellTemplate="referencia" alignment="center" dataType="string" [width]="180" [minWidth]="150" [allowSearch]="true" [visible]="false"></dxi-column>
+                        <dxi-column caption="Requiere Autorización" cellTemplate="requirioAutorizacion" alignment="center" dataType="string" [width]="180" [visible]="false"></dxi-column>
+                        <dxi-column caption="Dirección IP" cellTemplate="direccionIP" alignment="center" dataType="string" [width]="150" [allowSearch]="true" [visible]="false"></dxi-column>
 
                         <!--
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
@@ -149,27 +139,32 @@
                             </span>
                         </div>
                         <div *dxTemplate="let data of 'tipoMovimiento'">
-                            <span class="cell-content" [title]="obtenerValorAnidado(data.data, 'tipoMovimiento.nombre') || 'Sin registro'">
+                            <span class="tx-badge tx-badge-tipo-movimiento" [title]="obtenerValorAnidado(data.data, 'tipoMovimiento.nombre') || 'Sin registro'">
+                                <i class="fas fa-exchange-alt"></i>
                                 {{ obtenerValorAnidado(data.data, 'tipoMovimiento.nombre') || 'Sin registro' }}
                             </span>
                         </div>
                         <div *dxTemplate="let data of 'tipoSaldo'">
-                            <span class="cell-content" [title]="obtenerValorAnidado(data.data, 'tipoSaldo.nombre') || 'Sin registro'">
+                            <span class="tx-badge tx-badge-tipo-saldo" [title]="obtenerValorAnidado(data.data, 'tipoSaldo.nombre') || 'Sin registro'">
+                                <i class="fas fa-coins"></i>
                                 {{ obtenerValorAnidado(data.data, 'tipoSaldo.nombre') || 'Sin registro' }}
                             </span>
                         </div>
                         <div *dxTemplate="let data of 'contextoOperacion'">
-                            <span class="cell-content" [title]="obtenerValorAnidado(data.data, 'contextoOperacion.nombre') || 'Sin registro'">
+                            <span class="tx-badge tx-badge-contexto" [title]="obtenerValorAnidado(data.data, 'contextoOperacion.nombre') || 'Sin registro'">
+                                <i class="fas fa-layer-group"></i>
                                 {{ obtenerValorAnidado(data.data, 'contextoOperacion.nombre') || 'Sin registro' }}
                             </span>
                         </div>
                         <div *dxTemplate="let data of 'origen'">
-                            <span class="cell-content" [title]="formatearOrigen(data.data)">
+                            <span class="tx-badge tx-badge-origen" [title]="formatearOrigen(data.data)">
+                                <i class="fas fa-arrow-from-right"></i>
                                 {{ formatearOrigen(data.data) }}
                             </span>
                         </div>
                         <div *dxTemplate="let data of 'destino'">
-                            <span class="cell-content" [title]="formatearDestino(data.data)">
+                            <span class="tx-badge tx-badge-destino" [title]="formatearDestino(data.data)">
+                                <i class="fas fa-arrow-to-right"></i>
                                 {{ formatearDestino(data.data) }}
                             </span>
                         </div>
@@ -215,7 +210,8 @@
                             </span>
                         </div>
                         <div *dxTemplate="let data of 'usuario'">
-                            <span class="cell-content" [title]="obtenerValorAnidado(data.data, 'usuario.nombre') || 'Sin registro'">
+                            <span class="tx-badge tx-badge-usuario" [title]="obtenerValorAnidado(data.data, 'usuario.nombre') || 'Sin registro'">
+                                <i class="fas fa-user"></i>
                                 {{ obtenerValorAnidado(data.data, 'usuario.nombre') || 'Sin registro' }}
                             </span>
                         </div>
