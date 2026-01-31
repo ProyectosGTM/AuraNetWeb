@@ -22,9 +22,9 @@ export class TransaccionesService {
   //   return this.http.get(`${environment.API_SECURITY}/ledger/saldo/monedero/${id}`);
   // }
 
-  // obtenerSaldoCaja(id: number): Observable<any> {
-  //   return this.http.get(`${environment.API_SECURITY}/ledger/saldo/caja/${id}`);
-  // }
+  obtenerSaldoCaja(id: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/ledger/saldo/caja/${id}`);
+  }
 
   // obtenerSaldoTesoreria(id: number): Observable<any> {
   //   return this.http.get(`${environment.API_SECURITY}/ledger/saldo/tesoreria/${id}`);

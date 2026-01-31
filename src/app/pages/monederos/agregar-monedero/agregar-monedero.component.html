@@ -26,22 +26,17 @@
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Afiliado</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isAfiliadoOpen"
-                        (mousedown)="toggleAfiliado($event)">
-                        <i class="fas fa-user"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!monederoForm.get('idAfiliado')?.value">
-                            {{ afiliadoLabel || 'Selecciona un afiliado...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isAfiliadoOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let a of listaAfiliados"
-                            (mousedown)="setAfiliado(a.id, a.nombreCompleto, $event)">
-                            {{ a.nombreCompleto }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaAfiliados"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idAfiliado"
+                        placeholder="Selecciona un afiliado..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-afiliado">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4">
@@ -69,24 +64,16 @@
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Es Principal</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isEsPrincipalOpen"
-                        (mousedown)="toggleEsPrincipal($event)">
-                        <i class="fas fa-star"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value">
-                            {{ monederoForm.get('esPrincipal')?.value === 1 ? 'Sí' : 'No' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isEsPrincipalOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" (mousedown)="setEsPrincipal(1, $event)">
-                            Sí
-                          </button>
-                          <button type="button" class="select-option" (mousedown)="setEsPrincipal(0, $event)">
-                            No
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaEsPrincipal"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="esPrincipal"
+                        placeholder="Selecciona..."
+                        searchEnabled="false"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-es-principal">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4">
@@ -103,22 +90,17 @@
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Estatus Monedero</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isEstatusMonederoOpen"
-                        (mousedown)="toggleEstatusMonedero($event)">
-                        <i class="fas fa-toggle-on"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!monederoForm.get('idEstatusMonedero')?.value">
-                            {{ estatusMonederoLabel || 'Selecciona un estatus...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isEstatusMonederoOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let e of listaEstatusMonedero"
-                            (mousedown)="setEstatusMonedero(e.id, e.text, $event)">
-                            {{ e.text }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaEstatusMonedero"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idEstatusMonedero"
+                        placeholder="Selecciona un estatus..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
                     </label>
                   </div>
                 </div>

@@ -82,73 +82,49 @@
                                 <div class="col-12 col-md-6 col-lg-4">
                                     <label class="field">
                                         <span class="field-label text-white">Rol</span>
-                                        <div class="input-sleek select-sleek" [class.is-open]="isRolOpen"
-                                            (mousedown)="toggleRol($event)">
-                                            <i class="fas fa-user-shield"></i>
-                                            <div class="sleek-control select-display">
-                                                <span class="select-value"
-                                                    [class.placeholder]="!usuarioForm.get('idRol')?.value">
-                                                    {{ rolLabel || 'Selecciona un rol...' }}
-                                                </span>
-                                            </div>
-                                            <span class="sleek-line"></span>
-                                            <div class="select-panel" *ngIf="isRolOpen"
-                                                (mousedown)="$event.stopPropagation()">
-                                                <button type="button" class="select-option" *ngFor="let r of listaRoles"
-                                                    (mousedown)="setRol(r.id, r.nombre, $event)">
-                                                    {{ r.nombre }}
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <dx-select-box
+                                            [dataSource]="listaRoles"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="idRol"
+                                            placeholder="Selecciona un rol..."
+                                            searchEnabled="true"
+                                            searchMode="contains"
+                                            [showClearButton]="true"
+                                            class="dx-select-box-custom dx-select-box-rol">
+                                        </dx-select-box>
                                     </label>
                                 </div>
                                 <div class="col-12 col-md-4">
                                     <label class="field">
                                         <span class="field-label text-white">Cliente</span>
-                                        <div class="input-sleek select-sleek" [class.is-open]="isClienteOpen"
-                                            (mousedown)="toggleCliente($event)">
-                                            <i class="fas fa-building"></i>
-                                            <div class="sleek-control select-display">
-                                                <span class="select-value"
-                                                    [class.placeholder]="!usuarioForm.get('idCliente')?.value">
-                                                    {{ clienteLabel || 'Selecciona un cliente...' }}
-                                                </span>
-                                            </div>
-                                            <span class="sleek-line"></span>
-                                            <div class="select-panel" *ngIf="isClienteOpen"
-                                                (mousedown)="$event.stopPropagation()">
-                                                <button type="button" class="select-option"
-                                                    *ngFor="let c of listaClientes"
-                                                    (mousedown)="setCliente(c.id, c.nombre, $event)">
-                                                    {{ c.nombre }}
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <dx-select-box
+                                            [dataSource]="listaClientes"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="idCliente"
+                                            placeholder="Selecciona un cliente..."
+                                            searchEnabled="true"
+                                            searchMode="contains"
+                                            [showClearButton]="true"
+                                            class="dx-select-box-custom dx-select-box-cliente">
+                                        </dx-select-box>
                                     </label>
                                 </div>
                                 <div class="col-12 col-md-4">
                                     <label class="field">
                                         <span class="field-label text-white">Sala</span>
-                                        <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
-                                            (mousedown)="toggleSala($event)">
-                                            <i class="fas fa-door-open"></i>
-                                            <div class="sleek-control select-display">
-                                                <span class="select-value"
-                                                    [class.placeholder]="!usuarioForm.get('idSala')?.value">
-                                                    {{ salaLabel || 'Selecciona una sala...' }}
-                                                </span>
-                                            </div>
-                                            <span class="sleek-line"></span>
-
-                                            <div class="select-panel" *ngIf="isSalaOpen"
-                                                (mousedown)="$event.stopPropagation()">
-                                                <button type="button" class="select-option" *ngFor="let s of listaSalas"
-                                                    (mousedown)="setSala(s.idSala, s.nombreComercialSala || s.nombreSala, $event)">
-                                                    {{ s.nombreComercialSala || s.nombreSala }}
-                                                </button>
-
-                                            </div>
-                                        </div>
+                                        <dx-select-box
+                                            [dataSource]="listaSalas"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="idSala"
+                                            placeholder="Selecciona una sala..."
+                                            searchEnabled="true"
+                                            searchMode="contains"
+                                            [showClearButton]="true"
+                                            class="dx-select-box-custom dx-select-box-sala">
+                                        </dx-select-box>
                                     </label>
                                 </div>
 

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -18,8 +18,6 @@ export class AbrirBovedaComponent implements OnInit {
   abrirTesoreriaForm: FormGroup;
   public listaSalas: any[] = [];
   public listaCajas: any[] = [];
-  isSalaAbrirOpen = false;
-  salaAbrirLabel = '';
 
   constructor(
     private router: Router,
@@ -83,33 +81,6 @@ export class AbrirBovedaComponent implements OnInit {
     });
   }
 
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
-  }
-
-  private closeSelects() {
-    this.isSalaAbrirOpen = false;
-    this.turnosAbrirArray.controls.forEach(control => {
-      control.patchValue({ isCajaOpen: false });
-    });
-  }
-
-  toggleSalaAbrir(event: any) {
-    event.stopPropagation();
-    this.isSalaAbrirOpen = !this.isSalaAbrirOpen;
-  }
-
-  setSalaAbrir(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.abrirTesoreriaForm.patchValue({ idSala: id });
-    this.salaAbrirLabel = label;
-    this.isSalaAbrirOpen = false;
-  }
-
   get turnosAbrirArray(): FormArray {
     return this.abrirTesoreriaForm.get('turnosAbrir') as FormArray;
   }
@@ -117,8 +88,6 @@ export class AbrirBovedaComponent implements OnInit {
   agregarTurnoAbrir() {
     const turnoForm = this.fb.group({
       idCaja: [null, Validators.required],
-      cajaLabel: [''],
-      isCajaOpen: [false],
       fondoInicial: ['', [Validators.min(0.01)]],
       idEstatusTurno: [null],
       fechaApertura: ['']
@@ -139,29 +108,6 @@ export class AbrirBovedaComponent implements OnInit {
       return;
     }
     this.turnosAbrirArray.removeAt(index);
-  }
-
-  toggleCajaTurno(turno: FormGroup, event: any) {
-    event.stopPropagation();
-    const isOpen = turno.get('isCajaOpen')?.value || false;
-    turno.patchValue({ isCajaOpen: !isOpen });
-  }
-
-  setCajaTurno(turno: FormGroup, cajaId: number, cajaText: string, event: any) {
-    event.stopPropagation();
-    turno.patchValue({
-      idCaja: cajaId,
-      cajaLabel: cajaText,
-      isCajaOpen: false
-    });
-  }
-
-  isCajaTurnoOpen(turno: FormGroup): boolean {
-    return turno.get('isCajaOpen')?.value || false;
-  }
-
-  getCajaLabel(turno: FormGroup): string {
-    return turno.get('cajaLabel')?.value || 'Selecciona una caja...';
   }
 
   guardarAbrirTesoreria() {

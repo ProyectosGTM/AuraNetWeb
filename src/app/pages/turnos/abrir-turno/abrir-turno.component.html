@@ -45,22 +45,17 @@
                                                 <i class="fas fa-cash-register"></i>
                                                 Caja *
                                             </span>
-                                            <div class="input-sleek select-sleek" [class.is-open]="isCajaOpen"
-                                                (mousedown)="toggleCaja($event)">
-                                                <i class="fas fa-cash-register"></i>
-                                                <div class="sleek-control select-display">
-                                                    <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idCaja')?.value">
-                                                        {{ cajaLabel || 'Selecciona una caja...' }}
-                                                    </span>
-                                                </div>
-                                                <span class="sleek-line"></span>
-                                                <div class="select-panel" *ngIf="isCajaOpen" (mousedown)="$event.stopPropagation()">
-                                                    <button type="button" class="select-option" *ngFor="let c of listaCajas"
-                                                        (mousedown)="setCaja(c.id, c.text, $event)">
-                                                        {{ c.text }}
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            <dx-select-box
+                                                [dataSource]="listaCajas"
+                                                displayExpr="text"
+                                                valueExpr="id"
+                                                formControlName="idCaja"
+                                                placeholder="Selecciona una caja..."
+                                                searchEnabled="true"
+                                                searchMode="contains"
+                                                [showClearButton]="true"
+                                                class="dx-select-box-custom dx-select-box-caja">
+                                            </dx-select-box>
                                             <small class="form-text-hint">Elige la caja donde vas a trabajar</small>
                                         </label>
                                     </div>
@@ -70,22 +65,17 @@
                                                 <i class="fas fa-toggle-on"></i>
                                                 Estatus Turno *
                                             </span>
-                                            <div class="input-sleek select-sleek" [class.is-open]="isEstatusTurnoOpen"
-                                                (mousedown)="toggleEstatusTurno($event)">
-                                                <i class="fas fa-toggle-on"></i>
-                                                <div class="sleek-control select-display">
-                                                    <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idEstatusTurno')?.value">
-                                                        {{ estatusTurnoLabel || 'Selecciona un estatus...' }}
-                                                    </span>
-                                                </div>
-                                                <span class="sleek-line"></span>
-                                                <div class="select-panel" *ngIf="isEstatusTurnoOpen" (mousedown)="$event.stopPropagation()">
-                                                    <button type="button" class="select-option" *ngFor="let e of listaEstatusTurno"
-                                                        (mousedown)="setEstatusTurno(e.id, e.text, $event)">
-                                                        {{ e.text }}
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            <dx-select-box
+                                                [dataSource]="listaEstatusTurno"
+                                                displayExpr="text"
+                                                valueExpr="id"
+                                                formControlName="idEstatusTurno"
+                                                placeholder="Selecciona un estatus..."
+                                                searchEnabled="true"
+                                                searchMode="contains"
+                                                [showClearButton]="true"
+                                                class="dx-select-box-custom dx-select-box-estatus">
+                                            </dx-select-box>
                                             <small class="form-text-hint">Tipo de turno que vas a abrir</small>
                                         </label>
                                     </div>
@@ -95,22 +85,17 @@
                                                 <i class="fas fa-wallet"></i>
                                                 Tesorería *
                                             </span>
-                                            <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaOpen"
-                                                (mousedown)="toggleTesoreria($event)">
-                                                <i class="fas fa-building"></i>
-                                                <div class="sleek-control select-display">
-                                                    <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idTesoreria')?.value">
-                                                        {{ tesoreriaLabel || 'Selecciona una tesorería...' }}
-                                                    </span>
-                                                </div>
-                                                <span class="sleek-line"></span>
-                                                <div class="select-panel" *ngIf="isTesoreriaOpen" (mousedown)="$event.stopPropagation()">
-                                                    <button type="button" class="select-option" *ngFor="let t of listaTesoreria"
-                                                        (mousedown)="setTesoreria(t.id, t.text, $event)">
-                                                        {{ t.text }}
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            <dx-select-box
+                                                [dataSource]="listaTesoreria"
+                                                displayExpr="text"
+                                                valueExpr="id"
+                                                formControlName="idTesoreria"
+                                                placeholder="Selecciona una tesorería..."
+                                                searchEnabled="true"
+                                                searchMode="contains"
+                                                [showClearButton]="true"
+                                                class="dx-select-box-custom dx-select-box-boveda">
+                                            </dx-select-box>
                                             <small class="form-text-hint">Tesorería asociada a esta caja</small>
                                         </label>
                                     </div>

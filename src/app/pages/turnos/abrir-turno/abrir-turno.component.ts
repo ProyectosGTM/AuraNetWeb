@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -21,14 +21,6 @@ export class AbrirTurnoComponent implements OnInit {
   public listaCajas: any[] = [];
   public listaTesoreria: any[] = [];
   public listaEstatusTurno: SelectItem[] = [];
-
-  // Estados para selects
-  isCajaOpen = false;
-  cajaLabel = '';
-  isTesoreriaOpen = false;
-  tesoreriaLabel = '';
-  isEstatusTurnoOpen = false;
-  estatusTurnoLabel = '';
 
   constructor(
     private router: Router,
@@ -86,20 +78,6 @@ export class AbrirTurnoComponent implements OnInit {
     });
   }
 
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
-  }
-
-  private closeSelects() {
-    this.isCajaOpen = false;
-    this.isTesoreriaOpen = false;
-    this.isEstatusTurnoOpen = false;
-  }
-
   formatearFecha(fecha: string | null): string {
     if (!fecha) return '';
     try {
@@ -122,42 +100,6 @@ export class AbrirTurnoComponent implements OnInit {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(valor);
-  }
-
-  toggleCaja(event: any) {
-    event.stopPropagation();
-    this.isCajaOpen = !this.isCajaOpen;
-  }
-
-  setCaja(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.abrirTurnoForm.patchValue({ idCaja: id });
-    this.cajaLabel = label;
-    this.isCajaOpen = false;
-  }
-
-  toggleTesoreria(event: any) {
-    event.stopPropagation();
-    this.isTesoreriaOpen = !this.isTesoreriaOpen;
-  }
-
-  setTesoreria(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.abrirTurnoForm.patchValue({ idTesoreria: id });
-    this.tesoreriaLabel = label;
-    this.isTesoreriaOpen = false;
-  }
-
-  toggleEstatusTurno(event: any) {
-    event.stopPropagation();
-    this.isEstatusTurnoOpen = !this.isEstatusTurnoOpen;
-  }
-
-  setEstatusTurno(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.abrirTurnoForm.patchValue({ idEstatusTurno: id });
-    this.estatusTurnoLabel = label;
-    this.isEstatusTurnoOpen = false;
   }
 
   guardarAbrirTurno() {

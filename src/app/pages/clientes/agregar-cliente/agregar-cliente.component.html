@@ -36,25 +36,17 @@
                                     <div class="col-12 col-md-6 col-lg-4 mt-1">
                                     <label class="field">
                                         <span class="field-label text-white">Cuenta Padre</span>
-                                        <div class="input-sleek select-sleek" [class.is-open]="isCuentaPadreOpen"
-                                            (mousedown)="toggleCuentaPadre($event)">
-                                            <i class="fas fa-sitemap"></i>
-                                            <div class="sleek-control select-display">
-                                                <span class="select-value"
-                                                    [class.placeholder]="!clienteForm.get('idPadre')?.value">
-                                                    {{ cuentaPadreLabel || 'Seleccione una cuenta padre' }}
-                                                </span>
-                                            </div>
-                                            <span class="sleek-line"></span>
-                                            <div class="select-panel" *ngIf="isCuentaPadreOpen"
-                                                (mousedown)="$event.stopPropagation()">
-                                                <button type="button" class="select-option"
-                                                    *ngFor="let c of listaClientes"
-                                                    (mousedown)="setCuentaPadre(c.id, clienteDisplayExpr(c), $event)">
-                                                    {{ clienteDisplayExpr(c) }}
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <dx-select-box
+                                            [dataSource]="listaClientes"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="idPadre"
+                                            placeholder="Seleccione una cuenta padre"
+                                            searchEnabled="true"
+                                            searchMode="contains"
+                                            [showClearButton]="true"
+                                            class="dx-select-box-custom dx-select-box-cliente">
+                                        </dx-select-box>
                                     </label>
                                 </div>
 
@@ -74,25 +66,17 @@
                                     <div class="col-12 col-md-6 col-lg-4 mt-1">
                                     <label class="field">
                                         <span class="field-label text-white">Tipo Persona</span>
-                                        <div class="input-sleek select-sleek" [class.is-open]="isTipoPersonaOpen"
-                                            (mousedown)="toggleTipoPersona($event)">
-                                            <i class="fas fa-user-tag"></i>
-                                            <div class="sleek-control select-display">
-                                                <span class="select-value"
-                                                    [class.placeholder]="clienteForm.get('tipoPersona')?.value == null">
-                                                    {{ tipoPersonaLabel || 'Seleccione un tipo' }}
-                                                </span>
-                                            </div>
-                                            <span class="sleek-line"></span>
-                                            <div class="select-panel" *ngIf="isTipoPersonaOpen"
-                                                (mousedown)="$event.stopPropagation()">
-                                                <button type="button" class="select-option"
-                                                    *ngFor="let t of tipoPersonaItems"
-                                                    (mousedown)="setTipoPersona(t.id, t.text, $event)">
-                                                    {{ t.text }}
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <dx-select-box
+                                            [dataSource]="tipoPersonaItems"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="tipoPersona"
+                                            placeholder="Seleccione un tipo"
+                                            searchEnabled="false"
+                                            [showClearButton]="true"
+                                            (onValueChanged)="onTipoPersonaChange($event)"
+                                            class="dx-select-box-custom dx-select-box-tipo-id">
+                                        </dx-select-box>
                                     </label>
                                 </div>
 

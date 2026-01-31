@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -25,22 +25,12 @@ export class AgregarCajaComponent implements OnInit {
   public listaZonas: any[] = [];
   public listaTiposCaja: SelectItem[] = [];
   public listaEstatusCaja: SelectItem[] = [];
+  public listaRequiereArqueo: SelectItem[] = [
+    { id: 0, text: 'No' },
+    { id: 1, text: 'Sí' },
+  ];
 
   cajaForm: FormGroup;
-
-  isSalaOpen = false;
-  salaLabel = '';
-
-  isZonaOpen = false;
-  zonaLabel = '';
-
-  isTipoCajaOpen = false;
-  tipoCajaLabel = '';
-
-  isEstatusCajaOpen = false;
-  estatusCajaLabel = '';
-
-  isRequiereArqueoOpen = false;
 
   constructor(
     private fb: FormBuilder,
@@ -89,11 +79,13 @@ export class AgregarCajaComponent implements OnInit {
     this.listaSalas = (responses.salas.data || []).map((s: any) => ({
       ...s,
       id: Number(s.id),
+      text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
     }));
 
     this.listaZonas = (responses.zonas.data || []).map((z: any) => ({
       ...z,
       id: Number(z.idZona || z.id),
+      text: (z.nombreZona ?? z.nombre ?? 'Sin nombre').trim(),
     }));
 
     this.listaTiposCaja = (responses.tiposCaja.data || []).map((t: any) => ({
@@ -120,6 +112,7 @@ export class AgregarCajaComponent implements OnInit {
         this.listaSalas = (response.data || []).map((s: any) => ({
           ...s,
           id: Number(s.id),
+          text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
         }));
       },
       error: (error) => {
@@ -134,6 +127,7 @@ export class AgregarCajaComponent implements OnInit {
         this.listaZonas = (response.data || []).map((z: any) => ({
           ...z,
           id: Number(z.idZona || z.id),
+          text: (z.nombreZona ?? z.nombre ?? 'Sin nombre').trim(),
         }));
       },
       error: (error) => {
@@ -186,51 +180,6 @@ export class AgregarCajaComponent implements OnInit {
           limiteEfectivo: data.limiteEfectivo?.toString() || '',
           requiereArqueo: data.requiereArqueo === 1 || data.requiereArqueo === true ? 1 : 0,
         });
-
-        // Establecer labels para los selects
-        const idSala = Number(data.idSala ?? 0);
-        if (idSala) {
-          this.salaLabel = data.nombreSala || '';
-          if (!this.salaLabel && this.listaSalas && this.listaSalas.length > 0) {
-            const foundSala = this.listaSalas.find((x: any) => Number(x.id) === idSala);
-            if (foundSala) {
-              this.salaLabel = foundSala.nombreSala || foundSala.nombre || 'Sala';
-            }
-          }
-        }
-
-        const idZona = Number(data.idZona ?? 0);
-        if (idZona) {
-          this.zonaLabel = data.nombreZona || '';
-          if (!this.zonaLabel && this.listaZonas && this.listaZonas.length > 0) {
-            const foundZona = this.listaZonas.find((x: any) => Number(x.id) === idZona);
-            if (foundZona) {
-              this.zonaLabel = foundZona.nombreZona || foundZona.nombre || 'Zona';
-            }
-          }
-        }
-
-        const idTipoCaja = Number(data.idTipoCaja ?? 0);
-        if (idTipoCaja) {
-          this.tipoCajaLabel = data.nombreTipoCaja || '';
-          if (!this.tipoCajaLabel && this.listaTiposCaja && this.listaTiposCaja.length > 0) {
-            const foundTipo = this.listaTiposCaja.find((x: SelectItem) => x.id === idTipoCaja);
-            if (foundTipo) {
-              this.tipoCajaLabel = foundTipo.text;
-            }
-          }
-        }
-
-        const idEstatusCaja = Number(data.idEstatusCaja ?? 0);
-        if (idEstatusCaja) {
-          this.estatusCajaLabel = data.nombreEstatusCaja || '';
-          if (!this.estatusCajaLabel && this.listaEstatusCaja && this.listaEstatusCaja.length > 0) {
-            const foundEstatus = this.listaEstatusCaja.find((x: SelectItem) => x.id === idEstatusCaja);
-            if (foundEstatus) {
-              this.estatusCajaLabel = foundEstatus.text;
-            }
-          }
-        }
       },
       error: (error) => {
         console.error('Error al obtener caja:', error);
@@ -258,108 +207,6 @@ export class AgregarCajaComponent implements OnInit {
       limiteEfectivo: ['', Validators.required],
       requiereArqueo: [0, Validators.required],
     });
-  }
-
-  toggleSala(event: MouseEvent) {
-    event.preventDefault();
-    this.isSalaOpen = !this.isSalaOpen;
-    if (this.isSalaOpen) {
-      this.isZonaOpen = false;
-      this.isTipoCajaOpen = false;
-      this.isEstatusCajaOpen = false;
-    }
-  }
-
-  setSala(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.cajaForm.patchValue({ idSala: id });
-    this.salaLabel = nombre;
-    this.isSalaOpen = false;
-  }
-
-  toggleZona(event: MouseEvent) {
-    event.preventDefault();
-    this.isZonaOpen = !this.isZonaOpen;
-    if (this.isZonaOpen) {
-      this.isSalaOpen = false;
-      this.isTipoCajaOpen = false;
-      this.isEstatusCajaOpen = false;
-    }
-  }
-
-  setZona(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.cajaForm.patchValue({ idZona: id });
-    this.zonaLabel = nombre;
-    this.isZonaOpen = false;
-  }
-
-  toggleTipoCaja(event: MouseEvent) {
-    event.preventDefault();
-    this.isTipoCajaOpen = !this.isTipoCajaOpen;
-    if (this.isTipoCajaOpen) {
-      this.isSalaOpen = false;
-      this.isZonaOpen = false;
-      this.isEstatusCajaOpen = false;
-    }
-  }
-
-  setTipoCaja(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.cajaForm.patchValue({ idTipoCaja: id });
-    this.tipoCajaLabel = nombre;
-    this.isTipoCajaOpen = false;
-  }
-
-  toggleEstatusCaja(event: MouseEvent) {
-    event.preventDefault();
-    this.isEstatusCajaOpen = !this.isEstatusCajaOpen;
-    if (this.isEstatusCajaOpen) {
-      this.isSalaOpen = false;
-      this.isZonaOpen = false;
-      this.isTipoCajaOpen = false;
-    }
-  }
-
-  setEstatusCaja(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.cajaForm.patchValue({ idEstatusCaja: id });
-    this.estatusCajaLabel = nombre;
-    this.isEstatusCajaOpen = false;
-  }
-
-  toggleRequiereArqueo(event: MouseEvent) {
-    event.preventDefault();
-    this.isRequiereArqueoOpen = !this.isRequiereArqueoOpen;
-    if (this.isRequiereArqueoOpen) {
-      this.isSalaOpen = false;
-      this.isZonaOpen = false;
-      this.isTipoCajaOpen = false;
-      this.isEstatusCajaOpen = false;
-    }
-  }
-
-  setRequiereArqueo(valor: number, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.cajaForm.patchValue({ requiereArqueo: valor });
-    this.isRequiereArqueoOpen = false;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocClickCloseSelects(e: MouseEvent): void {
-    const target = e.target as HTMLElement;
-    if (target.closest('.select-sleek')) return;
-
-    this.isSalaOpen = false;
-    this.isZonaOpen = false;
-    this.isTipoCajaOpen = false;
-    this.isEstatusCajaOpen = false;
-    this.isRequiereArqueoOpen = false;
   }
 
   allowOnlyNumbers(event: KeyboardEvent): void {

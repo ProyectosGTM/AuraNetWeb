@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -24,12 +24,6 @@ export class AgregarTesoreriaComponent implements OnInit {
   public listaEstatusTesoreria: SelectItem[] = [];
 
   tesoreriaForm: FormGroup;
-
-  isSalaOpen = false;
-  salaLabel = '';
-
-  isEstatusTesoreriaOpen = false;
-  estatusTesoreriaLabel = '';
 
   constructor(
     private fb: FormBuilder,
@@ -57,6 +51,7 @@ export class AgregarTesoreriaComponent implements OnInit {
             this.listaSalas = (responses.salas.data || []).map((s: any) => ({
               ...s,
               id: Number(s.id),
+              text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
             }));
             
             // Procesar estatus tesorería
@@ -92,6 +87,7 @@ export class AgregarTesoreriaComponent implements OnInit {
         this.listaSalas = (response.data || []).map((s: any) => ({
           ...s,
           id: Number(s.id),
+          text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
         }));
       },
       error: (error) => {
@@ -135,39 +131,12 @@ export class AgregarTesoreriaComponent implements OnInit {
           }
         };
 
-        // Poblar el formulario con los datos requeridos
         this.tesoreriaForm.patchValue({
           idSala: Number(data.idSala ?? 0),
           fecha: formatDate(data.fecha),
           fondoInicial: data.fondoInicial?.toString() || '',
           idEstatusTesoreria: data.idEstatusTesoreria ? Number(data.idEstatusTesoreria) : null,
         });
-
-        // Establecer label de sala - usar nombreSala del response
-        const idSala = Number(data.idSala ?? 0);
-        if (idSala) {
-          // Priorizar nombreSala del response, luego buscar en lista
-          this.salaLabel = data.nombreSala || '';
-          if (!this.salaLabel && this.listaSalas && this.listaSalas.length > 0) {
-            const foundSala = this.listaSalas.find((x: any) => Number(x.id) === idSala);
-            if (foundSala) {
-              this.salaLabel = foundSala.nombreSala || foundSala.nombre || 'Sala';
-            }
-          }
-        }
-
-        // Establecer label de estatus tesorería
-        const idEstatus = Number(data.idEstatusTesoreria ?? 0);
-        if (idEstatus) {
-          // Priorizar nombreEstatusTesoreria del response
-          this.estatusTesoreriaLabel = data.nombreEstatusTesoreria || '';
-          if (!this.estatusTesoreriaLabel && this.listaEstatusTesoreria && this.listaEstatusTesoreria.length > 0) {
-            const foundEstatus = this.listaEstatusTesoreria.find((x: SelectItem) => x.id === idEstatus);
-            if (foundEstatus) {
-              this.estatusTesoreriaLabel = foundEstatus.text;
-            }
-          }
-        }
       },
       error: (error) => {
         console.error('Error al obtener tesorería:', error);
@@ -190,47 +159,6 @@ export class AgregarTesoreriaComponent implements OnInit {
       fondoInicial: ['', Validators.required],
       idEstatusTesoreria: [null, Validators.required],
     });
-  }
-
-  toggleSala(event: MouseEvent) {
-    event.preventDefault();
-    this.isSalaOpen = !this.isSalaOpen;
-    if (this.isSalaOpen) {
-      this.isEstatusTesoreriaOpen = false;
-    }
-  }
-
-  setSala(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.tesoreriaForm.patchValue({ idSala: id });
-    this.salaLabel = nombre;
-    this.isSalaOpen = false;
-  }
-
-  toggleEstatusTesoreria(event: MouseEvent) {
-    event.preventDefault();
-    this.isEstatusTesoreriaOpen = !this.isEstatusTesoreriaOpen;
-    if (this.isEstatusTesoreriaOpen) {
-      this.isSalaOpen = false;
-    }
-  }
-
-  setEstatusTesoreria(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.tesoreriaForm.patchValue({ idEstatusTesoreria: id });
-    this.estatusTesoreriaLabel = nombre;
-    this.isEstatusTesoreriaOpen = false;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocClickCloseSelects(e: MouseEvent): void {
-    const target = e.target as HTMLElement;
-    if (target.closest('.select-sleek')) return;
-
-    this.isSalaOpen = false;
-    this.isEstatusTesoreriaOpen = false;
   }
 
   allowOnlyNumbers(event: KeyboardEvent): void {

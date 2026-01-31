@@ -67,22 +67,17 @@
                 <div class="col-12 col-md-6 col-lg-3">
                   <label class="field">
                     <span class="field-label text-white">Sala</span>
-                    <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
-                      (mousedown)="toggleSala($event)">
-                      <i class="fas fa-door-open"></i>
-                      <div class="sleek-control select-display">
-                        <span class="select-value" [class.placeholder]="!zonaForm.get('idSala')?.value">
-                          {{ salaLabel || 'Selecciona una sala...' }}
-                        </span>
-                      </div>
-                      <span class="sleek-line"></span>
-                      <div class="select-panel" *ngIf="isSalaOpen" (mousedown)="$event.stopPropagation()">
-                        <button type="button" class="select-option" *ngFor="let s of listaSalas"
-                          (mousedown)="setSala(s.idSala, s.nombreSala, $event)">
-                          {{ s.nombreSala }}
-                        </button>
-                      </div>
-                    </div>
+                    <dx-select-box
+                      [dataSource]="listaSalas"
+                      displayExpr="text"
+                      valueExpr="id"
+                      formControlName="idSala"
+                      placeholder="Selecciona una sala..."
+                      searchEnabled="true"
+                      searchMode="contains"
+                      [showClearButton]="true"
+                      class="dx-select-box-custom dx-select-box-sala">
+                    </dx-select-box>
                   </label>
                 </div>
                 <div class="col-12 col-md-6 col-lg-3">

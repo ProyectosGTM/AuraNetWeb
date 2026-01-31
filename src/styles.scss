@@ -352,11 +352,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .input-sleek {
   position: relative;
   width: 100%;
-  border-radius: 14px;
-  padding: 17px 14px 14px 44px;
-  background: rgba(13, 18, 29, 0.35);
-  border: 1px solid rgba(108, 117, 125, 0.35);
-  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  padding: 14px 16px 14px 44px;
+  background: #1e2832;
+  border: none;
+  border-bottom: 1px solid #8996af;
+  box-shadow: none;
   transition: 0.25s ease;
 }
 
@@ -540,6 +541,335 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .select-option:hover {
   background: rgba(228, 0, 65, 0.2);
+}
+
+/* ========== DevExtreme SelectBox (global) ========== */
+.dx-select-box-custom {
+  width: 100% !important;
+  min-height: 50px !important;
+
+  .dx-textbox {
+    min-height: 50px !important;
+  }
+
+  .dx-textbox-input {
+    background: rgba(13, 18, 29, 0.35) !important;
+    border: 1px solid rgba(108, 117, 125, 0.35) !important;
+    border-radius: 14px !important;
+    color: #ffffff !important;
+    padding: 20px 14px 17px 44px !important;
+    min-height: 50px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 14px !important;
+    transition: all 0.25s ease !important;
+
+    &:focus {
+      background: rgba(27, 33, 51, 0.65) !important;
+      border-color: rgba(106, 140, 255, 0.7) !important;
+      box-shadow: 0 0 0 3px rgba(106, 140, 255, 0.14), 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.45) !important;
+    }
+  }
+
+  .dx-textbox-container {
+    position: relative;
+  }
+
+  .dx-dropdowneditor-icon {
+    color: rgba(255, 255, 255, 0.65) !important;
+    right: 14px !important;
+  }
+
+  &.dx-state-focused .dx-textbox-input {
+    background: rgba(27, 33, 51, 0.65) !important;
+    border-color: rgba(106, 140, 255, 0.7) !important;
+    box-shadow: 0 0 0 3px rgba(106, 140, 255, 0.14), 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+  }
+}
+
+/* Icon modifiers (Font Awesome 5 Free) */
+.dx-select-box-custom.dx-select-box-caja .dx-textbox-container::before {
+  content: '\f1b0';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-monedero .dx-textbox-container::before,
+.dx-select-box-custom.dx-select-box-boveda .dx-textbox-container::before {
+  content: '\f555';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-sala .dx-textbox-container::before {
+  content: '\f1ad';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-modulo .dx-textbox-container::before {
+  content: '\f3ed';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-zona .dx-textbox-container::before {
+  content: '\f5fd';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-tipo-caja .dx-textbox-container::before {
+  content: '\f466';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-estatus .dx-textbox-container::before {
+  content: '\f205';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-turno .dx-textbox-container::before {
+  content: '\f017';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-afiliado .dx-textbox-container::before {
+  content: '\f007';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-tipo-id .dx-textbox-container::before {
+  content: '\f2c2';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-sexo .dx-textbox-container::before {
+  content: '\f228';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-es-principal .dx-textbox-container::before {
+  content: '\f005';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-rol .dx-textbox-container::before {
+  content: '\f505';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-cliente .dx-textbox-container::before {
+  content: '\f1ad';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-maquina .dx-textbox-container::before,
+.dx-select-box-custom.dx-select-box-tipo-maquina .dx-textbox-container::before {
+  content: '\f1b9';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-fabricante .dx-textbox-container::before {
+  content: '\f275';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-moneda .dx-textbox-container::before {
+  content: '\f51e';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+.dx-select-box-custom.dx-select-box-tipo-zona .dx-textbox-container::before {
+  content: '\f5fd';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dx-popup-wrapper { z-index: 10000 !important; }
+.dx-overlay-content {
+  background: rgba(13, 18, 29, 0.96) !important;
+  border: 1px solid rgba(108, 117, 125, 0.35) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(8px) !important;
+}
+.dx-list {
+  background: transparent !important;
+  .dx-list-item {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    transition: background 0.15s ease !important;
+    &:hover { background: rgba(228, 0, 65, 0.2) !important; }
+    &.dx-state-selected { background: rgba(228, 0, 65, 0.3) !important; }
+  }
+}
+.dx-scrollable-scrollbar .dx-scrollbar-scrollable .dx-scrollbar-scroll {
+  background: rgba(228, 0, 65, 0.55) !important;
+  &:hover { background: rgba(228, 0, 65, 0.75) !important; }
 }
 
 // Estilos duplicados removidos - usar los definidos arriba

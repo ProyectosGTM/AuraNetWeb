@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -21,16 +21,12 @@ export class AgregarMonederoComponent implements OnInit {
   public title = 'Agregar Monedero';
   public listaAfiliados: any[] = [];
   public listaEstatusMonedero: SelectItem[] = [];
+  public listaEsPrincipal: SelectItem[] = [
+    { id: 0, text: 'No' },
+    { id: 1, text: 'Sí' },
+  ];
 
   monederoForm: FormGroup;
-
-  isAfiliadoOpen = false;
-  afiliadoLabel = '';
-
-  isEstatusMonederoOpen = false;
-  estatusMonederoLabel = '';
-
-  isEsPrincipalOpen = false;
 
   constructor(
     private fb: FormBuilder,
@@ -70,11 +66,10 @@ export class AgregarMonederoComponent implements OnInit {
   }
 
   private procesarListas(responses: any) {
-    this.listaAfiliados = (responses.afiliados.data || []).map((a: any) => ({
-      ...a,
-      id: Number(a.id),
-      nombreCompleto: `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim()
-    }));
+    this.listaAfiliados = (responses.afiliados.data || []).map((a: any) => {
+      const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();
+      return { ...a, id: Number(a.id), text: text || 'Sin nombre' };
+    });
 
     this.listaEstatusMonedero = (responses.estatusMonedero.data || []).map((e: any) => ({
       id: Number(e.id),
@@ -90,11 +85,10 @@ export class AgregarMonederoComponent implements OnInit {
   obtenerAfiliados(): void {
     this.monederosService.obtenerAfiliados().subscribe({
       next: (response: any) => {
-        this.listaAfiliados = (response.data || []).map((a: any) => ({
-          ...a,
-          id: Number(a.id),
-          nombreCompleto: `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim()
-        }));
+        this.listaAfiliados = (response.data || []).map((a: any) => {
+          const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();
+          return { ...a, id: Number(a.id), text: text || 'Sin nombre' };
+        });
       },
       error: (error) => {
         console.error('Error al obtener afiliados:', error);
@@ -129,28 +123,6 @@ export class AgregarMonederoComponent implements OnInit {
           alias: data.alias || '',
           idEstatusMonedero: data.idEstatusMonedero ? Number(data.idEstatusMonedero) : null,
         });
-
-        const idAfiliado = Number(data.idAfiliado ?? 0);
-        if (idAfiliado) {
-          this.afiliadoLabel = data.nombreCompletoAfiliado || '';
-          if (!this.afiliadoLabel && this.listaAfiliados && this.listaAfiliados.length > 0) {
-            const foundAfiliado = this.listaAfiliados.find((x: any) => Number(x.id) === idAfiliado);
-            if (foundAfiliado) {
-              this.afiliadoLabel = foundAfiliado.nombreCompleto || 'Afiliado';
-            }
-          }
-        }
-
-        const idEstatusMonedero = Number(data.idEstatusMonedero ?? 0);
-        if (idEstatusMonedero) {
-          this.estatusMonederoLabel = data.nombreEstatusMonedero || '';
-          if (!this.estatusMonederoLabel && this.listaEstatusMonedero && this.listaEstatusMonedero.length > 0) {
-            const foundEstatus = this.listaEstatusMonedero.find((x: SelectItem) => x.id === idEstatusMonedero);
-            if (foundEstatus) {
-              this.estatusMonederoLabel = foundEstatus.text;
-            }
-          }
-        }
       },
       error: (error) => {
         console.error('Error al obtener monedero:', error);
@@ -175,66 +147,6 @@ export class AgregarMonederoComponent implements OnInit {
       alias: [''],
       idEstatusMonedero: [null, Validators.required],
     });
-  }
-
-  toggleAfiliado(event: MouseEvent) {
-    event.preventDefault();
-    this.isAfiliadoOpen = !this.isAfiliadoOpen;
-    if (this.isAfiliadoOpen) {
-      this.isEstatusMonederoOpen = false;
-      this.isEsPrincipalOpen = false;
-    }
-  }
-
-  setAfiliado(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.monederoForm.patchValue({ idAfiliado: id });
-    this.afiliadoLabel = nombre;
-    this.isAfiliadoOpen = false;
-  }
-
-  toggleEstatusMonedero(event: MouseEvent) {
-    event.preventDefault();
-    this.isEstatusMonederoOpen = !this.isEstatusMonederoOpen;
-    if (this.isEstatusMonederoOpen) {
-      this.isAfiliadoOpen = false;
-      this.isEsPrincipalOpen = false;
-    }
-  }
-
-  setEstatusMonedero(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.monederoForm.patchValue({ idEstatusMonedero: id });
-    this.estatusMonederoLabel = nombre;
-    this.isEstatusMonederoOpen = false;
-  }
-
-  toggleEsPrincipal(event: MouseEvent) {
-    event.preventDefault();
-    this.isEsPrincipalOpen = !this.isEsPrincipalOpen;
-    if (this.isEsPrincipalOpen) {
-      this.isAfiliadoOpen = false;
-      this.isEstatusMonederoOpen = false;
-    }
-  }
-
-  setEsPrincipal(valor: number, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.monederoForm.patchValue({ esPrincipal: valor });
-    this.isEsPrincipalOpen = false;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocClickCloseSelects(e: MouseEvent): void {
-    const target = e.target as HTMLElement;
-    if (target.closest('.select-sleek')) return;
-
-    this.isAfiliadoOpen = false;
-    this.isEstatusMonederoOpen = false;
-    this.isEsPrincipalOpen = false;
   }
 
   buildPayloadMonedero(): any {

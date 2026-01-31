@@ -92,64 +92,49 @@
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Cliente</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isClienteOpen"
-                        (mousedown)="toggleCliente($event)">
-                        <i class="fas fa-building"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idCliente')?.value">
-                            {{ clienteLabel || 'Selecciona un cliente...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isClienteOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let c of listaClientes"
-                            (mousedown)="setCliente(c.id, c.nombre, $event)">
-                            {{ c.nombre }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaClientes"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idCliente"
+                        placeholder="Selecciona un cliente..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-cliente">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Sala</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
-                        (mousedown)="toggleSala($event)">
-                        <i class="fas fa-door-open"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idSala')?.value">
-                            {{ salaLabel || 'Selecciona una sala...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isSalaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let s of listaSalas"
-                            (mousedown)="setSala(s.id, s.nombre, $event)">
-                            {{ s.nombre }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaSalas"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idSala"
+                        placeholder="Selecciona una sala..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-sala">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Zona</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isZonaOpen"
-                        (mousedown)="toggleZona($event)">
-                        <i class="fas fa-th"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idZona')?.value">
-                            {{ zonaLabel || 'Selecciona una zona...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isZonaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let z of listaZonas"
-                            (mousedown)="setZona(z.id, z.nombre, $event)">
-                            {{ z.nombre }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaZonas"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idZona"
+                        placeholder="Selecciona una zona..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-zona">
+                      </dx-select-box>
                     </label>
                   </div>
                 </div>
@@ -168,64 +153,49 @@
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Tipo de Máquina</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isTipoMaquinaOpen"
-                        (mousedown)="toggleTipoMaquina($event)">
-                        <i class="fas fa-list"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idTipoMaquina')?.value">
-                            {{ tipoMaquinaLabel || 'Selecciona un tipo...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isTipoMaquinaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let t of listaTipoMaquina"
-                            (mousedown)="setTipoMaquina(t.id, t.text, $event)">
-                            {{ t.text }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaTipoMaquina"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idTipoMaquina"
+                        placeholder="Selecciona un tipo..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-tipo-maquina">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Fabricante</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isFabricanteOpen"
-                        (mousedown)="toggleFabricante($event)">
-                        <i class="fas fa-industry"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idFabricante')?.value">
-                            {{ fabricanteLabel || 'Selecciona un fabricante...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isFabricanteOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let f of listaFabricantes"
-                            (mousedown)="setFabricante(f.id, f.text, $event)">
-                            {{ f.text }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaFabricantes"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idFabricante"
+                        placeholder="Selecciona un fabricante..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-fabricante">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Estatus</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isEstatusMaquinaOpen"
-                        (mousedown)="toggleEstatusMaquina($event)">
-                        <i class="fas fa-check-circle"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!maquinaForm.get('idEstatusMaquina')?.value">
-                            {{ estatusMaquinaLabel || 'Selecciona un estatus...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isEstatusMaquinaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let e of listaEstatusMaquina"
-                            (mousedown)="setEstatusMaquina(e.id, e.text, $event)">
-                            {{ e.text }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaEstatusMaquina"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idEstatusMaquina"
+                        placeholder="Selecciona un estatus..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
                     </label>
                   </div>
                 </div>

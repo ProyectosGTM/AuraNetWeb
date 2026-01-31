@@ -99,9 +99,6 @@ export class AgregarZonaComponent implements OnInit {
   isTipoZonaOpen = false;
   tipoZonaLabel = '';
 
-  isSalaOpen = false;
-  salaLabel = '';
-
   isMaquinaOpen = false;
   maquinaLabel = '';
   listaTiposMaquina = [
@@ -115,7 +112,6 @@ export class AgregarZonaComponent implements OnInit {
     event.preventDefault();
     this.isTipoZonaOpen = !this.isTipoZonaOpen;
     if (this.isTipoZonaOpen) {
-      this.isSalaOpen = false;
       this.isMaquinaOpen = false;
     }
   }
@@ -124,7 +120,6 @@ export class AgregarZonaComponent implements OnInit {
     event.preventDefault();
     this.isMaquinaOpen = !this.isMaquinaOpen;
     if (this.isMaquinaOpen) {
-      this.isSalaOpen = false;
       this.isTipoZonaOpen = false;
     }
   }
@@ -166,22 +161,6 @@ export class AgregarZonaComponent implements OnInit {
     this.tipoZonaLabel = nombre;
     this.isTipoZonaOpen = false;
     this.addZone();
-  }
-
-  toggleSala(event: MouseEvent) {
-    event.preventDefault();
-    this.isSalaOpen = !this.isSalaOpen;
-    if (this.isSalaOpen) {
-      this.isTipoZonaOpen = false;
-    }
-  }
-
-  setSala(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.zonaForm.patchValue({ idSala: id });
-    this.salaLabel = nombre;
-    this.isSalaOpen = false;
   }
 
   constructor(
@@ -251,18 +230,11 @@ export class AgregarZonaComponent implements OnInit {
 
   obtenerSalas() {
     this.salaService.obtenerSalas().subscribe((response) => {
-      this.listaSalas = (response.data || []).map((c: any) => ({
-        ...c,
-        idSala: Number(c.idSala),
-      }));
-      // Actualizar label si ya hay un valor en el formulario
-      const currentId = Number(this.zonaForm.get('idSala')?.value ?? 0);
-      if (currentId && this.listaSalas && this.listaSalas.length > 0) {
-        const found = this.listaSalas.find((x: any) => Number(x.idSala) === currentId);
-        if (found) {
-          this.salaLabel = found.nombreSala;
-        }
-      }
+      this.listaSalas = (response.data || []).map((c: any) => {
+        const id = Number(c.idSala ?? c.id);
+        const text = (c.nombreSala ?? c.nombre ?? 'Sin nombre').trim();
+        return { ...c, id, idSala: id, text };
+      });
     });
   }
 
@@ -301,22 +273,6 @@ export class AgregarZonaComponent implements OnInit {
           } else {
             // Si la lista aún no está cargada, usar el nombre del servicio
             this.tipoZonaLabel = data.nombreTipoZona ?? '';
-          }
-        }
-
-        const idSala = Number(data.idSala ?? 0);
-        if (idSala) {
-          if (this.listaSalas && this.listaSalas.length > 0) {
-            const foundSala = this.listaSalas.find((x: any) => Number(x.idSala) === idSala);
-            if (foundSala) {
-              this.salaLabel = foundSala.nombreSala;
-            } else {
-              // Si no se encuentra en la lista, usar el nombre del servicio
-              this.salaLabel = data.nombreSala ?? '';
-            }
-          } else {
-            // Si la lista aún no está cargada, usar el nombre del servicio
-            this.salaLabel = data.nombreSala ?? '';
           }
         }
 
@@ -521,7 +477,6 @@ export class AgregarZonaComponent implements OnInit {
     if (target.closest('.select-sleek')) return;
 
     this.isTipoZonaOpen = false;
-    this.isSalaOpen = false;
     this.isMaquinaOpen = false;
   }
 

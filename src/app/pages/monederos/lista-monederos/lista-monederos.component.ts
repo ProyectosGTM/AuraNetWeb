@@ -1,4 +1,4 @@
-import { Component, HostListener, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -45,22 +45,10 @@ export class ListaMonederosComponent {
   public listaTurnos: any[] = [];
   public listaMonederosDisponibles: any[] = [];
 
-  // Estados para selects cargar monedero
-  isTurnoCajaOpen = false;
-  turnoCajaLabel = '';
-  isMonederoOpen = false;
-  monederoLabel = '';
-
   // Formulario para descargar monedero
   descargarMonederoForm: FormGroup;
   public listaTurnosDescargar: any[] = [];
   public listaMonederosDisponiblesDescargar: any[] = [];
-
-  // Estados para selects descargar monedero
-  isTurnoCajaDescargarOpen = false;
-  turnoCajaDescargarLabel = '';
-  isMonederoDescargarOpen = false;
-  monederoDescargarLabel = '';
 
   // Formulario y datos para consultar saldo
   consultarSaldoForm: FormGroup;
@@ -94,21 +82,6 @@ export class ListaMonederosComponent {
   ngOnInit() {
     this.cargarEstatusMonedero();
     this.setupDataSource();
-  }
-
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
-  }
-
-  private closeSelects() {
-    this.isTurnoCajaOpen = false;
-    this.isMonederoOpen = false;
-    this.isTurnoCajaDescargarOpen = false;
-    this.isMonederoDescargarOpen = false;
   }
 
   cargarEstatusMonedero() {
@@ -415,30 +388,6 @@ export class ListaMonederosComponent {
     });
   }
 
-  toggleTurnoCaja(event: any) {
-    event.stopPropagation();
-    this.isTurnoCajaOpen = !this.isTurnoCajaOpen;
-  }
-
-  setTurnoCaja(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.cargarMonederoForm.patchValue({ idTurnoCaja: id });
-    this.turnoCajaLabel = label;
-    this.isTurnoCajaOpen = false;
-  }
-
-  toggleMonedero(event: any) {
-    event.stopPropagation();
-    this.isMonederoOpen = !this.isMonederoOpen;
-  }
-
-  setMonedero(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.cargarMonederoForm.patchValue({ idMonedero: id });
-    this.monederoLabel = label;
-    this.isMonederoOpen = false;
-  }
-
   guardarCargarMonedero() {
     if (this.cargarMonederoForm.invalid) {
       Swal.fire({
@@ -470,8 +419,6 @@ export class ListaMonederosComponent {
         });
         this.cerrarModal();
         this.cargarMonederoForm.reset();
-        this.turnoCajaLabel = '';
-        this.monederoLabel = '';
         this.setupDataSource();
         if (this.dataGrid) {
           this.dataGrid.instance.refresh();
@@ -632,30 +579,6 @@ export class ListaMonederosComponent {
     }
   }
 
-  toggleTurnoCajaDescargar(event: any) {
-    event.stopPropagation();
-    this.isTurnoCajaDescargarOpen = !this.isTurnoCajaDescargarOpen;
-  }
-
-  setTurnoCajaDescargar(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.descargarMonederoForm.patchValue({ idTurnoCaja: id });
-    this.turnoCajaDescargarLabel = label;
-    this.isTurnoCajaDescargarOpen = false;
-  }
-
-  toggleMonederoDescargar(event: any) {
-    event.stopPropagation();
-    this.isMonederoDescargarOpen = !this.isMonederoDescargarOpen;
-  }
-
-  setMonederoDescargar(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.descargarMonederoForm.patchValue({ idMonedero: id });
-    this.monederoDescargarLabel = label;
-    this.isMonederoDescargarOpen = false;
-  }
-
   guardarDescargarMonedero() {
     if (this.descargarMonederoForm.invalid) {
       Swal.fire({
@@ -705,15 +628,7 @@ export class ListaMonederosComponent {
     if (this.modalRef) {
       this.modalRef.close();
       this.cargarMonederoForm.reset();
-      this.turnoCajaLabel = '';
-      this.monederoLabel = '';
-      this.isTurnoCajaOpen = false;
-      this.isMonederoOpen = false;
       this.descargarMonederoForm.reset();
-      this.turnoCajaDescargarLabel = '';
-      this.monederoDescargarLabel = '';
-      this.isTurnoCajaDescargarOpen = false;
-      this.isMonederoDescargarOpen = false;
       this.consultarSaldoForm.reset();
       this.saldoData = null;
       this.consultandoSaldo = false;

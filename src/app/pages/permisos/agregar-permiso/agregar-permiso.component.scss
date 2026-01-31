@@ -1,0 +1,104 @@
+// Mismo DevExtreme SelectBox que Recarga
+::ng-deep {
+  .dx-select-box-custom {
+    width: 100% !important;
+    min-height: 50px !important;
+
+    .dx-textbox {
+      min-height: 50px !important;
+    }
+
+    .dx-textbox-input {
+      background: rgba(13, 18, 29, 0.35) !important;
+      border: 1px solid rgba(108, 117, 125, 0.35) !important;
+      border-radius: 14px !important;
+      color: #ffffff !important;
+      padding: 20px 14px 17px 44px !important;
+      min-height: 50px !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 14px !important;
+      transition: all 0.25s ease !important;
+
+      &:focus {
+        background: rgba(27, 33, 51, 0.65) !important;
+        border-color: rgba(106, 140, 255, 0.7) !important;
+        box-shadow: 0 0 0 3px rgba(106, 140, 255, 0.14), 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+      }
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.45) !important;
+      }
+    }
+
+    .dx-textbox-container {
+      position: relative;
+    }
+
+    &.dx-select-box-modulo .dx-textbox-container::before {
+      content: '\f3ed';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #e40041;
+      opacity: 0.95;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .dx-dropdowneditor-icon {
+      color: rgba(255, 255, 255, 0.65) !important;
+      right: 14px !important;
+    }
+
+    &.dx-state-focused .dx-textbox-input {
+      background: rgba(27, 33, 51, 0.65) !important;
+      border-color: rgba(106, 140, 255, 0.7) !important;
+      box-shadow: 0 0 0 3px rgba(106, 140, 255, 0.14), 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+    }
+  }
+
+  .dx-popup-wrapper {
+    z-index: 10000 !important;
+  }
+
+  .dx-overlay-content {
+    background: rgba(13, 18, 29, 0.96) !important;
+    border: 1px solid rgba(108, 117, 125, 0.35) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  .dx-list {
+    background: transparent !important;
+
+    .dx-list-item {
+      color: rgba(255, 255, 255, 0.9) !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 12px !important;
+      padding: 6px 10px !important;
+      border-radius: 8px !important;
+      transition: background 0.15s ease !important;
+
+      &:hover {
+        background: rgba(228, 0, 65, 0.2) !important;
+      }
+
+      &.dx-state-selected {
+        background: rgba(228, 0, 65, 0.3) !important;
+      }
+    }
+  }
+
+  .dx-scrollable-scrollbar .dx-scrollbar-scrollable .dx-scrollbar-scroll {
+    background: rgba(228, 0, 65, 0.55) !important;
+
+    &:hover {
+      background: rgba(228, 0, 65, 0.75) !important;
+    }
+  }
+}

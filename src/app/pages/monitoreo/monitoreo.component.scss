@@ -265,7 +265,8 @@
 }
 
 .panel-list {
-  --item-h: 62px;
+  /* Mesero cards (casino-item) now use Capitán size → larger item height */
+  --item-h: 88px;
   --gap: 8px;
 
   height: calc((var(--item-h) * 3) + (var(--gap) * 2));
@@ -280,13 +281,14 @@
   gap: var(--gap);
 }
 
+/* Mesero cards: use Capitán size, proportions, padding and visual hierarchy */
 .casino-item {
   width: 100%;
   text-align: left;
   border-radius: 16px;
   border: 1px solid var(--stroke);
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.10));
-  padding: 9px 10px;
+  padding: 10px;
 
   display: grid;
   grid-template-columns: 32px 1fr 24px;
@@ -297,6 +299,7 @@
   cursor: pointer;
   transition: transform .12s ease, border-color .12s ease, background .12s ease;
   height: var(--item-h);
+  min-height: var(--item-h);
 
   &:hover {
     border-color: rgba(255, 10, 92, 0.35);
@@ -360,7 +363,7 @@
   }
 
   .ci-meta {
-    margin-top: 2px;
+    margin-top: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -387,9 +390,10 @@
   }
 }
 
+/* Capitán cards: use Mesero size — compact padding, tighter gaps */
 .panel-detail {
-  margin-top: 14px;
-  padding: 10px;
+  margin-top: 8px;
+  padding: 9px 10px;
   border-top: 1px solid var(--stroke);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18));
   flex: 1;
@@ -400,7 +404,7 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 10px;
+    gap: 6px;
   }
 
   .pd-title {
@@ -457,15 +461,15 @@
   }
 
   .pd-body {
-    margin-top: 8px;
+    margin-top: 2px;
     display: grid;
-    gap: 7px;
+    gap: 4px;
   }
 
   .pd-row {
     display: grid;
     grid-template-columns: 120px 1fr;
-    gap: 10px;
+    gap: 6px;
     align-items: center;
 
     .pd-k {
@@ -483,19 +487,19 @@
   }
 
   .pd-actions {
-    margin-top: 10px;
+    margin-top: 6px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 6px;
 
     button {
       border-radius: 14px;
-      padding: 9px 10px;
+      padding: 6px 8px;
       border: 1px solid var(--stroke);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 6px;
       font-weight: 800;
       font-size: 11.5px;
       cursor: pointer;
@@ -654,13 +658,13 @@
   }
 
   .panel-list {
-    --item-h: 60px;
+    --item-h: 88px;
     height: calc((var(--item-h) * 3) + (var(--gap) * 2));
   }
 
   .panel-detail {
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 8px;
+    padding: 9px 10px;
   }
 }
 
@@ -704,7 +708,7 @@
 }
 
 .panel-list {
-  --item-h: 62px;
+  --item-h: 88px;
   --gap: 8px;
 
   height: calc((var(--item-h) * 3) + (var(--gap) * 2));
@@ -720,7 +724,8 @@
 
 .casino-item {
   height: var(--item-h);
-  padding: 9px 10px;
+  min-height: var(--item-h);
+  padding: 10px;
 }
 
 .casino-item .ci-name {
@@ -729,20 +734,20 @@
 
 .casino-item .ci-meta {
   font-size: 11px;
-  margin-top: 2px;
+  margin-top: 8px;
 }
 
 .panel-detail {
-  flex: 0 0 auto;
-  margin-top: auto;
-  padding: 16px;
+  flex: 1;
+  min-height: 0;
+  margin-top: 8px;
+  padding: 9px 10px;
   overflow: hidden;
-  margin-top: 10px;
 }
 
 .panel-detail .pd-body {
-  margin-top: 8px;
-  gap: 7px;
+  margin-top: 2px;
+  gap: 4px;
 }
 
 .panel-detail .pd-row {
@@ -758,11 +763,11 @@
 }
 
 .panel-detail .pd-actions {
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .panel-detail .pd-actions button {
-  padding: 9px 10px;
+  padding: 6px 8px;
   font-size: 11.5px;
 }
 

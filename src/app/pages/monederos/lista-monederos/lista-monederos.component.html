@@ -172,49 +172,35 @@
                         <div class="col-12 col-md-6">
                             <label class="field">
                                 <span class="field-label text-white">Turno de Caja *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isTurnoCajaOpen"
-                                    (mousedown)="toggleTurnoCaja($event)">
-                                    <i class="fas fa-cash-register"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!cargarMonederoForm.get('idTurnoCaja')?.value">
-                                            {{ turnoCajaLabel || 'Selecciona un turno...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isTurnoCajaOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let t of listaTurnos"
-                                            (mousedown)="setTurnoCaja(t.id, t.text, $event)">
-                                            {{ t.text }}
-                                        </button>
-                                        <div *ngIf="listaTurnos.length === 0" class="select-option select-option-disabled">
-                                            No hay turnos disponibles
-                                        </div>
-                                    </div>
-                                </div>
+                                <dx-select-box
+                                    [dataSource]="listaTurnos"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idTurnoCaja"
+                                    placeholder="Selecciona un turno..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    class="dx-select-box-custom dx-select-box-turno">
+                                </dx-select-box>
+                                <div *ngIf="listaTurnos.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
                                 <span class="field-label text-white">Monedero *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isMonederoOpen"
-                                    (mousedown)="toggleMonedero($event)">
-                                    <i class="fas fa-wallet"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!cargarMonederoForm.get('idMonedero')?.value">
-                                            {{ monederoLabel || 'Selecciona un monedero...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isMonederoOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let m of listaMonederosDisponibles"
-                                            (mousedown)="setMonedero(m.id, m.text, $event)">
-                                            {{ m.text }}
-                                        </button>
-                                        <div *ngIf="listaMonederosDisponibles.length === 0" class="select-option select-option-disabled">
-                                            No hay monederos disponibles
-                                        </div>
-                                    </div>
-                                </div>
+                                <dx-select-box
+                                    [dataSource]="listaMonederosDisponibles"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idMonedero"
+                                    placeholder="Selecciona un monedero..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    class="dx-select-box-custom dx-select-box-monedero">
+                                </dx-select-box>
+                                <div *ngIf="listaMonederosDisponibles.length === 0" class="text-muted small mt-1">No hay monederos disponibles</div>
                             </label>
                         </div>
                         <div style="display: flex; justify-content: center; align-items: center;">
@@ -270,49 +256,35 @@
                         <div class="col-12 col-md-6">
                             <label class="field">
                                 <span class="field-label text-white">Turno de Caja *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isTurnoCajaDescargarOpen"
-                                    (mousedown)="toggleTurnoCajaDescargar($event)">
-                                    <i class="fas fa-cash-register"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!descargarMonederoForm.get('idTurnoCaja')?.value">
-                                            {{ turnoCajaDescargarLabel || 'Selecciona un turno...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isTurnoCajaDescargarOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let t of listaTurnosDescargar"
-                                            (mousedown)="setTurnoCajaDescargar(t.id, t.text, $event)">
-                                            {{ t.text }}
-                                        </button>
-                                        <div *ngIf="listaTurnosDescargar.length === 0" class="select-option select-option-disabled">
-                                            No hay turnos disponibles
-                                        </div>
-                                    </div>
-                                </div>
+                                <dx-select-box
+                                    [dataSource]="listaTurnosDescargar"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idTurnoCaja"
+                                    placeholder="Selecciona un turno..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    class="dx-select-box-custom dx-select-box-turno">
+                                </dx-select-box>
+                                <div *ngIf="listaTurnosDescargar.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
                                 <span class="field-label text-white">Monedero *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isMonederoDescargarOpen"
-                                    (mousedown)="toggleMonederoDescargar($event)">
-                                    <i class="fas fa-wallet"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!descargarMonederoForm.get('idMonedero')?.value">
-                                            {{ monederoDescargarLabel || 'Selecciona un monedero...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isMonederoDescargarOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let m of listaMonederosDisponiblesDescargar"
-                                            (mousedown)="setMonederoDescargar(m.id, m.text, $event)">
-                                            {{ m.text }}
-                                        </button>
-                                        <div *ngIf="listaMonederosDisponiblesDescargar.length === 0" class="select-option select-option-disabled">
-                                            No hay monederos disponibles
-                                        </div>
-                                    </div>
-                                </div>
+                                <dx-select-box
+                                    [dataSource]="listaMonederosDisponiblesDescargar"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idMonedero"
+                                    placeholder="Selecciona un monedero..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    class="dx-select-box-custom dx-select-box-monedero">
+                                </dx-select-box>
+                                <div *ngIf="listaMonederosDisponiblesDescargar.length === 0" class="text-muted small mt-1">No hay monederos disponibles</div>
                             </label>
                         </div>
                         <div style="display: flex; justify-content: center; align-items: center;">

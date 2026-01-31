@@ -31,7 +31,6 @@
                         </div>
                     </div>
                 </div>
-                Sección de Acciones POST
                 <div class="row mt-3">
                     <div class="col-12">
                         <div class="action-buttons-card">
@@ -58,6 +57,15 @@
                                     <div class="btn-action-text">
                                         <span class="btn-action-label">Cerrar Turno</span>
                                         <span class="btn-action-desc">Finalizar turno activo</span>
+                                    </div>
+                                </button>
+                                <button (click)="consultarSaldoCaja()" type="button" class="btn-action-large btn-action-large-info">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-wallet"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Consultar saldo caja</span>
+                                        <span class="btn-action-desc">Obtener saldo de una caja</span>
                                     </div>
                                 </button>
                             </div>
@@ -211,64 +219,49 @@
                         <div class="col-12 col-md-6">
                             <label class="field">
                                 <span class="field-label text-white">Caja *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isCajaOpen"
-                                    (mousedown)="toggleCaja($event)">
-                                    <i class="fas fa-cash-register"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idCaja')?.value">
-                                            {{ cajaLabel || 'Selecciona una caja...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isCajaOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let c of listaCajas"
-                                            (mousedown)="setCaja(c.id, c.text, $event)">
-                                            {{ c.text }}
-                                        </button>
-                                    </div>
-                                </div>
+                                <dx-select-box
+                                    [dataSource]="listaCajas"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idCaja"
+                                    placeholder="Selecciona una caja..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    class="dx-select-box-custom dx-select-box-caja">
+                                </dx-select-box>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
                                 <span class="field-label text-white">Estatus Turno *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isEstatusTurnoOpen"
-                                    (mousedown)="toggleEstatusTurno($event)">
-                                    <i class="fas fa-toggle-on"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idEstatusTurno')?.value">
-                                            {{ estatusTurnoLabel || 'Selecciona un estatus...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isEstatusTurnoOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let e of listaEstatusTurno"
-                                            (mousedown)="setEstatusTurno(e.id, e.text, $event)">
-                                            {{ e.text }}
-                                        </button>
-                                    </div>
-                                </div>
+                                <dx-select-box
+                                    [dataSource]="listaEstatusTurno"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idEstatusTurno"
+                                    placeholder="Selecciona un estatus..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    class="dx-select-box-custom dx-select-box-estatus">
+                                </dx-select-box>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="field">
                                 <span class="field-label text-white">Tesorería *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaOpen"
-                                    (mousedown)="toggleTesoreria($event)">
-                                    <i class="fas fa-building"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!abrirTurnoForm.get('idTesoreria')?.value">
-                                            {{ tesoreriaLabel || 'Selecciona una tesorería...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isTesoreriaOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let t of listaTesoreria"
-                                            (mousedown)="setTesoreria(t.id, t.text, $event)">
-                                            {{ t.text }}
-                                        </button>
-                                    </div>
-                                </div>
+                                <dx-select-box
+                                    [dataSource]="listaTesoreria"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idTesoreria"
+                                    placeholder="Selecciona una tesorería..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    class="dx-select-box-custom dx-select-box-boveda">
+                                </dx-select-box>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
@@ -322,25 +315,18 @@
                         <div class="col-12 col-md-6">
                             <label class="field">
                                 <span class="field-label text-white">Turno Activo *</span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isTurnoActivoOpen"
-                                    (mousedown)="toggleTurnoActivo($event)">
-                                    <i class="fas fa-clock"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!cerrarTurnoForm.get('idTurno')?.value">
-                                            {{ turnoActivoLabel || 'Selecciona un turno...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isTurnoActivoOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let t of listaTurnosActivos"
-                                            (mousedown)="setTurnoActivo(t.id, t.text, $event)">
-                                            {{ t.text }}
-                                        </button>
-                                        <div *ngIf="listaTurnosActivos.length === 0" class="select-option select-option-disabled">
-                                            No hay turnos activos disponibles
-                                        </div>
-                                    </div>
-                                </div>
+                                <dx-select-box
+                                    [dataSource]="listaTurnosActivos"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idTurno"
+                                    placeholder="Selecciona un turno..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    class="dx-select-box-custom dx-select-box-turno">
+                                </dx-select-box>
+                                <div *ngIf="listaTurnosActivos.length === 0" class="text-muted small mt-1">No hay turnos activos disponibles</div>
                             </label>
                         </div>
                         <div class="col-12 col-md-6">
@@ -374,6 +360,84 @@
         </button>
         <button type="button" class="btn btn-warning" (click)="guardarCerrarTurno()">
             <i class="fas fa-check"></i> Cerrar Turno
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Consultar saldo caja -->
+<ng-template #modalConsultarSaldoCaja let-modal>
+    <div class="modal-header modal-header-consultar-saldo-caja">
+        <h5 class="modal-title">
+            <i class="fas fa-wallet"></i>
+            <span>Consultar saldo de caja</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body modal-body-consultar-saldo-caja">
+        <div *ngIf="!saldoCajaData" class="action-modal-content">
+            <div class="action-icon-wrapper">
+                <div class="action-icon action-icon-info">
+                    <i class="fas fa-cash-register"></i>
+                </div>
+            </div>
+            <h4 class="action-title">Obtener saldo de una caja</h4>
+            <p class="action-description">Seleccione la caja para consultar su saldo actual.</p>
+            <form [formGroup]="consultarSaldoCajaForm" class="action-form">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="field">
+                            <span class="field-label text-white">Caja *</span>
+                            <dx-select-box
+                                [dataSource]="listaCajasSaldo"
+                                displayExpr="text"
+                                valueExpr="id"
+                                formControlName="idCaja"
+                                placeholder="Selecciona una caja..."
+                                searchEnabled="true"
+                                searchMode="contains"
+                                [showClearButton]="true"
+                                class="dx-select-box-custom dx-select-box-caja">
+                            </dx-select-box>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div *ngIf="saldoCajaData" class="saldo-caja-result">
+            <div class="saldo-caja-section">
+                <h5 class="saldo-caja-title"><i class="fas fa-coins"></i> Saldo de caja</h5>
+                <div class="saldo-caja-grid">
+                    <div class="saldo-caja-item" *ngIf="saldoCajaData.saldo != null">
+                        <span class="saldo-caja-label">Saldo</span>
+                        <span class="saldo-caja-value">{{ formatearMoneda(saldoCajaData.saldo) }}</span>
+                    </div>
+                    <div class="saldo-caja-item" *ngIf="saldoCajaData.efectivo != null">
+                        <span class="saldo-caja-label">Efectivo</span>
+                        <span class="saldo-caja-value">{{ formatearMoneda(saldoCajaData.efectivo) }}</span>
+                    </div>
+                    <div class="saldo-caja-item" *ngIf="saldoCajaData.total != null">
+                        <span class="saldo-caja-label">Total</span>
+                        <span class="saldo-caja-value">{{ formatearMoneda(saldoCajaData.total) }}</span>
+                    </div>
+                </div>
+                <div class="saldo-caja-raw" *ngIf="saldoCajaData && saldoCajaData.saldo == null && saldoCajaData.efectivo == null && saldoCajaData.total == null">
+                    <pre class="saldo-caja-json">{{ saldoCajaData | json }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-consultar-saldo-caja">
+        <button type="button" class="btn btn-secondary" (click)="saldoCajaData ? nuevaConsultaSaldoCaja() : cerrarModal()">
+            <i class="fas fa-arrow-left" *ngIf="saldoCajaData"></i>
+            <i class="fas fa-times" *ngIf="!saldoCajaData"></i>
+            {{ saldoCajaData ? 'Nueva consulta' : 'Cerrar' }}
+        </button>
+        <button *ngIf="!saldoCajaData" type="button" class="btn btn-info" (click)="buscarSaldoCaja()" [disabled]="consultarSaldoCajaForm.invalid || consultandoSaldoCaja">
+            <i class="fas fa-search" *ngIf="!consultandoSaldoCaja"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldoCaja"></i>
+            {{ consultandoSaldoCaja ? 'Consultando...' : 'Consultar' }}
         </button>
     </div>
 </ng-template>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -23,12 +23,9 @@ export class AgregarUsuarioComponent implements OnInit {
   public inputContrasena: boolean = true;
   public title = 'Agregar Usuario';
   public listaModulos: any[] = [];
-  public listaRoles: any;
-  public listaClientes: any;
-  public listaSalas: any;
-
-  clienteDisplayExpr = (c: any) =>
-    c ? `${c.nombre || ''} ${c.apellidoPaterno || ''}`.trim() : '';
+  public listaRoles: any[] = [];
+  public listaClientes: any[] = [];
+  public listaSalas: any[] = [];
 
   public permisosIds: number[] = [];
 
@@ -59,20 +56,6 @@ export class AgregarUsuarioComponent implements OnInit {
       }
     });
   }
-
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
-  }
-
-  private closeSelects() {
-    this.isRolOpen = false;
-    this.isClienteOpen = false;
-  }
-
 
   passwordsMatchValidator(formGroup: FormGroup) {
     const password = formGroup.get('passwordHash')?.value;
@@ -107,8 +90,12 @@ export class AgregarUsuarioComponent implements OnInit {
       const data = Array.isArray(response)
         ? response
         : (response?.data ?? response?.result ?? response?.salas ?? []);
-
-      this.listaSalas = Array.isArray(data) ? data : [];
+      const arr = Array.isArray(data) ? data : [];
+      this.listaSalas = arr.map((s: any) => ({
+        ...s,
+        id: Number(s?.idSala ?? s?.id ?? 0),
+        text: (s?.nombreComercialSala ?? s?.nombreSala ?? s?.nombre ?? 'Sin nombre').trim(),
+      }));
     });
   }
 
@@ -136,29 +123,13 @@ export class AgregarUsuarioComponent implements OnInit {
     });
   }
 
-  roleValueExpr = 'id';
-  roleDisplayExpr = (r: any) =>
-    r ? r.rolNombre ?? r.nombre ?? r.name ?? '' : '';
-
   obtenerRoles() {
     this.rolService.obtenerRoles().subscribe((response) => {
       const raw = (response as any)?.data ?? response ?? [];
-      this.listaRoles = (raw as any[]).map((r) => ({
+      this.listaRoles = (raw as any[]).map((r: any) => ({
         id: Number(r?.id ?? r?.Id ?? r?.idRol ?? r?.IDROL),
-        nombre: r?.rolNombre ?? r?.nombre ?? r?.name ?? '',
+        text: (r?.rolNombre ?? r?.nombre ?? r?.name ?? '').trim(),
       }));
-
-      if (this._pendingIdRol != null) {
-        this.usuarioForm.patchValue({ idRol: this._pendingIdRol });
-        this._pendingIdRol = null;
-      }
-
-      const currentId = Number(this.usuarioForm.get('idRol')?.value ?? 0);
-      if (currentId) {
-        const found = (this.listaRoles || []).find((x: any) => Number(x.id) === currentId);
-        if (found) this.rolLabel = found.nombre;
-      }
-
     });
   }
 
@@ -167,13 +138,8 @@ export class AgregarUsuarioComponent implements OnInit {
       this.listaClientes = (response.data || []).map((c: any) => ({
         ...c,
         id: Number(c.id),
+        text: (c?.nombre ?? c?.nombreComercial ?? '').trim(),
       }));
-      const currentId = Number(this.usuarioForm.get('idCliente')?.value ?? 0);
-      if (currentId) {
-        const found = (this.listaClientes || []).find((x: any) => Number(x.id) === currentId);
-        if (found) this.clienteLabel = found.nombre;
-      }
-
     });
   }
 
@@ -198,9 +164,6 @@ export class AgregarUsuarioComponent implements OnInit {
     this.usuarioForm.patchValue({ permisosIds: this.permisosIds });
   }
 
-  private _pendingIdRol: number | null = null;
-  private _pendingIdSala: number | null = null;
-
   obtenerUsuarioID() {
     this.usuaService.obtenerUsuario(this.idUsuario).subscribe((response: any) => {
       const data = response?.data ?? {};
@@ -220,6 +183,8 @@ export class AgregarUsuarioComponent implements OnInit {
         .map((x: any) => Number(x?.idPermiso))
         .filter((n: any) => Number.isFinite(n));
 
+      const idSalaNum = u?.idSala != null ? Number(u.idSala) : null;
+
       this.usuarioForm.patchValue({
         userName: u?.userName ?? '',
         telefono: u?.telefono ?? '',
@@ -230,35 +195,9 @@ export class AgregarUsuarioComponent implements OnInit {
         estatus: Number(u?.estatus ?? 1),
         idRol: idRolNum,
         idCliente: u?.idCliente != null ? Number(u.idCliente) : null,
+        idSala: idSalaNum,
         permisosIds: this.permisosIds,
       });
-
-      if (idRolNum) {
-        const found = (this.listaRoles || []).find((x: any) => Number(x.id) === idRolNum);
-        if (found) this.rolLabel = found.nombre;
-      }
-
-      const idClienteNum = u?.idCliente != null ? Number(u.idCliente) : null;
-      if (idClienteNum) {
-        const found = (this.listaClientes || []).find((x: any) => Number(x.id) === idClienteNum);
-        if (found) this.clienteLabel = found.nombre;
-      }
-
-      const idSalaNum = u?.idSala != null ? Number(u.idSala) : null;
-
-if (idSalaNum) {
-  const foundSala = (this.listaSalas || []).find((x: any) => Number(x.id) === idSalaNum);
-  if (foundSala) this.salaLabel = foundSala.nombre;
-}
-
-if (!this.listaSalas || this.listaSalas.length === 0) {
-  this._pendingIdSala = idSalaNum;
-}
-
-
-      if (!this.listaRoles || this.listaRoles.length === 0) {
-        this._pendingIdRol = idRolNum;
-      }
 
       this.applyAssignedPermsToModules();
     });
@@ -850,57 +789,6 @@ if (!this.listaSalas || this.listaSalas.length === 0) {
 
   regresar() {
     this.route.navigateByUrl('/usuarios');
-  }
-
-  isClienteOpen = false;
-  clienteLabel = '';
-
-  toggleCliente(event: MouseEvent) {
-    event.preventDefault();
-    this.isClienteOpen = !this.isClienteOpen;
-  }
-
-  setCliente(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.usuarioForm.patchValue({ idCliente: id });
-    this.clienteLabel = nombre;
-    this.isClienteOpen = false;
-  }
-
-  isRolOpen = false;
-  rolLabel = '';
-
-  toggleRol(event: MouseEvent) {
-    event.preventDefault();
-    this.isRolOpen = !this.isRolOpen;
-  }
-
-  setRol(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.usuarioForm.patchValue({ idRol: id });
-    this.rolLabel = nombre;
-    this.isRolOpen = false;
-  }
-
-  isSalaOpen = false;
-  salaLabel = '';
-
-  toggleSala(event: MouseEvent) {
-    event.preventDefault();
-    this.isSalaOpen = !this.isSalaOpen;
-  }
-
-  setSala(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.usuarioForm.patchValue({ idSala: id });
-    this.salaLabel = nombre;
-    this.isSalaOpen = false;
   }
 
 }

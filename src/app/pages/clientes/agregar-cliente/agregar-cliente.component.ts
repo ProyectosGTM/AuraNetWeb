@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -24,16 +24,7 @@ export class AgregarClienteComponent implements OnInit {
   public listaClientes: any[] = [];
   selectedFileName: string = '';
   previewUrl: string | ArrayBuffer | null = null;
-  clienteDisplayExpr = (c: any) => c ? `${c.nombre || ''} ${c.apellidoPaterno || ''} ${c.apellidoMaterno || ''}`.trim() : '';
   tipoPersonaItems = [{ id: 1, text: 'Física' }, { id: 2, text: 'Moral' }];
-  // public showRol: any;
-
-  // Custom select properties
-  isCuentaPadreOpen = false;
-  cuentaPadreLabel = '';
-
-  isTipoPersonaOpen = false;
-  tipoPersonaLabel = '';
 
   constructor(
     private fb: FormBuilder,
@@ -66,10 +57,10 @@ export class AgregarClienteComponent implements OnInit {
 
   obtenerClientes() {
     this.clieService.obtenerClientes().subscribe((response) => {
-      this.listaClientes = (response.data || []).map((c: any) => ({
-        ...c,
-        id: Number(c.id),
-      }));
+      this.listaClientes = (response.data || []).map((c: any) => {
+        const text = `${c.nombre || ''} ${c.apellidoPaterno || ''} ${c.apellidoMaterno || ''}`.trim();
+        return { ...c, id: Number(c.id), text: text || 'Sin nombre' };
+      });
     });
   }
 
@@ -125,22 +116,7 @@ export class AgregarClienteComponent implements OnInit {
         this.actaPreviewUrl = d.actaConstitutiva;
       }
 
-      // Establecer labels para selects personalizados
-      const idPadre = Number(d.idPadre ?? 0);
-      if (idPadre && this.listaClientes?.length > 0) {
-        const found = this.listaClientes.find((c: any) => Number(c.id) === idPadre);
-        if (found) {
-          this.cuentaPadreLabel = this.clienteDisplayExpr(found);
-        }
-      }
-
-      const tipoPersona = Number(d.tipoPersona ?? 0);
-      if (tipoPersona) {
-        const found = this.tipoPersonaItems.find((t: any) => t.id === tipoPersona);
-        if (found) {
-          this.tipoPersonaLabel = found.text;
-        }
-      }
+      this.onTipoPersonaChange(null);
     });
   }
 
@@ -167,48 +143,6 @@ export class AgregarClienteComponent implements OnInit {
       backdrop: 'static',
       keyboard: false,
     });
-  }
-
-  // Custom select methods
-  @HostListener('document:mousedown', ['$event'])
-  onDocClickCloseSelects(event: MouseEvent) {
-    if (!(event.target as HTMLElement).closest('.select-sleek')) {
-      this.closeAllSelects();
-    }
-  }
-
-  closeAllSelects() {
-    this.isCuentaPadreOpen = false;
-    this.isTipoPersonaOpen = false;
-  }
-
-  toggleCuentaPadre(event: MouseEvent) {
-    event.preventDefault();
-    this.closeAllSelects();
-    this.isCuentaPadreOpen = !this.isCuentaPadreOpen;
-  }
-
-  setCuentaPadre(id: any, label: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.clienteForm.patchValue({ idPadre: id });
-    this.cuentaPadreLabel = label;
-    this.isCuentaPadreOpen = false;
-  }
-
-  toggleTipoPersona(event: MouseEvent) {
-    event.preventDefault();
-    this.closeAllSelects();
-    this.isTipoPersonaOpen = !this.isTipoPersonaOpen;
-  }
-
-  setTipoPersona(id: any, text: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.clienteForm.patchValue({ tipoPersona: id });
-    this.tipoPersonaLabel = text;
-    this.isTipoPersonaOpen = false;
-    this.onTipoPersonaChange(null);
   }
 
   onTipoPersonaChange(_event: any) {

@@ -26,49 +26,35 @@
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
                       <span class="field-label text-white">Sala *</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
-                        (mousedown)="toggleSala($event)">
-                        <i class="fas fa-building"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!afiliadoForm.get('idSala')?.value">
-                            {{ salaLabel || 'Selecciona una sala...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isSalaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let s of listaSalas"
-                            (mousedown)="setSala(s.id, s.nombreSala || s.nombre, $event)">
-                            {{ s.nombreSala || s.nombre }}
-                          </button>
-                          <div *ngIf="listaSalas.length === 0" class="select-option select-option-disabled">
-                            No hay salas disponibles
-                          </div>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaSalas"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idSala"
+                        placeholder="Selecciona una sala..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-sala">
+                      </dx-select-box>
+                      <div *ngIf="listaSalas.length === 0" class="text-muted small mt-1">No hay salas disponibles</div>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
                       <span class="field-label text-white">Tipo Identificación *</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isTipoIdentificacionOpen"
-                        (mousedown)="toggleTipoIdentificacion($event)">
-                        <i class="fas fa-id-card"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!afiliadoForm.get('idTipoIdentificacion')?.value">
-                            {{ tipoIdentificacionLabel || 'Selecciona un tipo...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isTipoIdentificacionOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let t of listaTipoIdentificacion"
-                            (mousedown)="setTipoIdentificacion(t.id, t.text, $event)">
-                            {{ t.text }}
-                          </button>
-                          <div *ngIf="listaTipoIdentificacion.length === 0" class="select-option select-option-disabled">
-                            No hay tipos disponibles
-                          </div>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaTipoIdentificacion"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idTipoIdentificacion"
+                        placeholder="Selecciona un tipo..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-tipo-id">
+                      </dx-select-box>
+                      <div *ngIf="listaTipoIdentificacion.length === 0" class="text-muted small mt-1">No hay tipos disponibles</div>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
@@ -128,48 +114,33 @@
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
                       <span class="field-label text-white">Sexo *</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isSexoOpen"
-                        (mousedown)="toggleSexo($event)">
-                        <i class="fas fa-venus-mars"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!afiliadoForm.get('sexo')?.value">
-                            {{ afiliadoForm.get('sexo')?.value === 'M' ? 'Masculino' : afiliadoForm.get('sexo')?.value === 'F' ? 'Femenino' : 'Selecciona...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isSexoOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" (mousedown)="setSexo('M', $event)">
-                            Masculino
-                          </button>
-                          <button type="button" class="select-option" (mousedown)="setSexo('F', $event)">
-                            Femenino
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaSexo"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="sexo"
+                        placeholder="Selecciona..."
+                        searchEnabled="false"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-sexo">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
                       <span class="field-label text-white">Estatus Afiliado *</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isEstatusAfiliadoOpen"
-                        (mousedown)="toggleEstatusAfiliado($event)">
-                        <i class="fas fa-toggle-on"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!afiliadoForm.get('idEstatusAfiliado')?.value">
-                            {{ estatusAfiliadoLabel || 'Selecciona un estatus...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isEstatusAfiliadoOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let e of listaEstatusAfiliado"
-                            (mousedown)="setEstatusAfiliado(e.id, e.text, $event)">
-                            {{ e.text }}
-                          </button>
-                          <div *ngIf="listaEstatusAfiliado.length === 0" class="select-option select-option-disabled">
-                            No hay estatus disponibles
-                          </div>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaEstatusAfiliado"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idEstatusAfiliado"
+                        placeholder="Selecciona un estatus..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
+                      <div *ngIf="listaEstatusAfiliado.length === 0" class="text-muted small mt-1">No hay estatus disponibles</div>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">

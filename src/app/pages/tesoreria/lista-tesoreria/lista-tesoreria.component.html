@@ -35,55 +35,32 @@
                         </div>
                     </div>
                 </div>
-                <!-- Sección de Acciones POST -->
                 <div class="row mt-3">
                     <div class="col-12">
-                        <div class="action-buttons-card">
-                            <div class="action-buttons-header">
-                                <h5 class="action-buttons-title">
-                                    <i class="fas fa-bolt"></i>
-                                    <span>Acciones Rápidas</span>
-                                </h5>
-                            </div>
-                            <div class="action-buttons-content">
-                                <button (click)="abrirTesoreria()" type="button" class="btn-action-large btn-action-large-success">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-door-open"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Abrir Boveda</span>
-                                        <span class="btn-action-desc">Abrir boveda del día</span>
-                                    </div>
+                        <section class="acciones-rapidas">
+                            <h6 class="acciones-rapidas-titulo">Acciones rápidas</h6>
+                            <div class="acciones-rapidas-grid">
+                                <button (click)="abrirTesoreria()" type="button" class="accion-card accion-card--open">
+                                    <span class="accion-card-icon"><i class="fas fa-door-open"></i></span>
+                                    <span class="accion-card-label">Abrir Boveda</span>
                                 </button>
-                                <button (click)="cerrarTesoreria()" type="button" class="btn-action-large btn-action-large-danger">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-door-closed"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Cerrar Boveda</span>
-                                        <span class="btn-action-desc">Cerrar boveda del día</span>
-                                    </div>
+                                <button (click)="cerrarTesoreria()" type="button" class="accion-card accion-card--close"
+                                    [disabled]="loadingAcciones">
+                                    <span class="accion-card-icon"><i class="fas fa-door-closed"></i></span>
+                                    <span class="accion-card-label">Cerrar Boveda</span>
                                 </button>
-                                <button (click)="reponerTesoreria()" type="button" class="btn-action-large btn-action-large-success">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-arrow-up"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Reponer Efectivo</span>
-                                        <span class="btn-action-desc">Reponer efectivo a la boveda</span>
-                                    </div>
+                                <button (click)="reponerTesoreria()" type="button" class="accion-card accion-card--reponer"
+                                    [disabled]="loadingAcciones">
+                                    <span class="accion-card-icon"><i class="fas fa-arrow-up"></i></span>
+                                    <span class="accion-card-label">Reponer Efectivo</span>
                                 </button>
-                                <button (click)="retirarTesoreria()" type="button" class="btn-action-large btn-action-large-warning">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-arrow-down"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Retirar Efectivo</span>
-                                        <span class="btn-action-desc">Retirar efectivo de la boveda</span>
-                                    </div>
+                                <button (click)="retirarTesoreria()" type="button" class="accion-card accion-card--retirar"
+                                    [disabled]="loadingAcciones">
+                                    <span class="accion-card-icon"><i class="fas fa-arrow-down"></i></span>
+                                    <span class="accion-card-label">Retirar Efectivo</span>
                                 </button>
                             </div>
-                        </div>
+                        </section>
                     </div>
                 </div>
                 <div class="row mt-3 gy-4">
@@ -289,91 +266,61 @@
 
 <!-- Modal Cerrar Boveda -->
 <ng-template #modalCerrarTesoreria let-modal>
-    <div class="modal-header modal-header-cerrar-tesoreria">
+    <div class="modal-header modal-accion-header modal-accion-header--close">
         <h5 class="modal-title">
             <i class="fas fa-door-closed"></i>
-            <span>Cerrar Boveda del Día</span>
+            <span>Cerrar Boveda</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-cerrar-tesoreria">
-        <div class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-danger">
-                    <i class="fas fa-door-closed"></i>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="cerrarTesoreriaForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Boveda *</span>
+                        <dx-select-box
+                            [dataSource]="listaTesoreriaAbierta"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTesoreria"
+                            placeholder="Selecciona boveda abierta..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-boveda">
+                        </dx-select-box>
+                        <div *ngIf="listaTesoreriaAbierta.length === 0" class="text-muted small mt-1">No hay bovedas abiertas</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Fondo Contado *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="fondoContado" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Observaciones</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
                 </div>
             </div>
-            <h4 class="action-title">Cerrar Boveda</h4>
-            <p class="action-description">Llena los campos para cerrar la boveda. No debe haber turnos abiertos.</p>
-            <div class="action-form">
-                <form [formGroup]="cerrarTesoreriaForm">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-wallet"></i>
-                                    Boveda *
-                                </span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaCerrarOpen"
-                                    (mousedown)="toggleTesoreriaCerrar($event)">
-                                    <i class="fas fa-wallet"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!cerrarTesoreriaForm.get('idTesoreria')?.value">
-                                            {{ tesoreriaCerrarLabel || 'Selecciona una boveda abierta...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isTesoreriaCerrarOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let t of listaTesoreriaAbierta"
-                                            (mousedown)="setTesoreriaCerrar(t.id, t.text, $event)">
-                                            {{ t.text }}
-                                        </button>
-                                        <div *ngIf="listaTesoreriaAbierta.length === 0" class="select-option select-option-disabled">
-                                            No hay bovedas abiertas disponibles
-                                        </div>
-                                    </div>
-                                </div>
-                                <small class="form-text-hint">Elige la boveda que quieres cerrar</small>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-calculator"></i>
-                                    Fondo Contado *
-                                </span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    <input formControlName="fondoContado" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text-hint">Dinero físico que contaste al final del día</small>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-comment-alt"></i>
-                                    Observaciones
-                                </span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-comment-alt"></i>
-                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text-hint">Notas adicionales sobre el cierre (opcional)</small>
-                            </label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
-    <div class="modal-footer modal-footer-cerrar-tesoreria">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fas fa-times"></i> Cancelar
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
         <button type="button" class="btn btn-danger" (click)="guardarCerrarTesoreria()" [disabled]="cerrarTesoreriaForm.invalid">
             <i class="fas fa-check"></i> Cerrar Boveda
@@ -383,216 +330,148 @@
 
 <!-- Modal Reponer Boveda -->
 <ng-template #modalReponerTesoreria let-modal>
-    <div class="modal-header modal-header-reponer-tesoreria">
+    <div class="modal-header modal-accion-header modal-accion-header--reponer">
         <h5 class="modal-title">
             <i class="fas fa-arrow-up"></i>
-            <span>Reponer Efectivo a la Boveda</span>
+            <span>Reponer Efectivo</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-reponer-tesoreria">
-        <div class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-success">
-                    <i class="fas fa-arrow-up"></i>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="reponerTesoreriaForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Boveda *</span>
+                        <dx-select-box
+                            [dataSource]="listaTesoreriaReponer"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTesoreria"
+                            placeholder="Selecciona boveda abierta..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-boveda">
+                        </dx-select-box>
+                        <div *ngIf="listaTesoreriaReponer.length === 0" class="text-muted small mt-1">No hay bovedas abiertas</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monto *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Referencia</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-hashtag"></i>
+                            <input formControlName="referencia" class="sleek-control" type="text" placeholder="Opcional" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Observaciones</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
                 </div>
             </div>
-            <h4 class="action-title">Reponer Efectivo</h4>
-            <p class="action-description">Agrega dinero a la boveda.</p>
-            <div class="action-form">
-                <form [formGroup]="reponerTesoreriaForm">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-wallet"></i>
-                                    Boveda *
-                                </span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaReponerOpen"
-                                    (mousedown)="toggleTesoreriaReponer($event)">
-                                    <i class="fas fa-wallet"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!reponerTesoreriaForm.get('idTesoreria')?.value">
-                                            {{ tesoreriaReponerLabel || 'Selecciona una boveda...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isTesoreriaReponerOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let t of listaTesoreriaReponer"
-                                            (mousedown)="setTesoreriaReponer(t.id, t.text, $event)">
-                                            {{ t.text }}
-                                        </button>
-                                        <div *ngIf="listaTesoreriaReponer.length === 0" class="select-option select-option-disabled">
-                                            No hay bovedas disponibles
-                                        </div>
-                                    </div>
-                                </div>
-                                <small class="form-text-hint">Elige la boveda donde vas a agregar dinero</small>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-plus-circle"></i>
-                                    Monto *
-                                </span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text-hint">Cantidad de dinero que vas a agregar</small>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-hashtag"></i>
-                                    Referencia
-                                </span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-tag"></i>
-                                    <input formControlName="referencia" class="sleek-control" type="text" placeholder="Ej: REMESA-2024-001234" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text-hint">Número de referencia de la operación (opcional)</small>
-                            </label>
-                        </div>
-                        <div class="col-12">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-comment-alt"></i>
-                                    Observaciones
-                                </span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-comment-alt"></i>
-                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text-hint">Notas adicionales sobre la reposición (opcional)</small>
-                            </label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
-    <div class="modal-footer modal-footer-reponer-tesoreria">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fas fa-times"></i> Cancelar
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
         <button type="button" class="btn btn-success" (click)="guardarReponerTesoreria()" [disabled]="reponerTesoreriaForm.invalid">
-            <i class="fas fa-check"></i> Reponer Efectivo
+            <i class="fas fa-check"></i> Reponer
         </button>
     </div>
 </ng-template>
 
 <!-- Modal Retirar Boveda -->
 <ng-template #modalRetirarTesoreria let-modal>
-    <div class="modal-header modal-header-retirar-tesoreria">
+    <div class="modal-header modal-accion-header modal-accion-header--retirar">
         <h5 class="modal-title">
             <i class="fas fa-arrow-down"></i>
-            <span>Retirar Efectivo de la Boveda</span>
+            <span>Retirar Efectivo</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-retirar-tesoreria">
-        <div class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-warning">
-                    <i class="fas fa-arrow-down"></i>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="retirarTesoreriaForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Boveda *</span>
+                        <dx-select-box
+                            [dataSource]="listaTesoreriaRetirar"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTesoreria"
+                            placeholder="Selecciona boveda abierta..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-boveda">
+                        </dx-select-box>
+                        <div *ngIf="listaTesoreriaRetirar.length === 0" class="text-muted small mt-1">No hay bovedas abiertas</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monto *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Referencia</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-hashtag"></i>
+                            <input formControlName="referencia" class="sleek-control" type="text" placeholder="Opcional" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Observaciones</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
                 </div>
             </div>
-            <h4 class="action-title">Retirar Efectivo</h4>
-            <p class="action-description">Saca dinero de la boveda.</p>
-            <div class="action-form">
-                <form [formGroup]="retirarTesoreriaForm">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-wallet"></i>
-                                    Boveda *
-                                </span>
-                                <div class="input-sleek select-sleek" [class.is-open]="isTesoreriaRetirarOpen"
-                                    (mousedown)="toggleTesoreriaRetirar($event)">
-                                    <i class="fas fa-wallet"></i>
-                                    <div class="sleek-control select-display">
-                                        <span class="select-value" [class.placeholder]="!retirarTesoreriaForm.get('idTesoreria')?.value">
-                                            {{ tesoreriaRetirarLabel || 'Selecciona una boveda...' }}
-                                        </span>
-                                    </div>
-                                    <span class="sleek-line"></span>
-                                    <div class="select-panel" *ngIf="isTesoreriaRetirarOpen" (mousedown)="$event.stopPropagation()">
-                                        <button type="button" class="select-option" *ngFor="let t of listaTesoreriaRetirar"
-                                            (mousedown)="setTesoreriaRetirar(t.id, t.text, $event)">
-                                            {{ t.text }}
-                                        </button>
-                                        <div *ngIf="listaTesoreriaRetirar.length === 0" class="select-option select-option-disabled">
-                                            No hay bovedas disponibles
-                                        </div>
-                                    </div>
-                                </div>
-                                <small class="form-text-hint">Elige la boveda de donde vas a retirar dinero</small>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-minus-circle"></i>
-                                    Monto *
-                                </span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text-hint">Cantidad de dinero que vas a retirar</small>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-hashtag"></i>
-                                    Referencia
-                                </span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-tag"></i>
-                                    <input formControlName="referencia" class="sleek-control" type="text" placeholder="Ej: DEP-BANCO-001234" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text-hint">Número de referencia de la operación (opcional)</small>
-                            </label>
-                        </div>
-                        <div class="col-12">
-                            <label class="field">
-                                <span class="field-label text-white">
-                                    <i class="fas fa-comment-alt"></i>
-                                    Observaciones
-                                </span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-comment-alt"></i>
-                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                                <small class="form-text-hint">Notas adicionales sobre el retiro (opcional)</small>
-                            </label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
-    <div class="modal-footer modal-footer-retirar-tesoreria">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fas fa-times"></i> Cancelar
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
         <button type="button" class="btn btn-warning" (click)="guardarRetirarTesoreria()" [disabled]="retirarTesoreriaForm.invalid">
-            <i class="fas fa-check"></i> Retirar Efectivo
+            <i class="fas fa-check"></i> Retirar
         </button>
     </div>
 </ng-template>

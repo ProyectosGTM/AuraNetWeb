@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -24,19 +24,12 @@ export class AgregarAfiliadoComponent implements OnInit {
   public listaSalas: any[] = [];
   public listaTipoIdentificacion: SelectItem[] = [];
   public listaEstatusAfiliado: SelectItem[] = [];
+  public listaSexo: { id: string; text: string }[] = [
+    { id: 'M', text: 'Masculino' },
+    { id: 'F', text: 'Femenino' },
+  ];
 
   afiliadoForm: FormGroup;
-
-  isSalaOpen = false;
-  salaLabel = '';
-
-  isTipoIdentificacionOpen = false;
-  tipoIdentificacionLabel = '';
-
-  isEstatusAfiliadoOpen = false;
-  estatusAfiliadoLabel = '';
-
-  isSexoOpen = false;
 
   constructor(
     private fb: FormBuilder,
@@ -89,6 +82,7 @@ export class AgregarAfiliadoComponent implements OnInit {
     this.listaSalas = (responses.salas.data || []).map((s: any) => ({
       ...s,
       id: Number(s.id),
+      text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
     }));
 
     this.listaTipoIdentificacion = (responses.tipoIdentificacion.data || []).map((t: any) => ({
@@ -114,6 +108,7 @@ export class AgregarAfiliadoComponent implements OnInit {
         this.listaSalas = (response.data || []).map((s: any) => ({
           ...s,
           id: Number(s.id),
+          text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
         }));
       },
       error: (error) => {
@@ -168,34 +163,6 @@ export class AgregarAfiliadoComponent implements OnInit {
           email: data.email || '',
           telefonoCelular: data.telefonoCelular || ''
         });
-
-        // Establecer labels para los selects
-        const idSala = Number(data.idSala ?? 0);
-        if (idSala) {
-          this.salaLabel = data.nombreSala || '';
-          if (!this.salaLabel && this.listaSalas && this.listaSalas.length > 0) {
-            const foundSala = this.listaSalas.find((x: any) => Number(x.id) === idSala);
-            if (foundSala) {
-              this.salaLabel = foundSala.nombreSala || foundSala.nombre || 'Sala';
-            }
-          }
-        }
-
-        const idTipoIdentificacion = data.idTipoIdentificacion ? Number(data.idTipoIdentificacion) : null;
-        if (idTipoIdentificacion) {
-          const found = this.listaTipoIdentificacion.find((x: any) => Number(x.id) === idTipoIdentificacion);
-          if (found) {
-            this.tipoIdentificacionLabel = found.text;
-          }
-        }
-
-        const idEstatusAfiliado = data.idEstatusAfiliado ? Number(data.idEstatusAfiliado) : null;
-        if (idEstatusAfiliado) {
-          const found = this.listaEstatusAfiliado.find((x: any) => Number(x.id) === idEstatusAfiliado);
-          if (found) {
-            this.estatusAfiliadoLabel = found.text;
-          }
-        }
       },
       error: (error) => {
         Swal.fire({
@@ -238,68 +205,6 @@ export class AgregarAfiliadoComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       telefonoCelular: ['', Validators.required]
     });
-  }
-
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
-  }
-
-  private closeSelects() {
-    this.isSalaOpen = false;
-    this.isTipoIdentificacionOpen = false;
-    this.isEstatusAfiliadoOpen = false;
-    this.isSexoOpen = false;
-  }
-
-  toggleSala(event: any) {
-    event.stopPropagation();
-    this.isSalaOpen = !this.isSalaOpen;
-  }
-
-  setSala(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.afiliadoForm.patchValue({ idSala: id });
-    this.salaLabel = label;
-    this.isSalaOpen = false;
-  }
-
-  toggleTipoIdentificacion(event: any) {
-    event.stopPropagation();
-    this.isTipoIdentificacionOpen = !this.isTipoIdentificacionOpen;
-  }
-
-  setTipoIdentificacion(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.afiliadoForm.patchValue({ idTipoIdentificacion: id });
-    this.tipoIdentificacionLabel = label;
-    this.isTipoIdentificacionOpen = false;
-  }
-
-  toggleEstatusAfiliado(event: any) {
-    event.stopPropagation();
-    this.isEstatusAfiliadoOpen = !this.isEstatusAfiliadoOpen;
-  }
-
-  setEstatusAfiliado(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.afiliadoForm.patchValue({ idEstatusAfiliado: id });
-    this.estatusAfiliadoLabel = label;
-    this.isEstatusAfiliadoOpen = false;
-  }
-
-  toggleSexo(event: any) {
-    event.stopPropagation();
-    this.isSexoOpen = !this.isSexoOpen;
-  }
-
-  setSexo(valor: string, event: any) {
-    event.stopPropagation();
-    this.afiliadoForm.patchValue({ sexo: valor });
-    this.isSexoOpen = false;
   }
 
   guardar() {

@@ -26,22 +26,17 @@
                   <div class="col-12 col-md-6 col-lg-3">
                     <label class="field">
                       <span class="field-label text-white">Sala *</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isSalaOpen"
-                        (mousedown)="toggleSala($event)">
-                        <i class="fas fa-building"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!tesoreriaForm.get('idSala')?.value">
-                            {{ salaLabel || 'Selecciona una sala...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isSalaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let s of listaSalas"
-                            (mousedown)="setSala(s.id, s.nombreSala || s.nombre, $event)">
-                            {{ s.nombreSala || s.nombre }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaSalas"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idSala"
+                        placeholder="Selecciona una sala..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-sala">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-3">
@@ -68,22 +63,17 @@
                   <div class="col-12 col-md-6 col-lg-3">
                     <label class="field">
                       <span class="field-label text-white">Estatus Tesorería *</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isEstatusTesoreriaOpen"
-                        (mousedown)="toggleEstatusTesoreria($event)">
-                        <i class="fas fa-toggle-on"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!tesoreriaForm.get('idEstatusTesoreria')?.value">
-                            {{ estatusTesoreriaLabel || 'Selecciona un estatus...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isEstatusTesoreriaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let e of listaEstatusTesoreria"
-                            (mousedown)="setEstatusTesoreria(e.id, e.text, $event)">
-                            {{ e.text }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaEstatusTesoreria"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idEstatusTesoreria"
+                        placeholder="Selecciona un estatus..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
                     </label>
                   </div>
                 </div>

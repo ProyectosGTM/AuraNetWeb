@@ -1,4 +1,4 @@
-import { Component, HostListener, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -8,6 +8,7 @@ import { forkJoin, lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
+import { TransaccionesService } from 'src/app/shared/services/transacciones.service';
 import { TurnosService } from 'src/app/shared/services/turnos.service';
 import Swal from 'sweetalert2';
 
@@ -39,6 +40,7 @@ export class ListaTurnosComponent {
 
   @ViewChild('modalAbrirTurno', { static: false }) modalAbrirTurno!: TemplateRef<any>;
   @ViewChild('modalCerrarTurno', { static: false }) modalCerrarTurno!: TemplateRef<any>;
+  @ViewChild('modalConsultarSaldoCaja', { static: false }) modalConsultarSaldoCaja!: TemplateRef<any>;
   private modalRef?: NgbModalRef;
 
   // Formulario para abrir turno
@@ -51,17 +53,11 @@ export class ListaTurnosComponent {
   cerrarTurnoForm: FormGroup;
   public listaTurnosActivos: any[] = [];
 
-  // Estados para selects abrir turno
-  isCajaOpen = false;
-  cajaLabel = '';
-  isTesoreriaOpen = false;
-  tesoreriaLabel = '';
-  isEstatusTurnoOpen = false;
-  estatusTurnoLabel = '';
-
-  // Estados para selects cerrar turno
-  isTurnoActivoOpen = false;
-  turnoActivoLabel = '';
+  // Consultar saldo caja
+  consultarSaldoCajaForm: FormGroup;
+  listaCajasSaldo: { id: number; text: string }[] = [];
+  saldoCajaData: any = null;
+  consultandoSaldoCaja = false;
 
   constructor(
     private router: Router,
@@ -70,6 +66,7 @@ export class ListaTurnosComponent {
     private fb: FormBuilder,
     private cajasService: CajasService,
     private tesoreriaService: TesoreriaService,
+    private transaccionesService: TransaccionesService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -85,26 +82,14 @@ export class ListaTurnosComponent {
       fondoContado: ['', [Validators.required, Validators.min(0)]],
       observaciones: ['']
     });
+
+    this.consultarSaldoCajaForm = this.fb.group({
+      idCaja: [null, Validators.required]
+    });
   }
 
   ngOnInit() {
     this.setupDataSource();
-  }
-
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    // Si el click NO fue dentro de un select custom, cierra todos
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
-  }
-
-  private closeSelects() {
-    this.isCajaOpen = false;
-    this.isTesoreriaOpen = false;
-    this.isEstatusTurnoOpen = false;
-    this.isTurnoActivoOpen = false;
   }
 
   toggleExpandGroups() {
@@ -381,43 +366,6 @@ export class ListaTurnosComponent {
     }).format(valor);
   }
 
-  toggleCaja(event: any) {
-    event.stopPropagation();
-    this.isCajaOpen = !this.isCajaOpen;
-  }
-
-  setCaja(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.abrirTurnoForm.patchValue({ idCaja: id });
-    this.cajaLabel = label;
-    this.isCajaOpen = false;
-  }
-
-  toggleTesoreria(event: any) {
-    event.stopPropagation();
-    this.isTesoreriaOpen = !this.isTesoreriaOpen;
-  }
-
-  setTesoreria(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.abrirTurnoForm.patchValue({ idTesoreria: id });
-    this.tesoreriaLabel = label;
-    this.isTesoreriaOpen = false;
-  }
-
-  toggleEstatusTurno(event: any) {
-    event.stopPropagation();
-    this.isEstatusTurnoOpen = !this.isEstatusTurnoOpen;
-  }
-
-  setEstatusTurno(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.abrirTurnoForm.patchValue({ idEstatusTurno: id });
-    this.estatusTurnoLabel = label;
-    this.isEstatusTurnoOpen = false;
-  }
-
-
   guardarAbrirTurno() {
     if (this.abrirTurnoForm.invalid) {
       Swal.fire({
@@ -450,9 +398,6 @@ export class ListaTurnosComponent {
         });
         this.cerrarModal();
         this.abrirTurnoForm.reset();
-        this.cajaLabel = '';
-        this.tesoreriaLabel = '';
-        this.estatusTurnoLabel = '';
         this.setupDataSource();
         if (this.dataGrid) {
           this.dataGrid.instance.refresh();
@@ -523,18 +468,6 @@ export class ListaTurnosComponent {
     }
   }
 
-  toggleTurnoActivo(event: any) {
-    event.stopPropagation();
-    this.isTurnoActivoOpen = !this.isTurnoActivoOpen;
-  }
-
-  setTurnoActivo(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.cerrarTurnoForm.patchValue({ idTurno: id });
-    this.turnoActivoLabel = label;
-    this.isTurnoActivoOpen = false;
-  }
-
   guardarCerrarTurno() {
     if (this.cerrarTurnoForm.invalid) {
       Swal.fire({
@@ -566,7 +499,6 @@ export class ListaTurnosComponent {
         });
         this.cerrarModal();
         this.cerrarTurnoForm.reset();
-        this.turnoActivoLabel = '';
         this.setupDataSource();
         if (this.dataGrid) {
           this.dataGrid.instance.refresh();
@@ -585,17 +517,80 @@ export class ListaTurnosComponent {
     });
   }
 
+  consultarSaldoCaja() {
+    this.saldoCajaData = null;
+    this.consultarSaldoCajaForm.reset();
+    this.cajasService.obtenerCajas().subscribe({
+      next: (resp) => {
+        this.listaCajasSaldo = (resp.data || []).map((c: any) => ({
+          id: Number(c.id),
+          text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Sin nombre'
+        }));
+        this.modalRef = this.modalService.open(this.modalConsultarSaldoCaja, {
+          size: 'lg',
+          windowClass: 'modal-holder modal-consultar-saldo-caja',
+          centered: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      error: () => {
+        Swal.fire({
+          title: '¡Error!',
+          text: 'No se pudieron cargar las cajas.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  nuevaConsultaSaldoCaja() {
+    this.saldoCajaData = null;
+  }
+
+  buscarSaldoCaja() {
+    if (this.consultarSaldoCajaForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Seleccione una caja.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const id = Number(this.consultarSaldoCajaForm.value.idCaja);
+    this.consultandoSaldoCaja = true;
+    this.transaccionesService.obtenerSaldoCaja(id).subscribe({
+      next: (response) => {
+        this.consultandoSaldoCaja = false;
+        this.saldoCajaData = response?.data ?? response;
+      },
+      error: (err) => {
+        this.consultandoSaldoCaja = false;
+        Swal.fire({
+          title: '¡Error!',
+          text: err?.error?.message || err?.error || 'No se pudo obtener el saldo de la caja.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
   cerrarModal() {
     if (this.modalRef) {
       this.modalRef.close();
       this.abrirTurnoForm.reset();
       this.cerrarTurnoForm.reset();
-      this.cajaLabel = '';
-      this.tesoreriaLabel = '';
-      this.turnoActivoLabel = '';
-      this.isCajaOpen = false;
-      this.isTesoreriaOpen = false;
-      this.isTurnoActivoOpen = false;
+      this.consultarSaldoCajaForm.reset();
+      this.saldoCajaData = null;
     }
   }
 }

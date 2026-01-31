@@ -26,25 +26,18 @@
                                 <div class="col-12">
                                     <label class="field">
                                         <span class="field-label text-white">Sala *</span>
-                                        <div class="input-sleek select-sleek" [class.is-open]="isSalaAbrirOpen"
-                                            (mousedown)="toggleSalaAbrir($event)">
-                                            <i class="fas fa-building"></i>
-                                            <div class="sleek-control select-display">
-                                                <span class="select-value" [class.placeholder]="!abrirTesoreriaForm.get('idSala')?.value">
-                                                    {{ salaAbrirLabel || 'Selecciona una sala...' }}
-                                                </span>
-                                            </div>
-                                            <span class="sleek-line"></span>
-                                            <div class="select-panel" *ngIf="isSalaAbrirOpen" (mousedown)="$event.stopPropagation()">
-                                                <button type="button" class="select-option" *ngFor="let s of listaSalas"
-                                                    (mousedown)="setSalaAbrir(s.id, s.text, $event)">
-                                                    {{ s.text }}
-                                                </button>
-                                                <div *ngIf="listaSalas.length === 0" class="select-option select-option-disabled">
-                                                    No hay salas disponibles
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <dx-select-box
+                                            [dataSource]="listaSalas"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="idSala"
+                                            placeholder="Selecciona una sala..."
+                                            searchEnabled="true"
+                                            searchMode="contains"
+                                            [showClearButton]="true"
+                                            class="dx-select-box-custom dx-select-box-sala">
+                                        </dx-select-box>
+                                        <div *ngIf="listaSalas.length === 0" class="text-muted small mt-1">No hay salas disponibles</div>
                                     </label>
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -67,71 +60,66 @@
                                         </div>
                                     </label>
                                 </div>
-                                <!-- Sección de Turnos a Abrir -->
-                                <div class="col-12 mt-4">
-                                    <div class="turnos-section">
+                                <!-- Sección de Turnos a Abrir (compacta) -->
+                                <div class="col-12 mt-3">
+                                    <div class="turnos-section turnos-section--compact">
                                         <div class="turnos-section-header">
                                             <div class="turnos-header-content">
                                                 <h5 class="turnos-title">
                                                     <i class="fas fa-cash-register"></i>
                                                     Turnos a Abrir *
                                                 </h5>
-                                                <p class="turnos-subtitle">Agrega al menos un turno de caja para abrir la boveda</p>
+                                                <p class="turnos-subtitle">Al menos un turno de caja</p>
                                             </div>
                                             <button type="button" class="btn-add-turno" (click)="agregarTurnoAbrir()">
                                                 <i class="fas fa-plus"></i>
-                                                <span>Agregar Turno</span>
+                                                <span>Agregar</span>
                                             </button>
                                         </div>
-                                    <div class="turnos-list" *ngIf="turnosAbrirArray.length > 0">
-                                        <div class="turno-item" *ngFor="let turno of turnosAbrirArray.controls; let i = index" [formGroup]="turno">
-                                            <div class="turno-header">
-                                                <span class="turno-number">Turno {{ i + 1 }}</span>
-                                                <button type="button" class="btn btn-sm btn-danger" 
-                                                    (click)="eliminarTurnoAbrir(i)"
-                                                    [disabled]="turnosAbrirArray.length === 1"
-                                                    [title]="turnosAbrirArray.length === 1 ? 'Debe haber al menos un turno' : 'Eliminar turno'">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                            <div class="row g-2 mt-2">
-                                                <div class="col-12 col-md-6">
-                                                    <label class="field">
-                                                        <span class="field-label text-white">Caja *</span>
-                                                        <div class="input-sleek select-sleek" [class.is-open]="isCajaTurnoOpen(turno)"
-                                                            (mousedown)="toggleCajaTurno(turno, $event)">
-                                                            <i class="fas fa-cash-register"></i>
-                                                            <div class="sleek-control select-display">
-                                                                <span class="select-value" [class.placeholder]="!turno.get('idCaja')?.value">
-                                                                    {{ getCajaLabel(turno) }}
-                                                                </span>
-                                                            </div>
-                                                            <span class="sleek-line"></span>
-                                                            <div class="select-panel" *ngIf="isCajaTurnoOpen(turno)" (mousedown)="$event.stopPropagation()">
-                                                                <button type="button" class="select-option" *ngFor="let c of listaCajas"
-                                                                    (mousedown)="setCajaTurno(turno, c.id, c.text, $event)">
-                                                                    {{ c.text }}
-                                                                </button>
-                                                            </div>
+                                        <div class="turnos-list" *ngIf="turnosAbrirArray.length > 0">
+                                            <div class="turno-item" *ngFor="let turno of turnosAbrirArray.controls; let i = index" [formGroup]="turno">
+                                                <div class="turno-row">
+                                                    <span class="turno-number">#{{ i + 1 }}</span>
+                                                    <div class="row g-2 turno-fields flex-grow-1">
+                                                        <div class="col-6">
+                                                            <label class="field field--inline">
+                                                                <span class="field-label text-white">Caja</span>
+                                                                <dx-select-box
+                                                                    [dataSource]="listaCajas"
+                                                                    displayExpr="text"
+                                                                    valueExpr="id"
+                                                                    formControlName="idCaja"
+                                                                    placeholder="Caja..."
+                                                                    searchEnabled="true"
+                                                                    searchMode="contains"
+                                                                    [showClearButton]="true"
+                                                                    class="dx-select-box-custom dx-select-box-caja dx-select-box--compact">
+                                                                </dx-select-box>
+                                                            </label>
                                                         </div>
-                                                    </label>
-                                                </div>
-                                                <div class="col-12 col-md-6">
-                                                    <label class="field">
-                                                        <span class="field-label text-white">Fondo Inicial</span>
-                                                        <div class="input-sleek">
-                                                            <i class="fas fa-dollar-sign"></i>
-                                                            <input formControlName="fondoInicial" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="Opcional" />
-                                                            <span class="sleek-line"></span>
+                                                        <div class="col-6">
+                                                            <label class="field field--inline">
+                                                                <span class="field-label text-white">Monto</span>
+                                                                <div class="input-sleek input-sleek--compact">
+                                                                    <i class="fas fa-dollar-sign"></i>
+                                                                    <input formControlName="fondoInicial" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0" />
+                                                                    <span class="sleek-line"></span>
+                                                                </div>
+                                                            </label>
                                                         </div>
-                                                    </label>
+                                                    </div>
+                                                    <button type="button" class="btn-remove-turno" 
+                                                        (click)="eliminarTurnoAbrir(i)"
+                                                        [disabled]="turnosAbrirArray.length === 1"
+                                                        [title]="turnosAbrirArray.length === 1 ? 'Debe haber al menos un turno' : 'Eliminar'">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                        <div class="form-placeholder" *ngIf="turnosAbrirArray.length === 0">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            <p><strong>Campo obligatorio:</strong> Debe agregar al menos un turno de caja para continuar.</p>
+                                        <div class="form-placeholder form-placeholder--compact" *ngIf="turnosAbrirArray.length === 0">
+                                            <i class="fas fa-plus-circle"></i>
+                                            <p>Agrega al menos un turno</p>
                                         </div>
                                     </div>
                                 </div>

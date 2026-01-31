@@ -57,22 +57,17 @@
                   <div class="col-12 col-lg-3">
                     <label class="field">
                       <span class="field-label text-white">Cliente</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isClienteOpen"
-                        (mousedown)="toggleCliente($event)">
-                        <i class="fas fa-building"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value" [class.placeholder]="!salaForm.get('idCliente')?.value">
-                            {{ clienteLabel || 'Selecciona un cliente...' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isClienteOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let c of listaClientes"
-                            (mousedown)="setCliente(c.id, c.nombre, $event)">
-                            {{ c.nombre }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="listaClientes"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idCliente"
+                        placeholder="Selecciona un cliente..."
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-cliente">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-3">
@@ -298,45 +293,31 @@
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Moneda Principal</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isIdMonedaOpen"
-                        (mousedown)="toggleIdMoneda($event)">
-                        <i class="fas fa-coins"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value"
-                            [class.placeholder]="salaForm.get('idMonedaPrincipal')?.value == null">
-                            {{ idMonedaLabel || 'Seleccione una moneda' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isIdMonedaOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let it of idMonedaItems"
-                            (mousedown)="setIdMoneda(it.id, it.text, $event)">
-                            {{ it.text }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="idMonedaItems"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idMonedaPrincipal"
+                        placeholder="Seleccione una moneda"
+                        searchEnabled="false"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-moneda">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Estatus Licencia</span>
-                      <div class="input-sleek select-sleek" [class.is-open]="isIdEstatusLicOpen"
-                        (mousedown)="toggleIdEstatusLic($event)">
-                        <i class="fas fa-toggle-on"></i>
-                        <div class="sleek-control select-display">
-                          <span class="select-value"
-                            [class.placeholder]="salaForm.get('idEstatusLicencia')?.value == null">
-                            {{ idEstatusLicLabel || 'Seleccione un estatus' }}
-                          </span>
-                        </div>
-                        <span class="sleek-line"></span>
-                        <div class="select-panel" *ngIf="isIdEstatusLicOpen" (mousedown)="$event.stopPropagation()">
-                          <button type="button" class="select-option" *ngFor="let it of idEstatusLicItems"
-                            (mousedown)="setIdEstatusLic(it.id, it.text, $event)">
-                            {{ it.text }}
-                          </button>
-                        </div>
-                      </div>
+                      <dx-select-box
+                        [dataSource]="idEstatusLicItems"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idEstatusLicencia"
+                        placeholder="Seleccione un estatus"
+                        searchEnabled="false"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4">

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -16,7 +16,7 @@ import Swal from 'sweetalert2';
 export class AgregarPermisoComponent implements OnInit {
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
-  public listaModulos: any;
+  public listaModulos: any[] = [];
   public permisoForm: FormGroup;
   public idPermiso: number;
   public title = 'Agregar Permiso';
@@ -72,20 +72,8 @@ export class AgregarPermisoComponent implements OnInit {
       this.listaModulos = (response?.data || []).map((m: any) => ({
         ...m,
         id: Number(m.id),
+        text: (m.nombre ?? m.Nombre ?? m.name ?? 'Sin nombre').trim(),
       }));
-
-      const currentId = Number(this.permisoForm.get('idModulo')?.value ?? 0);
-
-      if (currentId) {
-        const found = (this.listaModulos || []).find((x: any) => Number(x.id) === currentId);
-        if (found) this.moduloLabel = found.nombre ?? found.Nombre ?? found.name ?? '';
-      }
-
-      if (this._pendingIdModulo != null) {
-        const found = (this.listaModulos || []).find((x: any) => Number(x.id) === this._pendingIdModulo);
-        if (found) this.moduloLabel = found.nombre ?? found.Nombre ?? found.name ?? '';
-        this._pendingIdModulo = null;
-      }
     });
   }
 
@@ -105,12 +93,6 @@ export class AgregarPermisoComponent implements OnInit {
         descripcion: response.data.descripcion,
         idModulo: idModuloNum,
       });
-
-      if (idModuloNum) {
-        const found = (this.listaModulos || []).find((x: any) => Number(x.id) === idModuloNum);
-        if (found) this.moduloLabel = found.nombre ?? found.Nombre ?? found.name ?? '';
-        else this._pendingIdModulo = idModuloNum;
-      }
     });
   }
 
@@ -305,45 +287,5 @@ export class AgregarPermisoComponent implements OnInit {
   regresar() {
     this.route.navigateByUrl('/permisos');
   }
-
-  isModuloOpen = false;
-  moduloLabel = '';
-  private _pendingIdModulo: number | null = null;
-
-  toggleModulo(ev: MouseEvent) {
-    ev.preventDefault();
-    ev.stopPropagation();
-    this.isModuloOpen = !this.isModuloOpen;
-  }
-
-  setModulo(id: any, label: string, ev: MouseEvent) {
-    ev.preventDefault();
-    ev.stopPropagation();
-
-    this.permisoForm.patchValue({ idModulo: Number(id) });
-    this.moduloLabel = label;
-    this.isModuloOpen = false;
-
-    (ev.currentTarget as HTMLElement)?.blur();
-    (document.activeElement as HTMLElement)?.blur();
-  }
-
-  @HostListener('document:mousedown', ['$event'])
-onDocMouseDown(ev: MouseEvent) {
-  const target = ev.target as HTMLElement;
-
-  // si el click NO fue dentro de un select custom, cierra todos
-  if (!target.closest('.select-sleek')) {
-    this.closeSelects();
-  }
-}
-
-private closeSelects() {
-  this.isModuloOpen = false;
-  // si también tienes "tipo" u otros selects en este componente, agrégalos aquí:
-  // this.isTipoOpen = false;
-}
-
-
 
 }

@@ -26,29 +26,17 @@
                                 <div class="col-12 col-md-4">
                                     <label class="field">
                                         <span class="field-label text-white">Módulo</span>
-
-                                        <div class="input-sleek select-sleek" [class.is-open]="isModuloOpen"
-                                            (mousedown)="toggleModulo($event)">
-                                            <i class="fas fa-shield-alt"></i>
-
-                                            <div class="sleek-control select-display">
-                                                <span class="select-value"
-                                                    [class.placeholder]="!permisoForm.get('idModulo')?.value">
-                                                    {{ moduloLabel || 'Selecciona un módulo...' }}
-                                                </span>
-                                            </div>
-
-                                            <span class="sleek-line"></span>
-
-                                            <div class="select-panel" *ngIf="isModuloOpen"
-                                                (mousedown)="$event.stopPropagation()">
-                                                <button type="button" class="select-option"
-                                                    *ngFor="let m of listaModulos"
-                                                    (mousedown)="setModulo(m.id, m.nombre, $event)">
-                                                    {{ m.nombre }}
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <dx-select-box
+                                            [dataSource]="listaModulos"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="idModulo"
+                                            placeholder="Selecciona un módulo..."
+                                            searchEnabled="true"
+                                            searchMode="contains"
+                                            [showClearButton]="true"
+                                            class="dx-select-box-custom dx-select-box-modulo">
+                                        </dx-select-box>
                                     </label>
                                 </div>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -30,20 +30,6 @@ export class AgregarMaquinaComponent implements OnInit {
   public listaFabricantes: any;
   public listaEstatusMaquina: any;
   maquinaForm: FormGroup;
-
-  // Custom selects
-  isClienteOpen = false;
-  clienteLabel = '';
-  isZonaOpen = false;
-  zonaLabel = '';
-  isSalaOpen = false;
-  salaLabel = '';
-  isTipoMaquinaOpen = false;
-  tipoMaquinaLabel = '';
-  isFabricanteOpen = false;
-  fabricanteLabel = '';
-  isEstatusMaquinaOpen = false;
-  estatusMaquinaLabel = '';
 
   constructor(
     private fb: FormBuilder,
@@ -92,22 +78,20 @@ export class AgregarMaquinaComponent implements OnInit {
   }
 
   private procesarListas(responses: any) {
-    // Procesar clientes
     this.listaClientes = (responses.clientes.data || []).map((c: any) => ({
       ...c,
       id: Number(c.id),
+      text: (c.nombre ?? '').trim() || 'Sin nombre',
     }));
-    
-    // Procesar zonas
     this.listaZonas = (responses.zonas.data || []).map((z: any) => ({
       id: Number(z.idZona || z.id),
-      nombre: z.nombreZona || z.nombre || ''
+      nombre: z.nombreZona || z.nombre || '',
+      text: (z.nombreZona ?? z.nombre ?? 'Sin nombre').trim(),
     }));
-    
-    // Procesar salas
     this.listaSalas = (responses.salas.data || []).map((s: any) => ({
       id: Number(s.idSala || s.id),
-      nombre: s.nombreSala || s.nombre || ''
+      nombre: s.nombreSala || s.nombre || '',
+      text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
     }));
     
     // Procesar tipo máquina
@@ -143,6 +127,7 @@ export class AgregarMaquinaComponent implements OnInit {
       this.listaClientes = (response.data || []).map((c: any) => ({
         ...c,
         id: Number(c.id),
+        text: (c.nombre ?? '').trim() || 'Sin nombre',
       }));
     });
   }
@@ -151,7 +136,8 @@ export class AgregarMaquinaComponent implements OnInit {
     this.zonaService.obtenerZonas().subscribe((response) => {
       this.listaZonas = (response.data || []).map((z: any) => ({
         id: Number(z.idZona || z.id),
-        nombre: z.nombreZona || z.nombre || ''
+        nombre: z.nombreZona || z.nombre || '',
+        text: (z.nombreZona ?? z.nombre ?? 'Sin nombre').trim(),
       }));
     });
   }
@@ -160,7 +146,8 @@ export class AgregarMaquinaComponent implements OnInit {
     this.salasService.obtenerSalas().subscribe((response) => {
       this.listaSalas = (response.data || []).map((s: any) => ({
         id: Number(s.idSala || s.id),
-        nombre: s.nombreSala || s.nombre || ''
+        nombre: s.nombreSala || s.nombre || '',
+        text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
       }));
     });
   }
@@ -232,9 +219,6 @@ export class AgregarMaquinaComponent implements OnInit {
           iconoMaquina: data.iconoMaquina || '',
         });
 
-        // Establecer labels
-        this.establecerLabels(data);
-        
         // Cargar imágenes si existen
         if (data.imagenMaquina) {
           this.imagenPreviewUrl = data.imagenMaquina;
@@ -257,52 +241,7 @@ export class AgregarMaquinaComponent implements OnInit {
     });
   }
 
-  private establecerLabels(data: any) {
-    const idCliente = Number(data.idCliente ?? 0);
-    if (idCliente && this.listaClientes?.length > 0) {
-      const found = this.listaClientes.find((x: any) => Number(x.id) === idCliente);
-      if (found) {
-        const nombreCompleto = [
-          data.nombreCliente,
-          data.apellidoPaternoCliente,
-          data.apellidoMaternoCliente
-        ].filter(Boolean).join(' ').trim();
-        this.clienteLabel = nombreCompleto || found.nombre || 'Cliente';
-      }
-    }
-
-    const idZona = Number(data.idZona ?? 0);
-    if (idZona && this.listaZonas?.length > 0) {
-      const found = this.listaZonas.find((z: any) => Number(z.id) === idZona);
-      if (found) this.zonaLabel = found.nombre || data.nombreZona || '';
-    }
-
-    const idSala = Number(data.idSala ?? 0);
-    if (idSala && this.listaSalas?.length > 0) {
-      const found = this.listaSalas.find((s: any) => Number(s.id) === idSala);
-      if (found) this.salaLabel = found.nombre || data.nombreSala || '';
-    }
-
-    const idTipo = Number(data.idTipoMaquina ?? 0);
-    if (idTipo && this.listaTipoMaquina?.length > 0) {
-      const found = this.listaTipoMaquina.find((t: SelectItem) => t.id === idTipo);
-      if (found) this.tipoMaquinaLabel = found.text || data.nombreTipoMaquina || '';
-    }
-
-    const idFabricante = Number(data.idFabricante ?? 0);
-    if (idFabricante && this.listaFabricantes?.length > 0) {
-      const found = this.listaFabricantes.find((f: SelectItem) => f.id === idFabricante);
-      if (found) this.fabricanteLabel = found.text || data.nombreFabricante || '';
-    }
-
-    const idEstatus = Number(data.idEstatusMaquina ?? 0);
-    if (idEstatus && this.listaEstatusMaquina?.length > 0) {
-      const found = this.listaEstatusMaquina.find((e: SelectItem) => e.id === idEstatus);
-      if (found) this.estatusMaquinaLabel = found.text || data.nombreEstatusMaquina || '';
-    }
-  }
-
-  initForm(): void {
+  private   initForm(): void {
     this.maquinaForm = this.fb.group({
       numeroSerie: [''],
       nombre: [''],
@@ -323,139 +262,6 @@ export class AgregarMaquinaComponent implements OnInit {
       imagenMaquina: [''],
       iconoMaquina: [''],
     });
-  }
-
-  // Custom select methods
-  toggleCliente(event: MouseEvent) {
-    event.preventDefault();
-    this.isClienteOpen = !this.isClienteOpen;
-    if (this.isClienteOpen) {
-      this.isZonaOpen = false;
-      this.isSalaOpen = false;
-      this.isTipoMaquinaOpen = false;
-      this.isFabricanteOpen = false;
-      this.isEstatusMaquinaOpen = false;
-    }
-  }
-
-  setCliente(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.maquinaForm.patchValue({ idCliente: id });
-    this.clienteLabel = nombre;
-    this.isClienteOpen = false;
-  }
-
-  toggleZona(event: MouseEvent) {
-    event.preventDefault();
-    this.isZonaOpen = !this.isZonaOpen;
-    if (this.isZonaOpen) {
-      this.isClienteOpen = false;
-      this.isSalaOpen = false;
-      this.isTipoMaquinaOpen = false;
-      this.isFabricanteOpen = false;
-      this.isEstatusMaquinaOpen = false;
-    }
-  }
-
-  setZona(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.maquinaForm.patchValue({ idZona: id });
-    this.zonaLabel = nombre;
-    this.isZonaOpen = false;
-  }
-
-  toggleSala(event: MouseEvent) {
-    event.preventDefault();
-    this.isSalaOpen = !this.isSalaOpen;
-    if (this.isSalaOpen) {
-      this.isClienteOpen = false;
-      this.isZonaOpen = false;
-      this.isTipoMaquinaOpen = false;
-      this.isFabricanteOpen = false;
-      this.isEstatusMaquinaOpen = false;
-    }
-  }
-
-  setSala(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.maquinaForm.patchValue({ idSala: id });
-    this.salaLabel = nombre;
-    this.isSalaOpen = false;
-  }
-
-  toggleTipoMaquina(event: MouseEvent) {
-    event.preventDefault();
-    this.isTipoMaquinaOpen = !this.isTipoMaquinaOpen;
-    if (this.isTipoMaquinaOpen) {
-      this.isClienteOpen = false;
-      this.isZonaOpen = false;
-      this.isSalaOpen = false;
-      this.isFabricanteOpen = false;
-      this.isEstatusMaquinaOpen = false;
-    }
-  }
-
-  setTipoMaquina(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.maquinaForm.patchValue({ idTipoMaquina: id });
-    this.tipoMaquinaLabel = nombre;
-    this.isTipoMaquinaOpen = false;
-  }
-
-  toggleFabricante(event: MouseEvent) {
-    event.preventDefault();
-    this.isFabricanteOpen = !this.isFabricanteOpen;
-    if (this.isFabricanteOpen) {
-      this.isClienteOpen = false;
-      this.isZonaOpen = false;
-      this.isSalaOpen = false;
-      this.isTipoMaquinaOpen = false;
-      this.isEstatusMaquinaOpen = false;
-    }
-  }
-
-  setFabricante(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.maquinaForm.patchValue({ idFabricante: id });
-    this.fabricanteLabel = nombre;
-    this.isFabricanteOpen = false;
-  }
-
-  toggleEstatusMaquina(event: MouseEvent) {
-    event.preventDefault();
-    this.isEstatusMaquinaOpen = !this.isEstatusMaquinaOpen;
-    if (this.isEstatusMaquinaOpen) {
-      this.isClienteOpen = false;
-      this.isZonaOpen = false;
-      this.isSalaOpen = false;
-      this.isTipoMaquinaOpen = false;
-      this.isFabricanteOpen = false;
-    }
-  }
-
-  setEstatusMaquina(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.maquinaForm.patchValue({ idEstatusMaquina: id });
-    this.estatusMaquinaLabel = nombre;
-    this.isEstatusMaquinaOpen = false;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocClick(event: MouseEvent) {
-    if (!(event.target as HTMLElement).closest('.select-sleek')) {
-      this.isClienteOpen = false;
-      this.isZonaOpen = false;
-      this.isSalaOpen = false;
-      this.isTipoMaquinaOpen = false;
-      this.isFabricanteOpen = false;
-      this.isEstatusMaquinaOpen = false;
-    }
   }
 
   // File upload properties

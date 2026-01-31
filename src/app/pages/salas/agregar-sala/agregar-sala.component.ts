@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -25,24 +25,9 @@ export class AgregarSalaComponent implements OnInit {
   public listaTipoZona: any;
   public listaMonedas: any;
   public listaEstatusLic: any;
+  public idMonedaItems: SelectItem[] = [];
+  public idEstatusLicItems: SelectItem[] = [];
   salaForm: FormGroup;
-
-  isClienteOpen = false;
-  clienteLabel = '';
-
-  toggleCliente(event: MouseEvent) {
-    event.preventDefault();
-    this.isClienteOpen = !this.isClienteOpen;
-  }
-
-  setCliente(id: any, nombre: string, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.salaForm.patchValue({ idCliente: id });
-    this.clienteLabel = nombre;
-    this.isClienteOpen = false;
-  }
 
   constructor(
     private fb: FormBuilder,
@@ -68,27 +53,25 @@ export class AgregarSalaComponent implements OnInit {
           estatusLic: this.salasService.obtenerEstatusLic()
         }).subscribe({
           next: (responses) => {
-            // Procesar clientes
             this.listaClientes = (responses.clientes.data || []).map((c: any) => ({
               ...c,
               id: Number(c.id),
+              text: (c.nombre ?? '').trim() || 'Sin nombre',
             }));
             
-            // Procesar monedas
             const monedas = (responses.monedas.data || []).map((c: any) => ({
               id: Number(c.id),
-              text: c.nombre || ''
+              text: (c.nombre ?? '').trim() || 'Sin nombre',
             } as SelectItem));
             this.listaMonedas = monedas;
-            this.setIdMonedaItems(monedas);
-            
-            // Procesar estatus licencia
+            this.idMonedaItems = monedas;
+
             const estatusLic = (responses.estatusLic.data || []).map((c: any) => ({
               id: Number(c.id),
-              text: c.nombre || ''
+              text: (c.nombre ?? '').trim() || 'Sin nombre',
             } as SelectItem));
             this.listaEstatusLic = estatusLic;
-            this.setIdEstatusLicItems(estatusLic);
+            this.idEstatusLicItems = estatusLic;
             
             // Ahora obtener la sala con todas las listas cargadas
             this.obtenerSala();
@@ -117,19 +100,10 @@ export class AgregarSalaComponent implements OnInit {
     this.salasService.obtenerMonedas().subscribe((response) => {
       const monedas = (response.data || []).map((c: any) => ({
         id: Number(c.id),
-        text: c.nombre || ''
+        text: (c.nombre ?? '').trim() || 'Sin nombre',
       } as SelectItem));
       this.listaMonedas = monedas;
-      this.setIdMonedaItems(monedas);
-      
-      // Establecer label si ya hay un valor en el formulario
-      const currentId = Number(this.salaForm.get('idMonedaPrincipal')?.value ?? 0);
-      if (currentId) {
-        const found = monedas.find((x: SelectItem) => x.id === currentId);
-        if (found) {
-          this.idMonedaLabel = found.text;
-        }
-      }
+      this.idMonedaItems = monedas;
     });
   }
 
@@ -137,19 +111,10 @@ export class AgregarSalaComponent implements OnInit {
     this.salasService.obtenerEstatusLic().subscribe((response) => {
       const estatusLic = (response.data || []).map((c: any) => ({
         id: Number(c.id),
-        text: c.nombre || ''
+        text: (c.nombre ?? '').trim() || 'Sin nombre',
       } as SelectItem));
       this.listaEstatusLic = estatusLic;
-      this.setIdEstatusLicItems(estatusLic);
-      
-      // Establecer label si ya hay un valor en el formulario
-      const currentId = Number(this.salaForm.get('idEstatusLicencia')?.value ?? 0);
-      if (currentId) {
-        const found = estatusLic.find((x: SelectItem) => x.id === currentId);
-        if (found) {
-          this.idEstatusLicLabel = found.text;
-        }
-      }
+      this.idEstatusLicItems = estatusLic;
     });
   }
 
@@ -158,12 +123,8 @@ export class AgregarSalaComponent implements OnInit {
       this.listaClientes = (response.data || []).map((c: any) => ({
         ...c,
         id: Number(c.id),
+        text: (c.nombre ?? '').trim() || 'Sin nombre',
       }));
-      const currentId = Number(this.salaForm.get('idCliente')?.value ?? 0);
-      if (currentId) {
-        const found = (this.listaClientes || []).find((x: any) => Number(x.id) === currentId);
-        if (found) this.clienteLabel = found.nombre;
-      }
     });
   }
 
@@ -218,47 +179,6 @@ export class AgregarSalaComponent implements OnInit {
           idEstatusLicencia: Number(data.idEstatusLicencia ?? 0),
           idCliente: Number(data.idCliente ?? 0),
         });
-
-        // Establecer labels para los selects usando los nombres del servicio
-        const idCliente = Number(data.idCliente ?? 0);
-        if (idCliente && this.listaClientes && this.listaClientes.length > 0) {
-          const foundCliente = this.listaClientes.find((x: any) => Number(x.id) === idCliente);
-          if (foundCliente) {
-            // Construir el nombre completo del cliente
-            const nombreCompleto = [
-              data.nombreCliente,
-              data.apellidoPaternoCliente,
-              data.apellidoMaternoCliente
-            ].filter(Boolean).join(' ').trim();
-            this.clienteLabel = nombreCompleto || foundCliente.nombre || 'Cliente';
-          }
-        }
-
-        // Establecer label de moneda usando nombreMoneda del servicio
-        const idMoneda = Number(data.idMonedaPrincipal ?? 0);
-        if (idMoneda) {
-          this.idMonedaLabel = data.nombreMoneda || '';
-          // Si no viene en el servicio, buscar en la lista
-          if (!this.idMonedaLabel && this.idMonedaItems && this.idMonedaItems.length > 0) {
-            const foundMoneda = this.idMonedaItems.find((x: SelectItem) => x.id === idMoneda);
-            if (foundMoneda) {
-              this.idMonedaLabel = foundMoneda.text;
-            }
-          }
-        }
-
-        // Establecer label de estatus licencia usando nombreEstatusLicencia del servicio
-        const idEstatusLic = Number(data.idEstatusLicencia ?? 0);
-        if (idEstatusLic) {
-          this.idEstatusLicLabel = data.nombreEstatusLicencia || '';
-          // Si no viene en el servicio, buscar en la lista
-          if (!this.idEstatusLicLabel && this.idEstatusLicItems && this.idEstatusLicItems.length > 0) {
-            const foundEstatus = this.idEstatusLicItems.find((x: SelectItem) => x.id === idEstatusLic);
-            if (foundEstatus) {
-              this.idEstatusLicLabel = foundEstatus.text;
-            }
-          }
-        }
 
         // Cargar imágenes si existen
         if (data.logotipoSala) {
@@ -748,105 +668,6 @@ export class AgregarSalaComponent implements OnInit {
     }
   }
 
-  isIdClienteOpen = false;
-  idClienteLabel = '';
-  idClienteItems: SelectItem[] = [];
-
-  isIdMonedaOpen = false;
-  idMonedaLabel = '';
-  idMonedaItems: SelectItem[] = [];
-
-  isIdEstatusLicOpen = false;
-  idEstatusLicLabel = '';
-  idEstatusLicItems: SelectItem[] = [];
-
-  toggleIdCliente(e: MouseEvent): void {
-    e.preventDefault();
-    e.stopPropagation();
-    this.isIdClienteOpen = !this.isIdClienteOpen;
-    if (this.isIdClienteOpen) {
-      this.isIdMonedaOpen = false;
-      this.isIdEstatusLicOpen = false;
-    }
-  }
-
-  setIdCliente(id: number, text: string, e: MouseEvent): void {
-    e.preventDefault();
-    e.stopPropagation();
-    this.salaForm.patchValue({ idCliente: id });
-    this.idClienteLabel = text;
-    this.isIdClienteOpen = false;
-  }
-
-  toggleIdMoneda(e: MouseEvent): void {
-    e.preventDefault();
-    e.stopPropagation();
-    this.isIdMonedaOpen = !this.isIdMonedaOpen;
-    if (this.isIdMonedaOpen) {
-      this.isIdClienteOpen = false;
-      this.isIdEstatusLicOpen = false;
-    }
-  }
-
-  setIdMoneda(id: number, text: string, e: MouseEvent): void {
-    e.preventDefault();
-    e.stopPropagation();
-    this.salaForm.patchValue({ idMonedaPrincipal: id });
-    this.idMonedaLabel = text;
-    this.isIdMonedaOpen = false;
-  }
-
-  toggleIdEstatusLic(e: MouseEvent): void {
-    e.preventDefault();
-    e.stopPropagation();
-    this.isIdEstatusLicOpen = !this.isIdEstatusLicOpen;
-    if (this.isIdEstatusLicOpen) {
-      this.isIdClienteOpen = false;
-      this.isIdMonedaOpen = false;
-    }
-  }
-
-  setIdEstatusLic(id: number, text: string, e: MouseEvent): void {
-    e.preventDefault();
-    e.stopPropagation();
-    this.salaForm.patchValue({ idEstatusLicencia: id });
-    this.idEstatusLicLabel = text;
-    this.isIdEstatusLicOpen = false;
-  }
-
-
-  setIdClienteItems(items: SelectItem[]): void {
-    this.idClienteItems = items || [];
-    const current = this.salaForm.get('idCliente')?.value;
-    const found = this.idClienteItems.find(x => x.id === current);
-    this.idClienteLabel = found ? found.text : '';
-  }
-
-  setIdMonedaItems(items: SelectItem[]): void {
-    this.idMonedaItems = items || [];
-    const current = this.salaForm.get('idMonedaPrincipal')?.value;
-    const found = this.idMonedaItems.find(x => x.id === current);
-    this.idMonedaLabel = found ? found.text : '';
-  }
-
-  setIdEstatusLicItems(items: SelectItem[]): void {
-    this.idEstatusLicItems = items || [];
-    const current = this.salaForm.get('idEstatusLicencia')?.value;
-    const found = this.idEstatusLicItems.find(x => x.id === current);
-    this.idEstatusLicLabel = found ? found.text : '';
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocClickCloseIds(e: MouseEvent): void {
-    const target = e.target as HTMLElement;
-    if (target.closest('.select-sleek')) return;
-
-    this.isIdClienteOpen = false;
-    this.isIdMonedaOpen = false;
-    this.isIdEstatusLicOpen = false;
-  }
-
-
   submit(): void {
     if (this.salaForm.invalid) {
 
@@ -1210,11 +1031,6 @@ export class AgregarSalaComponent implements OnInit {
     this.planoDistribucionPreviewUrl = null;
     this.planoDistribucionFileName = null;
     this.planoDistribucionFile = null;
-    
-    // Limpiar labels
-    this.clienteLabel = '';
-    this.idMonedaLabel = '';
-    this.idEstatusLicLabel = '';
     
     // Resetear estados
     this.selectedLat = 0;

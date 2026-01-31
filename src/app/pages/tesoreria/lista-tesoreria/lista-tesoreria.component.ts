@@ -1,4 +1,4 @@
-import { Component, HostListener, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -46,20 +46,16 @@ export class ListaTesoreriaComponent {
   // Formulario para cerrar tesorería
   cerrarTesoreriaForm: FormGroup;
   public listaTesoreriaAbierta: any[] = [];
-  isTesoreriaCerrarOpen = false;
-  tesoreriaCerrarLabel = '';
 
   // Formulario para reponer tesorería
   reponerTesoreriaForm: FormGroup;
   public listaTesoreriaReponer: any[] = [];
-  isTesoreriaReponerOpen = false;
-  tesoreriaReponerLabel = '';
 
   // Formulario para retirar tesorería
   retirarTesoreriaForm: FormGroup;
   public listaTesoreriaRetirar: any[] = [];
-  isTesoreriaRetirarOpen = false;
-  tesoreriaRetirarLabel = '';
+
+  loadingAcciones = false;
 
   constructor(
     private router: Router,
@@ -529,42 +525,33 @@ export class ListaTesoreriaComponent {
     this.router.navigate(['/tesoreria/abrir-boveda']);
   }
 
-  @HostListener('document:mousedown', ['$event'])
-  onDocMouseDown(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    if (!target.closest('.select-sleek')) {
-      this.closeSelects();
-    }
+  private soloBovedasAbiertas(data: any[]): any[] {
+    return (data || []).filter((t: any) => {
+      const c = (t.codigoEstatusTesoreria || '').toString().toUpperCase();
+      return c === 'ABIERTA' || c === 'ABIERTO';
+    });
   }
 
-  private closeSelects() {
-    this.isTesoreriaCerrarOpen = false;
-    this.isTesoreriaReponerOpen = false;
-    this.isTesoreriaRetirarOpen = false;
+  private mapTesoreriaOption(t: any): any {
+    return {
+      ...t,
+      id: Number(t.id),
+      text: `${t.nombreSala || ''} - ${this.formatearFecha(t.fecha)}${t.fondoInicial != null ? ' - Fondo: ' + this.formatearMoneda(t.fondoInicial) : ''}`.trim()
+    };
   }
 
   cerrarTesoreria() {
-    // Cargar lista de tesorerías abiertas usando servicio paginado
+    this.loadingAcciones = true;
     this.tesoreriaService.obtenerTesoreriaData(1, 100).subscribe({
       next: (response) => {
-        // Filtrar solo las tesorerías abiertas (estatus = abierto)
-        const todasLasTesoreria = (response.data || []);
-        this.listaTesoreriaAbierta = todasLasTesoreria
-          .filter((t: any) => {
-            // Filtrar por estatus abierto (generalmente código ABIERTA o similar)
-            const codigoEstatus = t.codigoEstatusTesoreria?.toUpperCase();
-            return codigoEstatus === 'ABIERTA' || codigoEstatus === 'ABIERTO';
-          })
-          .map((t: any) => ({
-            ...t,
-            id: Number(t.id),
-            text: `${t.nombreSala || ''} - ${this.formatearFecha(t.fecha)}${t.fondoInicial ? ' - Fondo: ' + this.formatearMoneda(t.fondoInicial) : ''}`.trim()
-          }));
+        this.loadingAcciones = false;
+        const abiertas = this.soloBovedasAbiertas(response.data || []);
+        this.listaTesoreriaAbierta = abiertas.map((t: any) => this.mapTesoreriaOption(t));
 
         if (this.listaTesoreriaAbierta.length === 0) {
           Swal.fire({
             title: '¡Atención!',
-            text: 'No hay tesorerías abiertas disponibles para cerrar.',
+            text: 'No hay bovedas abiertas disponibles para cerrar.',
             icon: 'warning',
             background: '#0d121d',
             confirmButtonColor: '#3085d6',
@@ -573,15 +560,18 @@ export class ListaTesoreriaComponent {
           return;
         }
 
+        this.cerrarTesoreriaForm.reset({ idTesoreria: null, fondoContado: '', observaciones: '' });
+
         this.modalRef = this.modalService.open(this.modalCerrarTesoreria, {
-          size: 'lg',
-          windowClass: 'modal-holder modal-cerrar-tesoreria',
+          size: 'md',
+          windowClass: 'modal-holder modal-accion',
           centered: true,
           backdrop: 'static',
           keyboard: true
         });
       },
       error: (error) => {
+        this.loadingAcciones = false;
         Swal.fire({
           title: '¡Error!',
           text: 'No se pudieron cargar las tesorerías disponibles.',
@@ -592,18 +582,6 @@ export class ListaTesoreriaComponent {
         });
       }
     });
-  }
-
-  toggleTesoreriaCerrar(event: any) {
-    event.stopPropagation();
-    this.isTesoreriaCerrarOpen = !this.isTesoreriaCerrarOpen;
-  }
-
-  setTesoreriaCerrar(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.cerrarTesoreriaForm.patchValue({ idTesoreria: id });
-    this.tesoreriaCerrarLabel = label;
-    this.isTesoreriaCerrarOpen = false;
   }
 
   guardarCerrarTesoreria() {
@@ -652,24 +630,37 @@ export class ListaTesoreriaComponent {
   }
 
   reponerTesoreria() {
-    // Cargar lista de tesorerías usando servicio paginado
+    this.loadingAcciones = true;
     this.tesoreriaService.obtenerTesoreriaData(1, 100).subscribe({
       next: (response) => {
-        this.listaTesoreriaReponer = (response.data || []).map((t: any) => ({
-          ...t,
-          id: Number(t.id),
-          text: `${t.nombreSala || ''} - ${this.formatearFecha(t.fecha)}${t.fondoInicial ? ' - Fondo: ' + this.formatearMoneda(t.fondoInicial) : ''}`.trim()
-        }));
+        this.loadingAcciones = false;
+        const abiertas = this.soloBovedasAbiertas(response.data || []);
+        this.listaTesoreriaReponer = abiertas.map((t: any) => this.mapTesoreriaOption(t));
+
+        if (this.listaTesoreriaReponer.length === 0) {
+          Swal.fire({
+            title: '¡Atención!',
+            text: 'No hay bovedas abiertas disponibles para reponer.',
+            icon: 'warning',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Confirmar',
+          });
+          return;
+        }
+
+        this.reponerTesoreriaForm.reset({ idTesoreria: null, monto: '', referencia: '', observaciones: '' });
 
         this.modalRef = this.modalService.open(this.modalReponerTesoreria, {
-          size: 'lg',
-          windowClass: 'modal-holder modal-reponer-tesoreria',
+          size: 'md',
+          windowClass: 'modal-holder modal-accion',
           centered: true,
           backdrop: 'static',
           keyboard: true
         });
       },
       error: (error) => {
+        this.loadingAcciones = false;
         Swal.fire({
           title: '¡Error!',
           text: 'No se pudieron cargar las tesorerías disponibles.',
@@ -680,18 +671,6 @@ export class ListaTesoreriaComponent {
         });
       }
     });
-  }
-
-  toggleTesoreriaReponer(event: any) {
-    event.stopPropagation();
-    this.isTesoreriaReponerOpen = !this.isTesoreriaReponerOpen;
-  }
-
-  setTesoreriaReponer(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.reponerTesoreriaForm.patchValue({ idTesoreria: id });
-    this.tesoreriaReponerLabel = label;
-    this.isTesoreriaReponerOpen = false;
   }
 
   guardarReponerTesoreria() {
@@ -741,24 +720,37 @@ export class ListaTesoreriaComponent {
   }
 
   retirarTesoreria() {
-    // Cargar lista de tesorerías usando servicio paginado
+    this.loadingAcciones = true;
     this.tesoreriaService.obtenerTesoreriaData(1, 100).subscribe({
       next: (response) => {
-        this.listaTesoreriaRetirar = (response.data || []).map((t: any) => ({
-          ...t,
-          id: Number(t.id),
-          text: `${t.nombreSala || ''} - ${this.formatearFecha(t.fecha)}${t.fondoInicial ? ' - Fondo: ' + this.formatearMoneda(t.fondoInicial) : ''}`.trim()
-        }));
+        this.loadingAcciones = false;
+        const abiertas = this.soloBovedasAbiertas(response.data || []);
+        this.listaTesoreriaRetirar = abiertas.map((t: any) => this.mapTesoreriaOption(t));
+
+        if (this.listaTesoreriaRetirar.length === 0) {
+          Swal.fire({
+            title: '¡Atención!',
+            text: 'No hay bovedas abiertas disponibles para retirar.',
+            icon: 'warning',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Confirmar',
+          });
+          return;
+        }
+
+        this.retirarTesoreriaForm.reset({ idTesoreria: null, monto: '', referencia: '', observaciones: '' });
 
         this.modalRef = this.modalService.open(this.modalRetirarTesoreria, {
-          size: 'lg',
-          windowClass: 'modal-holder modal-retirar-tesoreria',
+          size: 'md',
+          windowClass: 'modal-holder modal-accion',
           centered: true,
           backdrop: 'static',
           keyboard: true
         });
       },
       error: (error) => {
+        this.loadingAcciones = false;
         Swal.fire({
           title: '¡Error!',
           text: 'No se pudieron cargar las tesorerías disponibles.',
@@ -769,18 +761,6 @@ export class ListaTesoreriaComponent {
         });
       }
     });
-  }
-
-  toggleTesoreriaRetirar(event: any) {
-    event.stopPropagation();
-    this.isTesoreriaRetirarOpen = !this.isTesoreriaRetirarOpen;
-  }
-
-  setTesoreriaRetirar(id: number, label: string, event: any) {
-    event.stopPropagation();
-    this.retirarTesoreriaForm.patchValue({ idTesoreria: id });
-    this.tesoreriaRetirarLabel = label;
-    this.isTesoreriaRetirarOpen = false;
   }
 
   guardarRetirarTesoreria() {
@@ -833,14 +813,8 @@ export class ListaTesoreriaComponent {
     if (this.modalRef) {
       this.modalRef.close();
       this.cerrarTesoreriaForm.reset();
-      this.tesoreriaCerrarLabel = '';
-      this.isTesoreriaCerrarOpen = false;
       this.reponerTesoreriaForm.reset();
-      this.tesoreriaReponerLabel = '';
-      this.isTesoreriaReponerOpen = false;
       this.retirarTesoreriaForm.reset();
-      this.tesoreriaRetirarLabel = '';
-      this.isTesoreriaRetirarOpen = false;
     }
   }
 }
