@@ -38,6 +38,7 @@ export class ListaMonederosComponent {
   @ViewChild('modalCargarMonedero', { static: false }) modalCargarMonedero!: TemplateRef<any>;
   @ViewChild('modalDescargarMonedero', { static: false }) modalDescargarMonedero!: TemplateRef<any>;
   @ViewChild('modalConsultarSaldo', { static: false }) modalConsultarSaldo!: TemplateRef<any>;
+  @ViewChild('modalCambiarEstatus', { static: false }) modalCambiarEstatus!: TemplateRef<any>;
   private modalRef?: NgbModalRef;
 
   // Formulario para cargar monedero
@@ -54,6 +55,11 @@ export class ListaMonederosComponent {
   consultarSaldoForm: FormGroup;
   saldoData: any = null;
   consultandoSaldo = false;
+
+  // Formulario para cambiar estatus de monedero
+  cambiarEstatusForm: FormGroup;
+  public listaEstatusMonederoOpciones: { id: number; text: string }[] = [];
+  monederoSeleccionadoCambio: { numeroMonedero?: string; alias?: string } | null = null;
 
   constructor(
     private router: Router,
@@ -77,6 +83,11 @@ export class ListaMonederosComponent {
     this.consultarSaldoForm = this.fb.group({
       numero: ['', [Validators.required, Validators.minLength(1)]]
     });
+    this.cambiarEstatusForm = this.fb.group({
+      idMonedero: [null, Validators.required],
+      idEstatusMonedero: [null, Validators.required],
+      motivo: ['', [Validators.required, Validators.minLength(1)]]
+    });
   }
 
   ngOnInit() {
@@ -88,6 +99,10 @@ export class ListaMonederosComponent {
     this.monederosService.obtenerEstatusMonedero().subscribe({
       next: (response) => {
         this.listaEstatusMonedero = response?.data || [];
+        this.listaEstatusMonederoOpciones = this.listaEstatusMonedero.map((e: any) => ({
+          id: Number(e.id),
+          text: e.nombre || e.nombreEstatusMonedero || ''
+        }));
       },
       error: (error) => {
         console.error('Error al cargar estatus monedero:', error);
@@ -141,6 +156,71 @@ export class ListaMonederosComponent {
               confirmButtonText: 'Confirmar',
             });
           }
+        });
+      }
+    });
+  }
+
+  abrirCambiarEstatus(rowData: any) {
+    this.monederoSeleccionadoCambio = {
+      numeroMonedero: rowData.numeroMonedero,
+      alias: rowData.alias
+    };
+    this.cambiarEstatusForm.patchValue({
+      idMonedero: rowData.id,
+      idEstatusMonedero: null,
+      motivo: ''
+    });
+    this.modalRef = this.modalService.open(this.modalCambiarEstatus, {
+      size: 'md',
+      windowClass: 'modal-holder modal-cambiar-estatus',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+  }
+
+  guardarCambiarEstatus() {
+    if (this.cambiarEstatusForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Complete el nuevo estatus y el motivo.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const payload = {
+      idMonedero: Number(this.cambiarEstatusForm.value.idMonedero),
+      idEstatusMonedero: Number(this.cambiarEstatusForm.value.idEstatusMonedero),
+      motivo: (this.cambiarEstatusForm.value.motivo || '').trim()
+    };
+    this.monederosService.cambiarEstatus(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación exitosa!',
+          text: 'Se ha cambiado el estatus del monedero.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        if (this.modalRef) this.modalRef.close();
+        this.cambiarEstatusForm.reset();
+        this.monederoSeleccionadoCambio = null;
+        this.setupDataSource();
+        if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo cambiar el estatus del monedero.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
         });
       }
     });
@@ -630,8 +710,10 @@ export class ListaMonederosComponent {
       this.cargarMonederoForm.reset();
       this.descargarMonederoForm.reset();
       this.consultarSaldoForm.reset();
+      this.cambiarEstatusForm.reset();
       this.saldoData = null;
       this.consultandoSaldo = false;
+      this.monederoSeleccionadoCambio = null;
     }
   }
 }

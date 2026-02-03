@@ -90,9 +90,7 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <!-- Columnas 
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="120" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
-                         -->
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="160" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
                         <dxi-column caption="Estatus Turno" cellTemplate="EstatusTurno" alignment="center" dataType="string" [width]="200"></dxi-column>
                         <dxi-column dataField="nombreCompletoCliente" caption="Cliente" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column caption="Caja" cellTemplate="caja" alignment="center" dataType="string" [width]="180" [allowSearch]="true"></dxi-column>
@@ -117,6 +115,11 @@
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                            <div>
+                                <button type="button" id="saldoCajaButton" class="btnAcciones" (click)="verSaldoCaja(row.data.idCaja)" title="Obtener saldo de caja">
+                                    <i class="fa fa-wallet"></i>
+                                </button>
+                            </div>
                             <div>
                                 <button type="button" id="detallesButton" class="btnAcciones" title="Ver Detalles">
                                     <i class="fa fa-eye"></i>
@@ -195,95 +198,84 @@
 
 <!-- Modal Abrir Turno -->
 <ng-template #modalAbrirTurno let-modal>
-    <div class="modal-header modal-header-abrir-turno">
+    <div class="modal-header modal-accion-header modal-accion-header--abrir-turno">
         <h5 class="modal-title">
             <i class="fas fa-door-open"></i>
             <span>Abrir Turno de Caja</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
-            <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-abrir-turno">
-        <div class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-success">
-                    <i class="fas fa-door-open"></i>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="abrirTurnoForm">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Caja *</span>
+                        <dx-select-box
+                            [dataSource]="listaCajas"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-caja">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Estatus Turno *</span>
+                        <dx-select-box
+                            [dataSource]="listaEstatusTurno"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idEstatusTurno"
+                            placeholder="Selecciona un estatus..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-estatus">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Tesorería *</span>
+                        <dx-select-box
+                            [dataSource]="listaTesoreria"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTesoreria"
+                            placeholder="Selecciona una tesorería..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-boveda">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Fondo Inicial *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="fondoInicial" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
                 </div>
             </div>
-            <h4 class="action-title">Abrir Nuevo Turno</h4>
-            <p class="action-description">Complete los siguientes campos para abrir un nuevo turno de caja</p>
-            <div class="action-form">
-                <form [formGroup]="abrirTurnoForm">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Caja *</span>
-                                <dx-select-box
-                                    [dataSource]="listaCajas"
-                                    displayExpr="text"
-                                    valueExpr="id"
-                                    formControlName="idCaja"
-                                    placeholder="Selecciona una caja..."
-                                    searchEnabled="true"
-                                    searchMode="contains"
-                                    [showClearButton]="true"
-                                    class="dx-select-box-custom dx-select-box-caja">
-                                </dx-select-box>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Estatus Turno *</span>
-                                <dx-select-box
-                                    [dataSource]="listaEstatusTurno"
-                                    displayExpr="text"
-                                    valueExpr="id"
-                                    formControlName="idEstatusTurno"
-                                    placeholder="Selecciona un estatus..."
-                                    searchEnabled="true"
-                                    searchMode="contains"
-                                    [showClearButton]="true"
-                                    class="dx-select-box-custom dx-select-box-estatus">
-                                </dx-select-box>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Tesorería *</span>
-                                <dx-select-box
-                                    [dataSource]="listaTesoreria"
-                                    displayExpr="text"
-                                    valueExpr="id"
-                                    formControlName="idTesoreria"
-                                    placeholder="Selecciona una tesorería..."
-                                    searchEnabled="true"
-                                    searchMode="contains"
-                                    [showClearButton]="true"
-                                    class="dx-select-box-custom dx-select-box-boveda">
-                                </dx-select-box>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Fondo Inicial *</span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    <input formControlName="fondoInicial" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
-    <div class="modal-footer modal-footer-abrir-turno">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fas fa-times"></i> Cancelar
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-success" (click)="guardarAbrirTurno()">
+        <button type="button" class="btn btn-success" (click)="guardarAbrirTurno()" [disabled]="abrirTurnoForm.invalid">
             <i class="fas fa-check"></i> Abrir Turno
         </button>
     </div>
@@ -291,74 +283,63 @@
 
 <!-- Modal Cerrar Turno -->
 <ng-template #modalCerrarTurno let-modal>
-    <div class="modal-header modal-header-cerrar-turno">
+    <div class="modal-header modal-accion-header modal-accion-header--cerrar-turno">
         <h5 class="modal-title">
             <i class="fas fa-door-closed"></i>
             <span>Cerrar Turno de Caja</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
-            <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-cerrar-turno">
-        <div class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-warning">
-                    <i class="fas fa-door-closed"></i>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="cerrarTurnoForm">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Turno Activo *</span>
+                        <dx-select-box
+                            [dataSource]="listaTurnosActivos"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTurno"
+                            placeholder="Selecciona un turno..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-turno">
+                        </dx-select-box>
+                        <div *ngIf="listaTurnosActivos.length === 0" class="text-muted small mt-1">No hay turnos activos disponibles</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Fondo Contado *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="fondoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Observaciones</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Observaciones del cierre..." />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
                 </div>
             </div>
-            <h4 class="action-title">Cerrar Turno Actual</h4>
-            <p class="action-description">Complete los siguientes campos para cerrar el turno de caja activo</p>
-            <div class="action-form">
-                <form [formGroup]="cerrarTurnoForm">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Turno Activo *</span>
-                                <dx-select-box
-                                    [dataSource]="listaTurnosActivos"
-                                    displayExpr="text"
-                                    valueExpr="id"
-                                    formControlName="idTurno"
-                                    placeholder="Selecciona un turno..."
-                                    searchEnabled="true"
-                                    searchMode="contains"
-                                    [showClearButton]="true"
-                                    class="dx-select-box-custom dx-select-box-turno">
-                                </dx-select-box>
-                                <div *ngIf="listaTurnosActivos.length === 0" class="text-muted small mt-1">No hay turnos activos disponibles</div>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Fondo Contado *</span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    <input formControlName="fondoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-12">
-                            <label class="field">
-                                <span class="field-label text-white">Observaciones</span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-comment-alt"></i>
-                                    <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Observaciones del cierre..." />
-                                    <span class="sleek-line"></span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
-    <div class="modal-footer modal-footer-cerrar-turno">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fas fa-times"></i> Cancelar
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-warning" (click)="guardarCerrarTurno()">
+        <button type="button" class="btn btn-warning" (click)="guardarCerrarTurno()" [disabled]="cerrarTurnoForm.invalid">
             <i class="fas fa-check"></i> Cerrar Turno
         </button>
     </div>
@@ -366,25 +347,18 @@
 
 <!-- Modal Consultar saldo caja -->
 <ng-template #modalConsultarSaldoCaja let-modal>
-    <div class="modal-header modal-header-consultar-saldo-caja">
+    <div class="modal-header modal-accion-header modal-accion-header--consultar-caja">
         <h5 class="modal-title">
             <i class="fas fa-wallet"></i>
             <span>Consultar saldo de caja</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
-            <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-consultar-saldo-caja">
-        <div *ngIf="!saldoCajaData" class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-info">
-                    <i class="fas fa-cash-register"></i>
-                </div>
-            </div>
-            <h4 class="action-title">Obtener saldo de una caja</h4>
-            <p class="action-description">Seleccione la caja para consultar su saldo actual.</p>
-            <form [formGroup]="consultarSaldoCajaForm" class="action-form">
+    <div class="modal-body modal-accion-body">
+        <div *ngIf="!saldoCajaData">
+            <form [formGroup]="consultarSaldoCajaForm">
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="field">
@@ -428,11 +402,11 @@
             </div>
         </div>
     </div>
-    <div class="modal-footer modal-footer-consultar-saldo-caja">
-        <button type="button" class="btn btn-secondary" (click)="saldoCajaData ? nuevaConsultaSaldoCaja() : cerrarModal()">
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="saldoCajaData ? nuevaConsultaSaldoCaja() : cerrarModal()">
             <i class="fas fa-arrow-left" *ngIf="saldoCajaData"></i>
             <i class="fas fa-times" *ngIf="!saldoCajaData"></i>
-            {{ saldoCajaData ? 'Nueva consulta' : 'Cerrar' }}
+            <span>{{ saldoCajaData ? 'Nueva consulta' : 'Cancelar' }}</span>
         </button>
         <button *ngIf="!saldoCajaData" type="button" class="btn btn-info" (click)="buscarSaldoCaja()" [disabled]="consultarSaldoCajaForm.invalid || consultandoSaldoCaja">
             <i class="fas fa-search" *ngIf="!consultandoSaldoCaja"></i>

@@ -193,6 +193,35 @@ export class ListaTesoreriaComponent {
     }
   }
 
+  verSaldo(id: number) {
+    this.tesoreriaService.obtenerSaldoTesoreria(id).subscribe({
+      next: (response: any) => {
+        const data = response?.data ?? response;
+        const saldo = data?.saldo ?? data?.monto ?? data;
+        const saldoNum = typeof saldo === 'number' ? saldo : Number(saldo);
+        const saldoFormateado = isNaN(saldoNum) ? (typeof saldo === 'string' ? saldo : 'N/A') : this.formatearMoneda(saldoNum);
+        Swal.fire({
+          title: 'Saldo de Bóveda',
+          html: `<p class="mb-0">Saldo: <strong>${saldoFormateado}</strong></p>`,
+          icon: 'info',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Cerrar',
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo obtener el saldo de tesorería.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Cerrar',
+        });
+      }
+    });
+  }
+
   getIconoMovimiento(tipo: string): { class: string, icon: string } {
     const tipoLower = (tipo || '').toLowerCase();
     if (tipoLower.includes('retir')) {

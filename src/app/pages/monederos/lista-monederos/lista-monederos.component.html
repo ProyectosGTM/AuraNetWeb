@@ -94,7 +94,7 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="180"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="220"></dxi-column>
                         <dxi-column dataField="numeroMonedero" caption="Número Monedero" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="codigoRFID" caption="Código RFID" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="alias" caption="Alias" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -123,6 +123,12 @@
                         </dxo-export>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
+                                <button type="button" id="cambiarEstatusButton" class="btnAcciones"
+                                    (click)="abrirCambiarEstatus(row.data)" title="Cambiar estatus">
+                                    <i class="fa fa-exchange-alt"></i>
+                                </button>
+                            </div>
+                            <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarMonedero(row.data.id)">
                                     <i class="fa fa-edit"></i>
@@ -148,83 +154,70 @@
 
 <!-- Modal Cargar Monedero -->
 <ng-template #modalCargarMonedero let-modal>
-    <div class="modal-header modal-header-cargar-monedero">
+    <div class="modal-header modal-accion-header modal-accion-header--cargar">
         <h5 class="modal-title">
             <i class="fas fa-arrow-up"></i>
             <span>Cargar Efectivo a Monedero</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-cargar-monedero">
-        <div class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-success">
-                    <i class="fas fa-arrow-up"></i>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="cargarMonederoForm">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Turno de Caja *</span>
+                        <dx-select-box
+                            [dataSource]="listaTurnos"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTurnoCaja"
+                            placeholder="Selecciona un turno..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-turno">
+                        </dx-select-box>
+                        <div *ngIf="listaTurnos.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monedero *</span>
+                        <dx-select-box
+                            [dataSource]="listaMonederosDisponibles"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idMonedero"
+                            placeholder="Selecciona un monedero..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-monedero">
+                        </dx-select-box>
+                        <div *ngIf="listaMonederosDisponibles.length === 0" class="text-muted small mt-1">No hay monederos disponibles</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monto *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
                 </div>
             </div>
-            <h4 class="action-title">Cargar Efectivo</h4>
-            <p class="action-description">Complete los siguientes campos para cargar efectivo al monedero</p>
-            <div class="action-form">
-                <form [formGroup]="cargarMonederoForm">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Turno de Caja *</span>
-                                <dx-select-box
-                                    [dataSource]="listaTurnos"
-                                    displayExpr="text"
-                                    valueExpr="id"
-                                    formControlName="idTurnoCaja"
-                                    placeholder="Selecciona un turno..."
-                                    searchEnabled="true"
-                                    searchMode="contains"
-                                    [showClearButton]="true"
-                                    class="dx-select-box-custom dx-select-box-turno">
-                                </dx-select-box>
-                                <div *ngIf="listaTurnos.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Monedero *</span>
-                                <dx-select-box
-                                    [dataSource]="listaMonederosDisponibles"
-                                    displayExpr="text"
-                                    valueExpr="id"
-                                    formControlName="idMonedero"
-                                    placeholder="Selecciona un monedero..."
-                                    searchEnabled="true"
-                                    searchMode="contains"
-                                    [showClearButton]="true"
-                                    class="dx-select-box-custom dx-select-box-monedero">
-                                </dx-select-box>
-                                <div *ngIf="listaMonederosDisponibles.length === 0" class="text-muted small mt-1">No hay monederos disponibles</div>
-                            </label>
-                        </div>
-                        <div style="display: flex; justify-content: center; align-items: center;">
-                            <div class="col-12 col-md-6">
-                                <label class="field">
-                                    <span class="field-label text-white">Monto *</span>
-                                    <div class="input-sleek">
-                                        <i class="fas fa-dollar-sign"></i>
-                                        <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
-                                        <span class="sleek-line"></span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
-    <div class="modal-footer modal-footer-cargar-monedero">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fas fa-times"></i> Cancelar
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-success" (click)="guardarCargarMonedero()">
+        <button type="button" class="btn btn-success" (click)="guardarCargarMonedero()" [disabled]="cargarMonederoForm.invalid">
             <i class="fas fa-check"></i> Cargar
         </button>
     </div>
@@ -232,125 +225,164 @@
 
 <!-- Modal Descargar Monedero -->
 <ng-template #modalDescargarMonedero let-modal>
-    <div class="modal-header modal-header-descargar-monedero">
+    <div class="modal-header modal-accion-header modal-accion-header--descargar">
         <h5 class="modal-title">
             <i class="fas fa-arrow-down"></i>
             <span>Descargar Efectivo de Monedero</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-descargar-monedero">
-        <div class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-warning">
-                    <i class="fas fa-arrow-down"></i>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="descargarMonederoForm">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Turno de Caja *</span>
+                        <dx-select-box
+                            [dataSource]="listaTurnosDescargar"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTurnoCaja"
+                            placeholder="Selecciona un turno..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-turno">
+                        </dx-select-box>
+                        <div *ngIf="listaTurnosDescargar.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monedero *</span>
+                        <dx-select-box
+                            [dataSource]="listaMonederosDisponiblesDescargar"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idMonedero"
+                            placeholder="Selecciona un monedero..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-monedero">
+                        </dx-select-box>
+                        <div *ngIf="listaMonederosDisponiblesDescargar.length === 0" class="text-muted small mt-1">No hay monederos disponibles</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monto *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
                 </div>
             </div>
-            <h4 class="action-title">Descargar Efectivo</h4>
-            <p class="action-description">Complete los siguientes campos para descargar efectivo del monedero</p>
-            <div class="action-form">
-                <form [formGroup]="descargarMonederoForm">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Turno de Caja *</span>
-                                <dx-select-box
-                                    [dataSource]="listaTurnosDescargar"
-                                    displayExpr="text"
-                                    valueExpr="id"
-                                    formControlName="idTurnoCaja"
-                                    placeholder="Selecciona un turno..."
-                                    searchEnabled="true"
-                                    searchMode="contains"
-                                    [showClearButton]="true"
-                                    class="dx-select-box-custom dx-select-box-turno">
-                                </dx-select-box>
-                                <div *ngIf="listaTurnosDescargar.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="field">
-                                <span class="field-label text-white">Monedero *</span>
-                                <dx-select-box
-                                    [dataSource]="listaMonederosDisponiblesDescargar"
-                                    displayExpr="text"
-                                    valueExpr="id"
-                                    formControlName="idMonedero"
-                                    placeholder="Selecciona un monedero..."
-                                    searchEnabled="true"
-                                    searchMode="contains"
-                                    [showClearButton]="true"
-                                    class="dx-select-box-custom dx-select-box-monedero">
-                                </dx-select-box>
-                                <div *ngIf="listaMonederosDisponiblesDescargar.length === 0" class="text-muted small mt-1">No hay monederos disponibles</div>
-                            </label>
-                        </div>
-                        <div style="display: flex; justify-content: center; align-items: center;">
-                            <div class="col-12 col-md-6">
-                                <label class="field">
-                                    <span class="field-label text-white">Monto *</span>
-                                    <div class="input-sleek">
-                                        <i class="fas fa-dollar-sign"></i>
-                                        <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
-                                        <span class="sleek-line"></span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
-    <div class="modal-footer modal-footer-descargar-monedero">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
-            <i class="fas fa-times"></i> Cancelar
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-warning" (click)="guardarDescargarMonedero()">
+        <button type="button" class="btn btn-warning" (click)="guardarDescargarMonedero()" [disabled]="descargarMonederoForm.invalid">
             <i class="fas fa-check"></i> Descargar
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Cambiar Estatus Monedero -->
+<ng-template #modalCambiarEstatus let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--cambiar-estatus">
+        <h5 class="modal-title">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Cambiar estatus de monedero</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="cambiarEstatusForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Monedero</span>
+                        <div class="readonly-field">
+                            {{ monederoSeleccionadoCambio?.numeroMonedero || monederoSeleccionadoCambio?.alias || '—' }}
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Nuevo estatus *</span>
+                        <dx-select-box
+                            [dataSource]="listaEstatusMonederoOpciones"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idEstatusMonedero"
+                            placeholder="Seleccione estatus..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom">
+                        </dx-select-box>
+                    </label>
+                </div>
+                        <div class="col-12">
+                            <label class="field">
+                                <span class="field-label text-white">Motivo *</span>
+                                <div class="input-sleek input-sleek--textarea">
+                                    <i class="fas fa-comment-alt"></i>
+                                    <textarea formControlName="motivo" class="sleek-control" rows="3"
+                                        placeholder="Ej: Monedero reportado como extraviado por el cliente"></textarea>
+                                    <span class="sleek-line"></span>
+                                </div>
+                            </label>
+                        </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="guardarCambiarEstatus()" [disabled]="cambiarEstatusForm.invalid">
+            <i class="fas fa-check"></i> Cambiar estatus
         </button>
     </div>
 </ng-template>
 
 <!-- Modal Consultar Saldo -->
 <ng-template #modalConsultarSaldo let-modal>
-    <div class="modal-header modal-header-consultar-saldo">
+    <div class="modal-header modal-accion-header modal-accion-header--consultar-saldo">
         <h5 class="modal-title">
             <i class="fas fa-search-dollar"></i>
             <span>Consultar Saldo de Monedero</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()">
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-body-consultar-saldo">
-        <!-- Formulario de búsqueda -->
-        <div *ngIf="!saldoData" class="action-modal-content">
-            <div class="action-icon-wrapper">
-                <div class="action-icon action-icon-info">
-                    <i class="fas fa-search-dollar"></i>
-                </div>
-            </div>
-            <h4 class="action-title">Consultar Saldo</h4>
-            <p class="action-description">Ingrese el número de monedero para consultar su saldo actual</p>
-            <div class="action-form">
-                <form [formGroup]="consultarSaldoForm">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="field">
-                                <span class="field-label text-white">Número de Monedero *</span>
-                                <div class="input-sleek">
-                                    <i class="fas fa-credit-card"></i>
-                                    <input formControlName="numero" class="sleek-control" type="text" placeholder="MON-555" />
-                                    <span class="sleek-line"></span>
-                                </div>
-                            </label>
-                        </div>
+    <div class="modal-body modal-accion-body">
+        <div *ngIf="!saldoData">
+            <form [formGroup]="consultarSaldoForm">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="field">
+                            <span class="field-label text-white">Número de Monedero *</span>
+                            <div class="input-sleek">
+                                <i class="fas fa-credit-card"></i>
+                                <input formControlName="numero" class="sleek-control" type="text" placeholder="MON-555" />
+                                <span class="sleek-line"></span>
+                            </div>
+                        </label>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
 
         <!-- Vista de resultados -->
@@ -507,15 +539,15 @@
             </div>
         </div>
     </div>
-    <div class="modal-footer modal-footer-consultar-saldo">
-        <button type="button" class="btn btn-secondary" (click)="saldoData ? saldoData = null : cerrarModal()">
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="saldoData ? saldoData = null : cerrarModal()">
             <i class="fas fa-arrow-left" *ngIf="saldoData"></i>
-            <i class="fas fa-times" *ngIf="!saldoData"></i> 
-            {{ saldoData ? 'Nueva Consulta' : 'Cerrar' }}
+            <i class="fas fa-times" *ngIf="!saldoData"></i>
+            <span>{{ saldoData ? 'Nueva Consulta' : 'Cancelar' }}</span>
         </button>
         <button *ngIf="!saldoData" type="button" class="btn btn-info" (click)="buscarSaldo()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo">
             <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i>
-            <i class="fas fa-search" *ngIf="!consultandoSaldo"></i> 
+            <i class="fas fa-search" *ngIf="!consultandoSaldo"></i>
             {{ consultandoSaldo ? 'Consultando...' : 'Consultar' }}
         </button>
     </div>

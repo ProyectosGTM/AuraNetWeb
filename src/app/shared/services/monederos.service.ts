@@ -62,4 +62,9 @@ export class MonederosServices {
   consultarSaldoMonedero(numero: string): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/pos/monederos/${numero}`);
   }
+
+  /** POST monederos/cambiar-estatus - Cambiar estatus de un monedero */
+  cambiarEstatus(payload: { idMonedero: number; idEstatusMonedero: number; motivo: string }): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/monederos/cambiar-estatus`, payload);
+  }
 }

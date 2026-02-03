@@ -80,7 +80,7 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="240" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="280" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
                         <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fechaFormateada" caption="Fecha" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fondoInicialFormateado" caption="Fondo Inicial" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -102,6 +102,11 @@
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                            <div>
+                                <button type="button" id="saldoButton" class="btnAcciones" (click)="verSaldo(row.data.id)" title="Obtener saldo de tesorería">
+                                    <i class="fa fa-wallet"></i>
+                                </button>
+                            </div>
                             <div>
                                 <button type="button" id="resumenButton" class="btnAcciones" (click)="verResumen(row.data.id)" title="Ver Resumen">
                                     <i class="fa fa-chart-line"></i>
@@ -156,8 +161,8 @@
             <i class="fas fa-chart-line"></i>
             <span>Resumen de Boveda</span>
         </h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarResumen()">
-            <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarResumen()">
+            <i class="fas fa-times"></i>
         </button>
     </div>
     <div class="modal-body modal-body-resumen" *ngIf="resumenData">
@@ -214,8 +219,8 @@
         </div>
     </div>
     <div class="modal-footer modal-footer-resumen">
-        <button type="button" class="btn btn-primary" (click)="cerrarResumen()">
-            <i class="fas fa-times"></i> Cerrar
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarResumen()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
         </button>
     </div>
 </ng-template>
@@ -230,8 +235,8 @@
             </h5>
         </div>
         <div class="header-badge">{{ historialData.length }} movimiento{{ historialData.length !== 1 ? 's' : '' }}</div>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarHistorial()">
-            <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarHistorial()">
+            <i class="fas fa-times"></i>
         </button>
     </div>
     <div class="modal-body modal-body-historial">
@@ -257,9 +262,9 @@
             </div>
         </div>
     </div>
-    <div class="modal-footer modal-footer-historial">
-        <button type="button" class="btn btn-primary" (click)="cerrarHistorial()">
-            <i class="fas fa-times"></i> Cerrar
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarHistorial()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
         </button>
     </div>
 </ng-template>
