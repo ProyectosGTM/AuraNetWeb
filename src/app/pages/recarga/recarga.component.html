@@ -24,243 +24,345 @@
 
         <div class="row mt-2">
           <div class="col-12">
-            <div class="recarga-main-card">
+            <div class="recarga-shell" [class.is-start]="!(cajaSeleccionada || monederoSeleccionado || recargaForm.get('monto')?.value)">
               <form [formGroup]="recargaForm">
                 <div class="row g-3">
-                  <!-- Información de la Caja -->
-                  <div class="col-12 col-lg-6">
-                    <div class="info-card info-card-turno">
-                      <div class="info-card-header">
-                        <div class="info-card-icon icon-turno">
-                          <i class="fas fa-cash-register"></i>
+                  <!-- IZQUIERDA / RAIL -->
+                  <div class="col-12 col-lg-4">
+                    <div class="rail-card">
+                      <div class="rail-top">
+                        <div class="rail-badge">
+                          <i class="fas fa-shield-alt"></i>
                         </div>
-                        <div>
-                          <h5 class="info-card-title">Caja</h5>
-                          <p class="info-card-subtitle">Selecciona la caja</p>
+                        <div class="rail-title">
+                          <div class="t1">Flujo de Recarga</div>
+                          <div class="t2">Selecciona, valida y confirma</div>
                         </div>
                       </div>
-                      <div class="info-card-body">
-                        <label class="field">
-                          <span class="field-label text-white">Caja *</span>
-                          <dx-select-box
-                            [dataSource]="listaCajas"
-                            displayExpr="text"
-                            valueExpr="id"
-                            formControlName="idCaja"
-                            placeholder="Selecciona una caja..."
-                            searchEnabled="true"
-                            searchMode="contains"
-                            [showClearButton]="true"
-                            (onValueChanged)="onCajaChanged($event)"
-                            class="dx-select-box-custom dx-select-box-caja">
-                          </dx-select-box>
-                        </label>
-                        <div class="info-display" *ngIf="cajaSeleccionada" [@slideDownFade] [@staggerFadeIn]>
-                          <div class="info-row">
-                            <span class="info-label">
-                              <i class="fas fa-building"></i>
-                              Sala:
-                            </span>
-                            <span class="info-value">{{ cajaSeleccionada.nombreSala || 'Sin registro' }}</span>
+
+                      <div class="rail-steps">
+                        <div class="step" [class.active]="!cajaSeleccionada">
+                          <div class="dot"><span>1</span></div>
+                          <div class="meta">
+                            <div class="s-title">Caja</div>
+                            <div class="s-sub">Elige el punto de cobro</div>
                           </div>
-                          <div class="info-row">
-                            <span class="info-label">
-                              <i class="fas fa-map-marker-alt"></i>
-                              Zona:
-                            </span>
-                            <span class="info-value">{{ cajaSeleccionada.nombreZona || 'Sin registro' }}</span>
+                          <div class="state">
+                            <i class="fas fa-check" *ngIf="cajaSeleccionada"></i>
                           </div>
-                          <div class="info-row">
-                            <span class="info-label">
-                              <i class="fas fa-barcode"></i>
-                              Código:
-                            </span>
-                            <span class="info-value">{{ cajaSeleccionada.codigo || 'Sin registro' }}</span>
+                        </div>
+
+                        <div class="step" [class.active]="cajaSeleccionada && !monederoSeleccionado" [class.locked]="!cajaSeleccionada">
+                          <div class="dot"><span>2</span></div>
+                          <div class="meta">
+                            <div class="s-title">Monedero</div>
+                            <div class="s-sub">Selecciona al afiliado</div>
                           </div>
+                          <div class="state">
+                            <i class="fas fa-check" *ngIf="monederoSeleccionado"></i>
+                          </div>
+                        </div>
+
+                        <div class="step" [class.active]="cajaSeleccionada && monederoSeleccionado && !recargaForm.get('monto')?.value" [class.locked]="!monederoSeleccionado">
+                          <div class="dot"><span>3</span></div>
+                          <div class="meta">
+                            <div class="s-title">Monto</div>
+                            <div class="s-sub">Define la carga</div>
+                          </div>
+                          <div class="state">
+                            <i class="fas fa-check" *ngIf="recargaForm.get('monto')?.value"></i>
+                          </div>
+                        </div>
+
+                        <div class="step" [class.active]="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value" [class.locked]="!recargaForm.get('monto')?.value">
+                          <div class="dot"><span>4</span></div>
+                          <div class="meta">
+                            <div class="s-title">Confirmación</div>
+                            <div class="s-sub">Revisa el resumen</div>
+                          </div>
+                          <div class="state">
+                            <i class="fas fa-bolt" *ngIf="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value"></i>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="rail-kpi">
+                        <div class="kpi kpi-caja">
+                          <div class="k-label">Caja</div>
+                          <div class="k-value">{{ cajaSeleccionada?.codigo || '—' }}</div>
+                        </div>
+                        <div class="kpi kpi-monedero">
+                          <div class="k-label">Monedero</div>
+                          <div class="k-value">{{ monederoSeleccionado?.numeroMonedero || '—' }}</div>
+                        </div>
+                        <div class="kpi kpi-strong">
+                          <div class="k-label">Monto</div>
+                          <div class="k-value">{{ recargaForm.get('monto')?.value ? formatearMoneda(recargaForm.get('monto')?.value) : '—' }}</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Información del Monedero -->
-                  <div class="col-12 col-lg-6">
-                    <div class="info-card info-card-monedero">
-                      <div class="info-card-header">
-                        <div class="info-card-icon icon-monedero">
-                          <i class="fas fa-wallet"></i>
-                        </div>
-                        <div>
-                          <h5 class="info-card-title">Monedero</h5>
-                          <p class="info-card-subtitle">Selecciona el monedero a recargar</p>
-                        </div>
-                      </div>
-                      <div class="info-card-body">
-                        <label class="field">
-                          <span class="field-label text-white">Monedero *</span>
-                          <dx-select-box
-                            [dataSource]="listaMonederos"
-                            displayExpr="text"
-                            valueExpr="id"
-                            formControlName="idMonedero"
-                            placeholder="Selecciona un monedero..."
-                            searchEnabled="true"
-                            searchMode="contains"
-                            [showClearButton]="true"
-                            (onValueChanged)="onMonederoChanged($event)"
-                            class="dx-select-box-custom dx-select-box-monedero">
-                          </dx-select-box>
-                        </label>
-                        <div class="info-display" *ngIf="monederoSeleccionado" [@slideDownFade] [@staggerFadeIn]>
-                          <div class="info-row">
-                            <span class="info-label">
-                              <i class="fas fa-barcode"></i>
-                              Número:
-                            </span>
-                            <span class="info-value">{{ monederoSeleccionado.numeroMonedero || 'Sin registro' }}</span>
-                          </div>
-                          <div class="info-row">
-                            <span class="info-label">
-                              <i class="fas fa-tag"></i>
-                              Alias:
-                            </span>
-                            <span class="info-value">{{ monederoSeleccionado.alias || 'Sin registro' }}</span>
-                          </div>
-                          <div class="info-row">
-                            <span class="info-label">
-                              <i class="fas fa-user"></i>
-                              Afiliado:
-                            </span>
-                            <span class="info-value">{{ monederoSeleccionado.nombreCompletoAfiliado || 'Sin registro' }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Monto a Recargar -->
-                  <div class="col-12">
-                    <div class="info-card info-card-monto">
-                      <div class="info-card-header">
-                        <div class="info-card-icon icon-monto">
-                          <i class="fas fa-coins"></i>
-                        </div>
-                        <div>
-                          <h5 class="info-card-title">Monto a Recargar</h5>
-                          <p class="info-card-subtitle">Ingresa el monto que deseas cargar al monedero</p>
-                        </div>
-                      </div>
-                      <div class="info-card-body">
-                        <div class="row g-3" style="display: flex; align-items: center; justify-content: center;">
-                          <div class="col-12 col-md-6 col-lg-4">
-                            <label class="field">
-                              <span class="field-label text-white">Monto *</span>
-                              <div class="input-sleek input-monto-large">
-                                <i class="fas fa-dollar-sign"></i>
-                                <input formControlName="monto" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" (input)="onMontoChanged()" />
-                                <span class="sleek-line"></span>
+                  <!-- DERECHA / PANELS -->
+                  <div class="col-12 col-lg-8">
+                    <div class="row g-3">
+                      <!-- Caja -->
+                      <div class="col-12 col-xl-6">
+                        <div class="panel-card panel-caja">
+                          <div class="panel-head">
+                            <div class="ph-left">
+                              <div class="ph-ico ph-ico-caja">
+                                <i class="fas fa-cash-register"></i>
                               </div>
-                            </label>
-                          </div>
-                          <div class="col-12 col-md-6 col-lg-8">
-                            <div class="quick-amounts">
-                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(100)">
-                                <span class="quick-amount-icon">
-                                  <i class="fas fa-hand-holding-usd"></i>
-                                </span>
-                                <span class="quick-amount-value">$100</span>
-                              </button>
-                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(500)">
-                                <span class="quick-amount-icon">
-                                  <i class="fas fa-hand-holding-usd"></i>
-                                </span>
-                                <span class="quick-amount-value">$500</span>
-                              </button>
-                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(1000)">
-                                <span class="quick-amount-icon">
-                                  <i class="fas fa-hand-holding-usd"></i>
-                                </span>
-                                <span class="quick-amount-value">$1,000</span>
-                              </button>
-                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(2000)">
-                                <span class="quick-amount-icon">
-                                  <i class="fas fa-hand-holding-usd"></i>
-                                </span>
-                                <span class="quick-amount-value">$2,000</span>
-                              </button>
-                              <button type="button" class="quick-amount-btn" (click)="setMontoRapido(5000)">
-                                <span class="quick-amount-icon">
-                                  <i class="fas fa-hand-holding-usd"></i>
-                                </span>
-                                <span class="quick-amount-value">$5,000</span>
-                              </button>
+                              <div class="ph-txt">
+                                <div class="ph-title">Caja</div>
+                                <div class="ph-sub">Selecciona la caja</div>
+                              </div>
                             </div>
                           </div>
+
+                          <div class="panel-body">
+                            <div class="row g-2">
+                              <div class="col-12">
+                                <label class="field">
+                                  <span class="field-label text-white">Caja *</span>
+                                  <dx-select-box
+                                    [dataSource]="listaCajas"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idCaja"
+                                    placeholder="Selecciona una caja..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    (onValueChanged)="onCajaChanged($event)"
+                                    class="dx-select-box-custom dx-select-box-caja">
+                                  </dx-select-box>
+                                </label>
+                              </div>
+
+                              <div class="col-12">
+                                <div class="mini-chip mini-chip-caja" [class.on]="cajaSeleccionada">
+                                  <i class="fas fa-warehouse"></i>
+                                  <span>{{ cajaSeleccionada ? 'Caja lista' : 'Pendiente' }}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="detail-strip" *ngIf="cajaSeleccionada" [@slideDownFade] [@staggerFadeIn]>
+                              <div class="ditem">
+                                <div class="dlabel"><i class="fas fa-building"></i> Sala</div>
+                                <div class="dvalue">{{ cajaSeleccionada.nombreSala || 'Sin registro' }}</div>
+                              </div>
+                              <div class="ditem">
+                                <div class="dlabel"><i class="fas fa-map-marker-alt"></i> Zona</div>
+                                <div class="dvalue">{{ cajaSeleccionada.nombreZona || 'Sin registro' }}</div>
+                              </div>
+                              <div class="ditem">
+                                <div class="dlabel"><i class="fas fa-barcode"></i> Código</div>
+                                <div class="dvalue">{{ cajaSeleccionada.codigo || 'Sin registro' }}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Monedero -->
+                      <div class="col-12 col-xl-6">
+                        <div class="panel-card panel-monedero">
+                          <div class="panel-head">
+                            <div class="ph-left">
+                              <div class="ph-ico ph-ico-monedero">
+                                <i class="fas fa-wallet"></i>
+                              </div>
+                              <div class="ph-txt">
+                                <div class="ph-title">Monedero</div>
+                                <div class="ph-sub">Selecciona el monedero a recargar</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="panel-body">
+                            <div class="row g-2">
+                              <div class="col-12">
+                                <label class="field">
+                                  <span class="field-label text-white">Monedero *</span>
+                                  <dx-select-box
+                                    [dataSource]="listaMonederos"
+                                    displayExpr="text"
+                                    valueExpr="id"
+                                    formControlName="idMonedero"
+                                    placeholder="Selecciona un monedero..."
+                                    searchEnabled="true"
+                                    searchMode="contains"
+                                    [showClearButton]="true"
+                                    (onValueChanged)="onMonederoChanged($event)"
+                                    class="dx-select-box-custom dx-select-box-monedero">
+                                  </dx-select-box>
+                                </label>
+                              </div>
+
+                              <div class="col-12">
+                                <div class="mini-chip mini-chip-monedero" [class.on]="monederoSeleccionado">
+                                  <i class="fas fa-user-check"></i>
+                                  <span>{{ monederoSeleccionado ? 'Afiliado listo' : 'Pendiente' }}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="detail-strip" *ngIf="monederoSeleccionado" [@slideDownFade] [@staggerFadeIn]>
+                              <div class="ditem">
+                                <div class="dlabel"><i class="fas fa-barcode"></i> Número</div>
+                                <div class="dvalue">{{ monederoSeleccionado.numeroMonedero || 'Sin registro' }}</div>
+                              </div>
+                              <div class="ditem">
+                                <div class="dlabel"><i class="fas fa-tag"></i> Alias</div>
+                                <div class="dvalue">{{ monederoSeleccionado.alias || 'Sin registro' }}</div>
+                              </div>
+                              <div class="ditem">
+                                <div class="dlabel"><i class="fas fa-user"></i> Afiliado</div>
+                                <div class="dvalue">{{ monederoSeleccionado.nombreCompletoAfiliado || 'Sin registro' }}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Monto -->
+                      <div class="col-12">
+                        <div class="panel-card panel-monto">
+                          <div class="panel-head">
+                            <div class="ph-left">
+                              <div class="ph-ico ph-ico-monto">
+                                <i class="fas fa-coins"></i>
+                              </div>
+                              <div class="ph-txt">
+                                <div class="ph-title">Monto</div>
+                                <div class="ph-sub">Ingresa el monto a cargar</div>
+                              </div>
+                            </div>
+
+                            <div class="live-pill" *ngIf="recargaForm.get('monto')?.value">
+                              <i class="fas fa-bolt"></i>
+                              <span>{{ formatearMoneda(recargaForm.get('monto')?.value) }}</span>
+                            </div>
+                          </div>
+
+                          <div class="panel-body">
+                            <div class="row g-3 align-items-center">
+                              <div class="col-12 col-md-5">
+                                <label class="field">
+                                  <span class="field-label text-white">Monto *</span>
+                                  <div class="input-sleek input-monto">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <input formControlName="monto" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" (input)="onMontoChanged()" />
+                                    <span class="sleek-line"></span>
+                                  </div>
+                                </label>
+                              </div>
+
+                              <div class="col-12 col-md-7">
+                                <div class="quick-grid">
+                                  <button type="button" class="qbtn" (click)="setMontoRapido(100)">
+                                    <span class="qtop"><i class="fas fa-hand-holding-usd"></i></span>
+                                    <span class="qval">$100</span>
+                                  </button>
+                                  <button type="button" class="qbtn" (click)="setMontoRapido(500)">
+                                    <span class="qtop"><i class="fas fa-hand-holding-usd"></i></span>
+                                    <span class="qval">$500</span>
+                                  </button>
+                                  <button type="button" class="qbtn" (click)="setMontoRapido(1000)">
+                                    <span class="qtop"><i class="fas fa-hand-holding-usd"></i></span>
+                                    <span class="qval">$1,000</span>
+                                  </button>
+                                  <button type="button" class="qbtn" (click)="setMontoRapido(2000)">
+                                    <span class="qtop"><i class="fas fa-hand-holding-usd"></i></span>
+                                    <span class="qval">$2,000</span>
+                                  </button>
+                                  <button type="button" class="qbtn" (click)="setMontoRapido(5000)">
+                                    <span class="qtop"><i class="fas fa-hand-holding-usd"></i></span>
+                                    <span class="qval">$5,000</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Resumen -->
+                      <div class="col-12" #resumenElement *ngIf="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value">
+                        <div class="confirm-card" *ngIf="mostrarResumen" [@slideDownFade] [@staggerFadeIn]>
+                          <div class="confirm-head">
+                            <div class="ch-left">
+                              <div class="ch-ico">
+                                <i class="fas fa-receipt"></i>
+                              </div>
+                              <div class="ch-txt">
+                                <div class="ch-title">Confirmación</div>
+                                <div class="ch-sub"><strong>Revisa los detalles antes de confirmar</strong></div>
+                              </div>
+                            </div>
+                            <div class="ch-mark">
+                              <i class="fas fa-lock"></i>
+                              <span>Validado</span>
+                            </div>
+                          </div>
+
+                          <div class="confirm-body">
+                            <div class="row g-2">
+                              <div class="col-12 col-md-4">
+                                <div class="sum-tile">
+                                  <div class="st-top"><i class="fas fa-cash-register"></i><span>Caja</span></div>
+                                  <div class="st-main">{{ cajaSeleccionada.codigo || 'Sin registro' }}</div>
+                                  <div class="st-sub">{{ cajaSeleccionada.nombre || 'Sin registro' }}</div>
+                                </div>
+                              </div>
+
+                              <div class="col-12 col-md-4">
+                                <div class="sum-tile">
+                                  <div class="st-top"><i class="fas fa-wallet"></i><span>Monedero</span></div>
+                                  <div class="st-main">{{ monederoSeleccionado.numeroMonedero || 'Sin registro' }}</div>
+                                  <div class="st-sub">{{ monederoSeleccionado.alias || 'Sin registro' }}</div>
+                                </div>
+                              </div>
+
+                              <div class="col-12 col-md-4">
+                                <div class="sum-tile sum-tile-strong">
+                                  <div class="st-top"><i class="fas fa-coins"></i><span>Monto</span></div>
+                                  <div class="st-main st-main-big">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</div>
+                                  <div class="st-sub">Carga inmediata</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Acciones -->
+                      <div class="col-12">
+                        <div class="actions-bar">
+                          <button type="button" class="btn-action-recarga btn-secondary" (click)="limpiarFormulario()">
+                            <i class="fas fa-times"></i>
+                            <span>Cancelar</span>
+                          </button>
+
+                          <button type="button" class="btn-action-recarga btn-primary" (click)="procesarRecarga()" [disabled]="recargaForm.invalid || procesando">
+                            <i class="fas fa-check" *ngIf="!procesando"></i>
+                            <i class="fas fa-spinner fa-spin" *ngIf="procesando"></i>
+                            <span>{{ procesando ? 'Procesando...' : 'Confirmar Recarga' }}</span>
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Resumen de la Transacción -->
-                  <div class="col-12 mt-5" #resumenElement *ngIf="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value">
-                    <div class="info-card info-card-resumen" *ngIf="mostrarResumen" [@slideDownFade] [@staggerFadeIn]>
-                      <div class="info-card-header">
-                        <div class="info-card-icon icon-resumen">
-                          <i class="fas fa-receipt"></i>
-                        </div>
-                        <div>
-                          <h5 class="info-card-title">Resumen de Transacción</h5>
-                          <p class="info-card-subtitle"> <strong>Revisa los detalles antes de confirmar</strong></p>
-                        </div>
-                      </div>
-                      <div class="info-card-body">
-                        <div class="resumen-grid">
-                          <div class="resumen-item">
-                            <div class="resumen-item-header">
-                              <i class="fas fa-cash-register"></i>
-                              <span>Caja</span>
-                            </div>
-                            <div class="resumen-item-value">{{ cajaSeleccionada.codigo || 'Sin registro' }}</div>
-                            <div class="resumen-item-detail">{{ cajaSeleccionada.nombre || 'Sin registro' }}</div>
-                          </div>
-                          <div class="resumen-item">
-                            <div class="resumen-item-header">
-                              <i class="fas fa-wallet"></i>
-                              <span>Monedero</span>
-                            </div>
-                            <div class="resumen-item-value">{{ monederoSeleccionado.numeroMonedero || 'Sin registro' }}</div>
-                            <div class="resumen-item-detail">{{ monederoSeleccionado.alias || 'Sin registro' }}</div>
-                          </div>
-                          <div class="resumen-item resumen-item-highlight">
-                            <div class="resumen-item-header">
-                              <i class="fas fa-coins"></i>
-                              <span>Monto</span>
-                            </div>
-                            <div class="resumen-item-value-large">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Botones de Acción -->
-                  <div class="col-12">
-                    <div class="action-buttons-container">
-                      <button type="button" class="btn-action-recarga btn-action-recarga-secondary" (click)="limpiarFormulario()">
-                        <i class="fas fa-times"></i>
-                        <span>Cancelar</span>
-                      </button>
-                      <button type="button" class="btn-action-recarga btn-action-recarga-primary" (click)="procesarRecarga()" [disabled]="recargaForm.invalid || procesando">
-                        <i class="fas fa-check" *ngIf="!procesando"></i>
-                        <i class="fas fa-spinner fa-spin" *ngIf="procesando"></i>
-                        <span>{{ procesando ? 'Procesando...' : 'Confirmar Recarga' }}</span>
-                      </button>
-                    </div>
-                  </div>
                 </div>
               </form>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>

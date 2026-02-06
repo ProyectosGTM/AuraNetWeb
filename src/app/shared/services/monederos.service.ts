@@ -67,4 +67,17 @@ export class MonederosServices {
   cambiarEstatus(payload: { idMonedero: number; idEstatusMonedero: number; motivo: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/monederos/cambiar-estatus`, payload);
   }
+
+  reemplazarMonedero(payload: { idMonederoAnterior: number; numeroMonederoNuevo: string; motivo: string; transferirSaldo: boolean }) {
+    return this.http.post(`${environment.API_SECURITY}/monederos/reemplazar`, payload);
+  }
+
+  obtenerHistorialMovimientos(idMonedero: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/monederos/movimientos/historial/${idMonedero}`);
+  }
+
+    // monederos.service.ts
+  obtenerSaldosMonedero(idMonedero: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/ledger/saldo/monedero/${idMonedero}`);
+  }
 }
