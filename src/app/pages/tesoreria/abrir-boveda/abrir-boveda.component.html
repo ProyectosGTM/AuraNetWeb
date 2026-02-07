@@ -81,7 +81,7 @@
                                                 <div class="turno-row">
                                                     <span class="turno-number">#{{ i + 1 }}</span>
                                                     <div class="row g-2 turno-fields flex-grow-1">
-                                                        <div class="col-6">
+                                                        <div class="col-4">
                                                             <label class="field field--inline">
                                                                 <span class="field-label text-white">Caja</span>
                                                                 <dx-select-box
@@ -97,14 +97,30 @@
                                                                 </dx-select-box>
                                                             </label>
                                                         </div>
-                                                        <div class="col-6">
+                                                        <div class="col-4">
                                                             <label class="field field--inline">
-                                                                <span class="field-label text-white">Monto</span>
+                                                                <span class="field-label text-white">Monto *</span>
                                                                 <div class="input-sleek input-sleek--compact">
                                                                     <i class="fas fa-dollar-sign"></i>
                                                                     <input formControlName="fondoInicial" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0" />
                                                                     <span class="sleek-line"></span>
                                                                 </div>
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <label class="field field--inline">
+                                                                <span class="field-label text-white">Usuario *</span>
+                                                                <dx-select-box
+                                                                    [dataSource]="listaUsuarios"
+                                                                    displayExpr="text"
+                                                                    valueExpr="id"
+                                                                    formControlName="idUsuario"
+                                                                    placeholder="Usuario..."
+                                                                    searchEnabled="true"
+                                                                    searchMode="contains"
+                                                                    [showClearButton]="true"
+                                                                    class="dx-select-box-custom dx-select-box-usuario dx-select-box--compact">
+                                                                </dx-select-box>
                                                             </label>
                                                         </div>
                                                     </div>

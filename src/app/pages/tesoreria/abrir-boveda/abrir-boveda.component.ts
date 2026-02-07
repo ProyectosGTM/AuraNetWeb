@@ -5,8 +5,9 @@ import { forkJoin } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
-import { CajasService } from 'src/app/shared/services/cajas.service';
+import { TurnosActivosService } from 'src/app/shared/services/turnos-activos.service';
 import Swal from 'sweetalert2';
+import { UsuariosService } from 'src/app/shared/services/usuario.service';
 
 @Component({
   selector: 'app-abrir-boveda',
@@ -18,13 +19,16 @@ export class AbrirBovedaComponent implements OnInit {
   abrirTesoreriaForm: FormGroup;
   public listaSalas: any[] = [];
   public listaCajas: any[] = [];
+  public listaUsuarios: any[] = [];
+  public mapaUsuarios: Map<string, any> = new Map();
 
   constructor(
     private router: Router,
     private tesoreriaService: TesoreriaService,
     private fb: FormBuilder,
     private salasService: SalaService,
-    private cajasService: CajasService,
+    private turnosActivosService: TurnosActivosService,
+    private usuService: UsuariosService,
   ) {
     this.abrirTesoreriaForm = this.fb.group({
       idSala: [null, Validators.required],
@@ -48,12 +52,27 @@ export class AbrirBovedaComponent implements OnInit {
     this.cargarListas();
     // Agregar un turno inicial automáticamente
     this.agregarTurnoAbrir();
+    this.obtenerUsuarios();
+  }
+
+  obtenerUsuarios() {
+    this.usuService.obtenerUsuarios().subscribe((response) => {
+      const data = response.data || [];
+      this.listaUsuarios = data.map((u: any) => ({
+        ...u,
+        id: Number(u.id),
+        text: `${u.nombre || ''} ${u.apellidoPaterno || ''} ${u.apellidoMaterno || ''}`.trim() || u.usuario || u.correo || String(u.id)
+      }));
+      this.mapaUsuarios = new Map(
+        (this.listaUsuarios || []).map((u: any) => [String(u.id), u])
+      );
+    });
   }
 
   cargarListas() {
     forkJoin({
       salas: this.salasService.obtenerSalas(),
-      cajas: this.cajasService.obtenerCajas()
+      turnosActivos: this.turnosActivosService.obtenerTurnosActivos()
     }).subscribe({
       next: (responses) => {
         this.listaSalas = (responses.salas.data || []).map((s: any) => ({
@@ -62,11 +81,21 @@ export class AbrirBovedaComponent implements OnInit {
           text: `${s.nombreSala || ''}${s.nombreComercialSala ? ' - ' + s.nombreComercialSala : ''}`.trim() || 'Sala sin nombre'
         }));
 
-        this.listaCajas = (responses.cajas.data || []).map((c: any) => ({
-          ...c,
-          id: Number(c.id),
-          text: `${c.codigo || ''} - ${c.nombre || ''}`.trim()
-        }));
+        const turnosData = responses.turnosActivos?.data ?? responses.turnosActivos ?? [];
+        const turnosArray = Array.isArray(turnosData) ? turnosData : [];
+        const cajasMap = new Map<number, { id: number; text: string }>();
+        turnosArray.forEach((t: any) => {
+          const idCaja = Number(t.idCaja ?? t.caja?.id ?? t.id);
+          if (idCaja && !cajasMap.has(idCaja)) {
+            const codigo = t.codigoCaja ?? t.caja?.codigo ?? t.codigo ?? '';
+            const nombre = t.nombreCaja ?? t.caja?.nombre ?? t.nombre ?? '';
+            cajasMap.set(idCaja, {
+              id: idCaja,
+              text: `${codigo} - ${nombre}`.trim() || `Caja ${idCaja}`
+            });
+          }
+        });
+        this.listaCajas = Array.from(cajasMap.values());
       },
       error: (error) => {
         Swal.fire({
@@ -88,9 +117,8 @@ export class AbrirBovedaComponent implements OnInit {
   agregarTurnoAbrir() {
     const turnoForm = this.fb.group({
       idCaja: [null, Validators.required],
-      fondoInicial: ['', [Validators.min(0.01)]],
-      idEstatusTurno: [null],
-      fechaApertura: ['']
+      fondoInicial: ['', [Validators.required, Validators.min(0.01)]],
+      idUsuario: [null, Validators.required]
     });
     this.turnosAbrirArray.push(turnoForm);
   }
@@ -136,27 +164,17 @@ export class AbrirBovedaComponent implements OnInit {
     }
 
     const turnosArray = this.abrirTesoreriaForm.get('turnosAbrir') as FormArray;
-    const turnosAbrir = turnosArray.controls.map(control => {
-      const turno: any = {
-        idCaja: Number(control.get('idCaja')?.value)
-      };
-      if (control.get('fondoInicial')?.value) {
-        turno.fondoInicial = Number(control.get('fondoInicial')?.value);
-      }
-      if (control.get('idEstatusTurno')?.value) {
-        turno.idEstatusTurno = Number(control.get('idEstatusTurno')?.value);
-      }
-      if (control.get('fechaApertura')?.value) {
-        turno.fechaApertura = control.get('fechaApertura')?.value;
-      }
-      return turno;
-    });
+    const turnosAbrir = turnosArray.controls.map(control => ({
+      idCaja: Number(control.get('idCaja')?.value),
+      fondoInicial: Number(control.get('fondoInicial')?.value ?? 0),
+      idUsuario: Number(control.get('idUsuario')?.value)
+    }));
 
-    const payload: any = {
-      idsala: Number(this.abrirTesoreriaForm.value.idSala),
+    const payload = {
+      idSala: Number(this.abrirTesoreriaForm.value.idSala),
       fondoInicial: Number(this.abrirTesoreriaForm.value.fondoInicial),
-      observaciones: this.abrirTesoreriaForm.value.observaciones || null,
-      turnosAbrir: turnosAbrir
+      observaciones: this.abrirTesoreriaForm.value.observaciones || '',
+      turnosAbrir
     };
 
     this.tesoreriaService.abrirTesoreria(payload).subscribe({
