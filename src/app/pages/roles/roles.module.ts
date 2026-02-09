@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RolesRoutingModule } from './roles-routing.module';
 import { DxDataGridModule, DxLoadPanelModule } from 'devextreme-angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ListaRolesComponent } from './lista-roles/lista-roles.component';
 import { AgregarRolComponent } from './agregar-rol/agregar-rol.component';
@@ -17,6 +18,7 @@ import { AgregarRolComponent } from './agregar-rol/agregar-rol.component';
   imports: [
     CommonModule,
     RolesRoutingModule,
+    NgbTooltipModule,
     DxDataGridModule,
     DxLoadPanelModule,
     ReactiveFormsModule,

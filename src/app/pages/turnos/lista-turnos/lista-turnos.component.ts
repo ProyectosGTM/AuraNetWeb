@@ -9,6 +9,7 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { TransaccionesService } from 'src/app/shared/services/transacciones.service';
+import { TurnosActivosService } from 'src/app/shared/services/turnos-activos.service';
 import { TurnosService } from 'src/app/shared/services/turnos.service';
 import Swal from 'sweetalert2';
 
@@ -40,6 +41,8 @@ export class ListaTurnosComponent {
 
   @ViewChild('modalAbrirTurno', { static: false }) modalAbrirTurno!: TemplateRef<any>;
   @ViewChild('modalCerrarTurno', { static: false }) modalCerrarTurno!: TemplateRef<any>;
+  @ViewChild('modalReponerTurno', { static: false }) modalReponerTurno!: TemplateRef<any>;
+  @ViewChild('modalRetirarTurno', { static: false }) modalRetirarTurno!: TemplateRef<any>;
   @ViewChild('modalConsultarSaldoCaja', { static: false }) modalConsultarSaldoCaja!: TemplateRef<any>;
   private modalRef?: NgbModalRef;
 
@@ -52,6 +55,14 @@ export class ListaTurnosComponent {
   // Formulario para cerrar turno
   cerrarTurnoForm: FormGroup;
   public listaTurnosActivos: any[] = [];
+
+  // Reponer efectivo (Tesorería -> Caja)
+  reponerTurnoForm: FormGroup;
+  listaCajasReponer: { id: number; text: string }[] = [];
+
+  // Retirar efectivo (Caja -> Tesorería)
+  retirarTurnoForm: FormGroup;
+  listaCajasRetirar: { id: number; text: string }[] = [];
 
   // Consultar saldo caja
   consultarSaldoCajaForm: FormGroup;
@@ -67,6 +78,7 @@ export class ListaTurnosComponent {
     private cajasService: CajasService,
     private tesoreriaService: TesoreriaService,
     private transaccionesService: TransaccionesService,
+    private turnosActivosService: TurnosActivosService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -81,6 +93,18 @@ export class ListaTurnosComponent {
       idTurno: [null, Validators.required],
       fondoContado: ['', [Validators.required, Validators.min(0)]],
       observaciones: ['']
+    });
+
+    this.reponerTurnoForm = this.fb.group({
+      idCaja: [null, Validators.required],
+      monto: ['', [Validators.required, Validators.min(0.01)]],
+      motivo: ['', Validators.required]
+    });
+
+    this.retirarTurnoForm = this.fb.group({
+      idCaja: [null, Validators.required],
+      monto: ['', [Validators.required, Validators.min(0.01)]],
+      motivo: ['', Validators.required]
     });
 
     this.consultarSaldoCajaForm = this.fb.group({
@@ -468,6 +492,65 @@ export class ListaTurnosComponent {
     }
   }
 
+  esTurnoAbierto(row: any): boolean {
+    const codigo = (row?.codigoEstatusTurno || '').toString().toUpperCase().trim();
+    return codigo === 'ABIERTO';
+  }
+
+  abrirModalReponerDesdeFila(row: any) {
+    if (!row?.idCaja) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'No hay caja asociada a este turno.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Cerrar',
+      });
+      return;
+    }
+    this.listaCajasReponer = [{
+      id: Number(row.idCaja),
+      text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''} (Turno #${row.id})`.trim() || `Caja ${row.idCaja}`
+    }];
+    this.reponerTurnoForm.reset({ idCaja: row.idCaja, monto: '', motivo: '' });
+    this.reponerTurnoForm.patchValue({ idCaja: row.idCaja });
+    this.modalRef = this.modalService.open(this.modalReponerTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-reponer-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+  }
+
+  abrirModalRetirarDesdeFila(row: any) {
+    if (!row?.idCaja) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'No hay caja asociada a este turno.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Cerrar',
+      });
+      return;
+    }
+    this.listaCajasRetirar = [{
+      id: Number(row.idCaja),
+      text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''} (Turno #${row.id})`.trim() || `Caja ${row.idCaja}`
+    }];
+    this.retirarTurnoForm.reset({ idCaja: row.idCaja, monto: '', motivo: '' });
+    this.retirarTurnoForm.patchValue({ idCaja: row.idCaja });
+    this.modalRef = this.modalService.open(this.modalRetirarTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-retirar-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+  }
+
   verSaldoCaja(idCaja: number) {
     if (idCaja == null || idCaja === undefined) {
       Swal.fire({
@@ -503,6 +586,210 @@ export class ListaTurnosComponent {
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Cerrar',
+        });
+      }
+    });
+  }
+
+  reponerTurno() {
+    this.turnosActivosService.obtenerTurnosActivos().subscribe({
+      next: (response) => {
+        const turnosData = response?.data ?? response;
+        const turnos = Array.isArray(turnosData) ? turnosData : [];
+        const seen = new Set<number>();
+        this.listaCajasReponer = turnos
+          .filter((t: any) => {
+            if (t?.idCaja == null) return false;
+            const id = Number(t.idCaja);
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          })
+          .map((t: any) => ({
+            id: Number(t.idCaja),
+            text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
+          }));
+
+        if (this.listaCajasReponer.length === 0) {
+          Swal.fire({
+            title: 'Sin turnos activos',
+            text: 'No hay turnos de caja abiertos. Solo se puede reponer efectivo durante un turno activo.',
+            icon: 'warning',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Entendido',
+          });
+          return;
+        }
+
+        this.reponerTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
+        this.modalRef = this.modalService.open(this.modalReponerTurno, {
+          size: 'lg',
+          windowClass: 'modal-holder modal-reponer-turno',
+          centered: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || 'No se pudieron cargar los turnos activos.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  retirarTurno() {
+    this.turnosActivosService.obtenerTurnosActivos().subscribe({
+      next: (response) => {
+        const turnosData = response?.data ?? response;
+        const turnos = Array.isArray(turnosData) ? turnosData : [];
+        const seen = new Set<number>();
+        this.listaCajasRetirar = turnos
+          .filter((t: any) => {
+            if (t?.idCaja == null) return false;
+            const id = Number(t.idCaja);
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          })
+          .map((t: any) => ({
+            id: Number(t.idCaja),
+            text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
+          }));
+
+        if (this.listaCajasRetirar.length === 0) {
+          Swal.fire({
+            title: 'Sin turnos activos',
+            text: 'No hay turnos de caja abiertos. Solo se puede retirar efectivo durante un turno activo.',
+            icon: 'warning',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Entendido',
+          });
+          return;
+        }
+
+        this.retirarTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
+        this.modalRef = this.modalService.open(this.modalRetirarTurno, {
+          size: 'lg',
+          windowClass: 'modal-holder modal-retirar-turno',
+          centered: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || 'No se pudieron cargar los turnos activos.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  guardarRetirarTurno() {
+    if (this.retirarTurnoForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Por favor complete todos los campos requeridos.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+
+    const payload = {
+      idCaja: Number(this.retirarTurnoForm.value.idCaja),
+      monto: Number(this.retirarTurnoForm.value.monto),
+      motivo: (this.retirarTurnoForm.value.motivo || '').trim()
+    };
+
+    this.turnosService.retirarTurno(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación Exitosa!',
+          text: 'Se ha retirado efectivo de la caja correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        this.cerrarModal();
+        this.retirarTurnoForm.reset();
+        this.setupDataSource();
+        if (this.dataGrid) {
+          this.dataGrid.instance.refresh();
+        }
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo retirar el efectivo.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  guardarReponerTurno() {
+    if (this.reponerTurnoForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Por favor complete todos los campos requeridos.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+
+    const payload = {
+      idCaja: Number(this.reponerTurnoForm.value.idCaja),
+      monto: Number(this.reponerTurnoForm.value.monto),
+      motivo: (this.reponerTurnoForm.value.motivo || '').trim()
+    };
+
+    this.turnosService.reponerTurno(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación Exitosa!',
+          text: 'Se ha repuesto efectivo a la caja correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        this.cerrarModal();
+        this.reponerTurnoForm.reset();
+        this.setupDataSource();
+        if (this.dataGrid) {
+          this.dataGrid.instance.refresh();
+        }
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo reponer el efectivo.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
         });
       }
     });
@@ -629,6 +916,8 @@ export class ListaTurnosComponent {
       this.modalRef.close();
       this.abrirTurnoForm.reset();
       this.cerrarTurnoForm.reset();
+      this.reponerTurnoForm.reset();
+      this.retirarTurnoForm.reset();
       this.consultarSaldoCajaForm.reset();
       this.saldoCajaData = null;
     }

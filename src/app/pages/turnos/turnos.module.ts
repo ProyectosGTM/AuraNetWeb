@@ -5,7 +5,7 @@ import { TurnosRoutingModule } from './turnos-routing.module';
 import { ListaTurnosComponent } from './lista-turnos/lista-turnos.component';
 import { AbrirTurnoComponent } from './abrir-turno/abrir-turno.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
 import { SharedModule } from 'src/app/shared/shared.module';
 
@@ -20,6 +20,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
     FormsModule,
     ReactiveFormsModule,
     NgbModalModule,
+    NgbTooltipModule,
     DxDataGridModule,
     DxLoadPanelModule,
     DxPopupModule,

@@ -59,6 +59,24 @@
                                         <span class="btn-action-desc">Finalizar turno activo</span>
                                     </div>
                                 </button>
+                                <button (click)="reponerTurno()" type="button" class="btn-action-large btn-action-large-success">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Reponer Efectivo</span>
+                                        <span class="btn-action-desc">Transfiere efectivo de tesorería a caja</span>
+                                    </div>
+                                </button>
+                                <button (click)="retirarTurno()" type="button" class="btn-action-large btn-action-large-warning">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Retirar Efectivo</span>
+                                        <span class="btn-action-desc">Transfiere efectivo de caja a tesorería</span>
+                                    </div>
+                                </button>
                                 <button (click)="consultarSaldoCaja()" type="button" class="btn-action-large btn-action-large-info">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-wallet"></i>
@@ -116,12 +134,28 @@
                         </dxo-export>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
-                                <button type="button" id="saldoCajaButton" class="btnAcciones" (click)="verSaldoCaja(row.data.idCaja)" title="Obtener saldo de caja">
+                                <button *ngIf="esTurnoAbierto(row.data)" type="button" id="reponerButton" class="btnAcciones"
+                                    (click)="abrirModalReponerDesdeFila(row.data)"
+                                    ngbTooltip="Reponer efectivo (Tesorería → Caja)" placement="top" container="body">
+                                    <i class="fa fa-arrow-up"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button *ngIf="esTurnoAbierto(row.data)" type="button" id="retirarButton" class="btnAcciones"
+                                    (click)="abrirModalRetirarDesdeFila(row.data)"
+                                    ngbTooltip="Retirar efectivo (Caja → Tesorería)" placement="top" container="body">
+                                    <i class="fa fa-arrow-down"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="saldoCajaButton" class="btnAcciones" (click)="verSaldoCaja(row.data.idCaja)"
+                                    ngbTooltip="Obtener saldo de caja" placement="top" container="body">
                                     <i class="fa fa-wallet"></i>
                                 </button>
                             </div>
                             <div>
-                                <button type="button" id="detallesButton" class="btnAcciones" title="Ver Detalles">
+                                <button type="button" id="detallesButton" class="btnAcciones"
+                                    ngbTooltip="Ver detalles del turno" placement="top" container="body">
                                     <i class="fa fa-eye"></i>
                                 </button>
                             </div>
@@ -277,6 +311,136 @@
         </button>
         <button type="button" class="btn btn-success" (click)="guardarAbrirTurno()" [disabled]="abrirTurnoForm.invalid">
             <i class="fas fa-check"></i> Abrir Turno
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Reponer Efectivo -->
+<ng-template #modalReponerTurno let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--reponer-turno">
+        <h5 class="modal-title">
+            <i class="fas fa-arrow-up"></i>
+            <span>Reponer Efectivo a Caja</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <p class="text-muted small mb-3">Transfiere efectivo de <strong>Tesorería</strong> a <strong>Caja</strong> durante un turno activo. Requiere turno abierto.</p>
+        <form [formGroup]="reponerTurnoForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Caja con turno activo *</span>
+                        <dx-select-box
+                            [dataSource]="listaCajasReponer"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-caja">
+                        </dx-select-box>
+                        <div *ngIf="listaCajasReponer.length === 0" class="text-muted small mt-1">No hay cajas con turnos activos</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monto *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Motivo *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="motivo" class="sleek-control" type="text" placeholder="Ej: Alta demanda de retiros" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-success" (click)="guardarReponerTurno()" [disabled]="reponerTurnoForm.invalid">
+            <i class="fas fa-check"></i> Reponer
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Retirar Efectivo -->
+<ng-template #modalRetirarTurno let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--retirar-turno">
+        <h5 class="modal-title">
+            <i class="fas fa-arrow-down"></i>
+            <span>Retirar Efectivo de Caja</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <p class="text-muted small mb-3">Transfiere efectivo de <strong>Caja</strong> a <strong>Tesorería</strong> durante un turno activo. Requiere turno abierto y saldo suficiente en caja.</p>
+        <form [formGroup]="retirarTurnoForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Caja con turno activo *</span>
+                        <dx-select-box
+                            [dataSource]="listaCajasRetirar"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-caja">
+                        </dx-select-box>
+                        <div *ngIf="listaCajasRetirar.length === 0" class="text-muted small mt-1">No hay cajas con turnos activos</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monto *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Motivo *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="motivo" class="sleek-control" type="text" placeholder="Ej: Exceso de efectivo en caja" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-warning" (click)="guardarRetirarTurno()" [disabled]="retirarTurnoForm.invalid">
+            <i class="fas fa-check"></i> Retirar
         </button>
     </div>
 </ng-template>

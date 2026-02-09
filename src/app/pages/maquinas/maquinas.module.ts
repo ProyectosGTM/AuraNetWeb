@@ -6,6 +6,7 @@ import { ListaMaquinasComponent } from './lista-maquinas/lista-maquinas.componen
 import { AgregarMaquinaComponent } from './agregar-maquina/agregar-maquina.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/shared/shared.module';
 
 
@@ -17,6 +18,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
   imports: [
     CommonModule,
     MaquinasRoutingModule,
+    NgbTooltipModule,
     FormsModule,
     ReactiveFormsModule,
     DxDataGridModule,

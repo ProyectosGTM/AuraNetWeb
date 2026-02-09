@@ -78,15 +78,18 @@
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
-                                    (click)="actualizarCaja(row.data.id)">
+                                    (click)="actualizarCaja(row.data.id)"
+                                    ngbTooltip="Editar caja" placement="top" container="body">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
                             <div>
-                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones" (click)="activar(row.data)">
+                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones" (click)="activar(row.data)"
+                                    ngbTooltip="Activar caja" placement="top" container="body">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
-                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones" (click)="desactivar(row.data)">
+                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones" (click)="desactivar(row.data)"
+                                    ngbTooltip="Desactivar caja" placement="top" container="body">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </div>

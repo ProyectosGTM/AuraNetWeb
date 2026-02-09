@@ -24,12 +24,13 @@
 
         <div class="row mt-5">
           <div class="col-12">
-            <div class="recarga-shell" [class.is-start]="!(cajaSeleccionada || monederoSeleccionado || recargaForm.get('monto')?.value)">
+            <div [class.is-start]="!(cajaSeleccionada || monederoSeleccionado || recargaForm.get('monto')?.value)">
               <form [formGroup]="recargaForm">
                 <div class="row g-3">
-                  <!-- IZQUIERDA / RAIL -->
-                  <div class="col-12 col-lg-4">
-                    <div class="rail-card">
+                  
+                  <!-- 1. Flujo de Recarga (primera card, full width) -->
+                  <div class="col-12">
+                    <div class="rail-card rail-card--full">
                       <div class="rail-top">
                         <div class="rail-badge">
                           <i class="fas fa-shield-alt"></i>
@@ -85,30 +86,15 @@
                           </div>
                         </div>
                       </div>
-
-                      <div class="rail-kpi">
-                        <div class="kpi kpi-caja">
-                          <div class="k-label">Caja</div>
-                          <div class="k-value">{{ cajaSeleccionada?.codigo || '—' }}</div>
-                        </div>
-                        <div class="kpi kpi-monedero">
-                          <div class="k-label">Monedero</div>
-                          <div class="k-value">{{ monederoSeleccionado?.numeroMonedero || '—' }}</div>
-                        </div>
-                        <div class="kpi kpi-strong">
-                          <div class="k-label">Monto</div>
-                          <div class="k-value">{{ recargaForm.get('monto')?.value ? formatearMoneda(recargaForm.get('monto')?.value) : '—' }}</div>
-                        </div>
-                      </div>
                     </div>
                   </div>
 
-                  <!-- DERECHA / PANELS -->
-                  <div class="col-12 col-lg-8">
-                    <div class="row g-3">
+                  <!-- 2. Caja, Monedero y Monto en una fila (altura uniforme) -->
+                  <div class="col-12">
+                    <div class="row g-3 row-cards-equal">
                       <!-- Caja -->
-                      <div class="col-12 col-xl-6">
-                        <div class="panel-card panel-caja">
+                      <div class="col-12 col-md-4">
+                        <div class="panel-card panel-caja h-100">
                           <div class="panel-head">
                             <div class="ph-left">
                               <div class="ph-ico ph-ico-caja">
@@ -168,8 +154,8 @@
                       </div>
 
                       <!-- Monedero -->
-                      <div class="col-12 col-xl-6">
-                        <div class="panel-card panel-monedero">
+                      <div class="col-12 col-md-4">
+                        <div class="panel-card panel-monedero h-100">
                           <div class="panel-head">
                             <div class="ph-left">
                               <div class="ph-ico ph-ico-monedero">
@@ -229,8 +215,8 @@
                       </div>
 
                       <!-- Monto -->
-                      <div class="col-12">
-                        <div class="panel-card panel-monto">
+                      <div class="col-12 col-md-4">
+                        <div class="panel-card panel-monto h-100">
                           <div class="panel-head">
                             <div class="ph-left">
                               <div class="ph-ico ph-ico-monto">
@@ -242,26 +228,22 @@
                               </div>
                             </div>
 
-                            <div class="live-pill" *ngIf="recargaForm.get('monto')?.value">
-                              <i class="fas fa-bolt"></i>
-                              <span>{{ formatearMoneda(recargaForm.get('monto')?.value) }}</span>
-                            </div>
                           </div>
 
                           <div class="panel-body">
-                            <div class="row g-3 align-items-center">
-                              <div class="col-12 col-md-5">
+                            <div class="row g-2">
+                              <div class="col-12">
                                 <label class="field">
                                   <span class="field-label text-white">Monto *</span>
                                   <div class="input-sleek input-monto">
                                     <i class="fas fa-dollar-sign"></i>
-                                    <input formControlName="monto" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" (input)="onMontoChanged()" />
+                                    <input [value]="montoDisplay" class="sleek-control" type="text" inputmode="decimal" placeholder="0.00" (focus)="montoFocused = true" (input)="onMontoInput($event)" (blur)="onMontoBlur($event)" />
                                     <span class="sleek-line"></span>
                                   </div>
                                 </label>
                               </div>
 
-                              <div class="col-12 col-md-7">
+                              <div class="col-12">
                                 <div class="quick-grid">
                                   <button type="button" class="qbtn" (click)="setMontoRapido(100)">
                                     <span class="qtop"><i class="fas fa-hand-holding-usd"></i></span>
@@ -289,74 +271,80 @@
                           </div>
                         </div>
                       </div>
-
-                      <!-- Resumen -->
-                      <div class="col-12" #resumenElement *ngIf="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value">
-                        <div class="confirm-card" *ngIf="mostrarResumen" [@slideDownFade] [@staggerFadeIn]>
-                          <div class="confirm-head">
-                            <div class="ch-left">
-                              <div class="ch-ico">
-                                <i class="fas fa-receipt"></i>
-                              </div>
-                              <div class="ch-txt">
-                                <div class="ch-title">Confirmación</div>
-                                <div class="ch-sub"><strong>Revisa los detalles antes de confirmar</strong></div>
-                              </div>
-                            </div>
-                            <div class="ch-mark">
-                              <i class="fas fa-lock"></i>
-                              <span>Validado</span>
-                            </div>
-                          </div>
-
-                          <div class="confirm-body">
-                            <div class="row g-2">
-                              <div class="col-12 col-md-4">
-                                <div class="sum-tile">
-                                  <div class="st-top"><i class="fas fa-cash-register"></i><span>Caja</span></div>
-                                  <div class="st-main">{{ cajaSeleccionada.codigo || 'Sin registro' }}</div>
-                                  <div class="st-sub">{{ cajaSeleccionada.nombre || 'Sin registro' }}</div>
-                                </div>
-                              </div>
-
-                              <div class="col-12 col-md-4">
-                                <div class="sum-tile">
-                                  <div class="st-top"><i class="fas fa-wallet"></i><span>Monedero</span></div>
-                                  <div class="st-main">{{ monederoSeleccionado.numeroMonedero || 'Sin registro' }}</div>
-                                  <div class="st-sub">{{ monederoSeleccionado.alias || 'Sin registro' }}</div>
-                                </div>
-                              </div>
-
-                              <div class="col-12 col-md-4">
-                                <div class="sum-tile sum-tile-strong">
-                                  <div class="st-top"><i class="fas fa-coins"></i><span>Monto</span></div>
-                                  <div class="st-main st-main-big">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</div>
-                                  <div class="st-sub">Carga inmediata</div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Acciones -->
-                      <div class="col-12">
-                        <div class="actions-bar">
-                          <button type="button" class="btn-action-recarga btn-secondary" (click)="limpiarFormulario()">
-                            <i class="fas fa-times"></i>
-                            <span>Cancelar</span>
-                          </button>
-
-                          <button type="button" class="btn-action-recarga btn-primary" (click)="procesarRecarga()" [disabled]="recargaForm.invalid || procesando">
-                            <i class="fas fa-check" *ngIf="!procesando"></i>
-                            <i class="fas fa-spinner fa-spin" *ngIf="procesando"></i>
-                            <span>{{ procesando ? 'Procesando...' : 'Confirmar Recarga' }}</span>
-                          </button>
-                        </div>
-                      </div>
                     </div>
                   </div>
 
+                  <!-- 3. Confirmación (solo cuando el input de monto perdió el foco) -->
+                  <div class="col-12" #resumenElement *ngIf="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value && !montoFocused">
+                    <div class="confirm-card" *ngIf="mostrarResumen" [@slideDownFade] [@staggerFadeIn]>
+                      <div class="confirm-head">
+                        <div class="ch-left">
+                          <div class="ch-ico">
+                            <i class="fas fa-receipt"></i>
+                          </div>
+                          <div class="ch-txt">
+                            <div class="ch-title">Confirmación</div>
+                            <div class="ch-sub"><strong>Revisa los detalles antes de confirmar</strong></div>
+                          </div>
+                        </div>
+                        <div class="ch-mark">
+                          <i class="fas fa-lock"></i>
+                          <span>Validado</span>
+                        </div>
+                      </div>
+
+                      <div class="confirm-body">
+                        <div class="row g-2">
+                          <div class="col-12 col-md-4">
+                            <div class="sum-tile">
+                              <div class="st-top"><i class="fas fa-cash-register"></i><span>Caja</span></div>
+                              <div class="st-main">{{ cajaSeleccionada.codigo || 'Sin registro' }}</div>
+                              <div class="st-sub">{{ cajaSeleccionada.nombre || 'Sin registro' }}</div>
+                            </div>
+                          </div>
+
+                          <div class="col-12 col-md-4">
+                            <div class="sum-tile">
+                              <div class="st-top"><i class="fas fa-wallet"></i><span>Monedero</span></div>
+                              <div class="st-main">{{ monederoSeleccionado.numeroMonedero || 'Sin registro' }}</div>
+                              <div class="st-sub">{{ monederoSeleccionado.alias || 'Sin registro' }}</div>
+                            </div>
+                          </div>
+
+                          <div class="col-12 col-md-4">
+                            <div class="sum-tile sum-tile-strong">
+                              <div class="st-top"><i class="fas fa-coins"></i><span>Monto</span></div>
+                              <div class="st-main st-main-big">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</div>
+                              <div class="st-sub">Carga inmediata</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="actions-bar mt-3">
+                      <button type="button" class="btn-action-recarga btn-secondary" (click)="limpiarFormulario()">
+                        <i class="fas fa-times"></i>
+                        <span>Cancelar</span>
+                      </button>
+
+                      <button type="button" class="btn-action-recarga btn-primary" (click)="procesarRecarga()" [disabled]="recargaForm.invalid || procesando">
+                        <i class="fas fa-check" *ngIf="!procesando"></i>
+                        <i class="fas fa-spinner fa-spin" *ngIf="procesando"></i>
+                        <span>{{ procesando ? 'Procesando...' : 'Confirmar Recarga' }}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Acciones (solo Cancelar cuando no hay confirmación completa) -->
+                  <div class="col-12" *ngIf="!cajaSeleccionada || !monederoSeleccionado || !recargaForm.get('monto')?.value || montoFocused">
+                    <div class="actions-bar">
+                      <button type="button" class="btn-action-recarga btn-secondary" (click)="limpiarFormulario()">
+                        <i class="fas fa-times"></i>
+                        <span>Cancelar</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>

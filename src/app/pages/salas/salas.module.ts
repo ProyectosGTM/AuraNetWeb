@@ -6,6 +6,7 @@ import { ListaSalasComponent } from './lista-salas/lista-salas.component';
 import { AgregarSalaComponent } from './agregar-sala/agregar-sala.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/shared/shared.module';
 
 
@@ -17,6 +18,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
   imports: [
     CommonModule,
     SalasRoutingModule,
+    NgbTooltipModule,
     FormsModule,
     ReactiveFormsModule,
     DxDataGridModule,

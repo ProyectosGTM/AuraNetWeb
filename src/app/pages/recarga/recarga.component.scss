@@ -68,6 +68,25 @@
   gap: 8px;
 }
 
+.rail-card--full {
+  position: relative;
+  top: auto;
+  width: 100%;
+}
+
+.rail-card--full .rail-steps {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 12px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.rail-card--full .step {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .step {
   display: grid;
   grid-template-columns: 36px 1fr 26px;
@@ -179,6 +198,19 @@
   white-space: nowrap;
 }
 
+.row-cards-equal {
+  align-items: stretch;
+}
+
+.row-cards-equal .panel-card.h-100 {
+  display: flex;
+  flex-direction: column;
+}
+
+.row-cards-equal .panel-card.h-100 .panel-body {
+  flex: 1;
+}
+
 .panel-card {
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.10);
@@ -234,6 +266,13 @@
 .panel-body {
   padding: 12px 14px 14px 14px;
   overflow: visible;
+}
+
+.panel-caja .panel-body,
+.panel-monedero .panel-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .ph-left {
@@ -398,6 +437,11 @@
   color: rgba(228, 0, 65, 0.90);
   font-size: 14px;
   pointer-events: none;
+}
+
+.input-monto .sleek-control {
+  font-size: 28px;
+  font-weight: 600;
 }
 
 .sleek-control {

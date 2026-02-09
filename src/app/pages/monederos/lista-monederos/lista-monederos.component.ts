@@ -39,6 +39,8 @@ export class ListaMonederosComponent {
   @ViewChild('modalDescargarMonedero', { static: false }) modalDescargarMonedero!: TemplateRef<any>;
   @ViewChild('modalConsultarSaldo', { static: false }) modalConsultarSaldo!: TemplateRef<any>;
   @ViewChild('modalCambiarEstatus', { static: false }) modalCambiarEstatus!: TemplateRef<any>;
+  @ViewChild('modalTraspaso', { static: false }) modalTraspaso!: TemplateRef<any>;
+  @ViewChild('modalMonederosPorAfiliado', { static: false }) modalMonederosPorAfiliado!: TemplateRef<any>;
   private modalRef?: NgbModalRef;
 
   // Formulario para cargar monedero
@@ -60,6 +62,18 @@ export class ListaMonederosComponent {
   cambiarEstatusForm: FormGroup;
   public listaEstatusMonederoOpciones: { id: number; text: string }[] = [];
   monederoSeleccionadoCambio: { numeroMonedero?: string; alias?: string } | null = null;
+
+  // Formulario para traspaso
+  traspasoMonederoForm: FormGroup;
+  public listaAfiliadosTraspaso: any[] = [];
+  public listaTurnosTraspaso: any[] = [];
+  public listaMonederosTraspaso: any[] = [];
+
+  // Formulario para monederos por afiliado
+  monederosPorAfiliadoForm: FormGroup;
+  public listaAfiliadosMonederos: any[] = [];
+  public listaMonederosAfiliado: any[] = [];
+  public cargandoMonederosAfiliado = false;
 
   constructor(
     private router: Router,
@@ -87,6 +101,16 @@ export class ListaMonederosComponent {
       idMonedero: [null, Validators.required],
       idEstatusMonedero: [null, Validators.required],
       motivo: ['', [Validators.required, Validators.minLength(1)]]
+    });
+    this.traspasoMonederoForm = this.fb.group({
+      idAfiliado: [null, Validators.required],
+      idTurnoCaja: [null, Validators.required],
+      idMonederoOrigen: [null, Validators.required],
+      idMonederoDestino: [null, Validators.required],
+      monto: ['', [Validators.required, Validators.min(0.01)]]
+    });
+    this.monederosPorAfiliadoForm = this.fb.group({
+      idAfiliado: [null, Validators.required]
     });
   }
 
@@ -704,6 +728,174 @@ export class ListaMonederosComponent {
     });
   }
 
+  traspasoMonedero() {
+    forkJoin({
+      afiliados: this.monederosService.obtenerAfiliados(),
+      turnos: this.turnosService.obtenerTurnos()
+    }).subscribe({
+      next: (responses) => {
+        this.listaAfiliadosTraspaso = (responses.afiliados.data || []).map((a: any) => {
+          const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();
+          return { ...a, id: Number(a.id), text: text || 'Sin nombre' };
+        });
+        this.listaTurnosTraspaso = (responses.turnos.data || []).map((t: any) => ({
+          ...t,
+          id: Number(t.id),
+          text: `Turno #${t.id} - ${t.codigoCaja || ''} - ${this.formatearFechaHora(t.fechaApertura) || ''}`
+        }));
+        this.listaMonederosTraspaso = [];
+        this.traspasoMonederoForm.patchValue({ idMonederoOrigen: null, idMonederoDestino: null });
+        this.modalRef = this.modalService.open(this.modalTraspaso, {
+          size: 'lg',
+          windowClass: 'modal-holder modal-traspaso',
+          centered: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: 'No se pudieron cargar las listas necesarias.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  onAfiliadoChangeTraspaso(event: any) {
+    const idAfiliado = event.value;
+    this.traspasoMonederoForm.patchValue({ idMonederoOrigen: null, idMonederoDestino: null });
+    if (!idAfiliado) {
+      this.listaMonederosTraspaso = [];
+      return;
+    }
+    this.monederosService.obtenerMonederosPorAfiliado(idAfiliado).subscribe({
+      next: (response) => {
+        const data = response.data || response;
+        const lista = Array.isArray(data) ? data : (data?.monederos || []);
+        this.listaMonederosTraspaso = lista.map((m: any) => ({
+          ...m,
+          id: Number(m.id),
+          text: `${m.numeroMonedero || ''} - ${m.alias || ''}`.trim()
+        }));
+      },
+      error: () => {
+        this.listaMonederosTraspaso = [];
+      }
+    });
+  }
+
+  guardarTraspasoMonedero() {
+    if (this.traspasoMonederoForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Por favor complete todos los campos requeridos.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const vals = this.traspasoMonederoForm.value;
+    if (vals.idMonederoOrigen === vals.idMonederoDestino) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'El monedero origen y destino deben ser diferentes.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const payload = {
+      idTurnoCaja: vals.idTurnoCaja,
+      idMonederoOrigen: vals.idMonederoOrigen,
+      idMonederoDestino: vals.idMonederoDestino,
+      monto: Number(vals.monto)
+    };
+    this.monederosService.traspasoMonedero(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación Exitosa!',
+          text: 'Se ha traspasado el saldo entre monederos correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        this.cerrarModal();
+        this.setupDataSource();
+        if (this.dataGrid) {
+          this.dataGrid.instance.refresh();
+        }
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error.error?.message || error.error || 'No se pudo realizar el traspaso.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  verMonederosPorAfiliado() {
+    this.monederosService.obtenerAfiliados().subscribe({
+      next: (response) => {
+        this.listaAfiliadosMonederos = (response.data || []).map((a: any) => {
+          const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();
+          return { ...a, id: Number(a.id), text: text || 'Sin nombre' };
+        });
+        this.listaMonederosAfiliado = [];
+        this.monederosPorAfiliadoForm.reset();
+        this.modalRef = this.modalService.open(this.modalMonederosPorAfiliado, {
+          size: 'lg',
+          windowClass: 'modal-holder modal-monederos-afiliado',
+          centered: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: 'No se pudieron cargar los afiliados.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  onAfiliadoChangeMonederos(event: any) {
+    const idAfiliado = event.value;
+    this.listaMonederosAfiliado = [];
+    if (!idAfiliado) return;
+    this.cargandoMonederosAfiliado = true;
+    this.monederosService.obtenerMonederosPorAfiliado(idAfiliado).subscribe({
+      next: (response) => {
+        this.cargandoMonederosAfiliado = false;
+        const data = response.data || response;
+        this.listaMonederosAfiliado = Array.isArray(data) ? data : (data?.monederos || []);
+      },
+      error: () => {
+        this.cargandoMonederosAfiliado = false;
+        this.listaMonederosAfiliado = [];
+      }
+    });
+  }
+
   cerrarModal() {
     if (this.modalRef) {
       this.modalRef.close();
@@ -711,9 +903,12 @@ export class ListaMonederosComponent {
       this.descargarMonederoForm.reset();
       this.consultarSaldoForm.reset();
       this.cambiarEstatusForm.reset();
+      this.traspasoMonederoForm.reset();
+      this.monederosPorAfiliadoForm.reset();
       this.saldoData = null;
       this.consultandoSaldo = false;
       this.monederoSeleccionadoCambio = null;
+      this.listaMonederosAfiliado = [];
     }
   }
 }

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -22,6 +22,7 @@ import { SimplebarAngularModule } from 'simplebar-angular';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     ContactsRoutingModule,
     // WidgetModule,
     UIModule,

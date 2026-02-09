@@ -73,6 +73,24 @@
                                         <span class="btn-action-desc">Ver saldo por número</span>
                                     </div>
                                 </button>
+                                <button (click)="traspasoMonedero()" type="button" class="btn-action-large btn-action-large-purple">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Traspasar Saldo</span>
+                                        <span class="btn-action-desc">Entre monederos del mismo afiliado</span>
+                                    </div>
+                                </button>
+                                <button (click)="verMonederosPorAfiliado()" type="button" class="btn-action-large btn-action-large-secondary">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Monederos por Afiliado</span>
+                                        <span class="btn-action-desc">Ver monederos de un afiliado</span>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -124,23 +142,27 @@
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
                                 <button type="button" id="cambiarEstatusButton" class="btnAcciones"
-                                    (click)="abrirCambiarEstatus(row.data)" title="Cambiar estatus">
+                                    (click)="abrirCambiarEstatus(row.data)"
+                                    ngbTooltip="Cambiar estatus del monedero (Activo/Inactivo)" placement="top" container="body">
                                     <i class="fa fa-exchange-alt"></i>
                                 </button>
                             </div>
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
-                                    (click)="actualizarMonedero(row.data.id)">
+                                    (click)="actualizarMonedero(row.data.id)"
+                                    ngbTooltip="Editar monedero" placement="top" container="body">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
                             <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
-                                    (click)="activar(row.data)">
+                                    (click)="activar(row.data)"
+                                    ngbTooltip="Activar monedero" placement="top" container="body">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
-                                    (click)="desactivar(row.data)">
+                                    (click)="desactivar(row.data)"
+                                    ngbTooltip="Desactivar monedero" placement="top" container="body">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </div>
@@ -549,6 +571,174 @@
             <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i>
             <i class="fas fa-search" *ngIf="!consultandoSaldo"></i>
             {{ consultandoSaldo ? 'Consultando...' : 'Consultar' }}
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Traspasar Saldo -->
+<ng-template #modalTraspaso let-modal>
+    <div class="modal-header modal-accion-header modal-header-traspaso-monedero">
+        <h5 class="modal-title">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Traspasar Saldo entre Monederos</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <p class="text-muted small mb-3">Traspasa saldo EFECTIVO entre dos monederos del mismo afiliado. Requiere turno de caja abierto.</p>
+        <form [formGroup]="traspasoMonederoForm">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Afiliado *</span>
+                        <dx-select-box
+                            [dataSource]="listaAfiliadosTraspaso"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idAfiliado"
+                            placeholder="Selecciona un afiliado..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            (onValueChanged)="onAfiliadoChangeTraspaso($event)"
+                            class="dx-select-box-custom">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Turno de Caja *</span>
+                        <dx-select-box
+                            [dataSource]="listaTurnosTraspaso"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTurnoCaja"
+                            placeholder="Selecciona un turno..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-turno">
+                        </dx-select-box>
+                        <div *ngIf="listaTurnosTraspaso.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monedero Origen *</span>
+                        <dx-select-box
+                            [dataSource]="listaMonederosTraspaso"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idMonederoOrigen"
+                            placeholder="Monedero de origen..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-monedero">
+                        </dx-select-box>
+                        <div *ngIf="listaMonederosTraspaso.length === 0 && traspasoMonederoForm.get('idAfiliado')?.value" class="text-muted small mt-1">No hay monederos para este afiliado</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monedero Destino *</span>
+                        <dx-select-box
+                            [dataSource]="listaMonederosTraspaso"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idMonederoDestino"
+                            placeholder="Monedero de destino..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-monedero">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Monto *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="guardarTraspasoMonedero()" [disabled]="traspasoMonederoForm.invalid">
+            <i class="fas fa-exchange-alt"></i> Traspasar
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Monederos por Afiliado -->
+<ng-template #modalMonederosPorAfiliado let-modal>
+    <div class="modal-header modal-accion-header modal-header-monederos-afiliado">
+        <h5 class="modal-title">
+            <i class="fas fa-users"></i>
+            <span>Monederos por Afiliado</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <form [formGroup]="monederosPorAfiliadoForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Afiliado *</span>
+                        <dx-select-box
+                            [dataSource]="listaAfiliadosMonederos"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idAfiliado"
+                            placeholder="Selecciona un afiliado..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            (onValueChanged)="onAfiliadoChangeMonederos($event)"
+                            class="dx-select-box-custom">
+                        </dx-select-box>
+                    </label>
+                </div>
+            </div>
+        </form>
+        <div *ngIf="listaMonederosAfiliado.length > 0" class="mt-4">
+            <h6 class="text-white mb-3"><i class="fas fa-wallet"></i> Monederos del afiliado</h6>
+            <div class="monederos-afiliado-list">
+                <div class="monedero-afiliado-item" *ngFor="let m of listaMonederosAfiliado">
+                    <div class="monedero-afiliado-numero">{{ m.numeroMonedero || m.alias || 'Sin número' }}</div>
+                    <div class="monedero-afiliado-alias text-muted small">{{ m.alias || '—' }}</div>
+                    <div class="monedero-afiliado-estatus">
+                        <span class="estatus-badge" [ngClass]="m.estatus === 1 ? 'estatus-activo-badge' : 'estatus-inactivo-badge'">
+                            {{ m.estatus === 1 ? 'Activo' : 'Inactivo' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="monederosPorAfiliadoForm.get('idAfiliado')?.value && listaMonederosAfiliado.length === 0 && !cargandoMonederosAfiliado" class="mt-4 text-center text-muted">
+            <i class="fas fa-inbox fa-2x mb-2"></i>
+            <p>Este afiliado no tiene monederos</p>
+        </div>
+        <div *ngIf="cargandoMonederosAfiliado" class="mt-4 text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p class="text-muted mt-2">Cargando monederos...</p>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
         </button>
     </div>
 </ng-template>

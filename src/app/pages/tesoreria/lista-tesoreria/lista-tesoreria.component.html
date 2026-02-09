@@ -103,33 +103,39 @@
                         </dxo-export>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
-                                <button type="button" id="saldoButton" class="btnAcciones" (click)="verSaldo(row.data.id)" title="Obtener saldo de tesorería">
+                                <button type="button" id="saldoButton" class="btnAcciones" (click)="verSaldo(row.data.id)"
+                                    ngbTooltip="Obtener saldo de tesorería" placement="top" container="body">
                                     <i class="fa fa-wallet"></i>
                                 </button>
                             </div>
                             <div>
-                                <button type="button" id="resumenButton" class="btnAcciones" (click)="verResumen(row.data.id)" title="Ver Resumen">
+                                <button type="button" id="resumenButton" class="btnAcciones" (click)="verResumen(row.data.id)"
+                                    ngbTooltip="Ver resumen de tesorería" placement="top" container="body">
                                     <i class="fa fa-chart-line"></i>
                                 </button>
                             </div>
                             <div>
-                                <button type="button" id="historialButton" class="btnAcciones" (click)="verHistorial(row.data.id)" title="Ver Historial">
+                                <button type="button" id="historialButton" class="btnAcciones" (click)="verHistorial(row.data.id)"
+                                    ngbTooltip="Ver historial de movimientos" placement="top" container="body">
                                     <i class="fa fa-history"></i>
                                 </button>
                             </div>
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
-                                    (click)="actualizarTesoreria(row.data.id)">
+                                    (click)="actualizarTesoreria(row.data.id)"
+                                    ngbTooltip="Editar tesorería" placement="top" container="body">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
                             <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
-                                    (click)="activar(row.data)">
+                                    (click)="activar(row.data)"
+                                    ngbTooltip="Activar tesorería" placement="top" container="body">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
-                                    (click)="desactivar(row.data)">
+                                    (click)="desactivar(row.data)"
+                                    ngbTooltip="Desactivar tesorería" placement="top" container="body">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </div>

@@ -126,6 +126,17 @@
       background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
     }
   }
+
+  &.btn-action-large-secondary {
+    &:hover {
+      background: rgba(108, 117, 125, 0.15);
+      border-color: rgba(108, 117, 125, 0.35);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -274,7 +285,9 @@
   .modal-cargar-monedero,
   .modal-descargar-monedero,
   .modal-consultar-saldo,
-  .modal-reemplazar-monedero {
+  .modal-reemplazar-monedero,
+  .modal-traspaso,
+  .modal-monederos-afiliado {
     .modal-content {
       background: #0d121d;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -425,6 +438,93 @@
         font-size: 22px;
       }
     }
+  }
+
+  /* HEADER TRASPASO (MORADO) */
+  .modal-header-traspaso-monedero {
+    background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(155, 89, 182, 0.25);
+    margin: 0;
+    border: none;
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 22px;
+      }
+    }
+  }
+
+  /* HEADER MONEDEROS POR AFILIADO (GRIS) */
+  .modal-header-monederos-afiliado {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(108, 117, 125, 0.25);
+    margin: 0;
+    border: none;
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 22px;
+      }
+    }
+  }
+
+  .monederos-afiliado-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .monedero-afiliado-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .monedero-afiliado-numero {
+    font-weight: 500;
+    color: #fff;
+    font-size: 15px;
+  }
+
+  .monedero-afiliado-alias {
+    flex: 1;
   }
 
   .action-modal-content {
@@ -890,7 +990,9 @@
     .modal-header-cargar-monedero,
     .modal-header-descargar-monedero,
     .modal-header-consultar-saldo,
-    .modal-header-reemplazar-monedero {
+    .modal-header-reemplazar-monedero,
+    .modal-header-traspaso-monedero,
+    .modal-header-monederos-afiliado {
       padding: 16px 20px;
 
       .modal-title {

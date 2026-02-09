@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { CajasRoutingModule } from './cajas-routing.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ListaCajasComponent } from './lista-cajas/lista-cajas.component';
 import { AgregarCajaComponent } from './agregar-caja/agregar-caja.component';
@@ -16,6 +17,7 @@ import { AgregarCajaComponent } from './agregar-caja/agregar-caja.component';
     CajasRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    NgbTooltipModule,
     DxDataGridModule,
     DxLoadPanelModule,
     DxPopupModule,

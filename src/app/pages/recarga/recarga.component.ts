@@ -26,6 +26,7 @@ export class RecargaComponent implements OnInit {
 
   procesando: boolean = false;
   mostrarResumen: boolean = false;
+  montoFocused: boolean = false;
 
   @ViewChild('resumenElement', { static: false }) resumenElement!: ElementRef;
 
@@ -148,9 +149,66 @@ export class RecargaComponent implements OnInit {
     }, 100);
   }
 
-  onMontoChanged() {
-    // Verificar si hay caja y monedero seleccionados
+  onMontoInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const raw = this.parseMontoInput(input.value);
+    this.recargaForm.patchValue({ monto: raw }, { emitEvent: false });
+    const formatted = this.formatMontoWhileTyping(raw);
+    if (input.value !== formatted) {
+      input.value = formatted;
+      const len = formatted.length;
+      setTimeout(() => input.setSelectionRange(len, len), 0);
+    }
     this.verificarYMostrarResumen();
+  }
+
+  onMontoBlur(event: Event): void {
+    this.montoFocused = false;
+    const input = event.target as HTMLInputElement;
+    const raw = this.parseMontoInput(input.value);
+    this.recargaForm.patchValue({ monto: raw }, { emitEvent: false });
+    if (raw > 0) {
+      input.value = this.formatMontoFull(raw);
+    }
+    this.recargaForm.get('monto')?.markAsTouched();
+    this.verificarYMostrarResumen();
+  }
+
+  onMontoChanged() {
+    this.verificarYMostrarResumen();
+  }
+
+  private parseMontoInput(texto: string): number {
+    if (!texto || texto.trim() === '') return 0;
+    const limpio = texto.replace(/\$/g, '').replace(/,/g, '').replace(/[^\d.]/g, '');
+    const partes = limpio.split('.');
+    const parteEntera = partes[0] || '0';
+    const parteDecimal = partes.length > 1 ? '.' + partes.slice(1).join('').slice(0, 2) : '';
+    const num = parseFloat(parteEntera + parteDecimal);
+    return isNaN(num) ? 0 : num;
+  }
+
+  private formatMontoWhileTyping(valor: number | string | null | undefined): string {
+    if (valor === null || valor === undefined || valor === '' || valor === 0) return '';
+    const n = Number(valor);
+    if (isNaN(n)) return '';
+    const partes = n.toString().split('.');
+    const entera = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const decimal = partes[1] !== undefined ? '.' + partes[1].slice(0, 2) : '';
+    return '$' + entera + decimal;
+  }
+
+  private formatMontoFull(valor: number | string | null | undefined): string {
+    if (valor === null || valor === undefined || valor === '') return '';
+    const n = Number(valor);
+    if (isNaN(n) || n === 0) return '';
+    return `$${n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  get montoDisplay(): string {
+    const val = this.recargaForm.get('monto')?.value;
+    if (val === null || val === undefined || val === '' || val === 0) return '';
+    return this.montoFocused ? this.formatMontoWhileTyping(val) : this.formatMontoFull(val);
   }
 
   formatearFechaHora(fecha: string | null): string {

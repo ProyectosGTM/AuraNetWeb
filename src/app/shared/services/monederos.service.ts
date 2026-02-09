@@ -67,4 +67,19 @@ export class MonederosServices {
   cambiarEstatus(payload: { idMonedero: number; idEstatusMonedero: number; motivo: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/monederos/cambiar-estatus`, payload);
   }
+
+  /** POST monederos/traspaso - Traspasar saldo entre monederos del mismo afiliado */
+  traspasoMonedero(payload: {
+    idTurnoCaja: number;
+    idMonederoOrigen: number;
+    idMonederoDestino: number;
+    monto: number;
+  }): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/monederos/traspaso`, payload);
+  }
+
+  /** GET monederos/afiliado/{idAfiliado} - Obtener monederos de un afiliado */
+  obtenerMonederosPorAfiliado(idAfiliado: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/monederos/afiliado/${idAfiliado}`);
+  }
 }

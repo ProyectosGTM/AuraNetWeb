@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ZonasRoutingModule } from './zonas-routing.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ListaZonasComponent } from './lista-zonas/lista-zonas.component';
 import { AgregarZonaComponent } from './agregar-zona/agregar-zona.component';
@@ -16,6 +17,7 @@ import { AgregarZonaComponent } from './agregar-zona/agregar-zona.component';
     ZonasRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    NgbTooltipModule,
     DxDataGridModule,
     DxLoadPanelModule,
     DxPopupModule,

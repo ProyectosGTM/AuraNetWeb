@@ -1021,18 +1021,21 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   &:hover { background-color: #15121e; border-color: #8b5cf6; }
 }
 
+/* Paleta de colores única por acción (ningún botón comparte color):
+   actualizar=azul, pin=verde, delete=rojo, map=ámbar, resumen=violeta,
+   historial=sky, detalles=cyan, saldo=teal, saldoCaja=naranja, cambiarEstatus=índigo */
 #historialButton {
-  background-color: #1a2332;
-  border-color: #2d3f56;
-  i { color: #3b82f6; }
-  &:hover { background-color: #0f1720; border-color: #3b82f6; }
+  background-color: #0c1f2e;
+  border-color: #164e63;
+  i { color: #0ea5e9; }
+  &:hover { background-color: #0a1923; border-color: #0ea5e9; }
 }
 
 #detallesButton {
-  background-color: #1a1f2e;
-  border-color: #2d3a4f;
-  i { color: #50a5f1; }
-  &:hover { background-color: #0f1419; border-color: #50a5f1; }
+  background-color: #0c1f24;
+  border-color: #134e56;
+  i { color: #06b6d4; }
+  &:hover { background-color: #0a191c; border-color: #06b6d4; }
 }
 
 #saldoButton {
@@ -1043,17 +1046,31 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 #saldoCajaButton {
-  background-color: #0f2a2e;
-  border-color: #1e4d52;
-  i { color: #2dd4bf; }
-  &:hover { background-color: #0d2326; border-color: #2dd4bf; }
+  background-color: #2a1a0d;
+  border-color: #5c3419;
+  i { color: #fb923c; }
+  &:hover { background-color: #1f1209; border-color: #fb923c; }
 }
 
 #cambiarEstatusButton {
-  background-color: #1e293b;
-  border-color: #334155;
-  i { color: #60a5fa; }
-  &:hover { background-color: #0f172a; border-color: #60a5fa; }
+  background-color: #1e1b29;
+  border-color: #3d3652;
+  i { color: #a78bfa; }
+  &:hover { background-color: #15121e; border-color: #a78bfa; }
+}
+
+#reponerButton {
+  background-color: #132e22;
+  border-color: #1f4d3a;
+  i { color: #34c38f; }
+  &:hover { background-color: #0f241b; border-color: #34c38f; }
+}
+
+#retirarButton {
+  background-color: #2a1a0d;
+  border-color: #5c3419;
+  i { color: #f59e0b; }
+  &:hover { background-color: #1f1209; border-color: #f59e0b; }
 }
 
 .estatus {
