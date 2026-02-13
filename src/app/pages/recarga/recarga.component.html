@@ -24,6 +24,10 @@
 
         <div class="row mt-5">
           <div class="col-12">
+            <div class="form-indication form-indication--info mb-4">
+              <i class="fas fa-wallet"></i>
+              <span>Realiza operaciones de carga de efectivo a monederos. Selecciona caja con turno abierto, monedero del afiliado y el monto a cargar.</span>
+            </div>
             <div [class.is-start]="!(cajaSeleccionada || monederoSeleccionado || recargaForm.get('monto')?.value)">
               <form [formGroup]="recargaForm">
                 <div class="row g-3">
@@ -124,6 +128,7 @@
                                     (onValueChanged)="onCajaChanged($event)"
                                     class="dx-select-box-custom dx-select-box-caja">
                                   </dx-select-box>
+                                  <div *ngIf="listaCajas.length === 0" class="text-muted small mt-1">No hay cajas disponibles. Las cajas no están abiertas.</div>
                                 </label>
                               </div>
 

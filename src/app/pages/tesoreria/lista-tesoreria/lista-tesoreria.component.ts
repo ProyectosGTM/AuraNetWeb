@@ -228,6 +228,14 @@ export class ListaTesoreriaComponent {
       return { class: 'icon-retiro', icon: 'fa-arrow-down' };
     } else if (tipoLower.includes('repon')) {
       return { class: 'icon-reposicion', icon: 'fa-arrow-up' };
+    } else if (tipoLower.includes('apertura') || tipoLower.includes('abrir')) {
+      return { class: 'icon-apertura', icon: 'fa-door-open' };
+    } else if (tipoLower.includes('dotación') || tipoLower.includes('dotacion')) {
+      return { class: 'icon-dotacion', icon: 'fa-hand-holding-usd' };
+    } else if (tipoLower.includes('devolucion')) {
+      return { class: 'icon-devolucion', icon: 'fa-undo' };
+    } else if (tipoLower.includes('cierre') || tipoLower.includes('cerrar')) {
+      return { class: 'icon-cierre', icon: 'fa-door-closed' };
     }
     return { class: 'icon-otro', icon: 'fa-exchange-alt' };
   }
@@ -627,9 +635,9 @@ export class ListaTesoreriaComponent {
     }
 
     const payload = {
-      idTesoreria: this.cerrarTesoreriaForm.value.idTesoreria,
+      idTesoreria: Number(this.cerrarTesoreriaForm.value.idTesoreria),
       fondoContado: Number(this.cerrarTesoreriaForm.value.fondoContado),
-      observaciones: this.cerrarTesoreriaForm.value.observaciones || null
+      observaciones: (this.cerrarTesoreriaForm.value.observaciones || '').trim() || null
     };
 
     this.tesoreriaService.cerrarTesoreria(payload).subscribe({
@@ -716,10 +724,10 @@ export class ListaTesoreriaComponent {
     }
 
     const payload = {
-      idTesoreria: this.reponerTesoreriaForm.value.idTesoreria,
+      idTesoreria: Number(this.reponerTesoreriaForm.value.idTesoreria),
       monto: Number(this.reponerTesoreriaForm.value.monto),
-      referencia: this.reponerTesoreriaForm.value.referencia || null,
-      observaciones: this.reponerTesoreriaForm.value.observaciones || null
+      referencia: (this.reponerTesoreriaForm.value.referencia || '').trim() || null,
+      observaciones: (this.reponerTesoreriaForm.value.observaciones || '').trim() || null
     };
 
     this.tesoreriaService.reponerTesoreria(payload).subscribe({
@@ -806,10 +814,10 @@ export class ListaTesoreriaComponent {
     }
 
     const payload = {
-      idTesoreria: this.retirarTesoreriaForm.value.idTesoreria,
+      idTesoreria: Number(this.retirarTesoreriaForm.value.idTesoreria),
       monto: Number(this.retirarTesoreriaForm.value.monto),
-      referencia: this.retirarTesoreriaForm.value.referencia || null,
-      observaciones: this.retirarTesoreriaForm.value.observaciones || null
+      referencia: (this.retirarTesoreriaForm.value.referencia || '').trim() || null,
+      observaciones: (this.retirarTesoreriaForm.value.observaciones || '').trim() || null
     };
 
     this.tesoreriaService.retirarTesoreria(payload).subscribe({

@@ -91,6 +91,15 @@
                                         <span class="btn-action-desc">Ver monederos de un afiliado</span>
                                     </div>
                                 </button>
+                                <button (click)="ajusteMonedero()" type="button" class="btn-action-large btn-action-large-ajuste">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Ajustar Saldo</span>
+                                        <span class="btn-action-desc">Ajuste manual (solo Gerente)</span>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -112,7 +121,7 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="220"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="300"></dxi-column>
                         <dxi-column dataField="numeroMonedero" caption="Número Monedero" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="codigoRFID" caption="Código RFID" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="alias" caption="Alias" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -145,6 +154,20 @@
                                     (click)="abrirCambiarEstatus(row.data)"
                                     ngbTooltip="Cambiar estatus del monedero (Activo/Inactivo)" placement="top" container="body">
                                     <i class="fa fa-exchange-alt"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="reemplazarMonederoButton" class="btnAcciones"
+                                    (click)="abrirReemplazarMonedero(row.data)"
+                                    ngbTooltip="Reemplazar monedero (ej: extraviado)" placement="top" container="body">
+                                    <i class="fa fa-sync-alt"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="historialMonederoButton" class="btnAcciones"
+                                    (click)="verHistorialMonedero(row.data.id, row.data)"
+                                    ngbTooltip="Ver historial de movimientos" placement="top" container="body">
+                                    <i class="fa fa-history"></i>
                                 </button>
                             </div>
                             <div>
@@ -186,6 +209,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
+        <div class="form-indication">
+            <i class="fas fa-arrow-up"></i>
+            <span>Agrega efectivo al monedero desde una caja. Requiere turno de caja abierto.</span>
+        </div>
         <form [formGroup]="cargarMonederoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
@@ -257,6 +284,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-arrow-down"></i>
+            <span>Retira efectivo del monedero hacia la caja. Requiere turno de caja abierto y saldo disponible.</span>
+        </div>
         <form [formGroup]="descargarMonederoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
@@ -328,6 +359,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
+        <div class="form-indication">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Cambia el estado del monedero (ej: Activo, Extraviado, Bloqueado). Indica el motivo del cambio.</span>
+        </div>
         <form [formGroup]="cambiarEstatusForm">
             <div class="row g-3">
                 <div class="col-12">
@@ -378,9 +413,229 @@
     </div>
 </ng-template>
 
+<!-- Modal Historial Movimientos Monedero -->
+<ng-template #modalHistorialMonedero let-modal>
+    <div class="modal-header modal-header-historial-monedero">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
+                <i class="fas fa-history"></i>
+                <span>Historial de Movimientos</span>
+            </h5>
+            <span class="historial-chip" *ngIf="monederoSeleccionadoHistorial">
+                <i class="fas fa-wallet"></i>
+                <span><b>{{ monederoSeleccionadoHistorial.numeroMonedero || monederoSeleccionadoHistorial.alias || 'Monedero' }}</b></span>
+            </span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="header-badge">{{ historialData.length }} movimiento{{ historialData.length !== 1 ? 's' : '' }}</span>
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarHistorialMonedero()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="modal-body modal-body-historial">
+        <div *ngIf="historialData.length === 0" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="empty-text">No hay movimientos registrados para este monedero.</div>
+        </div>
+        <div *ngIf="historialData.length > 0" class="movimientos-list">
+            <div class="movimiento-item" *ngFor="let m of historialData">
+                <div class="movimiento-icon" [ngClass]="getIconoMovimientoItem(m).class" [style.background]="getIconoMovimientoItem(m).color || null">
+                    <i class="fas" [ngClass]="getIconoMovimientoItem(m).icon"></i>
+                </div>
+                <div class="movimiento-content">
+                    <div class="movimiento-tipo">{{ m.tipoMovimiento?.nombre || m.tipo || 'Sin registro' }}</div>
+                    <div class="movimiento-concepto" *ngIf="m.concepto">{{ m.concepto }}</div>
+                    <div class="movimiento-meta">
+                        <span class="movimiento-fecha" *ngIf="m.fechaMovimiento">
+                            <i class="fas fa-clock"></i>
+                            {{ formatearFechaHora(m.fechaMovimiento) }}
+                        </span>
+                        <span class="movimiento-usuario" *ngIf="m.contextoOperacion?.nombre">
+                            <i class="fas fa-cash-register"></i>
+                            {{ m.contextoOperacion.nombre }}
+                        </span>
+                        <span class="movimiento-referencia" *ngIf="m.referencia">
+                            <i class="fas fa-link"></i>
+                            {{ m.referencia }}
+                        </span>
+                    </div>
+                </div>
+                <div class="movimiento-monto" [style.color]="(m.monto || 0) < 0 ? '#f46a6a' : '#34c38f'">{{ formatearMoneda(m.monto) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarHistorialMonedero()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Ajuste Saldo Monedero -->
+<ng-template #modalAjusteMonedero let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--ajuste">
+        <h5 class="modal-title">
+            <i class="fas fa-balance-scale"></i>
+            <span>Ajustar saldo de monedero</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--info">
+            <i class="fas fa-info-circle"></i>
+            <span>Realiza un ajuste manual de saldo. Solo GERENTE puede realizar ajustes. Requiere justificación obligatoria.</span>
+        </div>
+        <form [formGroup]="ajusteMonederoForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Monedero *</span>
+                        <dx-select-box
+                            [dataSource]="listaMonederosDisponiblesAjuste"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idMonedero"
+                            placeholder="Selecciona un monedero..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Tipo de ajuste *</span>
+                        <dx-select-box
+                            [dataSource]="[{ id: 'positivo', text: 'Agregar' }, { id: 'negativo', text: 'Quitar' }]"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="tipoAjuste"
+                            class="dx-select-box-custom">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Tipo de saldo *</span>
+                        <dx-select-box
+                            [dataSource]="listaTipoSaldoAjuste"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idTipoSaldo"
+                            class="dx-select-box-custom">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Monto *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Justificación *</span>
+                        <div class="input-sleek input-sleek--textarea">
+                            <i class="fas fa-comment-alt"></i>
+                            <textarea formControlName="justificacion" class="sleek-control" rows="3"
+                                placeholder="Ej: Corrección de error en carga manual - Ticket #12345"></textarea>
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="guardarAjusteMonedero()" [disabled]="ajusteMonederoForm.invalid">
+            <i class="fas fa-check"></i> Ajustar
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Reemplazar Monedero -->
+<ng-template #modalReemplazarMonedero let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--reemplazar">
+        <h5 class="modal-title">
+            <i class="fas fa-sync-alt"></i>
+            <span>Reemplazar monedero</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-sync-alt"></i>
+            <span>Reemplaza un monedero por uno nuevo (ej: extraviado). Se transfieren saldos y promociones activas. El monedero anterior queda marcado como REEMPLAZADO.</span>
+        </div>
+        <form [formGroup]="reemplazarMonederoForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Monedero a reemplazar</span>
+                        <div class="readonly-field">
+                            {{ monederoSeleccionadoReemplazar?.numeroMonedero || monederoSeleccionadoReemplazar?.alias || '—' }}
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Número monedero nuevo *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-wallet"></i>
+                            <input formControlName="numeroMonederoNuevo" class="sleek-control" type="text"
+                                placeholder="Ej: RFID-NEW-001234" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Motivo *</span>
+                        <div class="input-sleek input-sleek--textarea">
+                            <i class="fas fa-comment-alt"></i>
+                            <textarea formControlName="motivo" class="sleek-control" rows="3"
+                                placeholder="Ej: Monedero extraviado, se reemplaza por uno nuevo"></textarea>
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field d-flex align-items-center gap-2">
+                        <input type="checkbox" formControlName="transferirSaldo" class="form-check-input" />
+                        <span class="field-label text-white mb-0">Transferir saldo (efectivo, promocional, puntos)</span>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="guardarReemplazarMonedero()" [disabled]="reemplazarMonederoForm.invalid">
+            <i class="fas fa-check"></i> Reemplazar
+        </button>
+    </div>
+</ng-template>
+
 <!-- Modal Consultar Saldo -->
 <ng-template #modalConsultarSaldo let-modal>
-    <div class="modal-header modal-accion-header modal-accion-header--consultar-saldo">
+    <div class="modal-header modal-header-consultar-saldo">
         <h5 class="modal-title">
             <i class="fas fa-search-dollar"></i>
             <span>Consultar Saldo de Monedero</span>
@@ -389,8 +644,12 @@
             <i class="fas fa-times"></i>
         </button>
     </div>
-    <div class="modal-body modal-accion-body">
+    <div class="modal-body modal-body-resumen">
         <div *ngIf="!saldoData">
+            <div class="form-indication form-indication--info">
+                <i class="fas fa-search-dollar"></i>
+                <span>Consulta el saldo disponible (efectivo, promocional, puntos) y la información del monedero por número.</span>
+            </div>
             <form [formGroup]="consultarSaldoForm">
                 <div class="row g-3">
                     <div class="col-12">
@@ -587,7 +846,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
-        <p class="text-muted small mb-3">Traspasa saldo EFECTIVO entre dos monederos del mismo afiliado. Requiere turno de caja abierto.</p>
+        <div class="form-indication">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Traspasa saldo EFECTIVO entre dos monederos del mismo afiliado. Requiere turno de caja abierto.</span>
+        </div>
         <form [formGroup]="traspasoMonederoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">

@@ -82,4 +82,30 @@ export class MonederosServices {
   obtenerMonederosPorAfiliado(idAfiliado: number): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/monederos/afiliado/${idAfiliado}`);
   }
+
+  /** POST monederos/ajuste - Ajustar saldo de un monedero (solo GERENTE) */
+  ajusteMonedero(payload: {
+    idMonedero: number;
+    tipoAjuste: 'positivo' | 'negativo';
+    idTipoSaldo: number;
+    monto: number;
+    justificacion: string;
+  }): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/monederos/ajuste`, payload);
+  }
+
+  /** GET monederos/movimientos/historial/{id} - Historial de movimientos de un monedero */
+  obtenerHistorialMovimientosMonedero(idMonedero: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/monederos/movimientos/historial/${idMonedero}`);
+  }
+
+  /** POST monederos/reemplazar - Reemplazar un monedero por uno nuevo */
+  reemplazarMonedero(payload: {
+    idMonederoAnterior: number;
+    numeroMonederoNuevo: string;
+    motivo: string;
+    transferirSaldo: boolean;
+  }): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/monederos/reemplazar`, payload);
+  }
 }

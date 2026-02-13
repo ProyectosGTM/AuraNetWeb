@@ -1021,9 +1021,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   &:hover { background-color: #15121e; border-color: #8b5cf6; }
 }
 
-/* Paleta de colores única por acción (ningún botón comparte color):
-   actualizar=azul, pin=verde, delete=rojo, map=ámbar, resumen=violeta,
-   historial=sky, detalles=cyan, saldo=teal, saldoCaja=naranja, cambiarEstatus=índigo */
+/* Paleta de colores única por acción (NINGÚN botón comparte color):
+   actualizar=azul claro, pin=verde esmeralda, delete=rojo, map=ámbar,
+   resumen=violeta, historial=sky, detalles=cyan, saldo=teal, saldoCaja=naranja,
+   cambiarEstatus=rosa, reponer=verde lima, retirar=amarillo, resumenTurno=magenta,
+   movimientosTurno=rojo coral, suspenderTurno=gris azulado, reemplazarMonedero=morado,
+   historialMonedero=azul turquesa */
 #historialButton {
   background-color: #0c1f2e;
   border-color: #164e63;
@@ -1053,24 +1056,59 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 #cambiarEstatusButton {
-  background-color: #1e1b29;
-  border-color: #3d3652;
-  i { color: #a78bfa; }
-  &:hover { background-color: #15121e; border-color: #a78bfa; }
+  background-color: #2a0d1a;
+  border-color: #5c1930;
+  i { color: #f472b6; }
+  &:hover { background-color: #1f0912; border-color: #f472b6; }
 }
 
 #reponerButton {
-  background-color: #132e22;
-  border-color: #1f4d3a;
-  i { color: #34c38f; }
-  &:hover { background-color: #0f241b; border-color: #34c38f; }
+  background-color: #1a2e0d;
+  border-color: #2d4d1a;
+  i { color: #84cc16; }
+  &:hover { background-color: #141f09; border-color: #84cc16; }
 }
 
 #retirarButton {
-  background-color: #2a1a0d;
-  border-color: #5c3419;
-  i { color: #f59e0b; }
-  &:hover { background-color: #1f1209; border-color: #f59e0b; }
+  background-color: #2a2a0d;
+  border-color: #4d4d19;
+  i { color: #eab308; }
+  &:hover { background-color: #1f1f09; border-color: #eab308; }
+}
+
+#resumenTurnoButton {
+  background-color: #2a0d2a;
+  border-color: #5c195c;
+  i { color: #d946ef; }
+  &:hover { background-color: #1f091f; border-color: #d946ef; }
+}
+
+#movimientosTurnoButton {
+  background-color: #2a0d0d;
+  border-color: #5c1919;
+  i { color: #f87171; }
+  &:hover { background-color: #1f0909; border-color: #f87171; }
+}
+
+#suspenderTurnoButton {
+  background-color: #1a1e2e;
+  border-color: #2d3a4d;
+  i { color: #94a3b8; }
+  &:hover { background-color: #141920; border-color: #94a3b8; }
+}
+
+#reemplazarMonederoButton {
+  background-color: #1e0d2a;
+  border-color: #3d195c;
+  i { color: #a855f7; }
+  &:hover { background-color: #15091f; border-color: #a855f7; }
+}
+
+#historialMonederoButton {
+  background-color: #0d1e2a;
+  border-color: #193d5c;
+  i { color: #22d3ee; }
+  &:hover { background-color: #091520; border-color: #22d3ee; }
 }
 
 .estatus {
@@ -1210,6 +1248,21 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   .modal-accion-header--consultar-caja::before { background: linear-gradient(180deg, #50a5f1, #3d8bd9); }
   .modal-accion-header--consultar-caja .modal-title i { color: #50a5f1; }
 
+  .modal-accion-header--reponer-turno::before { background: linear-gradient(180deg, #20c997, #1aa87a); }
+  .modal-accion-header--reponer-turno .modal-title i { color: #20c997; }
+
+  .modal-accion-header--retirar-turno::before { background: linear-gradient(180deg, #6f42c1, #5a32a3); }
+  .modal-accion-header--retirar-turno .modal-title i { color: #6f42c1; }
+
+  .modal-accion-header--suspender-turno::before { background: linear-gradient(180deg, #6c757d, #5a6268); }
+  .modal-accion-header--suspender-turno .modal-title i { color: #adb5bd; }
+
+  .modal-accion-header--resumen-turno::before { background: linear-gradient(180deg, #17a2b8, #138496); }
+  .modal-accion-header--resumen-turno .modal-title i { color: #17a2b8; }
+
+  .modal-accion-header--movimientos-turno::before { background: linear-gradient(180deg, #fd7e14, #e8590c); }
+  .modal-accion-header--movimientos-turno .modal-title i { color: #fd7e14; }
+
   .modal-accion-body { padding: 20px 18px; }
 
   .modal-accion-footer {
@@ -1339,5 +1392,45 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     padding: 10px 14px;
     color: rgba(255, 255, 255, 0.9);
     font-size: 14px;
+  }
+}
+
+/* Indicaciones / instrucciones en formularios de modales - uso global */
+.form-indication {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: rgba(80, 165, 241, 0.06);
+  border: 1px solid rgba(80, 165, 241, 0.2);
+  border-radius: 10px;
+  border-left: 4px solid #50a5f1;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+
+  i {
+    color: #50a5f1;
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  &.form-indication--warning {
+    background: rgba(241, 180, 76, 0.06);
+    border-color: rgba(241, 180, 76, 0.2);
+    border-left-color: #f1b44c;
+
+    i { color: #f1b44c; }
+  }
+
+  &.form-indication--info {
+    background: rgba(23, 162, 184, 0.06);
+    border-color: rgba(23, 162, 184, 0.2);
+    border-left-color: #17a2b8;
+
+    i { color: #17a2b8; }
   }
 }

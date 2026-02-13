@@ -34,7 +34,10 @@
                                 </div>
                             </div>
                             <h4 class="action-title">Abrir Nuevo Turno</h4>
-                            <p class="action-description">Llena los campos para abrir el turno.</p>
+                            <div class="form-indication">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Llena los campos para abrir el turno. Selecciona la caja, tesorería y registra el fondo inicial.</span>
+                            </div>
                         </div>
                         <div class="card-form-body">
                             <form [formGroup]="abrirTurnoForm">
@@ -56,7 +59,8 @@
                                                 [showClearButton]="true"
                                                 class="dx-select-box-custom dx-select-box-caja">
                                             </dx-select-box>
-                                            <small class="form-text-hint">Elige la caja donde vas a trabajar</small>
+                                            <div *ngIf="listaCajas.length === 0" class="text-muted small mt-1">No hay cajas disponibles. Las cajas no están abiertas.</div>
+                                            <small *ngIf="listaCajas.length > 0" class="form-text-hint">Elige la caja donde vas a trabajar</small>
                                         </label>
                                     </div>
                                     <div class="col-12 col-md-6">

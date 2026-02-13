@@ -31,6 +31,75 @@
                         </div>
                     </div>
                 </div>
+                <!-- Turnos Activos (GET /pos/turnos/activos) -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="turnos-activos-card">
+                            <div class="turnos-activos-header">
+                                <h5 class="turnos-activos-title">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Turnos Activos</span>
+                                    <span class="turnos-activos-badge" *ngIf="!loadingTurnosActivos">{{ turnosActivos.length }}</span>
+                                </h5>
+                            </div>
+                            <div class="turnos-activos-body">
+                                <div class="turnos-activos-loading" *ngIf="loadingTurnosActivos">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Cargando turnos activos...</span>
+                                </div>
+                                <div class="turnos-activos-empty" *ngIf="!loadingTurnosActivos && turnosActivos.length === 0">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>No hay turnos activos en este momento.</span>
+                                </div>
+                                <div class="turnos-activos-list" *ngIf="!loadingTurnosActivos && turnosActivos.length > 0">
+                                    <div class="turno-activo-item" *ngFor="let turno of turnosActivos">
+                                        <div class="turno-activo-icon">
+                                            <i class="fas fa-cash-register"></i>
+                                        </div>
+                                        <div class="turno-activo-content">
+                                            <div class="turno-activo-header">
+                                                <div class="turno-activo-titulo">
+                                                    <span class="turno-activo-id">Turno ID: {{ turno.id }}</span>
+                                                    <span class="turno-activo-caja" *ngIf="turno.caja">
+                                                        {{ turno.caja.codigo || turno.caja.nombre || 'Caja ' + turno.caja.id }}
+                                                    </span>
+                                                </div>
+                                                <div class="turno-activo-saldo" *ngIf="turno.saldoActual != null">
+                                                    <i class="fas fa-dollar-sign"></i>
+                                                    <span>{{ formatearMoneda(turno.saldoActual) }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="turno-activo-meta">
+                                                <span *ngIf="turno.cajero?.nombre">
+                                                    <i class="fas fa-user"></i>
+                                                    {{ turno.cajero.nombre }}
+                                                </span>
+                                                <span *ngIf="turno.sala?.nombre">
+                                                    <i class="fas fa-building"></i>
+                                                    {{ turno.sala.nombre }}
+                                                </span>
+                                                <span *ngIf="turno.fechaApertura">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                    {{ formatearFechaHora(turno.fechaApertura) }}
+                                                </span>
+                                                <span *ngIf="turno.operaciones != null">
+                                                    <i class="fas fa-list"></i>
+                                                    {{ turno.operaciones }} operación{{ turno.operaciones !== 1 ? 'es' : '' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="turno-activo-status">
+                                            <span class="status-badge status-active">
+                                                <i class="fas fa-circle"></i>
+                                                Activo
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row mt-3">
                     <div class="col-12">
                         <div class="action-buttons-card">
@@ -86,12 +155,137 @@
                                         <span class="btn-action-desc">Obtener saldo de una caja</span>
                                     </div>
                                 </button>
+                                <button (click)="suspenderTurno()" type="button" class="btn-action-large btn-action-large-warning">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-pause-circle"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Suspender turno</span>
+                                        <span class="btn-action-desc">Pausar turno sin cerrarlo</span>
+                                    </div>
+                                </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mi turno activo (GET /pos/turnos/mi-turno/activo) -->
+                
+
+                <!-- Filtros (GET /pos/turnos/consulta/filtrada) -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="filtros-turnos-card">
+                            <div class="filtros-turnos-header">
+                                <h6 class="filtros-turnos-title"><i class="fas fa-filter"></i> Filtros</h6>
+                                <button type="button" class="btn-filtros-toggle" (click)="mostrarFiltrosAvanzados = !mostrarFiltrosAvanzados">
+                                    <i class="fas" [ngClass]="mostrarFiltrosAvanzados ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                    <span>{{ mostrarFiltrosAvanzados ? 'Ocultar' : 'Más' }} filtros</span>
+                                </button>
+                            </div>
+                            <form [formGroup]="filtrosForm" class="filtros-turnos-form">
+                                <!-- Filtros básicos -->
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-auto">
+                                        <label class="form-label small text-white mb-0">Caja</label>
+                                        <dx-select-box
+                                            [dataSource]="listaCajasParaFiltro"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="idCaja"
+                                            placeholder="Todas"
+                                            [showClearButton]="true"
+                                            class="dx-select-box-filtro">
+                                        </dx-select-box>
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="form-label small text-white mb-0">Estatus turno</label>
+                                        <dx-select-box
+                                            [dataSource]="listaEstatusTurnoParaFiltro"
+                                            displayExpr="text"
+                                            valueExpr="id"
+                                            formControlName="idEstatusTurno"
+                                            placeholder="Todos"
+                                            [showClearButton]="true"
+                                            class="dx-select-box-filtro">
+                                        </dx-select-box>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="aplicarFiltros()">
+                                            <i class="fas fa-search"></i> Aplicar
+                                        </button>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="limpiarFiltros()">
+                                            <i class="fas fa-times"></i> Limpiar
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Filtros avanzados (colapsable) -->
+                                <div class="filtros-avanzados" *ngIf="mostrarFiltrosAvanzados">
+                                    <div class="row g-2 align-items-end mt-2">
+                                        <div class="col-auto">
+                                            <label class="form-label small text-white mb-0">Sala</label>
+                                            <dx-select-box
+                                                [dataSource]="listaSalasParaFiltro"
+                                                displayExpr="text"
+                                                valueExpr="id"
+                                                formControlName="idSala"
+                                                placeholder="Todas"
+                                                [showClearButton]="true"
+                                                class="dx-select-box-filtro">
+                                            </dx-select-box>
+                                        </div>
+                                        <div class="col-auto">
+                                            <label class="form-label small text-white mb-0">Usuario</label>
+                                            <dx-select-box
+                                                [dataSource]="listaUsuariosParaFiltro"
+                                                displayExpr="text"
+                                                valueExpr="id"
+                                                formControlName="idUsuario"
+                                                placeholder="Todos"
+                                                [showClearButton]="true"
+                                                class="dx-select-box-filtro">
+                                            </dx-select-box>
+                                        </div>
+                                        <div class="col-auto">
+                                            <label class="form-label small text-white mb-0">Resultado arqueo</label>
+                                            <dx-select-box
+                                                [dataSource]="listaResultadoArqueoParaFiltro"
+                                                displayExpr="text"
+                                                valueExpr="id"
+                                                formControlName="idResultadoArqueo"
+                                                placeholder="Todos"
+                                                [showClearButton]="true"
+                                                class="dx-select-box-filtro">
+                                            </dx-select-box>
+                                        </div>
+                                        <div class="col-auto">
+                                            <label class="form-label small text-white mb-0">Fecha desde</label>
+                                            <input type="date" formControlName="fechaDesde" class="form-control form-control-sm">
+                                        </div>
+                                        <div class="col-auto">
+                                            <label class="form-label small text-white mb-0">Fecha hasta</label>
+                                            <input type="date" formControlName="fechaHasta" class="form-control form-control-sm">
+                                        </div>
+                                        <div class="col-auto d-flex align-items-end">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" formControlName="soloDiferencias" id="soloDiferencias">
+                                                <label class="form-check-label small text-white" for="soloDiferencias">
+                                                    Solo diferencias
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
                   
                 <div class="row mt-3 gy-4">
+                    <div class="turnos-grid-wrapper">
                     <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
                         [showColumnLines]="true" [dataSource]="listaTurnos" [showRowLines]="true" [rowAlternationEnabled]="'true'"[keyExpr]="'id'" [width]="'100%'"
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
@@ -108,19 +302,19 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="160" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
-                        <dxi-column caption="Estatus Turno" cellTemplate="EstatusTurno" alignment="center" dataType="string" [width]="200"></dxi-column>
-                        <dxi-column dataField="nombreCompletoCliente" caption="Cliente" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Caja" cellTemplate="caja" alignment="center" dataType="string" [width]="180" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Fondo Inicial" cellTemplate="fondoInicial" alignment="center" dataType="number" [width]="180" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Fondo Cierre" cellTemplate="fondoCierre" alignment="center" dataType="number" [width]="180" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Fondo Contado" cellTemplate="fondoContado" alignment="center" dataType="number" [width]="180" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Diferencia" cellTemplate="diferencia" alignment="center" dataType="number" [width]="180" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="fechaAperturaFormateada" caption="Fecha Apertura" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="fechaCierreFormateada" caption="Fecha Cierre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="numeroOperaciones" caption="Operaciones" alignment="center" dataType="number" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreCompletoUsuario" caption="Usuario" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string" [width]="100"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="320" [minWidth]="280" [fixed]="false" [fixedPosition]="'left'"></dxi-column>
+                        <dxi-column caption="Estatus Turno" cellTemplate="EstatusTurno" alignment="center" dataType="string" [width]="160" [minWidth]="140"></dxi-column>
+                        <dxi-column dataField="nombreCompletoCliente" caption="Cliente" alignment="center" dataType="string" [allowSearch]="true" [width]="200" [minWidth]="150"></dxi-column>
+                        <dxi-column caption="Caja" cellTemplate="caja" alignment="center" dataType="string" [width]="180" [minWidth]="150" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Fondo Inicial" cellTemplate="fondoInicial" alignment="center" dataType="number" [width]="160" [minWidth]="130" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Fondo Cierre" cellTemplate="fondoCierre" alignment="center" dataType="number" [width]="160" [minWidth]="130" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Fondo Contado" cellTemplate="fondoContado" alignment="center" dataType="number" [width]="160" [minWidth]="130" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Diferencia" cellTemplate="diferencia" alignment="center" dataType="number" [width]="140" [minWidth]="120" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="fechaAperturaFormateada" caption="Fecha Apertura" alignment="center" dataType="string" [allowSearch]="true" [width]="160" [minWidth]="130"></dxi-column>
+                        <dxi-column dataField="fechaCierreFormateada" caption="Fecha Cierre" alignment="center" dataType="string" [allowSearch]="true" [width]="160" [minWidth]="130"></dxi-column>
+                        <dxi-column dataField="numeroOperaciones" caption="Ops" alignment="center" dataType="number" [allowSearch]="true" [width]="100" [minWidth]="80"></dxi-column>
+                        <dxi-column dataField="nombreCompletoUsuario" caption="Usuario" alignment="center" dataType="string" [allowSearch]="true" [width]="180" [minWidth]="150"></dxi-column>
+                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string" [width]="110" [minWidth]="90"></dxi-column>
                         <dxi-column dataField="rfcCliente" caption="RFC Cliente" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
                         <dxi-column dataField="descripcionCaja" caption="Descripción Caja" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
                         <dxi-column dataField="fechaTesoreriaFormateada" caption="Fecha Tesorería" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
@@ -132,31 +326,33 @@
                         <dxo-export [enabled]="false" [allowExportSelectedData]="true"
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
-                        <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
-                            <div>
+                        <div *dxTemplate="let row of 'Acciones'" class="acciones-turnos-wrapper">
+                            <div class="acciones-turnos-grid">
                                 <button *ngIf="esTurnoAbierto(row.data)" type="button" id="reponerButton" class="btnAcciones"
                                     (click)="abrirModalReponerDesdeFila(row.data)"
                                     ngbTooltip="Reponer efectivo (Tesorería → Caja)" placement="top" container="body">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
-                            </div>
-                            <div>
                                 <button *ngIf="esTurnoAbierto(row.data)" type="button" id="retirarButton" class="btnAcciones"
                                     (click)="abrirModalRetirarDesdeFila(row.data)"
                                     ngbTooltip="Retirar efectivo (Caja → Tesorería)" placement="top" container="body">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
-                            </div>
-                            <div>
                                 <button type="button" id="saldoCajaButton" class="btnAcciones" (click)="verSaldoCaja(row.data.idCaja)"
                                     ngbTooltip="Obtener saldo de caja" placement="top" container="body">
                                     <i class="fa fa-wallet"></i>
                                 </button>
-                            </div>
-                            <div>
-                                <button type="button" id="detallesButton" class="btnAcciones"
-                                    ngbTooltip="Ver detalles del turno" placement="top" container="body">
-                                    <i class="fa fa-eye"></i>
+                                <button type="button" id="resumenTurnoButton" class="btnAcciones" (click)="verResumenTurno(row.data.id)"
+                                    ngbTooltip="Resumen y saldos del turno" placement="top" container="body">
+                                    <i class="fa fa-chart-pie"></i>
+                                </button>
+                                <button type="button" id="movimientosTurnoButton" class="btnAcciones" (click)="verMovimientosTurno(row.data.id)"
+                                    ngbTooltip="Ver movimientos del turno" placement="top" container="body">
+                                    <i class="fa fa-list-alt"></i>
+                                </button>
+                                <button *ngIf="esTurnoAbierto(row.data)" type="button" id="suspenderTurnoButton" class="btnAcciones" (click)="abrirModalSuspenderDesdeFila(row.data)"
+                                    ngbTooltip="Suspender turno temporalmente" placement="top" container="body">
+                                    <i class="fa fa-pause-circle"></i>
                                 </button>
                             </div>
                         </div>
@@ -196,7 +392,7 @@
                                     <i class="fas fa-door-closed"></i>
                                 </div>
                                 <div class="monto-content">
-                                    <div class="monto-value">{{ data.data.fondoContadoFormateado || '$0.00' }}</div>
+                                    <div class="monto-value">{{ data.data.fondoCierreFormateado || '$0.00' }}</div>
                                     <div class="monto-label">Cierre</div>
                                 </div>
                             </div>
@@ -224,6 +420,7 @@
                             </div>
                         </div>
                     </dx-data-grid>
+                    </div>
                 </div>
             </div>
         </div>
@@ -242,6 +439,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
+        <div class="form-indication">
+            <i class="fas fa-door-open"></i>
+            <span>Inicia un nuevo turno de caja. Selecciona la caja, tesorería y registra el fondo inicial.</span>
+        </div>
         <form [formGroup]="abrirTurnoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
@@ -258,6 +459,7 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-caja">
                         </dx-select-box>
+                        <div *ngIf="listaCajas.length === 0" class="text-muted small mt-1">No hay cajas disponibles. Las cajas no están abiertas.</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -327,7 +529,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
-        <p class="text-muted small mb-3">Transfiere efectivo de <strong>Tesorería</strong> a <strong>Caja</strong> durante un turno activo. Requiere turno abierto.</p>
+        <div class="form-indication">
+            <i class="fas fa-arrow-up"></i>
+            <span>Transfiere efectivo de <strong>Tesorería</strong> a <strong>Caja</strong> durante un turno activo. Requiere turno abierto.</span>
+        </div>
         <form [formGroup]="reponerTurnoForm">
             <div class="row g-3">
                 <div class="col-12">
@@ -392,7 +597,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
-        <p class="text-muted small mb-3">Transfiere efectivo de <strong>Caja</strong> a <strong>Tesorería</strong> durante un turno activo. Requiere turno abierto y saldo suficiente en caja.</p>
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-arrow-down"></i>
+            <span>Transfiere efectivo de <strong>Caja</strong> a <strong>Tesorería</strong> durante un turno activo. Requiere turno abierto y saldo suficiente en caja.</span>
+        </div>
         <form [formGroup]="retirarTurnoForm">
             <div class="row g-3">
                 <div class="col-12">
@@ -445,6 +653,74 @@
     </div>
 </ng-template>
 
+<!-- Modal Suspender turno (POST /pos/turnos/suspender) -->
+<ng-template #modalSuspenderTurno let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--suspender-turno">
+        <h5 class="modal-title">
+            <i class="fas fa-pause-circle"></i>
+            <span>Suspender turno temporalmente</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-pause-circle"></i>
+            <span>Pausa un turno sin cerrarlo (útil para cambios de turno o emergencias). El turno debe estar <strong>abierto</strong>, se identifica por <strong>ID de caja</strong>. El saldo permanece en la caja. Requiere rol Jefe de Sala o Gerente.</span>
+        </div>
+        <form [formGroup]="suspenderTurnoForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Caja con turno activo *</span>
+                        <dx-select-box
+                            [dataSource]="listaCajasSuspender"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-caja">
+                        </dx-select-box>
+                        <div *ngIf="listaCajasSuspender.length === 0" class="text-muted small mt-1">No hay cajas con turnos activos</div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Motivo *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="motivo" class="sleek-control" type="text" placeholder="Ej: Cambio de turno de personal" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Efectivo contado *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="efectivoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-warning" (click)="guardarSuspenderTurno()" [disabled]="suspenderTurnoForm.invalid">
+            <i class="fas fa-pause-circle"></i> Suspender turno
+        </button>
+    </div>
+</ng-template>
+
 <!-- Modal Cerrar Turno -->
 <ng-template #modalCerrarTurno let-modal>
     <div class="modal-header modal-accion-header modal-accion-header--cerrar-turno">
@@ -457,6 +733,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-door-closed"></i>
+            <span>Finaliza un turno de caja activo. Registra el fondo contado y las observaciones del cierre.</span>
+        </div>
         <form [formGroup]="cerrarTurnoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
@@ -522,6 +802,10 @@
     </div>
     <div class="modal-body modal-accion-body">
         <div *ngIf="!saldoCajaData">
+            <div class="form-indication form-indication--info">
+                <i class="fas fa-wallet"></i>
+                <span>Consulta el saldo actual de efectivo en una caja. Requiere que la caja tenga turno abierto.</span>
+            </div>
             <form [formGroup]="consultarSaldoCajaForm">
                 <div class="row g-3">
                     <div class="col-12">
@@ -538,6 +822,7 @@
                                 [showClearButton]="true"
                                 class="dx-select-box-custom dx-select-box-caja">
                             </dx-select-box>
+                            <div *ngIf="listaCajasSaldo.length === 0" class="text-muted small mt-1">No hay cajas disponibles. Las cajas no están abiertas.</div>
                         </label>
                     </div>
                 </div>
@@ -576,6 +861,134 @@
             <i class="fas fa-search" *ngIf="!consultandoSaldoCaja"></i>
             <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldoCaja"></i>
             {{ consultandoSaldoCaja ? 'Consultando...' : 'Consultar' }}
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Resumen turno (igual estructura que Bóveda - Resumen) -->
+<ng-template #modalResumenTurno let-modal>
+    <div class="modal-header modal-header-resumen-turno">
+        <h5 class="modal-title">
+            <i class="fas fa-chart-pie"></i>
+            <span>Resumen del turno</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalResumen()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-resumen">
+        <div *ngIf="loadingResumenTurno" class="historial-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>Cargando resumen...</div>
+        </div>
+        <div *ngIf="!loadingResumenTurno && resumenTurnoData" class="saldo-result-content">
+            <div class="saldo-section">
+                <h5 class="saldo-section-title">
+                    <i class="fas fa-coins"></i>
+                    <span>Resumen de saldos</span>
+                </h5>
+                <div class="saldo-cards-grid">
+                    <div class="saldo-card saldo-card-efectivo" *ngIf="resumenTurnoData.fondoInicial != null">
+                        <div class="saldo-card-icon"><i class="fas fa-arrow-up"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Fondo inicial</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(resumenTurnoData.fondoInicial) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-promocional" *ngIf="resumenTurnoData.saldoActual != null">
+                        <div class="saldo-card-icon"><i class="fas fa-wallet"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Saldo actual</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(resumenTurnoData.saldoActual) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-puntos" *ngIf="resumenTurnoData.diferenciaParcial != null">
+                        <div class="saldo-card-icon"><i class="fas" [ngClass]="(resumenTurnoData.diferenciaParcial || 0) >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Diferencia parcial</div>
+                            <div class="saldo-card-value" [class.text-success]="(resumenTurnoData.diferenciaParcial || 0) >= 0" [class.text-danger]="(resumenTurnoData.diferenciaParcial || 0) < 0">{{ formatearMoneda(resumenTurnoData.diferenciaParcial) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-total" *ngIf="(resumenTurnoData.turno?.numeroOperaciones ?? resumenTurnoData.numeroOperaciones) != null">
+                        <div class="saldo-card-icon"><i class="fas fa-calculator"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Operaciones</div>
+                            <div class="saldo-card-value">{{ resumenTurnoData.turno?.numeroOperaciones ?? resumenTurnoData.numeroOperaciones }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-redimible" *ngIf="resumenTurnoData.fondoContado != null">
+                        <div class="saldo-card-icon"><i class="fas fa-coins"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Fondo contado</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(resumenTurnoData.fondoContado) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-redimible" *ngIf="resumenTurnoData.fondoCierre != null">
+                        <div class="saldo-card-icon"><i class="fas fa-door-closed"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Fondo cierre</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(resumenTurnoData.fondoCierre) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-footer-resumen">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalResumen()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Movimientos turno (igual estructura que Bóveda - Historial) -->
+<ng-template #modalMovimientosTurno let-modal>
+    <div class="modal-header modal-header-movimientos-turno">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
+                <i class="fas fa-list-alt"></i>
+                <span>Movimientos del turno</span>
+            </h5>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="historial-count">{{ movimientosTurnoData.length }} movimiento{{ movimientosTurnoData.length !== 1 ? 's' : '' }}</span>
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalMovimientos()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="modal-body modal-body-historial">
+        <div *ngIf="loadingMovimientosTurno" class="historial-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>Cargando movimientos...</div>
+        </div>
+        <div *ngIf="!loadingMovimientosTurno && movimientosTurnoData.length === 0" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="empty-text">No hay movimientos registrados para este turno.</div>
+        </div>
+        <div *ngIf="!loadingMovimientosTurno && movimientosTurnoData.length > 0" class="movimientos-list">
+            <div class="movimiento-item" *ngFor="let m of movimientosTurnoData">
+                <div class="movimiento-icon" [ngClass]="(m.monto || 0) >= 0 ? 'icon-reposicion' : 'icon-retiro'">
+                    <i class="fas" [ngClass]="(m.monto || 0) >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                </div>
+                <div class="movimiento-content">
+                    <div class="movimiento-tipo">{{ m.concepto || m.tipoMovimiento?.nombre || m.descripcion || 'Movimiento' }}</div>
+                    <div class="movimiento-meta">
+                        <span class="movimiento-fecha" *ngIf="m.fechaMovimiento">
+                            <i class="fas fa-clock"></i>
+                            {{ m.fechaMovimiento }}
+                        </span>
+                    </div>
+                </div>
+                <div class="movimiento-monto" [style.color]="(m.monto || 0) < 0 ? '#f46a6a' : '#34c38f'">{{ formatearMoneda(m.monto) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalMovimientos()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
         </button>
     </div>
 </ng-template>

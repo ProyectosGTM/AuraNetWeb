@@ -172,55 +172,57 @@
         </button>
     </div>
     <div class="modal-body modal-body-resumen" *ngIf="resumenData">
-        <div class="modal-content-grid">
-            <div class="info-item">
-                <div class="info-item-top">
-                    <div class="info-icon icon-bg-purple">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="info-label">Sala</div>
-                </div>
-                <div class="info-value">{{ resumenData.nombreSala || 'Sin registro' }}</div>
+        <div class="resumen-compact">
+            <div class="resumen-header">
+                <span class="resumen-sala">{{ resumenData.nombreSala || 'Sin registro' }}</span>
+                <span class="resumen-fecha">{{ formatearFecha(resumenData.fecha) }}</span>
+                <span class="resumen-estatus" [class.estatus-abierta]="(resumenData.estatus || resumenData.nombreEstatusTesoreria || '').toUpperCase() === 'ABIERTA'"
+                    [class.estatus-cerrada]="(resumenData.estatus || resumenData.nombreEstatusTesoreria || '').toUpperCase() === 'CERRADA'">
+                    {{ resumenData.estatus || resumenData.nombreEstatusTesoreria || 'Sin registro' }}
+                </span>
             </div>
-            <div class="info-item">
-                <div class="info-item-top">
-                    <div class="info-icon icon-bg-pink">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <div class="info-label">Fecha</div>
+            <div class="resumen-destacados">
+                <div class="resumen-destacado resumen-saldo">
+                    <span class="resumen-destacado-label">Saldo actual</span>
+                    <span class="resumen-destacado-valor">{{ formatearMoneda(resumenData.saldoActual) }}</span>
                 </div>
-                <div class="info-value">{{ formatearFecha(resumenData.fecha) }}</div>
+                <div class="resumen-destacado resumen-fondo">
+                    <span class="resumen-destacado-label">Fondo inicial</span>
+                    <span class="resumen-destacado-valor">{{ formatearMoneda(resumenData.fondoInicial) }}</span>
+                </div>
             </div>
-            <div class="info-item">
-                <div class="info-item-top">
-                    <div class="info-icon icon-bg-green">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <div class="info-label">Fondo Contado</div>
+            <div class="resumen-grid">
+                <div class="resumen-mini">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span class="resumen-mini-valor">{{ formatearMoneda(resumenData.totalDotaciones) }}</span>
+                    <span class="resumen-mini-label">Dotaciones</span>
                 </div>
-                <div class="info-value">{{ formatearMoneda(resumenData.fondoContado) }}</div>
+                <div class="resumen-mini">
+                    <i class="fas fa-undo"></i>
+                    <span class="resumen-mini-valor">{{ formatearMoneda(resumenData.totalDevoluciones) }}</span>
+                    <span class="resumen-mini-label">Devoluciones</span>
+                </div>
+                <div class="resumen-mini">
+                    <i class="fas fa-arrow-up"></i>
+                    <span class="resumen-mini-valor">{{ formatearMoneda(resumenData.totalReposiciones) }}</span>
+                    <span class="resumen-mini-label">Reposiciones</span>
+                </div>
+                <div class="resumen-mini">
+                    <i class="fas fa-arrow-down"></i>
+                    <span class="resumen-mini-valor">{{ formatearMoneda(resumenData.totalRetiros) }}</span>
+                    <span class="resumen-mini-label">Retiros</span>
+                </div>
             </div>
-            <div class="info-item">
-                <div class="info-item-top">
-                    <div class="info-icon" [style.background]="resumenData?.colorEstatusTesoreria || '#6c757d'">
-                        <i class="fas fa-toggle-on"></i>
-                    </div>
-                    <div class="info-label">Estatus</div>
-                </div>
-                <div class="info-value">
-                    <span class="estatus-badge" [style.background-color]="resumenData?.colorEstatusTesoreria || '#6c757d'">
-                        {{ resumenData.nombreEstatusTesoreria || 'Sin registro' }}
+            <div class="resumen-turnos">
+                <span class="resumen-turnos-label">Turnos de caja (según servicio resumen)</span>
+                <div class="resumen-turnos-valores">
+                    <span class="resumen-turno abiertos">
+                        <i class="fas fa-door-open"></i> {{ resumenData.turnosAbiertos ?? 0 }} turnos abiertos
+                    </span>
+                    <span class="resumen-turno cerrados">
+                        <i class="fas fa-door-closed"></i> {{ resumenData.turnosCerrados ?? 0 }} turnos cerrados
                     </span>
                 </div>
-            </div>
-            <div class="info-item info-item-full">
-                <div class="info-item-top">
-                    <div class="info-icon icon-bg-blue">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                    <div class="info-label">Fondo Inicial</div>
-                </div>
-                <div class="info-value">{{ formatearMoneda(resumenData.fondoInicial) }}</div>
             </div>
         </div>
     </div>
@@ -254,14 +256,25 @@
         </div>
         <div *ngIf="historialData.length > 0" class="movimientos-list">
             <div class="movimiento-item" *ngFor="let m of historialData">
-                <div class="movimiento-icon" [ngClass]="getIconoMovimiento(m.tipoMovimiento).class">
-                    <i class="fas" [ngClass]="getIconoMovimiento(m.tipoMovimiento).icon"></i>
+                <div class="movimiento-icon" [ngClass]="getIconoMovimiento(m.tipo || m.tipoMovimiento).class">
+                    <i class="fas" [ngClass]="getIconoMovimiento(m.tipo || m.tipoMovimiento).icon"></i>
                 </div>
                 <div class="movimiento-content">
-                    <div class="movimiento-tipo">{{ m.tipoMovimiento || 'Sin registro' }}</div>
-                    <div class="movimiento-fecha">
-                        <i class="fas fa-clock"></i>
-                        {{ formatearFechaHora(m.fecha) }}
+                    <div class="movimiento-tipo">{{ m.tipo || m.tipoMovimiento || 'Sin registro' }}</div>
+                    <div class="movimiento-concepto" *ngIf="m.concepto">{{ m.concepto }}</div>
+                    <div class="movimiento-meta">
+                        <span class="movimiento-fecha">
+                            <i class="fas fa-clock"></i>
+                            {{ formatearFechaHora(m.fecha) }}
+                        </span>
+                        <span class="movimiento-usuario" *ngIf="m.usuario">
+                            <i class="fas fa-user"></i>
+                            {{ m.usuario }}
+                        </span>
+                        <span class="movimiento-referencia" *ngIf="m.referencia">
+                            <i class="fas fa-link"></i>
+                            {{ m.referencia }}
+                        </span>
                     </div>
                 </div>
                 <div class="movimiento-monto">{{ formatearMoneda(m.monto) }}</div>
@@ -287,6 +300,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-door-closed"></i>
+            <span>Cierra la bóveda del día. Registra el fondo contado y las observaciones del cierre.</span>
+        </div>
         <form [formGroup]="cerrarTesoreriaForm">
             <div class="row g-3">
                 <div class="col-12">
@@ -351,6 +368,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
+        <div class="form-indication">
+            <i class="fas fa-arrow-up"></i>
+            <span>Agrega efectivo a la bóveda desde una fuente externa. Aumenta el saldo disponible de la tesorería.</span>
+        </div>
         <form [formGroup]="reponerTesoreriaForm">
             <div class="row g-3">
                 <div class="col-12">
@@ -425,6 +446,10 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-arrow-down"></i>
+            <span>Retira efectivo de la bóveda. Requiere saldo suficiente en tesorería.</span>
+        </div>
         <form [formGroup]="retirarTesoreriaForm">
             <div class="row g-3">
                 <div class="col-12">

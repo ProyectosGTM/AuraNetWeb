@@ -58,11 +58,19 @@ export class AbrirBovedaComponent implements OnInit {
   obtenerUsuarios() {
     this.usuService.obtenerUsuarios().subscribe((response) => {
       const data = response.data || [];
-      this.listaUsuarios = data.map((u: any) => ({
-        ...u,
-        id: Number(u.id),
-        text: `${u.nombre || ''} ${u.apellidoPaterno || ''} ${u.apellidoMaterno || ''}`.trim() || u.usuario || u.correo || String(u.id)
-      }));
+      this.listaUsuarios = data.map((u: any) => {
+        const idRaw = u.id ?? u.Id;
+        const id = Number(idRaw);
+        const nombre = u.Nombre || u.nombre || '';
+        const apellidoPaterno = u.ApellidoPaterno || u.apellidoPaterno || '';
+        const apellidoMaterno = u.ApellidoMaterno || u.apellidoMaterno || '';
+        const nombreCompleto = `${nombre} ${apellidoPaterno} ${apellidoMaterno}`.trim();
+        
+        return {
+          id,
+          text: nombreCompleto || u.usuario || u.correo || String(id)
+        };
+      });
       this.mapaUsuarios = new Map(
         (this.listaUsuarios || []).map((u: any) => [String(u.id), u])
       );

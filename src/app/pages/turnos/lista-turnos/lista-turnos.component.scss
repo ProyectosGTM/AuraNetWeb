@@ -1,5 +1,90 @@
 // Estilos para lista turnos (usando los estilos globales del sistema)
 
+.turnos-grid-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 992px) {
+  .turnos-grid-wrapper {
+    margin: 0 -0.75rem;
+    padding: 0 0.75rem;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .turnos-grid-wrapper {
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  ::ng-deep .monto-cell {
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 8px;
+
+    .monto-icon {
+      font-size: 12px;
+    }f
+
+    .monto-value {
+      font-size: 12px;
+    }
+
+    .monto-label {
+      font-size: 10px;
+    }
+  }
+
+  ::ng-deep .btnAcciones {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+}
+
+// Estilos para columna de acciones responsive
+.acciones-turnos-wrapper {
+  width: 100%;
+  min-width: 280px;
+  padding: 4px 0;
+}
+
+.acciones-turnos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  
+  .btnAcciones {
+    flex-shrink: 0;
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .acciones-turnos-wrapper {
+    min-width: 240px;
+  }
+  
+  .acciones-turnos-grid {
+    gap: 4px;
+    
+    .btnAcciones {
+      width: 28px;
+      height: 28px;
+      
+      i {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
 .action-buttons-card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -30,6 +115,712 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+}
+
+// Turnos Activos (GET /pos/turnos/activos) - Resaltado y con scroll
+.turnos-activos-card {
+  background: linear-gradient(135deg, rgba(80, 165, 241, 0.15) 0%, rgba(80, 165, 241, 0.08) 100%);
+  border: 2px solid rgba(80, 165, 241, 0.4);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(80, 165, 241, 0.15);
+  overflow: hidden;
+
+  .turnos-activos-header {
+    background: linear-gradient(135deg, rgba(80, 165, 241, 0.2) 0%, rgba(80, 165, 241, 0.1) 100%);
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(80, 165, 241, 0.3);
+  }
+
+  .turnos-activos-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    i {
+      color: #50a5f1;
+      font-size: 18px;
+    }
+
+    .turnos-activos-badge {
+      background: rgba(80, 165, 241, 0.3);
+      border: 1px solid rgba(80, 165, 241, 0.5);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #50a5f1;
+      margin-left: auto;
+    }
+  }
+
+  .turnos-activos-body {
+    padding: 12px 18px;
+    min-height: 80px;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #3d8bd9 0%, #2e7ac7 100%);
+    }
+  }
+
+  .turnos-activos-loading {
+    color: #50a5f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 0;
+    font-size: 14px;
+
+    i {
+      font-size: 18px;
+    }
+  }
+
+  .turnos-activos-empty {
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 0;
+    font-size: 14px;
+
+    i {
+      font-size: 18px;
+      opacity: 0.6;
+    }
+  }
+
+  .turnos-activos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .turno-activo-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(80, 165, 241, 0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(80, 165, 241, 0.4);
+      transform: translateX(2px);
+      box-shadow: 0 4px 12px rgba(80, 165, 241, 0.15);
+    }
+
+    .turno-activo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(80, 165, 241, 0.3) 0%, rgba(80, 165, 241, 0.2) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid rgba(80, 165, 241, 0.3);
+
+      i {
+        color: #50a5f1;
+        font-size: 20px;
+      }
+    }
+
+    .turno-activo-content {
+      flex: 1;
+      min-width: 0;
+
+      .turno-activo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+        gap: 12px;
+
+        .turno-activo-titulo {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .turno-activo-id {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+          }
+
+          .turno-activo-caja {
+            font-size: 13px;
+            font-weight: 600;
+            color: #50a5f1;
+          }
+        }
+
+        .turno-activo-saldo {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(52, 211, 153, 0.15);
+          border: 1px solid rgba(52, 211, 153, 0.3);
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 700;
+          color: #34d399;
+          white-space: nowrap;
+          flex-shrink: 0;
+
+          i {
+            font-size: 12px;
+          }
+        }
+      }
+
+      .turno-activo-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        font-size: 12px;
+        color: #9ca3af;
+
+        span {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          i {
+            font-size: 11px;
+            opacity: 0.8;
+            color: #50a5f1;
+          }
+        }
+      }
+    }
+
+    .turno-activo-status {
+      flex-shrink: 0;
+      margin-top: 2px;
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+
+        i {
+          font-size: 6px;
+        }
+
+        &.status-active {
+          background: rgba(52, 211, 153, 0.15);
+          border: 1px solid rgba(52, 211, 153, 0.3);
+          color: #34d399;
+
+          i {
+            color: #34d399;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .turno-activo-item {
+      flex-direction: column;
+      align-items: stretch;
+
+      .turno-activo-content {
+        .turno-activo-header {
+          flex-direction: column;
+          align-items: stretch;
+
+          .turno-activo-saldo {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+
+      .turno-activo-status {
+        align-self: flex-end;
+      }
+    }
+  }
+}
+
+// Filtros (consulta filtrada)
+.filtros-turnos-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+
+  .filtros-turnos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .filtros-turnos-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    i { color: #50a5f1; margin-right: 6px; }
+  }
+
+  .btn-filtros-toggle {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #9ca3af;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    i {
+      font-size: 10px;
+    }
+  }
+
+  .filtros-turnos-form {
+    .dx-select-box-filtro {
+      min-width: 180px;
+    }
+
+    .form-control-sm {
+      min-width: 150px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 13px;
+      
+      &:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(80, 165, 241, 0.5);
+        color: #fff;
+        box-shadow: 0 0 0 0.2rem rgba(80, 165, 241, 0.25);
+      }
+    }
+
+    .form-check-input {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      
+      &:checked {
+        background-color: #50a5f1;
+        border-color: #50a5f1;
+      }
+    }
+
+    .form-check-label {
+      cursor: pointer;
+    }
+  }
+
+  .filtros-avanzados {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideDown 0.3s ease;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Igual que monederos: saldo-section / saldo-card (Resumen turno)
+.saldo-result-content {
+  .saldo-section {
+    margin-bottom: 24px;
+    &:last-child { margin-bottom: 0; }
+    .saldo-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(23, 162, 184, 0.35);
+      i { color: #17a2b8; font-size: 20px; }
+    }
+  }
+  .saldo-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+  }
+  .saldo-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.25s ease;
+    position: relative;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      opacity: 0.85;
+      border-radius: 12px 12px 0 0;
+    }
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    .saldo-card-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .saldo-card-content {
+      flex: 1;
+      min-width: 0;
+      .saldo-card-label {
+        font-size: 11px;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      .saldo-card-value {
+        font-size: 17px;
+        font-weight: 700;
+        color: #fff;
+      }
+    }
+    &.saldo-card-efectivo {
+      &::before { background: linear-gradient(90deg, #34c38f, #2aa876); }
+      .saldo-card-icon { background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%); }
+    }
+    &.saldo-card-promocional {
+      &::before { background: linear-gradient(90deg, #50a5f1, #3d8bd9); }
+      .saldo-card-icon { background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%); }
+    }
+    &.saldo-card-puntos {
+      &::before { background: linear-gradient(90deg, #17a2b8, #138496); }
+      .saldo-card-icon { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); }
+    }
+    &.saldo-card-total {
+      &::before { background: linear-gradient(90deg, #6f42c1, #5a32a3); }
+      .saldo-card-icon { background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); }
+    }
+    &.saldo-card-redimible {
+      &::before { background: linear-gradient(90deg, #6c757d, #5a6268); }
+      .saldo-card-icon { background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); }
+    }
+  }
+}
+
+// Estilos para modal-body-historial (igual que Bóveda)
+.modal-body-historial {
+  padding: 24px;
+}
+
+// Estilos para movimientos-list (igual que Bóveda)
+.movimientos-list {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 6px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+    border-radius: 10px;
+  }
+}
+
+.movimiento-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.2s ease;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(253, 126, 20, 0.3);
+    transform: translateX(2px);
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+.movimiento-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  color: #fff;
+
+  &.icon-retiro {
+    background: linear-gradient(135deg, #f46a6a 0%, #e85555 100%);
+  }
+
+  &.icon-reposicion {
+    background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+  }
+
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.movimiento-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.movimiento-tipo {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+.movimiento-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-top: 6px;
+}
+
+.movimiento-fecha {
+  font-size: 12px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.movimiento-monto {
+  font-size: 18px;
+  font-weight: 700;
+  color: #34c38f;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #fff;
+
+  .empty-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, rgba(253, 126, 20, 0.15) 0%, rgba(232, 89, 12, 0.15) 100%);
+    border: 2px solid rgba(253, 126, 20, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: #fd7e14;
+  }
+
+  .empty-text {
+    font-size: 16px;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+}
+.historial-loading {
+  text-align: center;
+  padding: 28px 0;
+  color: rgba(255, 255, 255, 0.85);
+  i { font-size: 22px; }
+  div { margin-top: 10px; color: #9ca3af; font-size: 13px; font-weight: 600; }
+}
+.historial-empty {
+  text-align: center;
+  padding: 38px 18px;
+  color: #9ca3af;
+  i { font-size: 46px; display: block; margin-bottom: 14px; opacity: 0.55; }
+  p { margin: 0; font-size: 14px; font-weight: 600; }
+}
+.historial-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+.historial-item {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 12px;
+}
+.historial-left {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.historial-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  i { font-size: 12px; }
+  &.icon-carga {
+    background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+  }
+  &.icon-descarga {
+    background: linear-gradient(135deg, #f46a6a 0%, #e85555 100%);
+  }
+}
+.historial-line {
+  position: absolute;
+  top: 30px;
+  bottom: -14px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+}
+.historial-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    border-color: rgba(253, 126, 20, 0.35);
+  }
+}
+.historial-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.historial-title { min-width: 0; }
+.historial-concepto {
+  font-weight: 600;
+  color: #fff;
+  font-size: 14px;
+}
+.historial-monto {
+  font-weight: 700;
+  font-size: 15px;
+  color: #34c38f;
+  &.negativo { color: #f46a6a; }
+}
+.historial-meta {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: #9ca3af;
+  span i { margin-right: 4px; opacity: 0.8; }
+}
+.historial-count {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .btn-action-large {
@@ -127,10 +918,13 @@
 }
 
 ::ng-deep {
+  // Modales de acciones rápidas (igual que Bóveda)
   .modal-abrir-turno,
   .modal-cerrar-turno,
   .modal-reponer-turno,
-  .modal-retirar-turno {
+  .modal-retirar-turno,
+  .modal-suspender-turno,
+  .modal-consultar-saldo-caja {
     .modal-content {
       background: #0d121d;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -159,6 +953,18 @@
       opacity: 0.8;
       margin: 0;
       padding: 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      
+      &::before {
+        display: none;
+      }
+
+      i {
+        display: block;
+        font-size: 1.25rem;
+      }
     }
 
     .btn-close:hover {
@@ -166,14 +972,120 @@
     }
   }
 
-  .modal-header-abrir-turno {
-    background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+  // Modales de columna (Resumen y Movimientos) - igual que Bóveda
+  .modal-resumen-turno,
+  .modal-movimientos-turno {
+    .modal-content {
+      background: #0d121d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-body-resumen {
+      padding: 20px 24px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px 24px;
+    }
+
+    .btn-close {
+      filter: invert(1);
+      opacity: 0.8;
+      margin: 0;
+      padding: 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      
+      &::before {
+        display: none;
+      }
+
+      i {
+        display: block;
+        font-size: 1.25rem;
+      }
+    }
+
+    .btn-close:hover {
+      opacity: 1;
+    }
+  }
+
+  // Estilos para modal-accion-header (igual que Bóveda)
+  .modal-accion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px 12px 0 0;
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 12px 0 0 0;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 18px;
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .modal-accion-body {
+    padding: 20px 18px;
+  }
+
+  .modal-accion-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  // Estilos para modales de columna (Resumen y Movimientos) - igual que Bóveda
+  .modal-header-resumen-turno {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
     padding: 20px 24px;
     border-radius: 12px 12px 0 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(52, 195, 143, 0.25);
+    box-shadow: 0 4px 20px rgba(23, 162, 184, 0.25);
     margin: 0;
     border: none;
 
@@ -192,15 +1104,14 @@
     }
   }
 
-  .modal-header-retirar-turno,
-  .modal-accion-header--retirar-turno {
-    background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%) !important;
+  .modal-header-movimientos-turno {
+    background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
     padding: 20px 24px;
     border-radius: 12px 12px 0 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(241, 180, 76, 0.25);
+    box-shadow: 0 4px 20px rgba(253, 126, 20, 0.25);
     margin: 0;
     border: none;
 
@@ -217,83 +1128,14 @@
         font-size: 22px;
       }
     }
-  }
 
-  .modal-header-reponer-turno,
-  .modal-accion-header--reponer-turno {
-    background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%) !important;
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(52, 195, 143, 0.25);
-    margin: 0;
-    border: none;
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
+    .historial-count {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
       font-weight: 600;
       color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-      }
-    }
-  }
-
-  .modal-header-cerrar-turno {
-    background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(241, 180, 76, 0.25);
-    margin: 0;
-    border: none;
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-      }
-    }
-  }
-
-  .modal-consultar-saldo-caja {
-    background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
-    padding: 20px 24px;
-    margin: 0;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(80, 165, 241, 0.25);
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-      }
     }
   }
 
@@ -747,3 +1589,9 @@
     color: #5b73e8;
   }
 }
+
+}
+
+
+
+

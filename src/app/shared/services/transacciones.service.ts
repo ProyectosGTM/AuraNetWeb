@@ -14,19 +14,18 @@ export class TransaccionesService {
     return this.http.get(`${environment.API_SECURITY}/ledger/${page}/${limit}`);
   }
 
-  // obtenerHistorialMonedero(id: number): Observable<any> {
-  //   return this.http.get(`${environment.API_SECURITY}/ledger/movimientos/monedero/${id}`);
-  // }
+  /** GET ledger/saldo/monedero/{id} - Obtener saldos de un monedero */
+  obtenerSaldoMonedero(id: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/ledger/saldo/monedero/${id}`);
+  }
 
-  // obtenerSaldoMonedero(id: number): Observable<any> {
-  //   return this.http.get(`${environment.API_SECURITY}/ledger/saldo/monedero/${id}`);
-  // }
-
+  /** GET ledger/saldo/caja/{id} - Obtener saldo de una caja */
   obtenerSaldoCaja(id: number): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/ledger/saldo/caja/${id}`);
   }
 
-  // obtenerSaldoTesoreria(id: number): Observable<any> {
-  //   return this.http.get(`${environment.API_SECURITY}/ledger/saldo/tesoreria/${id}`);
-  // }
+  /** GET ledger/movimientos/monedero/{id} - Historial de movimientos de monedero */
+  obtenerHistorialMonedero(id: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/ledger/movimientos/monedero/${id}`);
+  }
 }

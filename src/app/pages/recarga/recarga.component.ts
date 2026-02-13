@@ -53,7 +53,9 @@ export class RecargaComponent implements OnInit {
       monederos: this.monederosService.obtenerMonederos()
     }).subscribe({
       next: (responses) => {
-        this.listaCajas = (responses.cajas.data || []).map((c: any) => ({
+        const cajasData = responses.cajas.data || [];
+        const cajasAbiertas = cajasData.filter((c: any) => Number(c.idEstatusCaja) === 2);
+        this.listaCajas = cajasAbiertas.map((c: any) => ({
           ...c,
           id: Number(c.id),
           text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Caja sin nombre'

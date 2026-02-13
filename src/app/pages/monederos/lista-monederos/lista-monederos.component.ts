@@ -7,6 +7,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import { forkJoin, lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { MonederosServices } from 'src/app/shared/services/monederos.service';
+import { TransaccionesService } from 'src/app/shared/services/transacciones.service';
 import { TurnosService } from 'src/app/shared/services/turnos.service';
 import Swal from 'sweetalert2';
 
@@ -41,7 +42,13 @@ export class ListaMonederosComponent {
   @ViewChild('modalCambiarEstatus', { static: false }) modalCambiarEstatus!: TemplateRef<any>;
   @ViewChild('modalTraspaso', { static: false }) modalTraspaso!: TemplateRef<any>;
   @ViewChild('modalMonederosPorAfiliado', { static: false }) modalMonederosPorAfiliado!: TemplateRef<any>;
+  @ViewChild('modalReemplazarMonedero', { static: false }) modalReemplazarMonedero!: TemplateRef<any>;
+  @ViewChild('modalAjusteMonedero', { static: false }) modalAjusteMonedero!: TemplateRef<any>;
+  @ViewChild('modalHistorialMonedero', { static: false }) modalHistorialMonedero!: TemplateRef<any>;
   private modalRef?: NgbModalRef;
+
+  public historialData: any[] = [];
+  monederoSeleccionadoHistorial: { id?: number; numeroMonedero?: string; alias?: string } | null = null;
 
   // Formulario para cargar monedero
   cargarMonederoForm: FormGroup;
@@ -75,9 +82,23 @@ export class ListaMonederosComponent {
   public listaMonederosAfiliado: any[] = [];
   public cargandoMonederosAfiliado = false;
 
+  // Formulario para reemplazar monedero
+  reemplazarMonederoForm: FormGroup;
+  monederoSeleccionadoReemplazar: { id?: number; numeroMonedero?: string; alias?: string } | null = null;
+
+  // Formulario para ajuste de saldo (solo GERENTE)
+  ajusteMonederoForm: FormGroup;
+  public listaMonederosDisponiblesAjuste: any[] = [];
+  public listaTipoSaldoAjuste: { id: number; text: string }[] = [
+    { id: 1, text: 'Efectivo' },
+    { id: 2, text: 'Promocional' },
+    { id: 3, text: 'Puntos' }
+  ];
+
   constructor(
     private router: Router,
     private monederosService: MonederosServices,
+    private transaccionesService: TransaccionesService,
     private modalService: NgbModal,
     private fb: FormBuilder,
     private turnosService: TurnosService,
@@ -111,6 +132,19 @@ export class ListaMonederosComponent {
     });
     this.monederosPorAfiliadoForm = this.fb.group({
       idAfiliado: [null, Validators.required]
+    });
+    this.reemplazarMonederoForm = this.fb.group({
+      idMonederoAnterior: [null, Validators.required],
+      numeroMonederoNuevo: ['', [Validators.required, Validators.minLength(1)]],
+      motivo: ['', [Validators.required, Validators.minLength(1)]],
+      transferirSaldo: [true]
+    });
+    this.ajusteMonederoForm = this.fb.group({
+      idMonedero: [null, Validators.required],
+      tipoAjuste: ['positivo', Validators.required],
+      idTipoSaldo: [1, Validators.required],
+      monto: ['', [Validators.required, Validators.min(0.01)]],
+      justificacion: ['', [Validators.required, Validators.minLength(1)]]
     });
   }
 
@@ -201,6 +235,216 @@ export class ListaMonederosComponent {
       centered: true,
       backdrop: 'static',
       keyboard: true
+    });
+  }
+
+  ajusteMonedero() {
+    this.monederosService.obtenerMonederos().subscribe({
+      next: (response) => {
+        this.listaMonederosDisponiblesAjuste = (response.data || []).map((m: any) => {
+          const nombreCompletoAfiliado = `${m?.nombreAfiliado || ''} ${m?.apellidoPaternoAfiliado || ''} ${m?.apellidoMaternoAfiliado || ''}`.trim() || 'Sin afiliado';
+          return {
+            ...m,
+            id: Number(m.id),
+            nombreCompletoAfiliado,
+            text: `${m.numeroMonedero || ''} - ${m.alias || ''}`.trim()
+          };
+        });
+        this.ajusteMonederoForm.reset({
+          idMonedero: null,
+          tipoAjuste: 'positivo',
+          idTipoSaldo: 1,
+          monto: '',
+          justificacion: ''
+        });
+        this.modalRef = this.modalService.open(this.modalAjusteMonedero, {
+          size: 'md',
+          windowClass: 'modal-holder modal-ajuste-monedero',
+          centered: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: 'No se pudieron cargar los monederos.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  guardarAjusteMonedero() {
+    if (this.ajusteMonederoForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Complete todos los campos requeridos.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const payload = {
+      idMonedero: Number(this.ajusteMonederoForm.value.idMonedero),
+      tipoAjuste: this.ajusteMonederoForm.value.tipoAjuste as 'positivo' | 'negativo',
+      idTipoSaldo: Number(this.ajusteMonederoForm.value.idTipoSaldo),
+      monto: Number(this.ajusteMonederoForm.value.monto),
+      justificacion: (this.ajusteMonederoForm.value.justificacion || '').trim()
+    };
+    this.monederosService.ajusteMonedero(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación exitosa!',
+          text: 'Se ha realizado el ajuste de saldo correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        if (this.modalRef) this.modalRef.close();
+        this.ajusteMonederoForm.reset();
+        this.setupDataSource();
+        if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo realizar el ajuste.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  verHistorialMonedero(id: number, rowData?: any) {
+    this.monederoSeleccionadoHistorial = rowData ? { id: rowData.id, numeroMonedero: rowData.numeroMonedero, alias: rowData.alias } : null;
+    this.transaccionesService.obtenerHistorialMonedero(id).subscribe({
+      next: (response: any) => {
+        this.historialData = response.data || response || [];
+        this.modalRef = this.modalService.open(this.modalHistorialMonedero, {
+          size: 'lg',
+          windowClass: 'modal-holder modal-historial-movimientos',
+          centered: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo obtener el historial.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  cerrarHistorialMonedero() {
+    if (this.modalRef) this.modalRef.close();
+    this.historialData = [];
+    this.monederoSeleccionadoHistorial = null;
+  }
+
+  /** Usa icono/color del API si existe, sino fallback por nombre */
+  getIconoMovimientoItem(m: any): { icon: string; class: string; color?: string } {
+    const tm = m?.tipoMovimiento;
+    if (tm?.icono) {
+      const icon = tm.icono.startsWith('fa-') ? tm.icono : `fa-${tm.icono}`;
+      return { icon, class: 'icon-dinamico', color: tm.color };
+    }
+    const nombre = tm?.nombre || m?.tipo || '';
+    return { ...this.getIconoMovimiento(nombre), color: undefined };
+  }
+
+  getIconoMovimiento(tipo: string): { class: string; icon: string } {
+    const t = (tipo || '').toLowerCase();
+    if (t.includes('cargar') || t.includes('carga')) return { class: 'icon-carga', icon: 'fa-arrow-up' };
+    if (t.includes('descargar') || t.includes('descarga')) return { class: 'icon-descarga', icon: 'fa-arrow-down' };
+    if (t.includes('traspaso')) return { class: 'icon-traspaso', icon: 'fa-exchange-alt' };
+    if (t.includes('ajuste')) return { class: 'icon-ajuste', icon: 'fa-balance-scale' };
+    if (t.includes('reemplaz')) return { class: 'icon-reemplazo', icon: 'fa-sync-alt' };
+    if (t.includes('juego') || t.includes('apuesta')) return { class: 'icon-juego', icon: 'fa-gamepad' };
+    if (t.includes('promocion') || t.includes('bono')) return { class: 'icon-promo', icon: 'fa-gift' };
+    return { class: 'icon-otro', icon: 'fa-exchange-alt' };
+  }
+
+  abrirReemplazarMonedero(rowData: any) {
+    this.monederoSeleccionadoReemplazar = {
+      id: rowData.id,
+      numeroMonedero: rowData.numeroMonedero,
+      alias: rowData.alias
+    };
+    this.reemplazarMonederoForm.patchValue({
+      idMonederoAnterior: rowData.id,
+      numeroMonederoNuevo: '',
+      motivo: '',
+      transferirSaldo: true
+    });
+    this.modalRef = this.modalService.open(this.modalReemplazarMonedero, {
+      size: 'md',
+      windowClass: 'modal-holder modal-reemplazar-monedero',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+  }
+
+  guardarReemplazarMonedero() {
+    if (this.reemplazarMonederoForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Complete el número del monedero nuevo y el motivo.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const payload = {
+      idMonederoAnterior: Number(this.reemplazarMonederoForm.value.idMonederoAnterior),
+      numeroMonederoNuevo: (this.reemplazarMonederoForm.value.numeroMonederoNuevo || '').trim(),
+      motivo: (this.reemplazarMonederoForm.value.motivo || '').trim(),
+      transferirSaldo: !!this.reemplazarMonederoForm.value.transferirSaldo
+    };
+    this.monederosService.reemplazarMonedero(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación exitosa!',
+          text: 'Se ha reemplazado el monedero correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        if (this.modalRef) this.modalRef.close();
+        this.reemplazarMonederoForm.reset();
+        this.monederoSeleccionadoReemplazar = null;
+        this.setupDataSource();
+        if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo reemplazar el monedero.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
     });
   }
 
@@ -814,9 +1058,9 @@ export class ListaMonederosComponent {
       return;
     }
     const payload = {
-      idTurnoCaja: vals.idTurnoCaja,
-      idMonederoOrigen: vals.idMonederoOrigen,
-      idMonederoDestino: vals.idMonederoDestino,
+      idTurnoCaja: Number(vals.idTurnoCaja),
+      idMonederoOrigen: Number(vals.idMonederoOrigen),
+      idMonederoDestino: Number(vals.idMonederoDestino),
       monto: Number(vals.monto)
     };
     this.monederosService.traspasoMonedero(payload).subscribe({
@@ -905,9 +1149,12 @@ export class ListaMonederosComponent {
       this.cambiarEstatusForm.reset();
       this.traspasoMonederoForm.reset();
       this.monederosPorAfiliadoForm.reset();
+      this.reemplazarMonederoForm.reset();
+      this.ajusteMonederoForm.reset();
       this.saldoData = null;
       this.consultandoSaldo = false;
       this.monederoSeleccionadoCambio = null;
+      this.monederoSeleccionadoReemplazar = null;
       this.listaMonederosAfiliado = [];
     }
   }

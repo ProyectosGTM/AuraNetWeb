@@ -137,6 +137,17 @@
       background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
     }
   }
+
+  &.btn-action-large-ajuste {
+    &:hover {
+      background: rgba(23, 162, 184, 0.12);
+      border-color: rgba(23, 162, 184, 0.35);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -180,13 +191,22 @@
     color: #50a5f1;
   }
 
-  /* ✅ NUEVO: REEMPLAZAR (MORADO) */
+  /* ✅ REEMPLAZAR (MORADO) */
   .modal-accion-header--reemplazar::before {
     background: #9b59b6;
   }
 
   .modal-accion-header--reemplazar .modal-title i {
     color: #9b59b6;
+  }
+
+  /* AJUSTE SALDO (TEAL) */
+  .modal-accion-header--ajuste::before {
+    background: #17a2b8;
+  }
+
+  .modal-accion-header--ajuste .modal-title i {
+    color: #17a2b8;
   }
 }
 
@@ -335,58 +355,66 @@
     }
   }
 
-  .modal-header-cargar-monedero {
-    background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
+  // Estilos para modal-accion-header (igual que Bóveda - barra lateral)
+  .modal-accion-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(52, 195, 143, 0.25);
+    padding: 14px 18px;
     margin: 0;
     border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px 12px 0 0;
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 12px 0 0 0;
+    }
 
     .modal-title {
       margin: 0;
-      font-size: 20px;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 600;
       color: #fff;
       display: flex;
       align-items: center;
       gap: 10px;
 
       i {
-        font-size: 22px;
+        font-size: 18px;
+        opacity: 0.9;
       }
     }
   }
 
-  .modal-header-descargar-monedero {
-    background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
+  .modal-accion-body {
+    padding: 20px 18px;
+  }
+
+  .modal-accion-footer {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(241, 180, 76, 0.25);
-    margin: 0;
-    border: none;
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 500;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-      }
-    }
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
+  .modal-body-historial {
+    padding: 24px;
+  }
+
+  .modal-body-resumen {
+    padding: 20px 24px;
+  }
+
+  // Modales de columna (Consultar Saldo e Historial) - gradiente completo como Bóveda
   .modal-header-consultar-saldo {
     background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
     padding: 20px 24px;
@@ -401,7 +429,7 @@
     .modal-title {
       margin: 0;
       font-size: 20px;
-      font-weight: 500;
+      font-weight: 600;
       color: #fff;
       display: flex;
       align-items: center;
@@ -413,22 +441,27 @@
     }
   }
 
-  /* NUEVO - HEADER REEMPLAZAR (MORADO) */
-  .modal-header-reemplazar-monedero {
-    background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
+  .modal-header-historial-monedero {
+    background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
     padding: 20px 24px;
     border-radius: 12px 12px 0 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(155, 89, 182, 0.25);
+    box-shadow: 0 4px 20px rgba(80, 165, 241, 0.25);
     margin: 0;
     border: none;
+
+    .modal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
     .modal-title {
       margin: 0;
       font-size: 20px;
-      font-weight: 500;
+      font-weight: 600;
       color: #fff;
       display: flex;
       align-items: center;
@@ -438,59 +471,223 @@
         font-size: 22px;
       }
     }
-  }
 
-  /* HEADER TRASPASO (MORADO) */
-  .modal-header-traspaso-monedero {
-    background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(155, 89, 182, 0.25);
-    margin: 0;
-    border: none;
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 500;
+    .header-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
       color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    }
 
-      i {
-        font-size: 22px;
-      }
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 20px;
     }
   }
 
-  /* HEADER MONEDEROS POR AFILIADO (GRIS) */
-  .modal-header-monederos-afiliado {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
+  // Estilos para movimientos-list (igual que Bóveda)
+  .movimientos-list {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 6px;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+      border-radius: 10px;
+    }
+  }
+
+  .movimiento-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(108, 117, 125, 0.25);
-    margin: 0;
-    border: none;
+    gap: 14px;
+    transition: all 0.2s ease;
 
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 500;
-      color: #fff;
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(80, 165, 241, 0.3);
+      transform: translateX(2px);
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+  }
+
+  .movimiento-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    color: #fff;
+
+    &.icon-retiro {
+      background: linear-gradient(135deg, #f46a6a 0%, #e85555 100%);
+    }
+
+    &.icon-reposicion {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+    }
+
+    &.icon-apertura {
+      background: linear-gradient(135deg, #34c38f 0%, #28a745 100%);
+    }
+
+    &.icon-dotacion {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    }
+
+    &.icon-devolucion {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    }
+
+    &.icon-cierre {
+      background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    }
+
+    &.icon-otro {
+      background: linear-gradient(135deg, #5b73e8 0%, #4a5fc7 100%);
+    }
+
+    &.icon-carga {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+    }
+
+    &.icon-descarga {
+      background: linear-gradient(135deg, #f46a6a 0%, #e85555 100%);
+    }
+
+    &.icon-dinamico {
+      background: linear-gradient(135deg, #5b73e8 0%, #4a5fc7 100%);
+    }
+
+    &.icon-traspaso {
+      background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
+    }
+
+    &.icon-ajuste {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    }
+
+    &.icon-reemplazo {
+      background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
+    }
+
+    &.icon-juego {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    }
+
+    &.icon-promo {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    }
+
+    @media (max-width: 768px) {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .movimiento-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .movimiento-tipo {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+
+  .movimiento-concepto {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .movimiento-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    margin-top: 6px;
+  }
+
+  .movimiento-fecha,
+  .movimiento-usuario,
+  .movimiento-referencia {
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .movimiento-monto {
+    font-size: 18px;
+    font-weight: 700;
+    color: #34c38f;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      text-align: left;
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #fff;
+
+    .empty-icon {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, rgba(80, 165, 241, 0.15) 0%, rgba(61, 139, 217, 0.15) 100%);
+      border: 2px solid rgba(80, 165, 241, 0.3);
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+      font-size: 48px;
+      color: #50a5f1;
+    }
 
-      i {
-        font-size: 22px;
-      }
+    .empty-text {
+      font-size: 16px;
+      color: #9ca3af;
+      font-weight: 500;
     }
   }
 
@@ -1178,6 +1375,38 @@
   i {
     font-size: 12px;
   }
+
+  &.icon-carga {
+    background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+  }
+
+  &.icon-descarga {
+    background: linear-gradient(135deg, #f46a6a 0%, #e85555 100%);
+  }
+
+  &.icon-traspaso {
+    background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
+  }
+
+  &.icon-ajuste {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  }
+
+  &.icon-reemplazo {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  }
+
+  &.icon-juego {
+    background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+  }
+
+  &.icon-promo {
+    background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+  }
+
+  &.icon-otro {
+    background: linear-gradient(135deg, #5b73e8 0%, #4a5fc7 100%);
+  }
 }
 
 .historial-line {
@@ -1223,6 +1452,20 @@
   display: inline-block;
 }
 
+.historial-badge-tipo {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .historial-sub {
   margin-top: 6px;
   display: flex;
@@ -1245,6 +1488,9 @@
 .historial-monto {
   text-align: right;
   min-width: 170px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
 
   .monto-label {
     font-size: 11px;
@@ -1295,8 +1541,26 @@
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  i {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+  }
+}
+
+.historial-monto.negativo {
+  color: #f46a6a !important;
 }
 
 .meta-row {
