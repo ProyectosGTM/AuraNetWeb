@@ -1097,6 +1097,20 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   &:hover { background-color: #141920; border-color: #94a3b8; }
 }
 
+#reactivarTurnoButton {
+  background-color: #1a2e1a;
+  border-color: #2d4d2d;
+  i { color: #4ade80; }
+  &:hover { background-color: #142614; border-color: #4ade80; }
+}
+
+#corteParcialButton {
+  background-color: #0d1e2e;
+  border-color: #164e63;
+  i { color: #0ea5e9; }
+  &:hover { background-color: #0a1923; border-color: #0ea5e9; }
+}
+
 #reemplazarMonederoButton {
   background-color: #1e0d2a;
   border-color: #3d195c;
@@ -1109,6 +1123,20 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   border-color: #193d5c;
   i { color: #22d3ee; }
   &:hover { background-color: #091520; border-color: #22d3ee; }
+}
+
+#bovedaAbiertaSalaButton {
+  background-color: #1a2e1a;
+  border-color: #2d4d2d;
+  i { color: #4ade80; }
+  &:hover { background-color: #142614; border-color: #4ade80; }
+}
+
+#eliminarTesoreriaButton {
+  background-color: #2a0d0d;
+  border-color: #5c1919;
+  i { color: #ef4444; }
+  &:hover { background-color: #1f0909; border-color: #ef4444; }
 }
 
 .estatus {

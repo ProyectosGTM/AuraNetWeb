@@ -811,3 +811,130 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+// Acciones Rápidas (igual que turnos/monederos)
+.action-buttons-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 0;
+}
+
+.action-buttons-header {
+  margin-bottom: 16px;
+
+  .action-buttons-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i {
+      color: #50a5f1;
+    }
+  }
+}
+
+.action-buttons-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.btn-action-large {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .btn-action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    .btn-action-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .btn-action-desc {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  }
+
+  &.btn-action-large-success {
+    &:hover {
+      background: rgba(52, 195, 143, 0.1);
+      border-color: rgba(52, 195, 143, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
+    }
+  }
+
+  &.btn-action-large-warning {
+    &:hover {
+      background: rgba(241, 180, 76, 0.1);
+      border-color: rgba(241, 180, 76, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    }
+  }
+
+  &.btn-action-large-info {
+    &:hover {
+      background: rgba(80, 165, 241, 0.1);
+      border-color: rgba(80, 165, 241, 0.3);
+    }
+
+    .btn-action-icon {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .action-buttons-content {
+    flex-direction: column;
+  }
+
+  .btn-action-large {
+    min-width: 100%;
+  }
+}

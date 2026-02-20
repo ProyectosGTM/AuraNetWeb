@@ -80,7 +80,7 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="280" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="340" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
                         <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fechaFormateada" caption="Fecha" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fondoInicialFormateado" caption="Fondo Inicial" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -118,6 +118,18 @@
                                 <button type="button" id="historialButton" class="btnAcciones" (click)="verHistorial(row.data.id)"
                                     ngbTooltip="Ver historial de movimientos" placement="top" container="body">
                                     <i class="fa fa-history"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="bovedaAbiertaSalaButton" class="btnAcciones" (click)="verBovedaAbiertaSala(row.data)"
+                                    ngbTooltip="Ver bóveda abierta de la sala" placement="top" container="body">
+                                    <i class="fa fa-door-open"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="eliminarTesoreriaButton" class="btnAcciones" (click)="eliminarTesoreria(row.data)"
+                                    ngbTooltip="Eliminar tesorería" placement="top" container="body">
+                                    <i class="fa fa-trash-alt"></i>
                                 </button>
                             </div>
                             <div>

@@ -22,6 +22,57 @@
           </div>
         </div>
 
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="action-buttons-card">
+              <div class="action-buttons-header">
+                <h5 class="action-buttons-title">
+                  <i class="fas fa-bolt"></i>
+                  <span>Acciones Rápidas</span>
+                </h5>
+              </div>
+              <div class="action-buttons-content">
+                <button (click)="abrirModalAbrirTurno()" type="button" class="btn-action-large btn-action-large-success">
+                  <div class="btn-action-icon">
+                    <i class="fas fa-door-open"></i>
+                  </div>
+                  <div class="btn-action-text">
+                    <span class="btn-action-label">Abrir Turno</span>
+                    <span class="btn-action-desc">Iniciar nuevo turno de caja</span>
+                  </div>
+                </button>
+                <button (click)="abrirModalCerrarTurno()" type="button" class="btn-action-large btn-action-large-warning">
+                  <div class="btn-action-icon">
+                    <i class="fas fa-door-closed"></i>
+                  </div>
+                  <div class="btn-action-text">
+                    <span class="btn-action-label">Cerrar Turno</span>
+                    <span class="btn-action-desc">Finalizar turno activo</span>
+                  </div>
+                </button>
+                <button (click)="abrirModalDescargarMonedero()" type="button" class="btn-action-large btn-action-large-warning">
+                  <div class="btn-action-icon">
+                    <i class="fas fa-arrow-down"></i>
+                  </div>
+                  <div class="btn-action-text">
+                    <span class="btn-action-label">Descargar Monedero</span>
+                    <span class="btn-action-desc">Retirar efectivo de monedero a caja</span>
+                  </div>
+                </button>
+                <button (click)="abrirModalConsultarSaldo()" type="button" class="btn-action-large btn-action-large-info">
+                  <div class="btn-action-icon">
+                    <i class="fas fa-search-dollar"></i>
+                  </div>
+                  <div class="btn-action-text">
+                    <span class="btn-action-label">Consultar Saldo</span>
+                    <span class="btn-action-desc">Ver saldo por número de monedero</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="row mt-5">
           <div class="col-12">
             <div class="form-indication form-indication--info mb-4">
@@ -360,3 +411,279 @@
     </div>
   </div>
 </div>
+
+<!-- Modal Abrir Turno (POST /pos/turnos/abrir) -->
+<ng-template #modalAbrirTurno let-modal>
+  <div class="modal-header modal-accion-header modal-accion-header--abrir-turno">
+    <h5 class="modal-title">
+      <i class="fas fa-door-open"></i>
+      <span>Abrir Turno de Caja</span>
+    </h5>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="modal-body modal-accion-body">
+    <div class="form-indication">
+      <i class="fas fa-door-open"></i>
+      <span>Inicia un nuevo turno de caja. Selecciona la caja, tesorería y registra el fondo inicial.</span>
+    </div>
+    <form [formGroup]="abrirTurnoForm">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="field">
+            <span class="field-label text-white">Caja *</span>
+            <dx-select-box
+              [dataSource]="listaCajasAbrir"
+              displayExpr="text"
+              valueExpr="id"
+              formControlName="idCaja"
+              placeholder="Selecciona una caja..."
+              searchEnabled="true"
+              searchMode="contains"
+              [showClearButton]="true"
+              class="dx-select-box-custom dx-select-box-caja">
+            </dx-select-box>
+          </label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="field">
+            <span class="field-label text-white">Tesorería *</span>
+            <dx-select-box
+              [dataSource]="listaTesoreria"
+              displayExpr="text"
+              valueExpr="id"
+              formControlName="idTesoreria"
+              placeholder="Selecciona una tesorería..."
+              searchEnabled="true"
+              searchMode="contains"
+              [showClearButton]="true"
+              class="dx-select-box-custom dx-select-box-boveda">
+            </dx-select-box>
+          </label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="field">
+            <span class="field-label text-white">Estatus Turno *</span>
+            <dx-select-box
+              [dataSource]="listaEstatusTurno"
+              displayExpr="text"
+              valueExpr="id"
+              formControlName="idEstatusTurno"
+              placeholder="Selecciona un estatus..."
+              searchEnabled="true"
+              searchMode="contains"
+              [showClearButton]="true"
+              class="dx-select-box-custom">
+            </dx-select-box>
+          </label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="field">
+            <span class="field-label text-white">Fondo Inicial *</span>
+            <div class="input-sleek">
+              <i class="fas fa-dollar-sign"></i>
+              <input formControlName="fondoInicial" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+              <span class="sleek-line"></span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer modal-accion-footer">
+    <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+      <i class="fas fa-times"></i><span>Cancelar</span>
+    </button>
+    <button type="button" class="btn btn-success" (click)="guardarAbrirTurno()" [disabled]="abrirTurnoForm.invalid">
+      <i class="fas fa-check"></i> Abrir Turno
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Cerrar Turno (POST /pos/turnos/cerrar) -->
+<ng-template #modalCerrarTurno let-modal>
+  <div class="modal-header modal-accion-header modal-accion-header--cerrar-turno">
+    <h5 class="modal-title">
+      <i class="fas fa-door-closed"></i>
+      <span>Cerrar Turno de Caja</span>
+    </h5>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="modal-body modal-accion-body">
+    <div class="form-indication form-indication--warning">
+      <i class="fas fa-door-closed"></i>
+      <span>Finaliza un turno activo. Ingresa el fondo contado para el arqueo de caja.</span>
+    </div>
+    <form [formGroup]="cerrarTurnoForm">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="field">
+            <span class="field-label text-white">Turno *</span>
+            <dx-select-box
+              [dataSource]="listaTurnosActivos"
+              displayExpr="text"
+              valueExpr="id"
+              formControlName="idTurno"
+              placeholder="Selecciona un turno..."
+              searchEnabled="true"
+              searchMode="contains"
+              [showClearButton]="true"
+              class="dx-select-box-custom dx-select-box-caja">
+            </dx-select-box>
+          </label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="field">
+            <span class="field-label text-white">Fondo Contado *</span>
+            <div class="input-sleek">
+              <i class="fas fa-dollar-sign"></i>
+              <input formControlName="fondoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+              <span class="sleek-line"></span>
+            </div>
+          </label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="field">
+            <span class="field-label text-white">Observaciones</span>
+            <div class="input-sleek">
+              <i class="fas fa-comment-alt"></i>
+              <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+              <span class="sleek-line"></span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer modal-accion-footer">
+    <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+      <i class="fas fa-times"></i><span>Cancelar</span>
+    </button>
+    <button type="button" class="btn btn-warning" (click)="guardarCerrarTurno()" [disabled]="cerrarTurnoForm.invalid">
+      <i class="fas fa-check"></i> Cerrar Turno
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Descargar Monedero (POST /pos/monederos/descargar) -->
+<ng-template #modalDescargarMonedero let-modal>
+  <div class="modal-header modal-accion-header modal-accion-header--descargar">
+    <h5 class="modal-title">
+      <i class="fas fa-arrow-down"></i>
+      <span>Descargar Efectivo de Monedero</span>
+    </h5>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="modal-body modal-accion-body">
+    <div class="form-indication form-indication--warning">
+      <i class="fas fa-arrow-down"></i>
+      <span>Transfiere efectivo de <strong>Monedero</strong> a <strong>Caja</strong>. Requiere turno activo y saldo suficiente en monedero.</span>
+    </div>
+    <form [formGroup]="descargarMonederoForm">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="field">
+            <span class="field-label text-white">Turno de Caja *</span>
+            <dx-select-box
+              [dataSource]="listaTurnosDescargar"
+              displayExpr="text"
+              valueExpr="id"
+              formControlName="idTurnoCaja"
+              placeholder="Selecciona un turno..."
+              searchEnabled="true"
+              searchMode="contains"
+              [showClearButton]="true"
+              class="dx-select-box-custom dx-select-box-caja">
+            </dx-select-box>
+          </label>
+        </div>
+        <div class="col-12">
+          <label class="field">
+            <span class="field-label text-white">Monedero *</span>
+            <dx-select-box
+              [dataSource]="listaMonederosDescargar"
+              displayExpr="text"
+              valueExpr="id"
+              formControlName="idMonedero"
+              placeholder="Selecciona un monedero..."
+              searchEnabled="true"
+              searchMode="contains"
+              [showClearButton]="true"
+              class="dx-select-box-custom dx-select-box-monedero">
+            </dx-select-box>
+          </label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="field">
+            <span class="field-label text-white">Monto *</span>
+            <div class="input-sleek">
+              <i class="fas fa-dollar-sign"></i>
+              <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+              <span class="sleek-line"></span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer modal-accion-footer">
+    <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+      <i class="fas fa-times"></i><span>Cancelar</span>
+    </button>
+    <button type="button" class="btn btn-warning" (click)="guardarDescargarMonedero()" [disabled]="descargarMonederoForm.invalid">
+      <i class="fas fa-check"></i> Descargar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Consultar Saldo (GET /pos/monederos/{numero}) -->
+<ng-template #modalConsultarSaldo let-modal>
+  <div class="modal-header modal-accion-header modal-accion-header--consultar-saldo">
+    <h5 class="modal-title">
+      <i class="fas fa-search-dollar"></i>
+      <span>Consultar Saldo por Número</span>
+    </h5>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="modal-body modal-accion-body">
+    <div class="form-indication">
+      <i class="fas fa-search-dollar"></i>
+      <span>Obtén el saldo de un monedero usando su número o identificador RFID.</span>
+    </div>
+    <form [formGroup]="consultarSaldoForm">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="field">
+            <span class="field-label text-white">Número de Monedero *</span>
+            <div class="input-sleek">
+              <i class="fas fa-barcode"></i>
+              <input formControlName="numero" class="sleek-control" type="text" placeholder="Número RFID o identificador" />
+              <span class="sleek-line"></span>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div class="mt-3">
+        <button type="button" class="btn btn-info" (click)="buscarSaldoMonedero()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo">
+          <i class="fas fa-search" *ngIf="!consultandoSaldo"></i>
+          <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i> Buscar
+        </button>
+      </div>
+    </form>
+    <div *ngIf="saldoConsultado" class="mt-4 p-3 rounded" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+      <pre class="text-white mb-0 small">{{ saldoConsultado | json }}</pre>
+    </div>
+  </div>
+  <div class="modal-footer modal-accion-footer">
+    <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+      <i class="fas fa-times"></i><span>Cerrar</span>
+    </button>
+  </div>
+</ng-template>

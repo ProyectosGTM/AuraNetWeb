@@ -79,13 +79,13 @@ export class TurnosService {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/suspender`, data);
   }
 
-  /** POST /pos/turnos/reactivar - Reactivar turno suspendido */
-  reactivarTurno(data: { idTurno: number; motivo?: string }): Observable<any> {
+  /** POST /pos/turnos/reactivar - Reactivar turno suspendido (identificado por idCaja) */
+  reactivarTurno(data: { idCaja: number; observaciones?: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/reactivar`, data);
   }
 
-  /** POST /pos/turnos/corte-parcial - Corte parcial (Corte X) */
-  corteParcial(data: { idTurno: number; monto: number; motivo?: string }): Observable<any> {
+  /** POST /pos/turnos/corte-parcial - Corte parcial (Corte X). Genera reporte sin cerrar turno. Se identifica por idCaja. */
+  corteParcial(data: { idCaja: number; efectivoContado: number; observaciones?: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/corte-parcial`, data);
   }
 

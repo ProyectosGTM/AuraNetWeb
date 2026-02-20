@@ -10,6 +10,7 @@ import { NgStepperModule } from 'angular-ng-stepper';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { DxSelectBoxModule } from 'devextreme-angular';
+import { NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 @NgModule({
@@ -19,12 +20,14 @@ import { DxSelectBoxModule } from 'devextreme-angular';
     RecargaRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    UIModule, 
-    CdkStepperModule, 
+    UIModule,
+    CdkStepperModule,
     NgStepperModule,
     NgSelectModule,
     SharedModule,
-    DxSelectBoxModule
+    DxSelectBoxModule,
+    NgbModalModule,
+    NgbTooltipModule
   ]
 })
 export class RecargaModule { }

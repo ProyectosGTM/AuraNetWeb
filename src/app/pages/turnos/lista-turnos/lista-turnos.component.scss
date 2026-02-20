@@ -924,6 +924,8 @@
   .modal-reponer-turno,
   .modal-retirar-turno,
   .modal-suspender-turno,
+  .modal-reactivar-turno,
+  .modal-corte-parcial,
   .modal-consultar-saldo-caja {
     .modal-content {
       background: #0d121d;
@@ -1062,6 +1064,22 @@
         font-size: 18px;
         opacity: 0.9;
       }
+    }
+
+    &.modal-accion-header--reactivar-turno::before {
+      background: linear-gradient(180deg, #34c38f, #2aa876);
+    }
+
+    &.modal-accion-header--reactivar-turno .modal-title i {
+      color: #34c38f;
+    }
+
+    &.modal-accion-header--corte-parcial::before {
+      background: linear-gradient(180deg, #50a5f1, #3d8bd9);
+    }
+
+    &.modal-accion-header--corte-parcial .modal-title i {
+      color: #50a5f1;
     }
   }
 
@@ -1590,7 +1608,13 @@
   }
 }
 
-}
+
+
+
+
+
+
+
 
 
 

@@ -164,6 +164,24 @@
                                         <span class="btn-action-desc">Pausar turno sin cerrarlo</span>
                                     </div>
                                 </button>
+                                <button (click)="reactivarTurno()" type="button" class="btn-action-large btn-action-large-success">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Reactivar turno</span>
+                                        <span class="btn-action-desc">Continuar turno suspendido</span>
+                                    </div>
+                                </button>
+                                <button (click)="corteParcial()" type="button" class="btn-action-large btn-action-large-info">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-cut"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Corte parcial (Corte X)</span>
+                                        <span class="btn-action-desc">Generar reporte sin cerrar turno</span>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -353,6 +371,14 @@
                                 <button *ngIf="esTurnoAbierto(row.data)" type="button" id="suspenderTurnoButton" class="btnAcciones" (click)="abrirModalSuspenderDesdeFila(row.data)"
                                     ngbTooltip="Suspender turno temporalmente" placement="top" container="body">
                                     <i class="fa fa-pause-circle"></i>
+                                </button>
+                                <button *ngIf="esTurnoSuspendido(row.data)" type="button" id="reactivarTurnoButton" class="btnAcciones" (click)="abrirModalReactivarDesdeFila(row.data)"
+                                    ngbTooltip="Reactivar turno suspendido" placement="top" container="body">
+                                    <i class="fa fa-play-circle"></i>
+                                </button>
+                                <button *ngIf="esTurnoAbierto(row.data)" type="button" id="corteParcialButton" class="btnAcciones" (click)="abrirModalCorteParcialDesdeFila(row.data)"
+                                    ngbTooltip="Corte parcial (Corte X)" placement="top" container="body">
+                                    <i class="fa fa-cut"></i>
                                 </button>
                             </div>
                         </div>
@@ -717,6 +743,132 @@
         </button>
         <button type="button" class="btn btn-warning" (click)="guardarSuspenderTurno()" [disabled]="suspenderTurnoForm.invalid">
             <i class="fas fa-pause-circle"></i> Suspender turno
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Reactivar turno (POST /pos/turnos/reactivar) -->
+<ng-template #modalReactivarTurno let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--reactivar-turno">
+        <h5 class="modal-title">
+            <i class="fas fa-play-circle"></i>
+            <span>Reactivar turno suspendido</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="form-indication">
+            <i class="fas fa-play-circle"></i>
+            <span>Continúa un turno que fue suspendido, opcionalmente con cambio de cajero. El turno debe estar <strong>suspendido</strong>, se identifica por <strong>ID de caja</strong>. Requiere rol Jefe de Sala o Gerente.</span>
+        </div>
+        <form [formGroup]="reactivarTurnoForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Caja con turno suspendido *</span>
+                        <dx-select-box
+                            [dataSource]="listaCajasReactivar"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-caja">
+                        </dx-select-box>
+                        <div *ngIf="listaCajasReactivar.length === 0" class="text-muted small mt-1">No hay cajas con turnos suspendidos</div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Observaciones</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Ej: Continúa turno después de hora de comida" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-success" (click)="guardarReactivarTurno()" [disabled]="reactivarTurnoForm.invalid">
+            <i class="fas fa-play-circle"></i> Reactivar turno
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Corte parcial (POST /pos/turnos/corte-parcial) -->
+<ng-template #modalCorteParcial let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--corte-parcial">
+        <h5 class="modal-title">
+            <i class="fas fa-cut"></i>
+            <span>Corte parcial (Corte X)</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="form-indication">
+            <i class="fas fa-cut"></i>
+            <span>Genera un reporte del estado actual del turno sin cerrarlo. Compara efectivo contado vs saldo calculado. El turno debe estar <strong>abierto</strong>, se identifica por <strong>ID de caja</strong>. Requiere rol Operador, Jefe de Sala o Gerente.</span>
+        </div>
+        <form [formGroup]="corteParcialForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Caja con turno abierto *</span>
+                        <dx-select-box
+                            [dataSource]="listaCajasCorteParcial"
+                            displayExpr="text"
+                            valueExpr="id"
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
+                            searchEnabled="true"
+                            searchMode="contains"
+                            [showClearButton]="true"
+                            class="dx-select-box-custom dx-select-box-caja">
+                        </dx-select-box>
+                        <div *ngIf="listaCajasCorteParcial.length === 0" class="text-muted small mt-1">No hay cajas con turnos abiertos</div>
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">Efectivo contado *</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input formControlName="efectivoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
+                        <span class="field-label text-white">Observaciones</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-comment-alt"></i>
+                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Ej: Corte de medio día" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn btn-info" (click)="guardarCorteParcial()" [disabled]="corteParcialForm.invalid">
+            <i class="fas fa-cut"></i> Generar corte parcial
         </button>
     </div>
 </ng-template>
