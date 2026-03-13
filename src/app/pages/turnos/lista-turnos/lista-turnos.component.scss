@@ -905,7 +905,67 @@
       background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
     }
   }
+
+  /* Colores por servicio POS Turnos (cada acción distinta) */
+  &.btn-turnos-abrir {
+    border-color: rgba(0, 172, 193, 0.5);
+    background: rgba(0, 172, 193, 0.12);
+    .btn-action-icon { background: #00acc1; }
+    &:hover { background: rgba(0, 172, 193, 0.22); border-color: #00acc1; }
+  }
+  &.btn-turnos-cerrar {
+    border-color: rgba(255, 109, 0, 0.5);
+    background: rgba(255, 109, 0, 0.12);
+    .btn-action-icon { background: #ff6d00; }
+    &:hover { background: rgba(255, 109, 0, 0.22); border-color: #ff6d00; }
+  }
+  &.btn-turnos-reponer {
+    border-color: rgba(0, 200, 83, 0.5);
+    background: rgba(0, 200, 83, 0.12);
+    .btn-action-icon { background: #00c853; }
+    &:hover { background: rgba(0, 200, 83, 0.22); border-color: #00c853; }
+  }
+  &.btn-turnos-retirar {
+    border-color: rgba(255, 152, 0, 0.5);
+    background: rgba(255, 152, 0, 0.12);
+    .btn-action-icon { background: #ff9800; }
+    &:hover { background: rgba(255, 152, 0, 0.22); border-color: #ff9800; }
+  }
+  &.btn-turnos-consultar-caja {
+    border-color: rgba(41, 121, 255, 0.5);
+    background: rgba(41, 121, 255, 0.12);
+    .btn-action-icon { background: #2979ff; }
+    &:hover { background: rgba(41, 121, 255, 0.22); border-color: #2979ff; }
+  }
+  &.btn-turnos-suspender {
+    border-color: rgba(198, 40, 40, 0.6);
+    background: rgba(198, 40, 40, 0.12);
+    .btn-action-icon { background: #c62828; }
+    &:hover { background: rgba(198, 40, 40, 0.22); border-color: #c62828; }
+  }
+  &.btn-turnos-reactivar {
+    border-color: rgba(0, 150, 136, 0.5);
+    background: rgba(0, 150, 136, 0.12);
+    .btn-action-icon { background: #009688; }
+    &:hover { background: rgba(0, 150, 136, 0.22); border-color: #009688; }
+  }
+  &.btn-turnos-corte {
+    border-color: rgba(103, 58, 183, 0.5);
+    background: rgba(103, 58, 183, 0.12);
+    .btn-action-icon { background: #673ab7; }
+    &:hover { background: rgba(103, 58, 183, 0.22); border-color: #673ab7; }
+  }
 }
+
+/* Botones confirmar en modales Turnos (colores sólidos) */
+.btn-confirm-turnos-abrir { background: #00acc1 !important; border: 2px solid #00acc1 !important; color: #fff !important; }
+.btn-confirm-turnos-cerrar { background: #ff6d00 !important; border: 2px solid #ff6d00 !important; color: #fff !important; }
+.btn-confirm-turnos-reponer { background: #00c853 !important; border: 2px solid #00c853 !important; color: #fff !important; }
+.btn-confirm-turnos-retirar { background: #ff9800 !important; border: 2px solid #ff9800 !important; color: #fff !important; }
+.btn-confirm-turnos-suspender { background: #c62828 !important; border: 2px solid #c62828 !important; color: #fff !important; }
+.btn-confirm-turnos-reactivar { background: #009688 !important; border: 2px solid #009688 !important; color: #fff !important; }
+.btn-confirm-turnos-corte { background: #673ab7 !important; border: 2px solid #673ab7 !important; color: #fff !important; }
+.btn-confirm-turnos-consultar-caja { background: #2979ff !important; border: 2px solid #2979ff !important; color: #fff !important; }
 
 @media (max-width: 768px) {
   .action-buttons-content {

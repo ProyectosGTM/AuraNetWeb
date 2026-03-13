@@ -94,6 +94,11 @@ export class MonederosServices {
     return this.http.post(`${environment.API_SECURITY}/monederos/ajuste`, payload);
   }
 
+  /** GET monederos/numero/{numero} - Consultar monedero por número RFID (Swagger) */
+  obtenerMonederoPorNumero(numero: string): Observable<any> {
+    return this.http.get<any>(`${environment.API_SECURITY}/monederos/numero/${encodeURIComponent(numero)}`);
+  }
+
   /** GET monederos/movimientos/historial/{id} - Historial de movimientos de un monedero */
   obtenerHistorialMovimientosMonedero(idMonedero: number): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/monederos/movimientos/historial/${idMonedero}`);

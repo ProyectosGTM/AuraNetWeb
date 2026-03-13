@@ -46,7 +46,7 @@
                                 </h5>
                             </div>
                             <div class="action-buttons-content">
-                                <button (click)="cargarMonedero()" type="button" class="btn-action-large btn-action-large-success">
+                                <button (click)="cargarMonedero()" type="button" class="btn-action-large btn-monederos-cargar">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-arrow-up"></i>
                                     </div>
@@ -55,7 +55,7 @@
                                         <span class="btn-action-desc">Agregar saldo a monedero</span>
                                     </div>
                                 </button>
-                                <button (click)="descargarMonedero()" type="button" class="btn-action-large btn-action-large-warning">
+                                <button (click)="descargarMonedero()" type="button" class="btn-action-large btn-monederos-descargar">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-arrow-down"></i>
                                     </div>
@@ -64,7 +64,7 @@
                                         <span class="btn-action-desc">Retirar saldo de monedero</span>
                                     </div>
                                 </button>
-                                <button (click)="consultarSaldo()" type="button" class="btn-action-large btn-action-large-info">
+                                <button (click)="consultarSaldo()" type="button" class="btn-action-large btn-monederos-consultar">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-search-dollar"></i>
                                     </div>
@@ -73,7 +73,7 @@
                                         <span class="btn-action-desc">Ver saldo por número</span>
                                     </div>
                                 </button>
-                                <button (click)="traspasoMonedero()" type="button" class="btn-action-large btn-action-large-purple">
+                                <button (click)="traspasoMonedero()" type="button" class="btn-action-large btn-monederos-traspaso">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-exchange-alt"></i>
                                     </div>
@@ -82,7 +82,7 @@
                                         <span class="btn-action-desc">Entre monederos del mismo afiliado</span>
                                     </div>
                                 </button>
-                                <button (click)="verMonederosPorAfiliado()" type="button" class="btn-action-large btn-action-large-secondary">
+                                <button (click)="verMonederosPorAfiliado()" type="button" class="btn-action-large btn-monederos-afiliado">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-users"></i>
                                     </div>
@@ -91,7 +91,7 @@
                                         <span class="btn-action-desc">Ver monederos de un afiliado</span>
                                     </div>
                                 </button>
-                                <button (click)="ajusteMonedero()" type="button" class="btn-action-large btn-action-large-ajuste">
+                                <button (click)="ajusteMonedero()" type="button" class="btn-action-large btn-monederos-ajuste">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-balance-scale"></i>
                                     </div>
@@ -341,7 +341,7 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-warning" (click)="guardarDescargarMonedero()" [disabled]="descargarMonederoForm.invalid">
+        <button type="button" class="btn btn-monederos-descargar" (click)="guardarDescargarMonedero()" [disabled]="descargarMonederoForm.invalid">
             <i class="fas fa-check"></i> Descargar
         </button>
     </div>
@@ -826,7 +826,7 @@
             <i class="fas fa-times" *ngIf="!saldoData"></i>
             <span>{{ saldoData ? 'Nueva Consulta' : 'Cancelar' }}</span>
         </button>
-        <button *ngIf="!saldoData" type="button" class="btn btn-info" (click)="buscarSaldo()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo">
+        <button *ngIf="!saldoData" type="button" class="btn btn-monederos-consultar-saldo" (click)="buscarSaldo()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo">
             <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i>
             <i class="fas fa-search" *ngIf="!consultandoSaldo"></i>
             {{ consultandoSaldo ? 'Consultando...' : 'Consultar' }}

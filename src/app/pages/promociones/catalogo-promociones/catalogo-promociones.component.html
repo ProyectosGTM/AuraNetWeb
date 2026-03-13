@@ -1,0 +1,60 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon"><i class="fas fa-gift"></i></div>
+            <div>
+              <h4 class="title-title">Catálogo de Promociones</h4>
+              <p class="title-subtitle">Listado de promociones. Vigentes y por vencer.</p>
+            </div>
+          </div>
+          <div class="title-buttons">
+            <button type="button" class="btn-title" [class.btn-title--primary]="filtroVista === 'todas'" (click)="setFiltro('todas')">
+              <i class="fas fa-list"></i> Todas
+            </button>
+            <button type="button" class="btn-title" [class.btn-title--primary]="filtroVista === 'vigentes'" (click)="setFiltro('vigentes')">
+              <i class="fas fa-check-circle"></i> Vigentes
+            </button>
+            <button type="button" class="btn-title" [class.btn-title--primary]="filtroVista === 'por-vencer'" (click)="setFiltro('por-vencer')">
+              <i class="fas fa-clock"></i> Por vencer
+            </button>
+            <button type="button" class="btn-title btn-title--ghost" (click)="refreshGrid()">
+              <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12">
+            <dx-data-grid
+              #dataGrid
+              [dataSource]="listaPromociones"
+              [showBorders]="true"
+              [showRowLines]="true"
+              [rowAlternationEnabled]="true"
+              keyExpr="id"
+              [width]="'100%'"
+              [paging]="{ pageSize: pageSize }"
+              [pager]="{ showPageSizeSelector: true, allowedPageSizes: [10, 20, 50], showInfo: true, visible: true }"
+              [searchPanel]="{ visible: true, placeholder: 'Buscar...' }"
+              [filterRow]="{ visible: true }"
+              [headerFilter]="{ visible: true }">
+              <dxi-column caption="Acciones" [width]="120" cellTemplate="acciones"></dxi-column>
+              <dxi-column dataField="nombre" caption="Nombre" dataType="string" [allowSearch]="true"></dxi-column>
+              <dxi-column dataField="fechaInicioFormateada" caption="Inicio" dataType="string"></dxi-column>
+              <dxi-column dataField="fechaFinFormateada" caption="Fin" dataType="string"></dxi-column>
+              <dxi-column dataField="codigo" caption="Código" dataType="string" [allowSearch]="true"></dxi-column>
+              <dxi-column dataField="estatus" caption="Estatus" dataType="string" [allowSearch]="true"></dxi-column>
+              <div *dxTemplate="let cell of 'acciones'">
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="verDetalle(cell.data.id)">
+                  <i class="fas fa-eye"></i> Ver
+                </button>
+              </div>
+            </dx-data-grid>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

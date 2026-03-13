@@ -37,30 +37,55 @@
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">
-                        <section class="acciones-rapidas">
-                            <h6 class="acciones-rapidas-titulo">Acciones rápidas</h6>
-                            <div class="acciones-rapidas-grid">
-                                <button (click)="abrirTesoreria()" type="button" class="accion-card accion-card--open">
-                                    <span class="accion-card-icon"><i class="fas fa-door-open"></i></span>
-                                    <span class="accion-card-label">Abrir Boveda</span>
+                        <div class="action-buttons-card">
+                            <div class="action-buttons-header">
+                                <h5 class="action-buttons-title">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Acciones Rápidas</span>
+                                </h5>
+                            </div>
+                            <div class="action-buttons-content">
+                                <button (click)="abrirTesoreria()" type="button" class="btn-action-large btn-boveda-abrir">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-door-open"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Abrir Bóveda</span>
+                                        <span class="btn-action-desc">Iniciar nueva tesorería de sala</span>
+                                    </div>
                                 </button>
-                                <button (click)="cerrarTesoreria()" type="button" class="accion-card accion-card--close"
+                                <button (click)="cerrarTesoreria()" type="button" class="btn-action-large btn-boveda-cerrar"
                                     [disabled]="loadingAcciones">
-                                    <span class="accion-card-icon"><i class="fas fa-door-closed"></i></span>
-                                    <span class="accion-card-label">Cerrar Boveda</span>
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-door-closed"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Cerrar Bóveda</span>
+                                        <span class="btn-action-desc">Finalizar tesorería activa</span>
+                                    </div>
                                 </button>
-                                <button (click)="reponerTesoreria()" type="button" class="accion-card accion-card--reponer"
+                                <button (click)="reponerTesoreria()" type="button" class="btn-action-large btn-boveda-reponer"
                                     [disabled]="loadingAcciones">
-                                    <span class="accion-card-icon"><i class="fas fa-arrow-up"></i></span>
-                                    <span class="accion-card-label">Reponer Efectivo</span>
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Reponer Efectivo</span>
+                                        <span class="btn-action-desc">Ingresar efectivo a bóveda</span>
+                                    </div>
                                 </button>
-                                <button (click)="retirarTesoreria()" type="button" class="accion-card accion-card--retirar"
+                                <button (click)="retirarTesoreria()" type="button" class="btn-action-large btn-boveda-retirar"
                                     [disabled]="loadingAcciones">
-                                    <span class="accion-card-icon"><i class="fas fa-arrow-down"></i></span>
-                                    <span class="accion-card-label">Retirar Efectivo</span>
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Retirar Efectivo</span>
+                                        <span class="btn-action-desc">Extraer efectivo de bóveda</span>
+                                    </div>
                                 </button>
                             </div>
-                        </section>
+                        </div>
                     </div>
                 </div>
                 <div class="row mt-3 gy-4">

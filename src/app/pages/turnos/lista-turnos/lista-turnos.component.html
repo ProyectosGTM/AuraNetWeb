@@ -110,7 +110,7 @@
                                 </h5>
                             </div>
                             <div class="action-buttons-content">
-                                <button (click)="abrirTurno()" type="button" class="btn-action-large btn-action-large-success">
+                                <button (click)="abrirTurno()" type="button" class="btn-action-large btn-turnos-abrir">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-door-open"></i>
                                     </div>
@@ -119,7 +119,7 @@
                                         <span class="btn-action-desc">Iniciar nuevo turno de caja</span>
                                     </div>
                                 </button>
-                                <button (click)="cerrarTurno()" type="button" class="btn-action-large btn-action-large-warning">
+                                <button (click)="cerrarTurno()" type="button" class="btn-action-large btn-turnos-cerrar">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-door-closed"></i>
                                     </div>
@@ -128,7 +128,7 @@
                                         <span class="btn-action-desc">Finalizar turno activo</span>
                                     </div>
                                 </button>
-                                <button (click)="reponerTurno()" type="button" class="btn-action-large btn-action-large-success">
+                                <button (click)="reponerTurno()" type="button" class="btn-action-large btn-turnos-reponer">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-arrow-up"></i>
                                     </div>
@@ -137,7 +137,7 @@
                                         <span class="btn-action-desc">Transfiere efectivo de tesorería a caja</span>
                                     </div>
                                 </button>
-                                <button (click)="retirarTurno()" type="button" class="btn-action-large btn-action-large-warning">
+                                <button (click)="retirarTurno()" type="button" class="btn-action-large btn-turnos-retirar">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-arrow-down"></i>
                                     </div>
@@ -146,7 +146,7 @@
                                         <span class="btn-action-desc">Transfiere efectivo de caja a tesorería</span>
                                     </div>
                                 </button>
-                                <button (click)="consultarSaldoCaja()" type="button" class="btn-action-large btn-action-large-info">
+                                <button (click)="consultarSaldoCaja()" type="button" class="btn-action-large btn-turnos-consultar-caja">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-wallet"></i>
                                     </div>
@@ -155,7 +155,7 @@
                                         <span class="btn-action-desc">Obtener saldo de una caja</span>
                                     </div>
                                 </button>
-                                <button (click)="suspenderTurno()" type="button" class="btn-action-large btn-action-large-warning">
+                                <button (click)="suspenderTurno()" type="button" class="btn-action-large btn-turnos-suspender">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-pause-circle"></i>
                                     </div>
@@ -164,7 +164,7 @@
                                         <span class="btn-action-desc">Pausar turno sin cerrarlo</span>
                                     </div>
                                 </button>
-                                <button (click)="reactivarTurno()" type="button" class="btn-action-large btn-action-large-success">
+                                <button (click)="reactivarTurno()" type="button" class="btn-action-large btn-turnos-reactivar">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-play-circle"></i>
                                     </div>
@@ -173,7 +173,7 @@
                                         <span class="btn-action-desc">Continuar turno suspendido</span>
                                     </div>
                                 </button>
-                                <button (click)="corteParcial()" type="button" class="btn-action-large btn-action-large-info">
+                                <button (click)="corteParcial()" type="button" class="btn-action-large btn-turnos-corte">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-cut"></i>
                                     </div>
@@ -537,7 +537,7 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-success" (click)="guardarAbrirTurno()" [disabled]="abrirTurnoForm.invalid">
+        <button type="button" class="btn btn-confirm-turnos-abrir" (click)="guardarAbrirTurno()" [disabled]="abrirTurnoForm.invalid">
             <i class="fas fa-check"></i> Abrir Turno
         </button>
     </div>
@@ -605,7 +605,7 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-success" (click)="guardarReponerTurno()" [disabled]="reponerTurnoForm.invalid">
+        <button type="button" class="btn btn-confirm-turnos-reponer" (click)="guardarReponerTurno()" [disabled]="reponerTurnoForm.invalid">
             <i class="fas fa-check"></i> Reponer
         </button>
     </div>
@@ -673,7 +673,7 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-warning" (click)="guardarRetirarTurno()" [disabled]="retirarTurnoForm.invalid">
+        <button type="button" class="btn btn-confirm-turnos-retirar" (click)="guardarRetirarTurno()" [disabled]="retirarTurnoForm.invalid">
             <i class="fas fa-check"></i> Retirar
         </button>
     </div>
@@ -741,7 +741,7 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-warning" (click)="guardarSuspenderTurno()" [disabled]="suspenderTurnoForm.invalid">
+        <button type="button" class="btn btn-confirm-turnos-suspender" (click)="guardarSuspenderTurno()" [disabled]="suspenderTurnoForm.invalid">
             <i class="fas fa-pause-circle"></i> Suspender turno
         </button>
     </div>
@@ -799,7 +799,7 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-success" (click)="guardarReactivarTurno()" [disabled]="reactivarTurnoForm.invalid">
+        <button type="button" class="btn btn-confirm-turnos-reactivar" (click)="guardarReactivarTurno()" [disabled]="reactivarTurnoForm.invalid">
             <i class="fas fa-play-circle"></i> Reactivar turno
         </button>
     </div>
@@ -867,7 +867,7 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-info" (click)="guardarCorteParcial()" [disabled]="corteParcialForm.invalid">
+        <button type="button" class="btn btn-confirm-turnos-corte" (click)="guardarCorteParcial()" [disabled]="corteParcialForm.invalid">
             <i class="fas fa-cut"></i> Generar corte parcial
         </button>
     </div>
@@ -935,7 +935,7 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-warning" (click)="guardarCerrarTurno()" [disabled]="cerrarTurnoForm.invalid">
+        <button type="button" class="btn btn-confirm-turnos-cerrar" (click)="guardarCerrarTurno()" [disabled]="cerrarTurnoForm.invalid">
             <i class="fas fa-check"></i> Cerrar Turno
         </button>
     </div>
@@ -1009,7 +1009,7 @@
             <i class="fas fa-times" *ngIf="!saldoCajaData"></i>
             <span>{{ saldoCajaData ? 'Nueva consulta' : 'Cancelar' }}</span>
         </button>
-        <button *ngIf="!saldoCajaData" type="button" class="btn btn-info" (click)="buscarSaldoCaja()" [disabled]="consultarSaldoCajaForm.invalid || consultandoSaldoCaja">
+        <button *ngIf="!saldoCajaData" type="button" class="btn btn-confirm-turnos-consultar-caja" (click)="buscarSaldoCaja()" [disabled]="consultarSaldoCajaForm.invalid || consultandoSaldoCaja">
             <i class="fas fa-search" *ngIf="!consultandoSaldoCaja"></i>
             <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldoCaja"></i>
             {{ consultandoSaldoCaja ? 'Consultando...' : 'Consultar' }}

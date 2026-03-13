@@ -21,7 +21,7 @@
     gap: 8px;
 
     i {
-      color: #50a5f1;
+      color: #7c4dff;
     }
   }
 }
@@ -72,7 +72,7 @@
 
     .btn-action-label {
       font-size: 16px;
-      font-weight: 500;
+      font-weight: 600;
       color: #fff;
     }
 
@@ -82,71 +82,42 @@
     }
   }
 
-  &.btn-action-large-success {
-    &:hover {
-      background: rgba(52, 195, 143, 0.1);
-      border-color: rgba(52, 195, 143, 0.3);
-    }
-
-    .btn-action-icon {
-      background: linear-gradient(135deg, #34c38f 0%, #2aa876 100%);
-    }
+  /* Colores Monederos (mismo diseño que Turnos, paleta propia) */
+  &.btn-monederos-cargar {
+    border-color: rgba(52, 195, 143, 0.5);
+    background: rgba(52, 195, 143, 0.12);
+    .btn-action-icon { background: #34c38f; }
+    &:hover { background: rgba(52, 195, 143, 0.22); border-color: #34c38f; }
   }
-
-  &.btn-action-large-warning {
-    &:hover {
-      background: rgba(241, 180, 76, 0.1);
-      border-color: rgba(241, 180, 76, 0.3);
-    }
-
-    .btn-action-icon {
-      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
-    }
+  &.btn-monederos-descargar {
+    border-color: rgba(124, 77, 255, 0.5);
+    background: rgba(124, 77, 255, 0.12);
+    .btn-action-icon { background: #7c4dff; }
+    &:hover { background: rgba(124, 77, 255, 0.22); border-color: #7c4dff; }
   }
-
-  &.btn-action-large-info {
-    &:hover {
-      background: rgba(80, 165, 241, 0.1);
-      border-color: rgba(80, 165, 241, 0.3);
-    }
-
-    .btn-action-icon {
-      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
-    }
+  &.btn-monederos-consultar {
+    border-color: rgba(41, 121, 255, 0.5);
+    background: rgba(41, 121, 255, 0.12);
+    .btn-action-icon { background: #2979ff; }
+    &:hover { background: rgba(41, 121, 255, 0.22); border-color: #2979ff; }
   }
-
-  /* NUEVO - REEMPLAZAR (MORADO) */
-  &.btn-action-large-purple {
-    &:hover {
-      background: rgba(155, 89, 182, 0.12);
-      border-color: rgba(155, 89, 182, 0.35);
-    }
-
-    .btn-action-icon {
-      background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
-    }
+  &.btn-monederos-traspaso {
+    border-color: rgba(155, 89, 182, 0.5);
+    background: rgba(155, 89, 182, 0.12);
+    .btn-action-icon { background: #9b59b6; }
+    &:hover { background: rgba(155, 89, 182, 0.22); border-color: #9b59b6; }
   }
-
-  &.btn-action-large-secondary {
-    &:hover {
-      background: rgba(108, 117, 125, 0.15);
-      border-color: rgba(108, 117, 125, 0.35);
-    }
-
-    .btn-action-icon {
-      background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-    }
+  &.btn-monederos-afiliado {
+    border-color: rgba(108, 117, 125, 0.5);
+    background: rgba(108, 117, 125, 0.12);
+    .btn-action-icon { background: #6c757d; }
+    &:hover { background: rgba(108, 117, 125, 0.22); border-color: #6c757d; }
   }
-
-  &.btn-action-large-ajuste {
-    &:hover {
-      background: rgba(23, 162, 184, 0.12);
-      border-color: rgba(23, 162, 184, 0.35);
-    }
-
-    .btn-action-icon {
-      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    }
+  &.btn-monederos-ajuste {
+    border-color: rgba(23, 162, 184, 0.5);
+    background: rgba(23, 162, 184, 0.12);
+    .btn-action-icon { background: #17a2b8; }
+    &:hover { background: rgba(23, 162, 184, 0.22); border-color: #17a2b8; }
   }
 }
 

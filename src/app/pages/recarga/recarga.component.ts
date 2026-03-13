@@ -107,8 +107,12 @@ export class RecargaComponent implements OnInit {
     }).subscribe({
       next: (responses) => {
         const cajasData = responses.cajas.data || [];
-        const cajasAbiertas = cajasData.filter((c: any) => Number(c.idEstatusCaja) === 2);
-        this.listaCajas = cajasAbiertas.map((c: any) => ({
+        // Para recarga mostramos todas las cajas activas (estatus 1 o 2)
+        const cajasDisponibles = cajasData.filter((c: any) => {
+          const estatus = Number(c.idEstatusCaja);
+          return estatus === 1 || estatus === 2;
+        });
+        this.listaCajas = cajasDisponibles.map((c: any) => ({
           ...c,
           id: Number(c.id),
           text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Caja sin nombre'

@@ -42,6 +42,7 @@ const routes: Routes = [
   { path: 'turnos', loadChildren: () => import('./turnos/turnos.module').then(m => m.TurnosModule)},
   { path: 'afiliados', loadChildren: () => import('./afiliados/afiliados.module').then(m => m.AfiliadosModule)},
   { path: 'transacciones', loadChildren: () => import('./transacciones/transacciones.module').then(m => m.TransaccionesModule)},
+  { path: 'promociones', loadChildren: () => import('./promociones/promociones.module').then(m => m.PromocionesModule) },
 ];
 
 @NgModule({

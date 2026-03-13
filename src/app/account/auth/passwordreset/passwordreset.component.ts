@@ -115,6 +115,7 @@ export class PasswordresetComponent implements OnInit, AfterViewInit {
         });
         this.resetForm.reset();
         this.submitted = false;
+        this.loading = false;
         this.router.navigate(['/account', 'login']);
       },
 
@@ -126,10 +127,9 @@ export class PasswordresetComponent implements OnInit, AfterViewInit {
           icon: 'error',
           confirmButtonText: 'Entendido'
         });
-      },
-
-      complete: () => {
+        // Restaurar estado inicial para permitir un nuevo intento
         this.loading = false;
+        this.submitted = false;
       }
     });
   }

@@ -1,0 +1,33 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon"><i class="fas fa-chart-bar"></i></div>
+            <div>
+              <h4 class="title-title">Reportes de Promociones</h4>
+              <p class="title-subtitle">Reporte general de promociones.</p>
+            </div>
+          </div>
+          <div class="title-buttons">
+            <button type="button" class="btn-title btn-title--ghost" (click)="cargar()" [disabled]="loading">
+              <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-12">
+            <div *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Cargando reporte...</div>
+            <div *ngIf="!loading && reporteData" class="card bg-dark text-white border-secondary">
+              <div class="card-body">
+                <pre class="mb-0 small text-white" style="white-space: pre-wrap;">{{ reporteData | json }}</pre>
+              </div>
+            </div>
+            <p *ngIf="!loading && !reporteData" class="text-muted">No hay datos de reporte disponibles.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

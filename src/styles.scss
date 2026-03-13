@@ -145,6 +145,16 @@ body[data-bs-theme=dark] {
     }
 }
 
+/* SweetAlert2: títulos y subtítulos unificados en toda la app */
+.swal2-title {
+  color: #ffffff !important;
+}
+
+.swal2-html-container,
+.swal2-content {
+  color: #c7c7c7 !important;
+}
+
 // scroll bar
 .simplebar-scrollbar:before {
     width: 100%;
@@ -1462,3 +1472,70 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     i { color: #17a2b8; }
   }
 }
+
+/* Botones de servicios POS en módulo Recarga (colores bien diferenciados) */
+.modal-holder .btn-recarga-abrir-turno {
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-weight: 600;
+  border: 2px solid #00acc1 !important;
+  background: #00acc1 !important;
+  color: #fff !important;
+}
+.modal-holder .btn-recarga-abrir-turno:hover:not(:disabled) {
+  background: #26c6da !important;
+  border-color: #26c6da !important;
+}
+
+.modal-holder .btn-recarga-cerrar-turno {
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-weight: 600;
+  border: 2px solid #ff6d00 !important;
+  background: #ff6d00 !important;
+  color: #fff !important;
+}
+.modal-holder .btn-recarga-cerrar-turno:hover:not(:disabled) {
+  background: #ff9100 !important;
+  border-color: #ff9100 !important;
+}
+
+.modal-holder .btn-recarga-descargar {
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-weight: 600;
+  border: 2px solid #7c4dff !important;
+  background: #7c4dff !important;
+  color: #fff !important;
+}
+.modal-holder .btn-recarga-descargar:hover:not(:disabled) {
+  background: #b388ff !important;
+  border-color: #b388ff !important;
+}
+
+.modal-holder .btn-recarga-consultar-saldo {
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-weight: 600;
+  border: 2px solid #2979ff !important;
+  background: #2979ff !important;
+  color: #fff !important;
+}
+.modal-holder .btn-recarga-consultar-saldo:hover:not(:disabled) {
+  background: #448aff !important;
+  border-color: #448aff !important;
+}
+
+/* Turnos: botones confirmar en modales (colores por servicio) */
+.modal-holder .btn-confirm-turnos-abrir { background: #00acc1 !important; border: 2px solid #00acc1 !important; color: #fff !important; }
+.modal-holder .btn-confirm-turnos-cerrar { background: #ff6d00 !important; border: 2px solid #ff6d00 !important; color: #fff !important; }
+.modal-holder .btn-confirm-turnos-reponer { background: #00c853 !important; border: 2px solid #00c853 !important; color: #fff !important; }
+.modal-holder .btn-confirm-turnos-retirar { background: #ff9800 !important; border: 2px solid #ff9800 !important; color: #fff !important; }
+.modal-holder .btn-confirm-turnos-suspender { background: #c62828 !important; border: 2px solid #c62828 !important; color: #fff !important; }
+.modal-holder .btn-confirm-turnos-reactivar { background: #009688 !important; border: 2px solid #009688 !important; color: #fff !important; }
+.modal-holder .btn-confirm-turnos-corte { background: #673ab7 !important; border: 2px solid #673ab7 !important; color: #fff !important; }
+.modal-holder .btn-confirm-turnos-consultar-caja { background: #2979ff !important; border: 2px solid #2979ff !important; color: #fff !important; }
+
+/* Monederos: botones por servicio (Descargar / Consultar saldo) */
+.modal-holder .btn-monederos-descargar { background: #7c4dff !important; border: 2px solid #7c4dff !important; color: #fff !important; }
+.modal-holder .btn-monederos-consultar-saldo { background: #2979ff !important; border: 2px solid #2979ff !important; color: #fff !important; }
