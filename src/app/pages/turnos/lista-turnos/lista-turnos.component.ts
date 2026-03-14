@@ -1376,8 +1376,23 @@ export class ListaTurnosComponent {
       return;
     }
 
+    const idTurnoSeleccionado = Number(this.cerrarTurnoForm.value.idTurno);
+    const turno = this.listaTurnosActivos.find((t: any) => Number(t.id) === idTurnoSeleccionado);
+    const idCaja = turno?.idCaja != null ? Number(turno.idCaja) : null;
+    if (idCaja == null) {
+      Swal.fire({
+        title: '¡Error!',
+        text: 'No se pudo obtener la caja del turno seleccionado.',
+        icon: 'error',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+
     const payload = {
-      idTurno: this.cerrarTurnoForm.value.idTurno,
+      idCaja,
       fondoContado: Number(this.cerrarTurnoForm.value.fondoContado),
       observaciones: this.cerrarTurnoForm.value.observaciones || null
     };

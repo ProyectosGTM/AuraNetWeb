@@ -1112,9 +1112,9 @@ Al trabajar en este proyecto, aceptas:
 
 ---
 
-**Versión del Contrato:** 1.0  
+**Versión del Contrato:** 1.1  
 **Fecha de Vigencia:** 2024  
-**Última Actualización:** 2024
+**Última Actualización:** 2026-03-13
 
 ---
 

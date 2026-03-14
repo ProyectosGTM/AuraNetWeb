@@ -1050,5 +1050,5 @@ componente/
 
 ---
 
-**Última actualización:** 2024  
-**Versión del documento:** 1.0
+**Última actualización:** 2026-03-13  
+**Versión del documento:** 1.1

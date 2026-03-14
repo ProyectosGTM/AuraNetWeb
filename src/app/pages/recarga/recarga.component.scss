@@ -1,173 +1,115 @@
-// ========== PALETA (igual que Turnos/Bóveda/Monederos) ==========
-$recarga-caja: #00acc1;      // cyan
-$recarga-monedero: #00c853;  // verde
-$recarga-monto: #ff9800;     // naranja
-$recarga-confirm: #00c853;
-$recarga-muted: #9ca3af;
-$recarga-bg: #0d121d;
-$recarga-glass: rgba(255, 255, 255, 0.04);
-$recarga-border: rgba(255, 255, 255, 0.08);
-$recarga-border-strong: rgba(255, 255, 255, 0.12);
+// Paleta actual (v2) — conservada
+$brand-primary: #ff1a5b;
+$brand-dark: #0d121d;
+$brand-dark-2: #151b29;
+$brand-dark-3: #1b2232;
+$brand-border: rgba(255, 255, 255, 0.08);
+$brand-border-strong: rgba(255, 26, 91, 0.24);
+$brand-text-soft: rgba(255, 255, 255, 0.68);
+$brand-text-muted: rgba(255, 255, 255, 0.48);
+$brand-success: #19d38a;
 
-// ========== PÁGINA ==========
+// ——— Diseño anterior: página y hero ———
 .recarga-page {
   min-height: 100%;
   padding-bottom: 2rem;
-  position: relative;
+  background: $brand-dark;
 }
 
-// ========== HERO ==========
 .recarga-hero {
   position: relative;
-  border-radius: 20px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
   overflow: hidden;
-  margin-bottom: 2rem;
-  padding: 2rem 2.5rem;
 }
 
 .recarga-hero-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg,
-    rgba(0, 172, 193, 0.18) 0%,
-    rgba(0, 200, 83, 0.12) 40%,
-    rgba(124, 77, 255, 0.08) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 172, 193, 0.25), transparent 60%);
-    pointer-events: none;
-  }
+  display: none;
 }
 
 .recarga-hero-content {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.75rem;
+  z-index: 1;
 }
 
 .recarga-hero-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: linear-gradient(145deg, $recarga-caja 0%, darken($recarga-caja, 8%) 100%);
-  box-shadow: 0 12px 32px rgba(0, 172, 193, 0.4);
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.25rem;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: $brand-primary;
   color: #fff;
-  font-size: 1.75rem;
+  font-size: 2rem;
 }
 
 .recarga-hero-title {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 800;
   color: #fff;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .recarga-hero-subtitle {
-  margin: 0;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.75);
-  max-width: 420px;
+  margin: 0 0 1rem;
+  color: $brand-text-soft;
+  font-size: 1rem;
 }
 
 .recarga-hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.4rem 0.9rem;
+  padding: 0.5rem 1rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $brand-border;
+  color: $brand-text-soft;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .recarga-hero-badge-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: $recarga-monedero;
-  box-shadow: 0 0 10px $recarga-monedero;
-  animation: recarga-pulse 2s ease-in-out infinite;
+  background: $brand-success;
 }
 
-@keyframes recarga-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.1); }
-}
-
-// ========== FLOW ==========
+// ——— Flujo y cards (3 cards amplias) ———
 .recarga-flow {
-  position: relative;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
-// ========== CARDS (glassmorphism) ==========
 .recarga-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(3, minmax(320px, 1fr));
+  gap: 1.75rem;
   margin-bottom: 1.5rem;
-}
-
-@media (max-width: 992px) {
-  .recarga-cards {
-    grid-template-columns: 1fr;
-  }
 }
 
 .recarga-card {
   position: relative;
-  border-radius: 18px;
-  border: 1px solid $recarga-border;
-  background: $recarga-glass;
-  backdrop-filter: blur(12px);
+  border-radius: 22px;
+  background: $brand-dark;
+  border: 1px solid $brand-border;
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-}
-
-.recarga-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
 .recarga-card-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  opacity: 0.9;
-}
-
-.recarga-card-glow--caja {
-  background: linear-gradient(90deg, $recarga-caja, transparent);
-}
-
-.recarga-card-glow--monedero {
-  background: linear-gradient(90deg, $recarga-monedero, transparent);
-}
-
-.recarga-card-glow--monto {
-  background: linear-gradient(90deg, $recarga-monto, transparent);
+  display: none;
 }
 
 .recarga-card-header {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 1.25rem 0.75rem;
-  border-bottom: 1px solid $recarga-border;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1.25rem 1.25rem 0.5rem;
 }
 
 .recarga-card-icon {
@@ -177,24 +119,16 @@ $recarga-border-strong: rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   flex-shrink: 0;
 }
 
-.recarga-card-icon--caja {
-  background: $recarga-caja;
-  box-shadow: 0 8px 24px rgba(0, 172, 193, 0.35);
-}
-
-.recarga-card-icon--monedero {
-  background: $recarga-monedero;
-  box-shadow: 0 8px 24px rgba(0, 200, 83, 0.35);
-}
-
+.recarga-card-icon--caja,
+.recarga-card-icon--monedero,
 .recarga-card-icon--monto {
-  background: $recarga-monto;
-  box-shadow: 0 8px 24px rgba(255, 152, 0, 0.35);
+  background: $brand-dark-2;
+  border: 1px solid $brand-border;
+  color: $brand-primary;
 }
 
 .recarga-card-titles {
@@ -203,320 +137,266 @@ $recarga-border-strong: rgba(255, 255, 255, 0.12);
 
 .recarga-card-title {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #fff;
 }
 
 .recarga-card-sub {
-  margin: 0.2rem 0 0;
-  font-size: 0.8rem;
-  color: $recarga-muted;
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: $brand-text-soft;
 }
 
 .recarga-card-body {
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  padding: 0 1.25rem 1.25rem;
 }
 
-// Field
 .recarga-field {
   display: block;
+  margin-bottom: 0.85rem;
 }
 
 .recarga-field-label {
   display: block;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.4rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .recarga-field-hint {
-  margin: 0.4rem 0 0;
-  font-size: 0.75rem;
-  color: $recarga-muted;
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: $brand-text-muted;
 }
 
-// Input monto
-.recarga-input-monto {
-  position: relative;
-  border-radius: 14px;
-  border: 1px solid $recarga-border-strong;
-  background: rgba(0, 0, 0, 0.2);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.recarga-input-monto:focus-within {
-  border-color: $recarga-monto;
-  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.15);
-}
-
-.recarga-input-monto i {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: $recarga-monto;
-  font-size: 1rem;
-  pointer-events: none;
-}
-
-.recarga-input-control {
-  width: 100%;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: #fff;
-  font-size: 1.6rem;
-  font-weight: 600;
-  padding: 1rem 1rem 1rem 2.75rem;
-  border-radius: 14px;
-  text-align: center;
-}
-
-.recarga-input-control::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-// Chip estado
 .recarga-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.85rem;
   border-radius: 12px;
+  background: $brand-dark-2;
+  border: 1px solid $brand-border;
+  color: $brand-text-muted;
   font-size: 0.8rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid $recarga-border;
-  transition: all 0.2s;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
 }
 
-.recarga-card--caja .recarga-chip--on {
-  color: #fff;
-  background: rgba(0, 172, 193, 0.15);
-  border-color: rgba(0, 172, 193, 0.4);
+.recarga-chip--on {
+  border-color: $brand-border;
+  background: $brand-dark-2;
+  color: $brand-success;
 }
 
-.recarga-card--monedero .recarga-chip--on {
-  color: #fff;
-  background: rgba(0, 200, 83, 0.15);
-  border-color: rgba(0, 200, 83, 0.4);
+.recarga-chip--on i {
+  color: $brand-success;
 }
 
-// Detail strip
 .recarga-detail {
-  margin-top: 0.25rem;
-  padding: 0.75rem;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.15);
-  border: 1px solid $recarga-border;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
-
-@media (max-width: 576px) {
-  .recarga-detail {
-    grid-template-columns: 1fr;
-  }
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid $brand-border;
 }
 
 .recarga-detail-item {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.4rem 0;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  font-size: 0.8rem;
 }
 
 .recarga-detail-label {
-  font-size: 0.7rem;
-  color: $recarga-muted;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
+  color: $brand-text-muted;
 }
 
-.recarga-card--caja .recarga-detail-label i { color: $recarga-caja; }
-.recarga-card--monedero .recarga-detail-label i { color: $recarga-monedero; }
-.recarga-card--monto .recarga-detail-label i { color: $recarga-monto; }
+.recarga-detail-label i {
+  margin-right: 0.35rem;
+  color: $brand-primary;
+}
 
 .recarga-detail-value {
-  font-size: 0.85rem;
-  font-weight: 500;
   color: #fff;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-// Quick montos
-.recarga-quick {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.5rem;
+// Input monto
+.recarga-input-monto {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 56px;
+  padding: 0 1rem;
+  border-radius: 16px;
+  background: $brand-dark-2;
+  border: 1px solid $brand-border;
 }
 
-@media (max-width: 768px) {
-  .recarga-quick {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.recarga-input-monto i {
+  color: $brand-primary;
+  font-size: 1.1rem;
+}
+
+.recarga-input-control {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.recarga-input-control::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.recarga-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
 }
 
 .recarga-quick-btn {
-  padding: 0.75rem 0.5rem;
+  padding: 0.55rem 0.9rem;
   border-radius: 12px;
-  border: 1px solid $recarga-border;
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $brand-border;
+  background: $brand-dark-2;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .recarga-quick-btn:hover {
-  background: rgba(255, 152, 0, 0.15);
-  border-color: rgba(255, 152, 0, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 152, 0, 0.2);
+  background: $brand-dark-3;
 }
 
 .recarga-quick-val {
   display: block;
 }
 
-// ========== CONFIRMACIÓN ==========
+// ——— Confirmación ———
 .recarga-confirm-wrap {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
 }
 
 .recarga-confirm {
-  border-radius: 18px;
-  border: 1px solid rgba(0, 200, 83, 0.3);
-  background: linear-gradient(135deg, rgba(0, 200, 83, 0.1) 0%, rgba(0, 200, 83, 0.04) 100%);
-  backdrop-filter: blur(12px);
-  overflow: hidden;
+  padding: 1.5rem;
+  border-radius: 22px;
+  background: $brand-dark;
+  border: 1px solid $brand-border;
   margin-bottom: 1.25rem;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
 }
 
 .recarga-confirm-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
 }
 
 .recarga-confirm-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: $recarga-confirm;
-  box-shadow: 0 8px 24px rgba(0, 200, 83, 0.4);
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  background: $brand-dark-2;
+  border: 1px solid $brand-border;
+  color: $brand-success;
   font-size: 1.25rem;
 }
 
 .recarga-confirm-title {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 700;
   color: #fff;
 }
 
 .recarga-confirm-sub {
   margin: 0.2rem 0 0;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: $brand-text-soft;
 }
 
 .recarga-confirm-badge {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(0, 200, 83, 0.2);
-  border: 1px solid rgba(0, 200, 83, 0.4);
-  font-size: 0.8rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 12px;
+  background: $brand-dark-2;
+  border: 1px solid $brand-border;
+  color: $brand-success;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: #fff;
+  margin-left: auto;
 }
 
 .recarga-confirm-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  padding: 1.25rem 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .recarga-confirm-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .recarga-confirm-tile {
-  border-radius: 14px;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid $recarga-border;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  border-radius: 16px;
+  background: $brand-dark-2;
+  border: 1px solid $brand-border;
 }
 
 .recarga-confirm-tile--monto {
-  border-color: rgba(0, 200, 83, 0.25);
-  background: rgba(0, 200, 83, 0.08);
+  background: $brand-dark-2;
+  border-color: $brand-border;
 }
 
 .recarga-confirm-tile-label {
+  display: block;
+  margin-bottom: 0.35rem;
   font-size: 0.75rem;
-  color: $recarga-muted;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  font-weight: 600;
+  color: $brand-text-muted;
 }
 
 .recarga-confirm-tile-label i {
-  color: rgba(255, 255, 255, 0.7);
+  margin-right: 0.35rem;
+  color: $brand-primary;
 }
 
 .recarga-confirm-tile-main {
+  display: block;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #fff;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .recarga-confirm-tile-main--big {
   font-size: 1.5rem;
-  color: $recarga-monedero;
+  letter-spacing: -0.02em;
 }
 
 .recarga-confirm-tile-sub {
-  font-size: 0.8rem;
-  color: $recarga-muted;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: $brand-text-soft;
 }
 
-// ========== BOTONES ==========
+// ——— Botones de acción ———
 .recarga-actions {
   display: flex;
   justify-content: flex-end;
@@ -524,7 +404,7 @@ $recarga-border-strong: rgba(255, 255, 255, 0.12);
   flex-wrap: wrap;
 }
 
-.recarga-actions--single .recarga-btn {
+.recarga-actions--single .recarga-btn--cancel {
   margin-left: auto;
 }
 
@@ -533,94 +413,70 @@ $recarga-border-strong: rgba(255, 255, 255, 0.12);
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  padding: 0.85rem 1.5rem;
   min-width: 160px;
+  padding: 0.85rem 1.25rem;
   border-radius: 14px;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.25s ease;
-  border: 1px solid;
 }
 
 .recarga-btn--cancel {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: $recarga-border-strong;
-  color: rgba(255, 255, 255, 0.9);
+  background: $brand-dark-2;
+  border-color: $brand-border;
+  color: #fff;
 }
 
 .recarga-btn--cancel:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  background: $brand-dark-3;
 }
 
 .recarga-btn--confirm {
-  background: $recarga-confirm;
-  border-color: $recarga-confirm;
+  background: $brand-primary;
   color: #fff;
-  box-shadow: 0 8px 28px rgba(0, 200, 83, 0.4);
 }
 
 .recarga-btn--confirm:hover:not(:disabled) {
-  background: #00e676;
-  border-color: #00e676;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 36px rgba(0, 230, 118, 0.5);
+  opacity: 0.9;
 }
 
 .recarga-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
 }
 
-// ========== DEVEXTREME OVERRIDES (recarga) ==========
+// ——— DevExtreme: selects en recarga (sin iconos, sin efectos) ———
 ::ng-deep {
   .dx-select-recarga {
     width: 100% !important;
   }
 
+  .dx-select-recarga .dx-texteditor {
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  .dx-select-recarga .dx-texteditor-container {
+    background: $brand-dark-2 !important;
+    border: 1px solid $brand-border !important;
+    border-radius: 16px !important;
+    min-height: 52px !important;
+  }
+
   .dx-select-recarga .dx-textbox-input {
-    background: rgba(0, 0, 0, 0.25) !important;
-    border: 1px solid $recarga-border-strong !important;
-    border-radius: 12px !important;
+    background: transparent !important;
     color: #fff !important;
-    padding: 0.75rem 1rem 0.75rem 2.5rem !important;
-    min-height: 46px !important;
+    padding: 0.8rem 1rem !important;
     font-size: 0.9rem !important;
   }
 
-  .dx-select-recarga .dx-textbox-input::placeholder {
-    color: rgba(255, 255, 255, 0.35);
-  }
-
-  .dx-select-caja .dx-textbox-container::before,
-  .dx-select-monedero .dx-textbox-container::before {
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 500;
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 13px;
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  .dx-select-caja .dx-textbox-container::before {
-    content: '\f788';
-    color: $recarga-caja;
-  }
-
-  .dx-select-monedero .dx-textbox-container::before {
-    content: '\f555';
-    color: $recarga-monedero;
+  .dx-select-recarga .dx-placeholder {
+    color: $brand-text-muted !important;
   }
 
   .dx-select-recarga .dx-dropdowneditor-icon {
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: $brand-text-soft !important;
   }
 
   .dx-popup-wrapper {
@@ -628,21 +484,94 @@ $recarga-border-strong: rgba(255, 255, 255, 0.12);
   }
 
   .dx-overlay-content {
-    background: rgba(13, 18, 29, 0.98) !important;
-    border: 1px solid $recarga-border-strong !important;
-    border-radius: 14px !important;
-    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.5) !important;
+    background: $brand-dark-2 !important;
+    border: 1px solid $brand-border !important;
+    border-radius: 18px !important;
   }
 
   .dx-list .dx-list-item {
     color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 12px;
+    margin: 0.2rem 0.35rem;
   }
 
   .dx-list .dx-list-item:hover {
-    background: rgba(0, 172, 193, 0.12) !important;
+    background: $brand-dark-3 !important;
   }
 
   .dx-list .dx-list-item.dx-state-selected {
-    background: rgba(0, 172, 193, 0.2) !important;
+    background: $brand-dark-3 !important;
+    color: #fff !important;
+  }
+}
+
+// ——— Modales (encabezados con acento rosa para mantener paleta) ———
+.modal-accion-header--abrir-turno .modal-title i,
+.modal-accion-header--consultar-saldo .modal-title i { color: $brand-primary; }
+.modal-accion-header--cerrar-turno .modal-title i,
+.modal-accion-header--descargar .modal-title i { color: #f59e0b; }
+
+.panel-card {
+  background: $brand-dark-2;
+  border: 1px solid $brand-border;
+  border-radius: 16px;
+}
+
+// ——— Responsive ———
+@media (max-width: 992px) {
+  .recarga-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .recarga-confirm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .recarga-hero {
+    padding: 1.5rem 1rem;
+  }
+
+  .recarga-hero-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 1.6rem;
+  }
+
+  .recarga-hero-title {
+    font-size: 1.6rem;
+  }
+
+  .recarga-acciones-bar {
+    padding: 0 1rem 1rem;
+  }
+
+  .recarga-accion-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .recarga-flow {
+    padding: 0 1rem;
+  }
+
+  .recarga-actions {
+    flex-direction: column;
+  }
+
+  .recarga-btn {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .recarga-actions--single .recarga-btn--cancel {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .recarga-quick {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
