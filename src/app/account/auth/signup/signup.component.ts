@@ -58,6 +58,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.resetInternalState();
     this.resetToken =
       sessionStorage.getItem('reset_token') || this.route.snapshot.queryParamMap.get('token');
 
@@ -145,6 +146,24 @@ export class SignupComponent implements OnInit, OnDestroy {
     this.matchText = ok ? 'Las contraseñas coinciden' : 'Las contraseñas no coinciden';
     this.matchKey = ok ? 'match' : 'noMatch';
   }
+
+  private resetInternalState(): void {
+    this.submitted = false;
+    this.loading = false;
+    this.type = 'password';
+
+    this.hasMayus = false;
+    this.hasMinus = false;
+    this.hasNumber = false;
+    this.espCaracter = false;
+    this.minCaracteres = false;
+    this.maxCaracteres = false;
+    this.pwAllOk = false;
+    this.pwGuideText = 'La contraseña debe tener al menos una mayúscula.';
+    this.pwGuideKey = 'needUpper';
+    this.matchText = 'Las contraseñas no coinciden';
+    this.matchKey = 'noMatch';
+  }
   
   agregar(): void {
     this.submitted = true;
@@ -162,6 +181,7 @@ export class SignupComponent implements OnInit, OnDestroy {
         icon: 'error',
         confirmButtonText: 'Confirmar'
       });
+      this.resetInternalState();
       return;
     }
 
@@ -182,7 +202,7 @@ export class SignupComponent implements OnInit, OnDestroy {
 
         sessionStorage.removeItem('reset_token');
         this.signupForm.reset();
-        this.submitted = false;
+        this.resetInternalState();
 
         this.router.navigate(['/account', 'login']);
       }
@@ -195,14 +215,14 @@ export class SignupComponent implements OnInit, OnDestroy {
           icon: 'error',
           confirmButtonText: 'Confirmar'
         });
-      },
-      complete: () => this.loading = false
+        this.resetInternalState();
+      }
     });
   }
 
   cancelar(): void {
     this.signupForm.reset();
-    this.submitted = false;
+    this.resetInternalState();
     this.router.navigate(['/account', 'login']);
   }
 }

@@ -11,6 +11,8 @@ import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { TransaccionesService } from 'src/app/shared/services/transacciones.service';
 import { TurnosActivosService } from 'src/app/shared/services/turnos-activos.service';
 import { TurnosService } from 'src/app/shared/services/turnos.service';
+import { UsuariosService } from 'src/app/shared/services/usuario.service';
+import { SalaService } from 'src/app/shared/services/salas.service';
 import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
@@ -44,7 +46,38 @@ export class ListaTurnosComponent {
   @ViewChild('modalReponerTurno', { static: false }) modalReponerTurno!: TemplateRef<any>;
   @ViewChild('modalRetirarTurno', { static: false }) modalRetirarTurno!: TemplateRef<any>;
   @ViewChild('modalConsultarSaldoCaja', { static: false }) modalConsultarSaldoCaja!: TemplateRef<any>;
+  @ViewChild('modalResumenTurno', { static: false }) modalResumenTurno!: TemplateRef<any>;
+  @ViewChild('modalMovimientosTurno', { static: false }) modalMovimientosTurno!: TemplateRef<any>;
+  @ViewChild('modalSuspenderTurno', { static: false }) modalSuspenderTurno!: TemplateRef<any>;
+  @ViewChild('modalReactivarTurno', { static: false }) modalReactivarTurno!: TemplateRef<any>;
+  @ViewChild('modalCorteParcial', { static: false }) modalCorteParcial!: TemplateRef<any>;
   private modalRef?: NgbModalRef;
+
+  // Turnos activos (GET /pos/turnos/activos)
+  turnosActivos: any[] = [];
+  loadingTurnosActivos = false;
+
+  // Resumen turno (GET /pos/turnos/resumen/saldos/{id})
+  resumenTurnoData: any = null;
+  loadingResumenTurno = false;
+
+  // Movimientos turno (GET /pos/turnos/movimientos/{id})
+  movimientosTurnoData: any[] = [];
+  loadingMovimientosTurno = false;
+
+  // Consulta filtrada (GET /pos/turnos/consulta/filtrada)
+  filterParams: { [key: string]: string | number | boolean } = {};
+  filtrosForm: FormGroup;
+  listaCajasParaFiltro: { id: number; text: string }[] = [];
+  listaEstatusTurnoParaFiltro: { id: number; text: string }[] = [];
+  listaSalasParaFiltro: { id: number; text: string }[] = [];
+  listaUsuariosParaFiltro: { id: number; text: string }[] = [];
+  listaResultadoArqueoParaFiltro: { id: number; text: string }[] = [
+    { id: 1, text: 'Cuadrado' },
+    { id: 2, text: 'Sobrante' },
+    { id: 3, text: 'Faltante' }
+  ];
+  mostrarFiltrosAvanzados = false;
 
   // Formulario para abrir turno
   abrirTurnoForm: FormGroup;
@@ -64,6 +97,19 @@ export class ListaTurnosComponent {
   retirarTurnoForm: FormGroup;
   listaCajasRetirar: { id: number; text: string }[] = [];
 
+  // Suspender turno (POST /pos/turnos/suspender)
+  suspenderTurnoForm: FormGroup;
+  listaCajasSuspender: { id: number; text: string }[] = [];
+
+  // Reactivar turno (POST /pos/turnos/reactivar)
+  reactivarTurnoForm: FormGroup;
+  listaCajasReactivar: { id: number; text: string }[] = [];
+  idEstatusSuspendido: number | null = null;
+
+  // Corte parcial (POST /pos/turnos/corte-parcial)
+  corteParcialForm: FormGroup;
+  listaCajasCorteParcial: { id: number; text: string }[] = [];
+
   // Consultar saldo caja
   consultarSaldoCajaForm: FormGroup;
   listaCajasSaldo: { id: number; text: string }[] = [];
@@ -79,6 +125,8 @@ export class ListaTurnosComponent {
     private tesoreriaService: TesoreriaService,
     private transaccionesService: TransaccionesService,
     private turnosActivosService: TurnosActivosService,
+    private usuariosService: UsuariosService,
+    private salasService: SalaService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -107,13 +155,94 @@ export class ListaTurnosComponent {
       motivo: ['', Validators.required]
     });
 
+    this.suspenderTurnoForm = this.fb.group({
+      idCaja: [null, Validators.required],
+      motivo: ['', [Validators.required, Validators.minLength(1)]],
+      efectivoContado: ['', [Validators.required, Validators.min(0)]]
+    });
+
+    this.reactivarTurnoForm = this.fb.group({
+      idCaja: [null, Validators.required],
+      observaciones: ['']
+    });
+
+    this.corteParcialForm = this.fb.group({
+      idCaja: [null, Validators.required],
+      efectivoContado: ['', [Validators.required, Validators.min(0)]],
+      observaciones: ['']
+    });
+
     this.consultarSaldoCajaForm = this.fb.group({
       idCaja: [null, Validators.required]
+    });
+
+    this.filtrosForm = this.fb.group({
+      idCaja: [null],
+      idEstatusTurno: [null],
+      idSala: [null],
+      idUsuario: [null],
+      idResultadoArqueo: [null],
+      fechaDesde: [null],
+      fechaHasta: [null],
+      soloDiferencias: [false]
     });
   }
 
   ngOnInit() {
     this.setupDataSource();
+    this.cargarTurnosActivos();
+    this.cargarListasParaFiltros();
+  }
+
+  cargarListasParaFiltros() {
+    forkJoin({
+      cajas: this.cajasService.obtenerCajas(),
+      estatus: this.turnosService.obtenerEstatusTurno(),
+      salas: this.salasService.obtenerSalas(),
+      usuarios: this.usuariosService.obtenerUsuarios()
+    }).subscribe({
+      next: (r) => {
+        const cajasData = r.cajas?.data || [];
+        this.listaCajasParaFiltro = cajasData.map((c: any) => ({
+          id: Number(c.id),
+          text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Sin nombre'
+        }));
+        const estatusData = r.estatus?.data || [];
+        this.listaEstatusTurnoParaFiltro = estatusData.map((e: any) => ({
+          id: Number(e.id),
+          text: e.nombre || e.nombreEstatusTurno || ''
+        }));
+        const suspendido = estatusData.find((e: any) =>
+          (e.codigoEstatusTurno || e.codigo || e.nombre || '').toString().toUpperCase().includes('SUSPENDIDO')
+        );
+        this.idEstatusSuspendido = suspendido ? Number(suspendido.id) : null;
+        const salasData = r.salas?.data || [];
+        this.listaSalasParaFiltro = salasData.map((s: any) => ({
+          id: Number(s.id),
+          text: s.nombre || s.nombreComercial || 'Sin nombre'
+        }));
+        const usuariosData = r.usuarios?.data || [];
+        this.listaUsuariosParaFiltro = usuariosData.map((u: any) => ({
+          id: Number(u.id || u.Id),
+          text: u.nombreCompleto || `${u.nombre || u.Nombre || ''} ${u.apellidoPaterno || u.ApellidoPaterno || ''}`.trim() || 'Sin nombre'
+        }));
+      }
+    });
+  }
+
+  cargarTurnosActivos() {
+    this.loadingTurnosActivos = true;
+    this.turnosService.obtenerTurnosActivos().subscribe({
+      next: (resp) => {
+        this.loadingTurnosActivos = false;
+        const data = resp?.data ?? resp;
+        this.turnosActivos = Array.isArray(data) ? data : (data ? [data] : []);
+      },
+      error: () => {
+        this.loadingTurnosActivos = false;
+        this.turnosActivos = [];
+      }
+    });
   }
 
   toggleExpandGroups() {
@@ -124,6 +253,8 @@ export class ListaTurnosComponent {
   }
 
   limpiarCampos() {
+    this.filterParams = {};
+    this.filtrosForm?.reset({ idCaja: null, idEstatusTurno: null });
     if (this.dataGrid && this.dataGrid.instance) {
       this.dataGrid.instance.clearFilter();
       this.dataGrid.instance.clearGrouping();
@@ -132,6 +263,112 @@ export class ListaTurnosComponent {
       this.setupDataSource();
       this.dataGrid.instance.refresh();
     }
+  }
+
+  aplicarFiltros() {
+    const v = this.filtrosForm.value;
+    this.filterParams = {};
+    
+    if (v.idCaja != null && v.idCaja !== '') this.filterParams['idCaja'] = Number(v.idCaja);
+    if (v.idEstatusTurno != null && v.idEstatusTurno !== '') this.filterParams['idEstatusTurno'] = Number(v.idEstatusTurno);
+    if (v.idSala != null && v.idSala !== '') this.filterParams['idSala'] = Number(v.idSala);
+    if (v.idUsuario != null && v.idUsuario !== '') this.filterParams['idUsuario'] = Number(v.idUsuario);
+    if (v.idResultadoArqueo != null && v.idResultadoArqueo !== '') this.filterParams['idResultadoArqueo'] = Number(v.idResultadoArqueo);
+    if (v.fechaDesde) this.filterParams['fechaDesde'] = v.fechaDesde;
+    if (v.fechaHasta) this.filterParams['fechaHasta'] = v.fechaHasta;
+    if (v.soloDiferencias === true) this.filterParams['soloDiferencias'] = true;
+    
+    this.setupDataSource();
+    if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+  }
+
+  limpiarFiltros() {
+    this.filterParams = {};
+    this.filtrosForm.reset({
+      idCaja: null,
+      idEstatusTurno: null,
+      idSala: null,
+      idUsuario: null,
+      idResultadoArqueo: null,
+      fechaDesde: null,
+      fechaHasta: null,
+      soloDiferencias: false
+    });
+    this.setupDataSource();
+    if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+  }
+
+  verResumenTurno(idTurno: number) {
+    if (idTurno == null || idTurno === undefined) return;
+    this.resumenTurnoData = null;
+    this.loadingResumenTurno = true;
+    this.modalRef = this.modalService.open(this.modalResumenTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-resumen-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+    this.turnosService.obtenerResumenTurno(Number(idTurno)).subscribe({
+      next: (resp) => {
+        this.loadingResumenTurno = false;
+        this.resumenTurnoData = resp?.data ?? resp ?? null;
+      },
+      error: (err) => {
+        this.loadingResumenTurno = false;
+        this.resumenTurnoData = null;
+        Swal.fire({
+          title: 'Error',
+          text: err?.error?.message || err?.error || 'No se pudo cargar el resumen del turno.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Cerrar',
+        });
+      }
+    });
+  }
+
+  verMovimientosTurno(idTurno: number) {
+    if (idTurno == null || idTurno === undefined) return;
+    this.movimientosTurnoData = [];
+    this.loadingMovimientosTurno = true;
+    this.modalRef = this.modalService.open(this.modalMovimientosTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-movimientos-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+    this.turnosService.obtenerMovimientosTurno(Number(idTurno)).subscribe({
+      next: (resp) => {
+        this.loadingMovimientosTurno = false;
+        const list = resp?.data ?? resp;
+        this.movimientosTurnoData = Array.isArray(list) ? list : list?.movimientos ? list.movimientos : [];
+      },
+      error: (err) => {
+        this.loadingMovimientosTurno = false;
+        this.movimientosTurnoData = [];
+        Swal.fire({
+          title: 'Error',
+          text: err?.error?.message || err?.error || 'No se pudieron cargar los movimientos.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Cerrar',
+        });
+      }
+    });
+  }
+
+  cerrarModalResumen() {
+    if (this.modalRef) this.modalRef.close();
+    this.resumenTurnoData = null;
+  }
+
+  cerrarModalMovimientos() {
+    if (this.modalRef) this.modalRef.close();
+    this.movimientosTurnoData = [];
   }
 
   onPageIndexChanged(e: any) {
@@ -151,9 +388,18 @@ export class ListaTurnosComponent {
         const page = Math.floor(skip / take) + 1;
 
         try {
-          const resp: any = await lastValueFrom(
-            this.turnosService.obtenerTurnosData(page, take)
-          );
+          const hasFiltros = this.filterParams && Object.keys(this.filterParams).length > 0;
+          const resp: any = hasFiltros
+            ? await lastValueFrom(
+                this.turnosService.obtenerTurnosConsultaFiltrada({
+                  ...this.filterParams,
+                  limit: take,
+                  offset: skip
+                })
+              )
+            : await lastValueFrom(
+                this.turnosService.obtenerTurnosData(page, take)
+              );
           this.loading = false;
           const rows: any[] = Array.isArray(resp?.data) ? resp.data : [];
           const meta = resp?.paginated || {};
@@ -245,6 +491,9 @@ export class ListaTurnosComponent {
               fondoContadoFormateado: item?.fondoContado !== null && item?.fondoContado !== undefined 
                 ? `$${Number(item.fondoContado).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
                 : 'Sin registro',
+              fondoCierreFormateado: (item?.fondoCierre ?? item?.fondoContado) != null
+                ? `$${Number(item.fondoCierre ?? item.fondoContado).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : 'Sin registro',
               diferencia: item?.diferencia !== null && item?.diferencia !== undefined ? Number(item.diferencia) : 0,
               diferenciaFormateada: item?.diferencia !== null && item?.diferencia !== undefined 
                 ? `$${Number(item.diferencia).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
@@ -328,7 +577,9 @@ export class ListaTurnosComponent {
       estatusTurno: this.turnosService.obtenerEstatusTurno()
     }).subscribe({
       next: (responses) => {
-        this.listaCajas = (responses.cajas.data || []).map((c: any) => ({
+        const cajasData = responses.cajas.data || [];
+        const cajasAbiertas = cajasData.filter((c: any) => Number(c.idEstatusCaja) === 2);
+        this.listaCajas = cajasAbiertas.map((c: any) => ({
           ...c,
           id: Number(c.id),
           text: `${c.codigo || ''} - ${c.nombre || ''}`.trim()
@@ -497,6 +748,11 @@ export class ListaTurnosComponent {
     return codigo === 'ABIERTO';
   }
 
+  esTurnoSuspendido(row: any): boolean {
+    const codigo = (row?.codigoEstatusTurno || '').toString().toUpperCase().trim();
+    return codigo === 'SUSPENDIDO';
+  }
+
   abrirModalReponerDesdeFila(row: any) {
     if (!row?.idCaja) {
       Swal.fire({
@@ -592,6 +848,16 @@ export class ListaTurnosComponent {
   }
 
   reponerTurno() {
+    this.reponerTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
+    this.listaCajasReponer = [];
+    this.modalRef = this.modalService.open(this.modalReponerTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-reponer-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+
     this.turnosActivosService.obtenerTurnosActivos().subscribe({
       next: (response) => {
         const turnosData = response?.data ?? response;
@@ -609,27 +875,6 @@ export class ListaTurnosComponent {
             id: Number(t.idCaja),
             text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
           }));
-
-        if (this.listaCajasReponer.length === 0) {
-          Swal.fire({
-            title: 'Sin turnos activos',
-            text: 'No hay turnos de caja abiertos. Solo se puede reponer efectivo durante un turno activo.',
-            icon: 'warning',
-            background: '#0d121d',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Entendido',
-          });
-          return;
-        }
-
-        this.reponerTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
-        this.modalRef = this.modalService.open(this.modalReponerTurno, {
-          size: 'lg',
-          windowClass: 'modal-holder modal-reponer-turno',
-          centered: true,
-          backdrop: 'static',
-          keyboard: true
-        });
       },
       error: (error) => {
         Swal.fire({
@@ -644,7 +889,351 @@ export class ListaTurnosComponent {
     });
   }
 
+  suspenderTurno() {
+    this.suspenderTurnoForm.reset({ idCaja: null, motivo: '', efectivoContado: '' });
+    this.listaCajasSuspender = [];
+    this.modalRef = this.modalService.open(this.modalSuspenderTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-suspender-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+    this.turnosActivosService.obtenerTurnosActivos().subscribe({
+      next: (response) => {
+        const turnosData = response?.data ?? response;
+        const turnos = Array.isArray(turnosData) ? turnosData : [];
+        const seen = new Set<number>();
+        this.listaCajasSuspender = turnos
+          .filter((t: any) => {
+            if (t?.idCaja == null) return false;
+            const id = Number(t.idCaja);
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          })
+          .map((t: any) => ({
+            id: Number(t.idCaja),
+            text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
+          }));
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || 'No se pudieron cargar los turnos activos.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  abrirModalSuspenderDesdeFila(row: any) {
+    this.suspenderTurnoForm.reset({ idCaja: row.idCaja, motivo: '', efectivoContado: '' });
+    this.listaCajasSuspender = [{ id: Number(row.idCaja), text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''}`.trim() || `Caja ${row.idCaja}` }];
+    this.modalRef = this.modalService.open(this.modalSuspenderTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-suspender-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+  }
+
+  guardarSuspenderTurno() {
+    if (this.suspenderTurnoForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Complete todos los campos requeridos (caja, motivo y efectivo contado).',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const payload = {
+      idCaja: Number(this.suspenderTurnoForm.value.idCaja),
+      motivo: (this.suspenderTurnoForm.value.motivo || '').trim(),
+      efectivoContado: Number(this.suspenderTurnoForm.value.efectivoContado)
+    };
+    this.turnosService.suspenderTurno(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación exitosa!',
+          text: 'El turno se ha suspendido correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        this.cerrarModal();
+        this.suspenderTurnoForm.reset();
+        this.cargarTurnosActivos();
+        this.setupDataSource();
+        if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo suspender el turno.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  reactivarTurno() {
+    this.reactivarTurnoForm.reset({ idCaja: null, observaciones: '' });
+    this.listaCajasReactivar = [];
+    this.modalRef = this.modalService.open(this.modalReactivarTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-reactivar-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+    if (this.idEstatusSuspendido != null) {
+      this.turnosService.obtenerTurnosConsultaFiltrada({ idEstatusTurno: this.idEstatusSuspendido, limit: 500 }).subscribe({
+        next: (response) => {
+          const data = response?.data ?? response;
+          const turnos = Array.isArray(data) ? data : (data?.rows ? data.rows : []);
+          const seen = new Set<number>();
+          this.listaCajasReactivar = turnos
+            .filter((t: any) => {
+              if (t?.idCaja == null) return false;
+              const id = Number(t.idCaja);
+              if (seen.has(id)) return false;
+              seen.add(id);
+              return true;
+            })
+            .map((t: any) => ({
+              id: Number(t.idCaja),
+              text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
+            }));
+          if (this.listaCajasReactivar.length === 0) {
+            Swal.fire({
+              title: 'Sin turnos suspendidos',
+              text: 'No hay turnos suspendidos para reactivar.',
+              icon: 'info',
+              background: '#0d121d',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'Cerrar',
+            });
+          }
+        },
+        error: () => {
+          this.listaCajasReactivar = [];
+        }
+      });
+    }
+  }
+
+  abrirModalReactivarDesdeFila(row: any) {
+    if (!row?.idCaja) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'No hay caja asociada a este turno.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Cerrar',
+      });
+      return;
+    }
+    this.listaCajasReactivar = [{
+      id: Number(row.idCaja),
+      text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''} (Turno #${row.id})`.trim() || `Caja ${row.idCaja}`
+    }];
+    this.reactivarTurnoForm.reset({ idCaja: row.idCaja, observaciones: '' });
+    this.reactivarTurnoForm.patchValue({ idCaja: row.idCaja });
+    this.modalRef = this.modalService.open(this.modalReactivarTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-reactivar-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+  }
+
+  guardarReactivarTurno() {
+    if (this.reactivarTurnoForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Seleccione la caja con turno suspendido.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const payload = {
+      idCaja: Number(this.reactivarTurnoForm.value.idCaja),
+      observaciones: (this.reactivarTurnoForm.value.observaciones || '').trim() || undefined
+    };
+    this.turnosService.reactivarTurno(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación exitosa!',
+          text: 'El turno se ha reactivado correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        this.cerrarModal();
+        this.reactivarTurnoForm.reset();
+        this.cargarTurnosActivos();
+        this.setupDataSource();
+        if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo reactivar el turno.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  corteParcial() {
+    this.corteParcialForm.reset({ idCaja: null, efectivoContado: '', observaciones: '' });
+    this.listaCajasCorteParcial = [];
+    this.modalRef = this.modalService.open(this.modalCorteParcial, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-corte-parcial',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+    this.turnosActivosService.obtenerTurnosActivos().subscribe({
+      next: (response) => {
+        const turnosData = response?.data ?? response;
+        const turnos = Array.isArray(turnosData) ? turnosData : [];
+        const seen = new Set<number>();
+        this.listaCajasCorteParcial = turnos
+          .filter((t: any) => {
+            if (t?.idCaja == null) return false;
+            const id = Number(t.idCaja);
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          })
+          .map((t: any) => ({
+            id: Number(t.idCaja),
+            text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
+          }));
+        if (this.listaCajasCorteParcial.length === 0) {
+          Swal.fire({
+            title: 'Sin turnos abiertos',
+            text: 'No hay turnos abiertos para realizar corte parcial.',
+            icon: 'info',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Cerrar',
+          });
+        }
+      },
+      error: () => {
+        this.listaCajasCorteParcial = [];
+      }
+    });
+  }
+
+  abrirModalCorteParcialDesdeFila(row: any) {
+    if (!row?.idCaja) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'No hay caja asociada a este turno.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Cerrar',
+      });
+      return;
+    }
+    this.listaCajasCorteParcial = [{
+      id: Number(row.idCaja),
+      text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''} (Turno #${row.id})`.trim() || `Caja ${row.idCaja}`
+    }];
+    this.corteParcialForm.reset({ idCaja: row.idCaja, efectivoContado: '', observaciones: '' });
+    this.corteParcialForm.patchValue({ idCaja: row.idCaja });
+    this.modalRef = this.modalService.open(this.modalCorteParcial, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-corte-parcial',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+  }
+
+  guardarCorteParcial() {
+    if (this.corteParcialForm.invalid) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Complete todos los campos requeridos (caja y efectivo contado).',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    const payload = {
+      idCaja: Number(this.corteParcialForm.value.idCaja),
+      efectivoContado: Number(this.corteParcialForm.value.efectivoContado),
+      observaciones: (this.corteParcialForm.value.observaciones || '').trim() || undefined
+    };
+    this.turnosService.corteParcial(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          title: '¡Operación exitosa!',
+          text: 'Se ha generado el corte parcial (Corte X) correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        this.cerrarModal();
+        this.corteParcialForm.reset();
+        this.cargarTurnosActivos();
+        this.setupDataSource();
+        if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo realizar el corte parcial.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
   retirarTurno() {
+    this.retirarTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
+    this.listaCajasRetirar = [];
+    this.modalRef = this.modalService.open(this.modalRetirarTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-retirar-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+
     this.turnosActivosService.obtenerTurnosActivos().subscribe({
       next: (response) => {
         const turnosData = response?.data ?? response;
@@ -662,27 +1251,6 @@ export class ListaTurnosComponent {
             id: Number(t.idCaja),
             text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
           }));
-
-        if (this.listaCajasRetirar.length === 0) {
-          Swal.fire({
-            title: 'Sin turnos activos',
-            text: 'No hay turnos de caja abiertos. Solo se puede retirar efectivo durante un turno activo.',
-            icon: 'warning',
-            background: '#0d121d',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Entendido',
-          });
-          return;
-        }
-
-        this.retirarTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
-        this.modalRef = this.modalService.open(this.modalRetirarTurno, {
-          size: 'lg',
-          windowClass: 'modal-holder modal-retirar-turno',
-          centered: true,
-          backdrop: 'static',
-          keyboard: true
-        });
       },
       error: (error) => {
         Swal.fire({
@@ -808,8 +1376,23 @@ export class ListaTurnosComponent {
       return;
     }
 
+    const idTurnoSeleccionado = Number(this.cerrarTurnoForm.value.idTurno);
+    const turno = this.listaTurnosActivos.find((t: any) => Number(t.id) === idTurnoSeleccionado);
+    const idCaja = turno?.idCaja != null ? Number(turno.idCaja) : null;
+    if (idCaja == null) {
+      Swal.fire({
+        title: '¡Error!',
+        text: 'No se pudo obtener la caja del turno seleccionado.',
+        icon: 'error',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+
     const payload = {
-      idTurno: this.cerrarTurnoForm.value.idTurno,
+      idCaja,
       fondoContado: Number(this.cerrarTurnoForm.value.fondoContado),
       observaciones: this.cerrarTurnoForm.value.observaciones || null
     };
@@ -849,7 +1432,9 @@ export class ListaTurnosComponent {
     this.consultarSaldoCajaForm.reset();
     this.cajasService.obtenerCajas().subscribe({
       next: (resp) => {
-        this.listaCajasSaldo = (resp.data || []).map((c: any) => ({
+        const cajasData = resp.data || [];
+        const cajasAbiertas = cajasData.filter((c: any) => Number(c.idEstatusCaja) === 2);
+        this.listaCajasSaldo = cajasAbiertas.map((c: any) => ({
           id: Number(c.id),
           text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Sin nombre'
         }));
@@ -918,6 +1503,9 @@ export class ListaTurnosComponent {
       this.cerrarTurnoForm.reset();
       this.reponerTurnoForm.reset();
       this.retirarTurnoForm.reset();
+      this.suspenderTurnoForm.reset();
+      this.reactivarTurnoForm.reset();
+      this.corteParcialForm.reset();
       this.consultarSaldoCajaForm.reset();
       this.saldoCajaData = null;
     }

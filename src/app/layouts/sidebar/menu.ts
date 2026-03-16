@@ -12,7 +12,6 @@ export const MENU: MenuItem[] = [
         icon: 'uil-home-alt',
         subItems: [
             { id: 8, label: 'Tablero', link: '/dashboard' },
-            { id: 9, label: 'POS', link: '/recarga' },
             { id: 10, label: 'Perfil', link: '/contacts/profile' }
         ]
     },
@@ -28,7 +27,7 @@ export const MENU: MenuItem[] = [
             { id: 32, label: 'Bitacora', link: '/bitacora' }
         ]
     },
-
+    { id: 57, label: 'POS', icon: 'uil-shopping-bag', link: '/recarga' },
     // --- AGRUPADO: Clientes / Cadenas / Salas / Maquinas
     {
         id: 2,
@@ -49,8 +48,21 @@ export const MENU: MenuItem[] = [
     { id: 38, label: 'Ap. Turnos', icon: 'uil-clock', link: '/turnos' },
     { id: 11, label: 'Monederos', icon: 'uil-moneybag-alt', link: '/monederos' },
     { id: 41, label: 'Transacciones', icon: 'uil-exchange-alt', link: '/transacciones' },
-
-    // --- AGRUPADO: Saldo no debitado / Premios entregados / Venta Acumulada / Promociones
+    {
+        id: 50,
+        label: 'Promociones',
+        icon: 'uil-gift',
+        subItems: [
+            { id: 51, label: 'Catálogo', link: '/promociones/catalogo' },
+            { id: 52, label: 'Por afiliado', link: '/promociones/por-afiliado' },
+            { id: 53, label: 'Por monedero', link: '/promociones/por-monedero' },
+            { id: 54, label: 'Rollover', link: '/promociones/rollover' },
+            { id: 55, label: 'Pendientes de conversión', link: '/promociones/pendientes-conversion' },
+            { id: 56, label: 'Reportes', link: '/promociones/reportes' }
+        ]
+    },
+    { id: 27, label: 'Monitoreo', icon: 'uil-map', link: '/monitoreo' },
+    // --- AGRUPADO: Saldo no debitado / Premios entregados / Venta Acumulada (Promociones movido a ítem propio)
     {
         id: 13,
         label: 'Indicadores',
@@ -58,13 +70,14 @@ export const MENU: MenuItem[] = [
         subItems: [
             { id: 14, label: 'Saldo no debitado', link: '/saldo-no-debitado' },
             { id: 15, label: 'Premios entregados', link: '/premios-entregados' },
-            { id: 16, label: 'Venta Acumulada', link: '/venta-acumulada' },
-            { id: 17, label: 'Promociones', link: '/promociones' }
+            { id: 16, label: 'Venta Acumulada', link: '/venta-acumulada' }
         ]
     },
 
+    // --- Promociones (subitems desglosados)
+    
     // --- NO AGRUPADOS
-
+    
     { id: 20, label: 'Tipo Estado', icon: 'uil-toggle-on', link: '/tipo-estado' },
     { id: 21, label: 'Efectivo', icon: 'uil-money-stack', link: '/efectivo' },
     { id: 22, label: 'Lealtad', icon: 'uil-heart', link: '/lealtad' },
@@ -72,7 +85,6 @@ export const MENU: MenuItem[] = [
     { id: 24, label: 'Número de Identificación', icon: 'uil-credit-card', link: '/numero-identificacion' },
     { id: 25, label: 'Moneda', icon: 'uil-dollar-sign', link: '/moneda' },
     { id: 26, label: 'Cantidad Recibida', icon: 'uil-invoice', link: '/cantidad-recibida' },
-    { id: 27, label: 'Monitoreo', icon: 'uil-map', link: '/monitoreo' },
 
     // --- AGRUPADO: Usuarios / Permisos / Roles / Modulos / Bitacora
 

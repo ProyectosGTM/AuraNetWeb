@@ -100,7 +100,7 @@
               <button class="btn-accent btn-main" type="submit" [disabled]="signupForm.invalid || loading || !pwAllOk || !passwordsMatch">
                 <span class="loader" *ngIf="loading"></span>
                 <span class="btn-content" *ngIf="!loading">
-                  <i class="fas fa-save"></i>
+                  <i class="fas fa-check"></i>
                   <span>Guardar</span>
                 </span>
                 <span *ngIf="loading">Cargando...</span>

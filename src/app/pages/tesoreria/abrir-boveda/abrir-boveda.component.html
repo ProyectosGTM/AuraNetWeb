@@ -20,6 +20,12 @@
                     </div>
                 </div>
                 <div class="row mt-3 gy-4">
+                    <div class="col-12 mb-3">
+                        <div class="form-indication">
+                            <i class="fas fa-door-open"></i>
+                            <span>Abre la bóveda del día para una sala. Define el fondo inicial y los turnos de caja a abrir.</span>
+                        </div>
+                    </div>
                     <form [formGroup]="abrirTesoreriaForm">
                         <div class="col-12">
                             <div class="row g-3">
@@ -114,11 +120,12 @@
                                                                     [dataSource]="listaUsuarios"
                                                                     displayExpr="text"
                                                                     valueExpr="id"
-                                                                    formControlName="idUsuario"
+                                                                    [formControl]="turno.controls['idUsuario']"
                                                                     placeholder="Usuario..."
                                                                     searchEnabled="true"
                                                                     searchMode="contains"
                                                                     [showClearButton]="true"
+                                                                    acceptCustomValue="false"
                                                                     class="dx-select-box-custom dx-select-box-usuario dx-select-box--compact">
                                                                 </dx-select-box>
                                                             </label>

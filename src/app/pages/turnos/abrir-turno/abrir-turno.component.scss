@@ -116,3 +116,14 @@
     }
   }
 }
+
+/* Botón Abrir Turno (servicio POS) — color propio */
+.btn-abrir-turno-page {
+  background: #00acc1 !important;
+  border: 2px solid #00acc1 !important;
+  color: #fff !important;
+  &:hover:not(:disabled) {
+    background: #26c6da !important;
+    border-color: #26c6da !important;
+  }
+}

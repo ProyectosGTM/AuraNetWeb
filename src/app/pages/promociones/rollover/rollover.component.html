@@ -1,0 +1,138 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div>
+              <h4 class="title-title">Rollover de Promoción</h4>
+              <p class="title-subtitle" *ngIf="promocion">{{ promocion.nombre || 'Promoción' }}</p>
+              <p class="title-subtitle" *ngIf="!idPromocion">Selecciona una promoción vigente para analizar su rollover.</p>
+            </div>
+          </div>
+          <div class="title-buttons">
+            <button type="button" class="btn-title btn-title--ghost" (click)="idPromocion ? volver() : irSelector()">
+              <i class="fas fa-arrow-left"></i>
+              <span>{{ idPromocion ? 'Volver' : 'Ir a lista' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Selector de promociones vigentes -->
+        <div class="panel-card mt-3" *ngIf="idPromocion == null">
+          <div class="panel-head">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-list text-info"></i>
+              <span class="text-white fw-semibold">Promociones vigentes</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <p class="text-muted mb-3">Selecciona una promoción para ver su estado de rollover e historial de apuestas.</p>
+            <div *ngIf="loadingLista">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Cargando promociones vigentes...</span>
+            </div>
+            <div *ngIf="!loadingLista && listaVigentes.length === 0" class="text-muted">
+              No hay promociones vigentes. Ve al
+              <a routerLink="/promociones/catalogo">Catálogo de promociones</a>.
+            </div>
+            <div *ngIf="!loadingLista && listaVigentes.length > 0">
+              <dx-data-grid
+                [dataSource]="listaVigentes"
+                keyExpr="id"
+                [columnHidingEnabled]="true"
+                [showBorders]="true"
+                [showColumnLines]="true"
+                [showRowLines]="true"
+                [rowAlternationEnabled]="true">
+                <dxo-search-panel [visible]="true" [width]="200" placeholder="Buscar..."></dxo-search-panel>
+                <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]" [showInfo]="true"></dxo-pager>
+                <dxo-paging [pageSize]="20"></dxo-paging>
+
+                <dxi-column caption="Acciones" cellTemplate="acciones" alignment="center" [width]="140"></dxi-column>
+                <dxi-column dataField="nombre" caption="Nombre" dataType="string"></dxi-column>
+                <dxi-column dataField="codigo" caption="Código" dataType="string"></dxi-column>
+                <dxi-column dataField="fechaInicio" caption="Inicio" dataType="date"></dxi-column>
+                <dxi-column dataField="fechaFin" caption="Fin" dataType="date"></dxi-column>
+
+                <div *dxTemplate="let row of 'acciones'" class="d-flex justify-content-center">
+                  <a [routerLink]="['/promociones/rollover', row.data.id]" class="btnAcciones" ngbTooltip="Ver rollover">
+                    <i class="fa fa-chart-line"></i>
+                  </a>
+                </div>
+              </dx-data-grid>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalle de rollover -->
+        <div class="panel-card mt-3" *ngIf="idPromocion != null">
+          <div class="panel-head">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-info-circle text-success"></i>
+              <span class="text-white fw-semibold">Detalle de rollover</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <ul class="nav nav-tabs border-secondary">
+              <li class="nav-item">
+                <a class="nav-link" [class.active]="tab === 'estado'" (click)="setTab('estado')" href="javascript:void(0)">
+                  Estado actual
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" [class.active]="tab === 'historial'" (click)="setTab('historial')" href="javascript:void(0)">
+                  Historial
+                </a>
+              </li>
+            </ul>
+
+            <div class="mt-3" *ngIf="tab === 'estado'">
+              <div *ngIf="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Cargando rollover...</span>
+              </div>
+              <div *ngIf="!loading && rolloverData" class="panel-card">
+                <div class="panel-body">
+                  <pre class="mb-0 small text-white" style="white-space: pre-wrap;">{{ rolloverData | json }}</pre>
+                </div>
+              </div>
+              <p *ngIf="!loading && !rolloverData" class="text-muted mb-0">
+                No hay información de rollover para esta promoción.
+              </p>
+            </div>
+
+            <div class="mt-3" *ngIf="tab === 'historial'">
+              <div *ngIf="loadingHistorial">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Cargando historial...</span>
+              </div>
+              <div *ngIf="!loadingHistorial && historialData.length > 0">
+                <dx-data-grid
+                  [dataSource]="historialData"
+                  [columnHidingEnabled]="true"
+                  [showBorders]="true"
+                  [showColumnLines]="true"
+                  [showRowLines]="true"
+                  [rowAlternationEnabled]="true">
+                  <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]" [showInfo]="true"></dxo-pager>
+                  <dxo-paging [pageSize]="20"></dxo-paging>
+
+                  <dxi-column dataField="fecha" caption="Fecha" dataType="datetime"></dxi-column>
+                  <dxi-column dataField="monto" caption="Monto" dataType="number"></dxi-column>
+                  <dxi-column dataField="detalle" caption="Detalle" dataType="string"></dxi-column>
+                </dx-data-grid>
+              </div>
+              <p *ngIf="!loadingHistorial && historialData.length === 0" class="text-muted mb-0">
+                No hay historial de rollover para esta promoción.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

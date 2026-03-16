@@ -228,6 +228,14 @@ export class ListaTesoreriaComponent {
       return { class: 'icon-retiro', icon: 'fa-arrow-down' };
     } else if (tipoLower.includes('repon')) {
       return { class: 'icon-reposicion', icon: 'fa-arrow-up' };
+    } else if (tipoLower.includes('apertura') || tipoLower.includes('abrir')) {
+      return { class: 'icon-apertura', icon: 'fa-door-open' };
+    } else if (tipoLower.includes('dotación') || tipoLower.includes('dotacion')) {
+      return { class: 'icon-dotacion', icon: 'fa-hand-holding-usd' };
+    } else if (tipoLower.includes('devolucion')) {
+      return { class: 'icon-devolucion', icon: 'fa-undo' };
+    } else if (tipoLower.includes('cierre') || tipoLower.includes('cerrar')) {
+      return { class: 'icon-cierre', icon: 'fa-door-closed' };
     }
     return { class: 'icon-otro', icon: 'fa-exchange-alt' };
   }
@@ -307,6 +315,108 @@ export class ListaTesoreriaComponent {
             Swal.fire({
               title: '¡Error!',
               text: error.error || 'No se pudo desactivar el registro de tesorería.',
+              icon: 'error',
+              background: '#0d121d',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'Confirmar',
+            });
+          }
+        });
+      }
+    });
+  }
+
+  /** GET tesorerias/abierta/creada/sala/{idSala} - Ver bóveda abierta de la sala */
+  verBovedaAbiertaSala(rowData: any) {
+    const idSala = rowData.idSala ?? rowData.id_sala ?? rowData.sala?.id;
+    if (!idSala) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'No se encontró el ID de la sala para consultar.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    this.tesoreriaService.obtenerTesoreriaAbiertaPorSala(Number(idSala)).subscribe({
+      next: (response: any) => {
+        const data = response?.data ?? response;
+        if (!data || (Array.isArray(data) && data.length === 0)) {
+          Swal.fire({
+            title: 'Bóveda abierta',
+            html: `<p class="mb-0">No hay bóveda abierta para esta sala.</p>`,
+            icon: 'info',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Cerrar',
+          });
+          return;
+        }
+        const t = Array.isArray(data) ? data[0] : data;
+        const sala = t?.nombreSala ?? t?.nombreComercialSala ?? rowData.nombreSala ?? 'Sala';
+        const fondo = t?.fondoInicial != null ? this.formatearMoneda(t.fondoInicial) : 'N/A';
+        const estatus = t?.nombreEstatusTesoreria ?? t?.codigoEstatusTesoreria ?? 'N/A';
+        Swal.fire({
+          title: 'Bóveda abierta',
+          html: `
+            <p class="mb-1"><strong>Sala:</strong> ${sala}</p>
+            <p class="mb-1"><strong>Fondo inicial:</strong> ${fondo}</p>
+            <p class="mb-0"><strong>Estatus:</strong> ${estatus}</p>
+          `,
+          icon: 'info',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Cerrar',
+        });
+      },
+      error: (error) => {
+        Swal.fire({
+          title: '¡Error!',
+          text: error?.error?.message || error?.error || 'No se pudo obtener la bóveda abierta de la sala.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
+  }
+
+  /** DELETE tesorerias/{id} - Eliminar tesorería */
+  eliminarTesoreria(rowData: any) {
+    Swal.fire({
+      title: '¿Eliminar tesorería?',
+      html: `¿Está seguro que desea eliminar este registro de tesorería? Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#0d121d'
+    }).then((result) => {
+      if (result.value) {
+        this.tesoreriaService.eliminarTesoreria(Number(rowData.id)).subscribe({
+          next: () => {
+            Swal.fire({
+              title: '¡Eliminado!',
+              text: 'El registro de tesorería ha sido eliminado.',
+              icon: 'success',
+              background: '#0d121d',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'Confirmar',
+            });
+            this.setupDataSource();
+            if (this.dataGrid && this.dataGrid.instance) {
+              this.dataGrid.instance.refresh();
+            }
+          },
+          error: (error) => {
+            Swal.fire({
+              title: '¡Error!',
+              text: error?.error?.message || error?.error || 'No se pudo eliminar el registro de tesorería.',
               icon: 'error',
               background: '#0d121d',
               confirmButtonColor: '#3085d6',
@@ -627,9 +737,9 @@ export class ListaTesoreriaComponent {
     }
 
     const payload = {
-      idTesoreria: this.cerrarTesoreriaForm.value.idTesoreria,
+      idTesoreria: Number(this.cerrarTesoreriaForm.value.idTesoreria),
       fondoContado: Number(this.cerrarTesoreriaForm.value.fondoContado),
-      observaciones: this.cerrarTesoreriaForm.value.observaciones || null
+      observaciones: (this.cerrarTesoreriaForm.value.observaciones || '').trim() || null
     };
 
     this.tesoreriaService.cerrarTesoreria(payload).subscribe({
@@ -716,10 +826,10 @@ export class ListaTesoreriaComponent {
     }
 
     const payload = {
-      idTesoreria: this.reponerTesoreriaForm.value.idTesoreria,
+      idTesoreria: Number(this.reponerTesoreriaForm.value.idTesoreria),
       monto: Number(this.reponerTesoreriaForm.value.monto),
-      referencia: this.reponerTesoreriaForm.value.referencia || null,
-      observaciones: this.reponerTesoreriaForm.value.observaciones || null
+      referencia: (this.reponerTesoreriaForm.value.referencia || '').trim() || null,
+      observaciones: (this.reponerTesoreriaForm.value.observaciones || '').trim() || null
     };
 
     this.tesoreriaService.reponerTesoreria(payload).subscribe({
@@ -806,10 +916,10 @@ export class ListaTesoreriaComponent {
     }
 
     const payload = {
-      idTesoreria: this.retirarTesoreriaForm.value.idTesoreria,
+      idTesoreria: Number(this.retirarTesoreriaForm.value.idTesoreria),
       monto: Number(this.retirarTesoreriaForm.value.monto),
-      referencia: this.retirarTesoreriaForm.value.referencia || null,
-      observaciones: this.retirarTesoreriaForm.value.observaciones || null
+      referencia: (this.retirarTesoreriaForm.value.referencia || '').trim() || null,
+      observaciones: (this.retirarTesoreriaForm.value.observaciones || '').trim() || null
     };
 
     this.tesoreriaService.retirarTesoreria(payload).subscribe({
