@@ -694,7 +694,6 @@ export class AgregarUsuarioComponent implements OnInit {
     const {
       confirmPassword,
       permisosIds,
-      userName,
       passwordHash,
       nombre,
       apellidoPaterno,
@@ -709,7 +708,6 @@ export class AgregarUsuarioComponent implements OnInit {
     const toNumOrNull = (v: any) => (v === null || v === undefined || v === '' ? null : Number(v));
 
     const payload: any = {
-      userName,
       nombre,
       apellidoPaterno,
       apellidoMaterno,

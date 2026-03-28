@@ -10,7 +10,7 @@
 7. [Grids y Tablas](#grids-y-tablas)
 8. [Formularios](#formularios)
 9. [Modales](#modales)
-10. [Servicios y APIs](#servicios-y-apis)
+10. [Servicios y APIs](#servicios-y-apis) (incluye [autenticación y roles](#autenticación-jwt-y-roles-de-usuario))
 11. [Manejo de Errores](#manejo-de-errores)
 12. [Animaciones](#animaciones)
 13. [Estilos y SCSS](#estilos-y-scss)
@@ -26,6 +26,8 @@
 Este documento establece el **contrato de desarrollo** que todos los desarrolladores deben seguir al trabajar en el proyecto AuraNet. El incumplimiento de estas reglas puede resultar en el rechazo de pull requests y requerir refactorización.
 
 **OBJETIVO:** Mantener consistencia, calidad y mantenibilidad del código en todo el proyecto.
+
+**REGLA PRIORITARIA DEL PROYECTO:** **NO** modificar, refactorizar, optimizar ni "mejorar" código ya establecido, salvo que exista una instrucción explícita y directa para hacerlo.
 
 **VIGENCIA:** Este contrato es obligatorio para todos los desarrolladores desde su fecha de publicación.
 
@@ -737,6 +739,50 @@ this.servicio.obtenerTodos().subscribe(
 );
 ```
 
+### Autenticación, JWT y roles de usuario
+
+**Contexto:** Varios flujos y endpoints del backend dependen del **rol** del usuario autenticado. El front debe poder identificar de forma **única y estable** ese rol para condicionar UI, llamadas a API o mensajes (sin sustituir la autorización del servidor).
+
+#### Login
+
+- **Endpoint:** `POST` `{API_SECURITY}/login` (ej. cuerpo con credenciales según `Credentials` / formulario de login).
+- **Respuesta exitosa (contrato real):** Incluye entre otros campos:
+  - `token`: JWT de sesión.
+  - **`rol`**: **string** con el **identificador del rol** asignado al usuario (ej. `"1"`).
+  - Datos de perfil (`id`, `nombre`, `userName`, `idCliente`, cliente, etc.) según el servicio.
+
+El proyecto persiste el resultado vía `AuthenticationService.setData()`: token y objeto de usuario en `sessionStorage` (claves `token`, `user`, `permissions` cuando apliquen). La entidad `User` incluye la propiedad **`rol`**.
+
+#### JWT (payload)
+
+Al decodificar el payload del `token` (sin verificar firma en front; solo lectura de claims), el backend expone el rol en el claim **`rol`** como **string**, coherente con el valor devuelto en el login (ej. `"rol": "1"`).
+
+**Regla:** Para comparar rol en el cliente, normalizar a **string** (ej. `String(rol)`) frente al catálogo de roles, porque el API y el JWT entregan el id de rol como string.
+
+#### Catálogo de roles: `GET /roles/list`
+
+Los nombres y descripciones legibles provienen del listado de roles (respuesta típica con `data` y `paginated`). **El `id` de cada ítem del catálogo debe coincidir con el valor de `rol` del login y del JWT** (mismo significado, mismo formato string en la API de roles).
+
+**Roles vigentes en sistema (referencia de negocio):**
+
+| id (catálogo) | nombre         | descripción (resumen)        |
+|---------------|----------------|------------------------------|
+| 1             | SA             | Super Administrador          |
+| 2             | Administrador  | Administrador                |
+| 3             | Gerente        | Gerente de operación de sala |
+| 4             | JefeSala       | Encargado de sala            |
+| 5             | Cajero         | Cajero de la sala            |
+| 6             | Jugador        | Usuario jugador              |
+
+Si Swagger u otra documentación citan roles por número (ej. “Gerente (2)”), **alinear siempre con el `id` del catálogo `/roles/list`**: en la tabla anterior, “2” = Administrador, “3” = Gerente, etc. No asumir otro orden sin validar contra el servicio.
+
+#### Obligatorio para desarrollo
+
+1. **Identificar rol del usuario logueado** leyendo `rol` desde el objeto usuario en sesión (`getUser()?.rol`) y/o desde el JWT si hiciera falta; tratarlo como **id de catálogo en string**.
+2. **Enriquecer UX** (etiquetas, menús): opcionalmente cruzar con `GET /roles/list` para mostrar `nombre` / `descripcion`.
+3. **Reglas de negocio por rol** (qué pantallas, botones o llamadas aplican): documentarlas por módulo; la **autorización real sigue siendo del API** (403/401); el front solo refleja y mejora experiencia.
+4. **Permisos granulares:** Si el login devuelve `permisos` (ids de permiso), pueden combinarse con `rol` según defina el backend; no mezclar ids de permiso con ids de rol.
+
 ---
 
 ## Manejo de Errores
@@ -975,6 +1021,7 @@ const montoTotal = Math.max(0, montoBase - descuento + recargo);
 
 ### ❌ PROHIBIDO
 
+0. **NO** modificar ni mejorar código existente por iniciativa propia. Si no hay instrucción explícita, el código establecido se respeta tal cual.
 1. **NO** uses `any` sin justificación. Usa tipos específicos o `unknown`
 2. **NO** uses `console.log()` en código de producción
 3. **NO** uses `alert()`, `confirm()`, o `prompt()` nativos
@@ -1114,7 +1161,7 @@ Al trabajar en este proyecto, aceptas:
 
 **Versión del Contrato:** 1.1  
 **Fecha de Vigencia:** 2024  
-**Última Actualización:** 2026-03-13
+**Última Actualización:** 2026-03-24
 
 ---
 

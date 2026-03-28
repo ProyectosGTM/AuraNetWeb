@@ -123,7 +123,7 @@
 
 ::ng-deep .map-modal-html {
   color: #fff !important;
-  padding: 0 !important;
+  padding: 12px !important;
   margin: 0 !important;
   overflow: hidden !important;
   
@@ -260,57 +260,6 @@
     
     &:active {
       transform: translateY(0) !important;
-    }
-  }
-}
-
-// Estilos para el textarea de descripción - scroll horizontal sin saltos de línea
-.input-sleek--textarea {
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  
-  .sleek-control--textarea {
-    white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    word-wrap: normal;
-    word-break: normal;
-    height: auto !important;
-    min-height: 50px;
-    max-height: 50px;
-    line-height: 1.5;
-    resize: none;
-    
-    // Scrollbar estilizada para el scroll horizontal
-    &::-webkit-scrollbar {
-      height: 6px;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 3px;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background: rgba(228, 0, 65, 0.5);
-      border-radius: 3px;
-      
-      &:hover {
-        background: rgba(228, 0, 65, 0.7);
-      }
-    }
-  }
-}
-
-// Asegurar que el contenedor del textarea también maneje el overflow
-label.field {
-  .input-sleek--textarea {
-    overflow: hidden;
-    
-    &.input-sleek--textarea .sleek-control--textarea {
-      width: 100%;
-      display: block;
     }
   }
 }

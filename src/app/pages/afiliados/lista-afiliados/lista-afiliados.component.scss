@@ -1,1 +1,218 @@
-// Estilos para lista afiliados (usando los estilos globales del sistema)
+// Misma base que Monederos / Bóveda: action-buttons-card + btn-action-large
+
+.action-buttons-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 0;
+}
+
+.action-buttons-header {
+  margin-bottom: 16px;
+
+  .action-buttons-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i {
+      color: #e40041;
+    }
+  }
+}
+
+.action-buttons-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.btn-action-large {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .btn-action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    .btn-action-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .btn-action-desc {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  }
+
+  &.btn-afiliados-paginado {
+    border-color: rgba(41, 121, 255, 0.5);
+    background: rgba(41, 121, 255, 0.12);
+    .btn-action-icon {
+      background: #2979ff;
+    }
+    &:hover {
+      background: rgba(41, 121, 255, 0.22);
+      border-color: #2979ff;
+    }
+  }
+
+  &.btn-afiliados-inactivos {
+    border-color: rgba(108, 117, 125, 0.5);
+    background: rgba(108, 117, 125, 0.12);
+    .btn-action-icon {
+      background: #6c757d;
+    }
+    &:hover {
+      background: rgba(108, 117, 125, 0.22);
+      border-color: #6c757d;
+    }
+  }
+
+  &.btn-afiliados-cumpleaneros {
+    border-color: rgba(241, 180, 76, 0.5);
+    background: rgba(241, 180, 76, 0.12);
+    .btn-action-icon {
+      background: #f1b44c;
+    }
+    &:hover {
+      background: rgba(241, 180, 76, 0.22);
+      border-color: #f1b44c;
+    }
+  }
+
+  &.btn-afiliados-filtros-modal {
+    border-color: rgba(155, 89, 182, 0.5);
+    background: rgba(155, 89, 182, 0.12);
+    .btn-action-icon {
+      background: #9b59b6;
+    }
+    &:hover {
+      background: rgba(155, 89, 182, 0.22);
+      border-color: #9b59b6;
+    }
+  }
+
+  &.btn-afiliados-vista--activa {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(228, 0, 65, 0.25);
+    border-color: #e40041 !important;
+    background: rgba(228, 0, 65, 0.14) !important;
+  }
+}
+
+.lista-afiliados-busqueda-cuerpo {
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .action-buttons-content {
+    flex-direction: column;
+  }
+
+  .btn-action-large {
+    min-width: 100%;
+  }
+}
+
+/* Acento header modal — el resto viene de .modal-holder en styles.scss */
+::ng-deep .modal-holder.modal-afiliados-filtros-grid {
+  .modal-accion-header--filtros-afiliados::before {
+    background: #e40041;
+  }
+
+  .modal-accion-header--filtros-afiliados .modal-title i {
+    color: #e40041;
+  }
+
+  .input-sleek--select .sleek-control--select {
+    cursor: pointer;
+    appearance: none;
+    padding: 0 4px 0 0;
+  }
+}
+
+::ng-deep .modal-holder.modal-afiliados-bloquear {
+  .modal-accion-header--bloquear-afiliado::before {
+    background: #dc3545;
+  }
+
+  .modal-accion-header--bloquear-afiliado .modal-title i {
+    color: #ff6b6b;
+  }
+
+  .btn-alt--bloquear-afiliado {
+    background: #9b2335;
+    color: #ffffff;
+    box-shadow: 0 10px 26px rgba(155, 35, 53, 0.35);
+  }
+
+  .btn-alt--bloquear-afiliado:hover:not(:disabled) {
+    background: #c12a42;
+    transform: translateY(-1px);
+  }
+
+  .btn-alt--bloquear-afiliado:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btnAcciones--bloquear:hover {
+  border-color: rgba(220, 53, 69, 0.55);
+  i {
+    color: #ff8a94;
+  }
+}
+
+/* Filtros del grid — resalte cuando modo búsqueda activo (sobrescribe #afiliadosFiltrosButton) */
+#afiliadosFiltrosButton.btnAcciones--filtros-activo {
+  border-color: #e40041;
+  box-shadow: 0 0 0 1px rgba(228, 0, 65, 0.45);
+  background-color: #2a0d14;
+
+  i {
+    color: #ff4d7d;
+  }
+
+  &:hover {
+    border-color: #ff1a5b;
+  }
+}

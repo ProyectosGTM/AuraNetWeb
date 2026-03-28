@@ -285,12 +285,12 @@
               </div>
             </div>
             <div class="mb-3">
-              <label>Textarea</label>
+              <label>Text input</label>
               <div>
-                <textarea formControlName="textarea" class="form-control" rows="5" [ngClass]="{'is-invalid': typesubmit && type.textarea.errors}"></textarea>
-                @if(typesubmit && type.textarea.errors){
+                <input type="text" formControlName="textInput" class="form-control" placeholder="Single line text" [ngClass]="{'is-invalid': typesubmit && type.textInput.errors}" />
+                @if(typesubmit && type.textInput.errors){
                 <div class="invalid-feedback">
-                  @if(type.textarea.errors.required){
+                  @if(type.textInput.errors.required){
                   <span>This value is required.</span>
                   }
                 </div>}

@@ -35,26 +35,85 @@
                         </div>
                     </div>
                 </div>
+                <!-- Vistas del listado — mismo patrón que Monederos / Bóveda (action-buttons-card + btn-action-large) -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="action-buttons-card">
+                            <div class="action-buttons-header">
+                                <h5 class="action-buttons-title">
+                                    <i class="fas fa-th-large"></i>
+                                    <span>Vistas del listado</span>
+                                </h5>
+                            </div>
+                            <div class="action-buttons-content">
+                                <button type="button" class="btn-action-large btn-afiliados-paginado"
+                                    [class.btn-afiliados-vista--activa]="modoLista === 'paginado'"
+                                    (click)="setModoLista('paginado')">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-server"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Listado paginado</span>
+                                        <span class="btn-action-desc">Carga por páginas desde el servidor</span>
+                                    </div>
+                                </button>
+                                <button type="button" class="btn-action-large btn-afiliados-inactivos"
+                                    [class.btn-afiliados-vista--activa]="modoLista === 'inactivos'"
+                                    (click)="setModoLista('inactivos')">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-user-slash"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Solo inactivos</span>
+                                        <span class="btn-action-desc">Afiliados dados de baja o inactivos</span>
+                                    </div>
+                                </button>
+                                <button type="button" class="btn-action-large btn-afiliados-cumpleaneros"
+                                    [class.btn-afiliados-vista--activa]="modoLista === 'cumpleaneros'"
+                                    (click)="setModoLista('cumpleaneros')">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-birthday-cake"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Cumpleañeros</span>
+                                        <span class="btn-action-desc">Próximos cumpleaños según el servicio</span>
+                                    </div>
+                                </button>
+                                <button type="button" class="btn-action-large btn-afiliados-filtros-modal"
+                                    [class.btn-afiliados-vista--activa]="modoLista === 'buscar'"
+                                    (click)="abrirModalFiltrosGrid()">
+                                    <div class="btn-action-icon">
+                                        <i class="fas fa-sliders-h"></i>
+                                    </div>
+                                    <div class="btn-action-text">
+                                        <span class="btn-action-label">Filtros del grid</span>
+                                        <span class="btn-action-desc">Búsqueda avanzada por nombre, sala y más</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row mt-3 gy-4">
                     <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
                         [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="'true'"
                         [dataSource]="listaAfiliados" [keyExpr]="'id'" [width]="'100%'"
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" [pager]="{ 
                                 showPageSizeSelector: true, 
-                                allowedPageSizes: [50], 
+                                allowedPageSizes: [20, 50], 
                                 showInfo: true,
                                 infoText: 'Página {0} de {1}', 
                                 visible: true 
-                            }" (onPageIndexChanged)=" onPageIndexChanged($event)"
+                            }" (onPageIndexChanged)="onPageIndexChanged($event)"
                         (onOptionChanged)="onGridOptionChanged($event)">
                         <dxo-search-panel [visible]="true" [width]="200" placeholder="Buscar..."></dxo-search-panel>
                         <dxo-group-panel [emptyPanelText]="mensajeAgrupar" [visible]="true"></dxo-group-panel>
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]"
+                        <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20, 50]"
                             [showInfo]="true"></dxo-pager>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="180"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="340"></dxi-column>
                         <dxi-column dataField="nombreCompleto" caption="Nombre Completo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="numeroIdentificacion" caption="Número Identificación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="email" caption="Email" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -74,12 +133,33 @@
                         <dxi-column dataField="apellidoMaterno" caption="Apellido Materno" dataType="string" [visible]="false"></dxi-column>
                         <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala" dataType="string" [visible]="false"></dxi-column>
 
-                        <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                        <div *dxTemplate="let row of 'Acciones'" class="d-flex flex-wrap gap-2 justify-content-center align-items-center">  
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarAfiliado(row.data.id)"
                                     ngbTooltip="Editar afiliado" placement="top" container="body">
                                     <i class="fa fa-edit"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="resumenAfiliadoButton" class="btnAcciones"
+                                    (click)="verResumenAfiliado(row.data)"
+                                    ngbTooltip="Ver resumen del afiliado" placement="top" container="body">
+                                    <i class="fa fa-id-card"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="monederosAfiliadoButton" class="btnAcciones"
+                                    (click)="verMonederosAfiliado(row.data)"
+                                    ngbTooltip="Ver monederos del afiliado" placement="top" container="body">
+                                    <i class="fa fa-wallet"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="bloquearAfiliadoButton" class="btnAcciones btnAcciones--bloquear"
+                                    (click)="abrirModalBloquearAfiliado(row.data)"
+                                    ngbTooltip="Bloquear afiliado y monederos" placement="top" container="body">
+                                    <i class="fa fa-ban"></i>
                                 </button>
                             </div>
                             <div>
@@ -110,3 +190,159 @@
         </div>
     </div>
 </div>
+
+<!-- Modal filtros grid — patrón Monederos / Bóveda (modal-accion-header + modal-accion-body + footer) -->
+<ng-template #modalFiltrosGrid let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--filtros-afiliados">
+        <h5 class="modal-title">
+            <i class="fas fa-sliders-h"></i>
+            <span>Busqueda Avanzada</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalFiltrosGrid()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--info">
+            <i class="fas fa-info-circle"></i>
+            <span>Completa los criterios que necesites y aplica para actualizar el listado con la búsqueda del servicio.</span>
+        </div>
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Texto</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-font"></i>
+                        <input type="text" class="sleek-control" placeholder="Texto libre"
+                            [(ngModel)]="filtroTexto" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Nombre</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-user"></i>
+                        <input type="text" class="sleek-control" placeholder="Nombre"
+                            [(ngModel)]="filtroNombre" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Apellido paterno</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-user"></i>
+                        <input type="text" class="sleek-control" placeholder="Apellido paterno"
+                            [(ngModel)]="filtroApellidoPaterno" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Apellido materno</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-user"></i>
+                        <input type="text" class="sleek-control" placeholder="Apellido materno"
+                            [(ngModel)]="filtroApellidoMaterno" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Número de identificación</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" class="sleek-control" placeholder="Para filtrar en grid"
+                            [(ngModel)]="filtroNumeroIdentificacion" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Sala</span>
+                    <div class="input-sleek input-sleek--select">
+                        <i class="fas fa-door-open"></i>
+                        <select class="sleek-control sleek-control--select" [(ngModel)]="filtroIdSala"
+                            [ngModelOptions]="{standalone: true}">
+                            <option [ngValue]="null">Todas</option>
+                            <option *ngFor="let s of salasParaFiltro" [ngValue]="s.id">
+                                {{ s.nombreSala || s.nombreComercialSala || ('Sala ' + s.id) }}
+                            </option>
+                        </select>
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalFiltrosGrid()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn-alt btn-alt--success" (click)="aplicarBusquedaFiltrosDesdeModal()">
+            <i class="fas fa-filter"></i><span>Aplicar búsqueda al grid</span>
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal bloquear afiliado — POST /afiliados/{id}/bloquear -->
+<ng-template #modalBloquearAfiliado let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--bloquear-afiliado">
+        <h5 class="modal-title">
+            <i class="fas fa-ban"></i>
+            <span>Bloquear afiliado</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalBloquearAfiliado()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <p class="text-white-50 small mb-3" *ngIf="afiliadoBloqueoEtiqueta">
+            <strong class="text-white">{{ afiliadoBloqueoEtiqueta }}</strong>
+        </p>
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-shield-alt"></i>
+            <span>Operación sensible: bloquea al afiliado y todos sus monederos. Requiere permisos de Jefe de Sala o Gerente según API.</span>
+        </div>
+        <div class="row g-3 mt-1">
+            <div class="col-6">
+                <label class="field">
+                    <span class="field-label text-white">Motivo</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-comment-alt"></i>
+                        <input type="text" class="sleek-control" placeholder="Describe el motivo del bloqueo"
+                            [(ngModel)]="bloqueoMotivo" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-6">
+                <label class="field">
+                    <span class="field-label text-white">Fecha fin de bloqueo</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="date" class="sleek-control" [(ngModel)]="bloqueoFechaFin"
+                            [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalBloquearAfiliado()"
+            [disabled]="bloqueoEnProceso">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn-alt btn-alt--bloquear-afiliado" (click)="confirmarBloqueoAfiliado()"
+            [disabled]="bloqueoEnProceso">
+            <i class="fas fa-ban"></i><span>Bloquear</span>
+        </button>
+    </div>
+</ng-template>
