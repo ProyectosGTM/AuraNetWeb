@@ -105,6 +105,11 @@ export class AfiliadosService {
     return this.http.get(`${environment.API_SECURITY}/cattiposidentificacion/list`);
   }
 
+  /** GET /catnivelesvip/list (catálogo niveles VIP) */
+  obtenerNivelesVip(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/catnivelesvip/list`);
+  }
+
   // ——— Escritura (no GET) ———
 
   agregarAfiliado(data: any): Observable<any> {
@@ -154,5 +159,56 @@ export class AfiliadosService {
       return throwError(() => ({ error: 'ID de afiliado inválido' }));
     }
     return this.http.post(`${this.baseUrl}/${idAfiliado}/bloquear`, body);
+  }
+
+  /**
+   * POST /afiliados/{id}/desbloquear
+   * Desbloquea al afiliado y reactiva sus monederos.
+   */
+  desbloquearAfiliado(id: number): Observable<any> {
+    const idAfiliado = this.idAfiliadoValido(id);
+    if (idAfiliado === null) {
+      return throwError(() => ({ error: 'ID de afiliado inválido' }));
+    }
+    return this.http.post(`${this.baseUrl}/${idAfiliado}/desbloquear`, {});
+  }
+
+  /**
+   * POST /afiliados/{id}/autoexclusion
+   * Programa de juego responsable. Body: motivo, duracionDias (mín. 30), observaciones.
+   */
+  registrarAutoexclusion(
+    id: number,
+    body: { motivo: string; duracionDias: number; observaciones: string }
+  ): Observable<any> {
+    const idAfiliado = this.idAfiliadoValido(id);
+    if (idAfiliado === null) {
+      return throwError(() => ({ error: 'ID de afiliado inválido' }));
+    }
+    return this.http.post(`${this.baseUrl}/${idAfiliado}/autoexclusion`, body);
+  }
+
+  /**
+   * DELETE /afiliados/{id}/autoexclusion
+   * Cancela la autoexclusión solo después de cumplida la fecha de fin (validación en API).
+   */
+  cancelarAutoexclusion(id: number): Observable<any> {
+    const idAfiliado = this.idAfiliadoValido(id);
+    if (idAfiliado === null) {
+      return throwError(() => ({ error: 'ID de afiliado inválido' }));
+    }
+    return this.http.delete(`${this.baseUrl}/${idAfiliado}/autoexclusion`);
+  }
+
+  /**
+   * POST /afiliados/{id}/nivel-vip
+   * Actualización manual del nivel VIP. Body: idNivelVIP, motivo.
+   */
+  actualizarNivelVip(id: number, body: { idNivelVIP: number; motivo: string }): Observable<any> {
+    const idAfiliado = this.idAfiliadoValido(id);
+    if (idAfiliado === null) {
+      return throwError(() => ({ error: 'ID de afiliado inválido' }));
+    }
+    return this.http.post(`${this.baseUrl}/${idAfiliado}/nivel-vip`, body);
   }
 }

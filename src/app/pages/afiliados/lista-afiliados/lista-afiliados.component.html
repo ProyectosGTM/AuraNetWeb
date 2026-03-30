@@ -46,17 +46,6 @@
                                 </h5>
                             </div>
                             <div class="action-buttons-content">
-                                <button type="button" class="btn-action-large btn-afiliados-paginado"
-                                    [class.btn-afiliados-vista--activa]="modoLista === 'paginado'"
-                                    (click)="setModoLista('paginado')">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-server"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Listado paginado</span>
-                                        <span class="btn-action-desc">Carga por páginas desde el servidor</span>
-                                    </div>
-                                </button>
                                 <button type="button" class="btn-action-large btn-afiliados-inactivos"
                                     [class.btn-afiliados-vista--activa]="modoLista === 'inactivos'"
                                     (click)="setModoLista('inactivos')">
@@ -113,7 +102,7 @@
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
                         <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20, 50]"
                             [showInfo]="true"></dxo-pager>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="340"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="492"></dxi-column>
                         <dxi-column dataField="nombreCompleto" caption="Nombre Completo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="numeroIdentificacion" caption="Número Identificación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="email" caption="Email" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -135,24 +124,31 @@
 
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex flex-wrap gap-2 justify-content-center align-items-center">  
                             <div>
-                                <button valueExpr="id" id="actualizarButton" class="btnAcciones"
+                                <button valueExpr="id" id="actualizarButton" class="btnAcciones btnAcciones--editar"
                                     (click)="actualizarAfiliado(row.data.id)"
                                     ngbTooltip="Editar afiliado" placement="top" container="body">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
                             <div>
-                                <button type="button" id="resumenAfiliadoButton" class="btnAcciones"
+                                <button type="button" id="resumenAfiliadoButton" class="btnAcciones btnAcciones--resumen"
                                     (click)="verResumenAfiliado(row.data)"
                                     ngbTooltip="Ver resumen del afiliado" placement="top" container="body">
                                     <i class="fa fa-id-card"></i>
                                 </button>
                             </div>
                             <div>
-                                <button type="button" id="monederosAfiliadoButton" class="btnAcciones"
+                                <button type="button" id="monederosAfiliadoButton" class="btnAcciones btnAcciones--monederos"
                                     (click)="verMonederosAfiliado(row.data)"
                                     ngbTooltip="Ver monederos del afiliado" placement="top" container="body">
                                     <i class="fa fa-wallet"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" id="nivelVipAfiliadoButton" class="btnAcciones btnAcciones--nivel-vip"
+                                    (click)="abrirModalNivelVipAfiliado(row.data)"
+                                    ngbTooltip="Actualizar nivel VIP (rol autorizado según API)" placement="top" container="body">
+                                    <i class="fas fa-crown"></i>
                                 </button>
                             </div>
                             <div>
@@ -162,13 +158,27 @@
                                     <i class="fa fa-ban"></i>
                                 </button>
                             </div>
-                            <div>
-                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
-                                    (click)="activar(row.data)"
-                                    ngbTooltip="Activar afiliado" placement="top" container="body">
-                                    <i class="fa fa-arrow-up"></i>
+                            <div *ngIf="puedeRegistrarAutoexclusion(row.data)">
+                                <button type="button" id="autoexclusionAfiliadoButton" class="btnAcciones btnAcciones--autoexclusion"
+                                    (click)="abrirModalAutoexclusionAfiliado(row.data)"
+                                    ngbTooltip="Registrar autoexclusión (juego responsable)" placement="top" container="body">
+                                    <i class="fa fa-hand-paper"></i>
                                 </button>
-                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
+                            </div>
+                            <div>
+                                <button type="button" id="cancelarAutoexclusionButton" class="btnAcciones btnAcciones--cancelar-autoexclusion"
+                                    (click)="cancelarAutoexclusionAfiliado(row.data)"
+                                    ngbTooltip="Cancelar autoexclusión (tras fecha fin; rol Gerente según API)" placement="top" container="body">
+                                    <i class="fas fa-calendar-times"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones btnAcciones--desbloquear"
+                                    (click)="desbloquearAfiliado(row.data)"
+                                    ngbTooltip="Desbloquear afiliado" placement="top" container="body">
+                                    <i class="fa fa-unlock"></i>
+                                </button>
+                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones btnAcciones--desactivar"
                                     (click)="desactivar(row.data)"
                                     ngbTooltip="Desactivar afiliado" placement="top" container="body">
                                     <i class="fa fa-arrow-down"></i>
@@ -343,6 +353,132 @@
         <button type="button" class="btn-alt btn-alt--bloquear-afiliado" (click)="confirmarBloqueoAfiliado()"
             [disabled]="bloqueoEnProceso">
             <i class="fas fa-ban"></i><span>Bloquear</span>
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal autoexclusión — POST /afiliados/{id}/autoexclusion -->
+<ng-template #modalAutoexclusionAfiliado let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--autoexclusion-afiliado">
+        <h5 class="modal-title">
+            <i class="fas fa-hand-paper"></i>
+            <span>Registrar autoexclusión</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalAutoexclusionAfiliado()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="modal-afiliado-nombre-autoexclusion" *ngIf="afiliadoAutoexclusionEtiqueta">
+            {{ afiliadoAutoexclusionEtiqueta }}
+        </div>
+        <div class="form-indication form-indication--warning">
+            <i class="fas fa-shield-alt"></i>
+            <span>Programa de juego responsable. Mínimo 30 días de duración. Requiere rol de Jefe de Sala o Gerente.</span>
+        </div>
+        <div class="row g-3 mt-1">
+            <div class="col-12">
+                <label class="field">
+                    <span class="field-label text-white">Motivo</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-comment-alt"></i>
+                        <input type="text" class="sleek-control" placeholder="Ej. Solicitud voluntaria del cliente por juego responsable"
+                            [(ngModel)]="autoexclusionMotivo" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Duración (días)</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-calendar-day"></i>
+                        <input type="number" class="sleek-control" min="30" step="1" placeholder="Mínimo 30"
+                            [(ngModel)]="autoexclusionDuracionDias" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Observaciones</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-sticky-note"></i>
+                        <input type="text" class="sleek-control" placeholder="Notas adicionales (opcional)"
+                            [(ngModel)]="autoexclusionObservaciones" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalAutoexclusionAfiliado()"
+            [disabled]="autoexclusionEnProceso">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn-alt btn-alt--autoexclusion-afiliado" (click)="confirmarAutoexclusionAfiliado()"
+            [disabled]="autoexclusionEnProceso">
+            <i class="fas fa-hand-paper"></i><span>Registrar</span>
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal nivel VIP — POST /afiliados/{id}/nivel-vip -->
+<ng-template #modalNivelVipAfiliado let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--nivel-vip-afiliado">
+        <h5 class="modal-title">
+            <i class="fas fa-crown"></i>
+            <span>Actualizar nivel VIP</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalNivelVipAfiliado()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <p class="text-white-50 small mb-3" *ngIf="vipAfiliadoEtiqueta">
+            <strong class="text-white">{{ vipAfiliadoEtiqueta }}</strong>
+        </p>
+        <div class="form-indication form-indication--info">
+            <i class="fas fa-info-circle"></i>
+            <span>Actualización manual del nivel VIP. La API documenta rol autorizado con identificador 2.</span>
+        </div>
+        <div class="row g-3 mt-1">
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Nivel VIP</span>
+                    <div class="input-sleek input-sleek--select">
+                        <i class="fas fa-layer-group"></i>
+                        <select class="sleek-control sleek-control--select" [(ngModel)]="vipIdNivelSeleccionado"
+                            [ngModelOptions]="{standalone: true}">
+                            <option [ngValue]="null">Selecciona…</option>
+                            <option *ngFor="let n of nivelesVipOpciones" [ngValue]="n.id">{{ n.text }}</option>
+                        </select>
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="field">
+                    <span class="field-label text-white">Motivo</span>
+                    <div class="input-sleek">
+                        <i class="fas fa-comment-alt"></i>
+                        <input type="text" class="sleek-control" placeholder="Ej. Cliente VIP por convenio corporativo"
+                            [(ngModel)]="vipMotivo" [ngModelOptions]="{standalone: true}">
+                        <span class="sleek-line"></span>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalNivelVipAfiliado()"
+            [disabled]="vipEnProceso">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn-alt btn-alt--nivel-vip-afiliado" (click)="confirmarNivelVipAfiliado()"
+            [disabled]="vipEnProceso">
+            <i class="fas fa-crown"></i><span>Guardar nivel VIP</span>
         </button>
     </div>
 </ng-template>

@@ -6,6 +6,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import { lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { AfiliadosService } from 'src/app/shared/services/afiliados.service';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import Swal from 'sweetalert2';
 
@@ -35,9 +36,13 @@ export class ListaAfiliadosComponent implements OnInit {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
   @ViewChild('modalFiltrosGrid', { static: false }) modalFiltrosGrid!: TemplateRef<any>;
   @ViewChild('modalBloquearAfiliado', { static: false }) modalBloquearAfiliado!: TemplateRef<any>;
+  @ViewChild('modalAutoexclusionAfiliado', { static: false }) modalAutoexclusionAfiliado!: TemplateRef<any>;
+  @ViewChild('modalNivelVipAfiliado', { static: false }) modalNivelVipAfiliado!: TemplateRef<any>;
 
   private modalFiltrosRef?: NgbModalRef;
   private modalBloquearRef?: NgbModalRef;
+  private modalAutoexclusionRef?: NgbModalRef;
+  private modalNivelVipRef?: NgbModalRef;
 
   /** Contexto del modal POST /afiliados/{id}/bloquear */
   afiliadoBloqueoId: number | null = null;
@@ -45,6 +50,23 @@ export class ListaAfiliadosComponent implements OnInit {
   bloqueoMotivo = '';
   bloqueoFechaFin = '';
   bloqueoEnProceso = false;
+
+  /** Contexto del modal POST /afiliados/{id}/autoexclusion */
+  afiliadoAutoexclusionId: number | null = null;
+  afiliadoAutoexclusionEtiqueta = '';
+  autoexclusionMotivo = '';
+  autoexclusionDuracionDias: number | string = '';
+  autoexclusionObservaciones = '';
+  autoexclusionEnProceso = false;
+
+  /** Contexto del modal POST /afiliados/{id}/nivel-vip */
+  vipAfiliadoId: number | null = null;
+  vipAfiliadoEtiqueta = '';
+  vipIdNivelSeleccionado: number | null = null;
+  vipMotivo = '';
+  vipEnProceso = false;
+  nivelesVipOpciones: { id: number; text: string }[] = [];
+
   public autoExpandAllGroups: boolean = true;
   isGrouped: boolean = false;
   public paginaActualData: any[] = [];
@@ -70,7 +92,8 @@ export class ListaAfiliadosComponent implements OnInit {
     private afiliadosService: AfiliadosService,
     private salaService: SalaService,
     private router: Router,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private rolAcceso: RolAccesoService
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -102,6 +125,20 @@ export class ListaAfiliadosComponent implements OnInit {
 
   agregar() {
     this.router.navigateByUrl('/afiliados/agregar-afiliado');
+  }
+
+  /**
+   * Muestra "Registrar autoexclusión" solo si no hay periodo vigente (`autoexclusionHasta` vacío/null).
+   */
+  puedeRegistrarAutoexclusion(fila: any): boolean {
+    const v = fila?.autoexclusionHasta;
+    if (v === null || v === undefined) {
+      return true;
+    }
+    if (typeof v === 'string' && v.trim() === '') {
+      return true;
+    }
+    return false;
   }
 
   /** true cuando el grid usa paginación remota contra el servidor. */
@@ -173,6 +210,243 @@ export class ListaAfiliadosComponent implements OnInit {
     this.afiliadoBloqueoId = null;
     this.afiliadoBloqueoEtiqueta = '';
     this.bloqueoEnProceso = false;
+  }
+
+  abrirModalAutoexclusionAfiliado(row: any) {
+    const id = row?.id;
+    if (id == null || id === '') {
+      return;
+    }
+    this.afiliadoAutoexclusionId = Number(id);
+    this.afiliadoAutoexclusionEtiqueta =
+      row?.nombreCompleto ||
+      [row?.nombre, row?.apellidoPaterno, row?.apellidoMaterno].filter(Boolean).join(' ').trim() ||
+      `Afiliado #${id}`;
+    this.autoexclusionMotivo = '';
+    this.autoexclusionDuracionDias = '';
+    this.autoexclusionObservaciones = '';
+    this.autoexclusionEnProceso = false;
+    this.modalAutoexclusionRef = this.modalService.open(this.modalAutoexclusionAfiliado, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-afiliados-autoexclusion',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+    });
+  }
+
+  cerrarModalAutoexclusionAfiliado() {
+    if (this.modalAutoexclusionRef) {
+      this.modalAutoexclusionRef.close();
+      this.modalAutoexclusionRef = undefined;
+    }
+    this.afiliadoAutoexclusionId = null;
+    this.afiliadoAutoexclusionEtiqueta = '';
+    this.autoexclusionEnProceso = false;
+  }
+
+  abrirModalNivelVipAfiliado(row: any) {
+    const id = row?.id;
+    if (id == null || id === '') {
+      return;
+    }
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('actualizarNivelVipAfiliado', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('actualizarNivelVipAfiliado');
+      return;
+    }
+    this.vipAfiliadoId = Number(id);
+    this.vipAfiliadoEtiqueta =
+      row?.nombreCompleto ||
+      [row?.nombre, row?.apellidoPaterno, row?.apellidoMaterno].filter(Boolean).join(' ').trim() ||
+      `Afiliado #${id}`;
+    this.vipIdNivelSeleccionado = null;
+    this.vipMotivo = '';
+    this.vipEnProceso = false;
+    this.nivelesVipOpciones = [];
+
+    this.afiliadosService.obtenerNivelesVip().subscribe({
+      next: (res: any) => {
+        const raw = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+        this.nivelesVipOpciones = raw
+          .filter((x: any) => x?.id != null)
+          .map((x: any) => ({
+            id: Number(x.id),
+            text:
+              String(x.nombre ?? x.nombreNivelVip ?? x.descripcion ?? '').trim() || `Nivel ${x.id}`,
+          }));
+        if (!this.nivelesVipOpciones.length) {
+          Swal.fire({
+            title: 'Sin niveles VIP',
+            text: 'No se recibieron niveles desde el catálogo.',
+            icon: 'warning',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+          });
+          return;
+        }
+        this.modalNivelVipRef = this.modalService.open(this.modalNivelVipAfiliado, {
+          size: 'lg',
+          windowClass: 'modal-holder modal-afiliados-nivel-vip',
+          centered: true,
+          backdrop: 'static',
+          keyboard: true,
+        });
+      },
+      error: () => {
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudo cargar el catálogo de niveles VIP.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+        });
+      },
+    });
+  }
+
+  cerrarModalNivelVipAfiliado() {
+    if (this.modalNivelVipRef) {
+      this.modalNivelVipRef.close();
+      this.modalNivelVipRef = undefined;
+    }
+    this.vipAfiliadoId = null;
+    this.vipAfiliadoEtiqueta = '';
+    this.vipEnProceso = false;
+  }
+
+  confirmarNivelVipAfiliado() {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('actualizarNivelVipAfiliado', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('actualizarNivelVipAfiliado');
+      return;
+    }
+    const motivo = (this.vipMotivo || '').trim();
+    if (!motivo) {
+      Swal.fire({
+        title: 'Motivo requerido',
+        text: 'Indica el motivo del cambio de nivel VIP.',
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
+    if (this.vipIdNivelSeleccionado == null || !Number.isFinite(Number(this.vipIdNivelSeleccionado))) {
+      Swal.fire({
+        title: 'Nivel VIP',
+        text: 'Selecciona un nivel VIP del catálogo.',
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
+    if (this.vipAfiliadoId == null || !Number.isFinite(this.vipAfiliadoId)) {
+      return;
+    }
+    const idNivelVIP = Math.trunc(Number(this.vipIdNivelSeleccionado));
+    this.vipEnProceso = true;
+    this.afiliadosService
+      .actualizarNivelVip(this.vipAfiliadoId, { idNivelVIP, motivo })
+      .subscribe({
+        next: () => {
+          this.vipEnProceso = false;
+          this.cerrarModalNivelVipAfiliado();
+          Swal.fire({
+            title: 'Nivel VIP actualizado',
+            text: 'El cambio se registró según el servidor.',
+            icon: 'success',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+          });
+          this.refrescarGrid();
+        },
+        error: (error: any) => {
+          this.vipEnProceso = false;
+          const raw = error?.error?.message ?? error?.error ?? error?.message;
+          const text =
+            typeof raw === 'string'
+              ? raw
+              : raw != null
+                ? JSON.stringify(raw)
+                : 'No se pudo actualizar el nivel VIP.';
+          Swal.fire({
+            title: 'Error',
+            text,
+            icon: 'error',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+          });
+        },
+      });
+  }
+
+  confirmarAutoexclusionAfiliado() {
+    const motivo = (this.autoexclusionMotivo || '').trim();
+    if (!motivo) {
+      Swal.fire({
+        title: 'Motivo requerido',
+        text: 'Indica el motivo de la autoexclusión.',
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
+    const dias = Math.trunc(Number(this.autoexclusionDuracionDias));
+    if (!Number.isFinite(dias) || dias < 30) {
+      Swal.fire({
+        title: 'Duración inválida',
+        text: 'La duración debe ser un número entero de al menos 30 días.',
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
+    if (this.afiliadoAutoexclusionId == null || !Number.isFinite(this.afiliadoAutoexclusionId)) {
+      return;
+    }
+    const observaciones = (this.autoexclusionObservaciones || '').trim();
+    this.autoexclusionEnProceso = true;
+    this.afiliadosService
+      .registrarAutoexclusion(this.afiliadoAutoexclusionId, {
+        motivo,
+        duracionDias: dias,
+        observaciones,
+      })
+      .subscribe({
+        next: () => {
+          this.autoexclusionEnProceso = false;
+          this.cerrarModalAutoexclusionAfiliado();
+          Swal.fire({
+            title: 'Autoexclusión registrada',
+            text: 'La solicitud fue registrada según el servidor.',
+            icon: 'success',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+          });
+          this.refrescarGrid();
+        },
+        error: (error: any) => {
+          this.autoexclusionEnProceso = false;
+          const raw = error?.error?.message ?? error?.error ?? error?.message;
+          const text =
+            typeof raw === 'string'
+              ? raw
+              : raw != null
+                ? JSON.stringify(raw)
+                : 'No se pudo registrar la autoexclusión.';
+          Swal.fire({
+            title: 'Error',
+            text,
+            icon: 'error',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+          });
+        },
+      });
   }
 
   confirmarBloqueoAfiliado() {
@@ -637,10 +911,69 @@ export class ListaAfiliadosComponent implements OnInit {
     });
   }
 
-  activar(rowData: any) {
+  cancelarAutoexclusionAfiliado(rowData: any) {
+    const nombre = rowData.nombreCompleto || rowData.numeroIdentificacion || `ID ${rowData.id}`;
     Swal.fire({
-      title: '¡Activar!',
-      html: `¿Está seguro que requiere activar el afiliado: <strong>${rowData.nombreCompleto || rowData.numeroIdentificacion}</strong>?`,
+      title: 'Cancelar autoexclusión',
+      html:
+        `¿Cancelar la autoexclusión de <strong>${nombre}</strong>?<br><br>` +
+        '<small style="color:#94a3b8">Solo aplica si ya cumplió la fecha de fin del periodo. La API devolverá error si aún está vigente. Requiere rol de Gerente según documentación.</small>',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#c12a42',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, cancelar',
+      cancelButtonText: 'Cerrar',
+      background: '#0d121d',
+    }).then((result) => {
+      if (!result.value) {
+        return;
+      }
+      this.afiliadosService.cancelarAutoexclusion(rowData.id).subscribe({
+        next: (response: any) => {
+          const msg =
+            typeof response?.message === 'string'
+              ? response.message
+              : 'La autoexclusión fue cancelada.';
+          Swal.fire({
+            title: 'Listo',
+            text: msg,
+            icon: 'success',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+          });
+          this.setupDataSource();
+          setTimeout(() => this.refrescarGrid(), 0);
+        },
+        error: (error: any) => {
+          const status = error?.status;
+          const raw = error?.error;
+          let text: string;
+          if (typeof raw === 'string') {
+            text = raw;
+          } else if (raw?.message) {
+            text = String(raw.message);
+          } else if (raw?.error) {
+            text = String(raw.error);
+          } else {
+            text = error?.message || 'No se pudo cancelar la autoexclusión.';
+          }
+          Swal.fire({
+            title: status === 400 ? 'No permitido' : 'Error',
+            text,
+            icon: status === 400 ? 'warning' : 'error',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+          });
+        },
+      });
+    });
+  }
+
+  desbloquearAfiliado(rowData: any) {
+    Swal.fire({
+      title: '¡Desbloquear!',
+      html: `¿Está seguro que requiere desbloquear el afiliado: <strong>${rowData.nombreCompleto || rowData.numeroIdentificacion}</strong>?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -650,11 +983,11 @@ export class ListaAfiliadosComponent implements OnInit {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.afiliadosService.updateEstatus(rowData.id, 1).subscribe({
-          next: (response) => {
+        this.afiliadosService.desbloquearAfiliado(rowData.id).subscribe({
+          next: (_response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',
-              html: `El afiliado ha sido activado.`,
+              html: `El afiliado ha sido desbloqueado.`,
               icon: 'success',
               background: '#0d121d',
               confirmButtonColor: '#3085d6',
@@ -666,7 +999,7 @@ export class ListaAfiliadosComponent implements OnInit {
           error: (error) => {
             Swal.fire({
               title: '¡Error!',
-              text: error.error || 'No se pudo activar el afiliado.',
+              text: error.error || 'No se pudo desbloquear el afiliado.',
               icon: 'error',
               background: '#0d121d',
               confirmButtonColor: '#3085d6',

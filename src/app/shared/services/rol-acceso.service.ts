@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
  * Claves de acciones sujetas a validación de rol en UI (extensible).
  * Cada clave tiene ids permitidos alineados con GET /roles/list y `user.rol` / JWT `rol`.
  */
-export type AccionConControlRol = 'registrarAfiliado';
+export type AccionConControlRol = 'registrarAfiliado' | 'actualizarNivelVipAfiliado';
 
 /** Nombres legibles por id de catálogo de roles (sync con contrato /roles/list). */
 const ROLES_CATALOGO: Record<string, string> = {
@@ -46,6 +46,14 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
     titulo: 'No puedes registrar afiliados',
     subtitulo: 'Tu rol actual no tiene permiso para crear registros de afiliados.',
     /** Texto del encabezado de la lista de roles (se formatea como título en el modal). */
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  actualizarNivelVipAfiliado: {
+    /** POST /afiliados/{id}/nivel-vip — Swagger: rol Gerente (id 2). */
+    rolesPermitidosIds: ['2'],
+    titulo: 'No puedes actualizar el nivel VIP',
+    subtitulo:
+      'Tu rol no tiene permiso para cambiar el nivel VIP. La API documenta el rol autorizado como Gerente (identificador 2).',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
 };

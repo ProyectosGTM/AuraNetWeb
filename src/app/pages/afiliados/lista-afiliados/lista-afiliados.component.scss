@@ -202,6 +202,157 @@
   }
 }
 
+/* Paleta unica por accion (sin repetir color en la fila de acciones) */
+.btnAcciones--editar {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  i { color: #60a5fa !important; }
+  &:hover { background-color: #0f172a !important; border-color: #60a5fa !important; }
+}
+
+.btnAcciones--resumen {
+  background-color: #1e1b29 !important;
+  border-color: #3d3652 !important;
+  i { color: #a78bfa !important; }
+  &:hover { background-color: #15121e !important; border-color: #a78bfa !important; }
+}
+
+.btnAcciones--monederos {
+  background-color: #0f2a2e !important;
+  border-color: #1e4d52 !important;
+  i { color: #2dd4bf !important; }
+  &:hover { background-color: #0d2326 !important; border-color: #2dd4bf !important; }
+}
+
+.btnAcciones--nivel-vip {
+  background-color: #24143a !important;
+  border-color: #4c1d95 !important;
+  i { color: #c4b5fd !important; }
+  &:hover { background-color: #1b0f2d !important; border-color: #c4b5fd !important; }
+}
+
+.btnAcciones--bloquear {
+  background-color: #2b1f0c !important;
+  border-color: #6b4f1d !important;
+  i { color: #fbbf24 !important; }
+  &:hover { background-color: #201708 !important; border-color: #fbbf24 !important; }
+}
+
+.btnAcciones--autoexclusion {
+  background-color: #0b2b20 !important;
+  border-color: #14532d !important;
+  i { color: #4ade80 !important; }
+  &:hover { background-color: #081f17 !important; border-color: #4ade80 !important; }
+}
+
+.modal-afiliado-nombre-autoexclusion {
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(217, 119, 6, 0.12));
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(217, 119, 6, 0.15);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+
+::ng-deep .modal-holder.modal-afiliados-autoexclusion {
+  .modal-accion-header--autoexclusion-afiliado::before {
+    background: #d97706;
+  }
+
+  .modal-accion-header--autoexclusion-afiliado .modal-title i {
+    color: #fbbf24;
+  }
+
+  .btn-alt--autoexclusion-afiliado {
+    background: #b45309;
+    color: #ffffff;
+    box-shadow: 0 10px 26px rgba(180, 83, 9, 0.35);
+  }
+
+  .btn-alt--autoexclusion-afiliado:hover:not(:disabled) {
+    background: #d97706;
+    transform: translateY(-1px);
+  }
+
+  .btn-alt--autoexclusion-afiliado:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btnAcciones--autoexclusion:hover {
+  border-color: rgba(217, 119, 6, 0.55);
+  i {
+    color: #fbbf24;
+  }
+}
+
+.btnAcciones--cancelar-autoexclusion:hover {
+  border-color: rgba(193, 42, 66, 0.55);
+  i {
+    color: #f8718a;
+  }
+}
+
+.btnAcciones--cancelar-autoexclusion {
+  background-color: #2a0d24 !important;
+  border-color: #5b214f !important;
+  i { color: #f472b6 !important; }
+  &:hover { background-color: #1e091a !important; border-color: #f472b6 !important; }
+}
+
+.btnAcciones--desbloquear {
+  background-color: #0f2a1a !important;
+  border-color: #1f5c3a !important;
+  i { color: #34d399 !important; }
+  &:hover { background-color: #0c2215 !important; border-color: #34d399 !important; }
+}
+
+.btnAcciones--desactivar {
+  background-color: #2a0d0d !important;
+  border-color: #7f1d1d !important;
+  i { color: #f87171 !important; }
+  &:hover { background-color: #1f0909 !important; border-color: #f87171 !important; }
+}
+
+::ng-deep .modal-holder.modal-afiliados-nivel-vip {
+  .modal-accion-header--nivel-vip-afiliado::before {
+    background: linear-gradient(90deg, #6d28d9, #a855f7);
+  }
+
+  .modal-accion-header--nivel-vip-afiliado .modal-title i {
+    color: #e9d5ff;
+  }
+
+  .btn-alt--nivel-vip-afiliado {
+    background: #7c3aed;
+    color: #ffffff;
+    box-shadow: 0 10px 26px rgba(124, 58, 237, 0.35);
+  }
+
+  .btn-alt--nivel-vip-afiliado:hover:not(:disabled) {
+    background: #8b5cf6;
+    transform: translateY(-1px);
+  }
+
+  .btn-alt--nivel-vip-afiliado:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btnAcciones--nivel-vip:hover {
+  border-color: rgba(168, 85, 247, 0.55);
+  i {
+    color: #d8b4fe;
+  }
+}
+
 /* Filtros del grid — resalte cuando modo búsqueda activo (sobrescribe #afiliadosFiltrosButton) */
 #afiliadosFiltrosButton.btnAcciones--filtros-activo {
   border-color: #e40041;
