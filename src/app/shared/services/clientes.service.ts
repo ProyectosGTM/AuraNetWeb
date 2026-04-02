@@ -40,15 +40,17 @@ export class ClientesService {
     }
 
   actualizarCliente(idCliente: number, saveForm: any): Observable<any> {
-    const body = saveForm && typeof saveForm === 'object' && !Array.isArray(saveForm) ? { ...saveForm } : saveForm;
+    const body =
+      saveForm && typeof saveForm === 'object' && !Array.isArray(saveForm)
+        ? (({ estatus, ...rest }) => rest)(saveForm)
+        : saveForm;
     if (body && typeof body === 'object') {
-      delete body.estatus;
       if (Number(body.tipoPersona) === 2) {
         body.apellidoPaterno = 'null';
         body.apellidoMaterno = 'null';
       }
     }
-    return this.http.patch(`${environment.API_SECURITY}/clientes/` + idCliente, body);
+    return this.http.put(`${environment.API_SECURITY}/clientes/` + idCliente, body);
   }
 
   private apiUrl = `${environment.API_SECURITY}/clientes`;

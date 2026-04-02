@@ -78,7 +78,7 @@ export class AgregarUsuarioComponent implements OnInit {
         emailConfirmado: [1],
         estatus: [1],
         idCliente: [null, [Validators.required]],
-        idSala: [null, [Validators.required]],
+        idSala: [null],
         permisosIds: this.fb.control<number[]>([]),
       },
       { validators: this.passwordsMatchValidator }
@@ -562,7 +562,11 @@ export class AgregarUsuarioComponent implements OnInit {
       idSala,
     } = this.usuarioForm.value;
 
-    const toNumOrNull = (v: any) => (v === null || v === undefined || v === '' ? null : Number(v));
+    const toNumOrNull = (v: any) => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
 
     const payload: any = {
       userName,
@@ -642,7 +646,6 @@ export class AgregarUsuarioComponent implements OnInit {
       userName: 'Correo electrónico',
       idRol: 'Rol',
       idCliente: 'Cliente',
-      idSala: 'Sala',
       passwordHash: 'Contraseña',
       confirmPassword: 'Confirmar contraseña',
       fotoPerfil: 'Foto de perfil',
@@ -705,7 +708,11 @@ export class AgregarUsuarioComponent implements OnInit {
       idSala,
     } = this.usuarioForm.value;
 
-    const toNumOrNull = (v: any) => (v === null || v === undefined || v === '' ? null : Number(v));
+    const toNumOrNull = (v: any) => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
 
     const payload: any = {
       nombre,

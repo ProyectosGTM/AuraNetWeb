@@ -375,12 +375,12 @@ export class AgregarClienteComponent implements OnInit {
     const logoForm = logoFormRaw && logoFormRaw !== this.DEFAULT_LOGO_URL ? logoFormRaw : '';
     const logoPadre = this.getLogotipoPadre();
 
+    const { estatus, ...vSinEstatus } = v;
     const payload: Record<string, unknown> = {
-      ...v,
+      ...vSinEstatus,
       tipoPersona: v.tipoPersona != null ? Number(v.tipoPersona) : null,
       logotipo: logoForm || logoPadre || null,
     };
-    delete payload['estatus'];
 
     this.clieService.agregarCliente(payload).subscribe(
       () => {

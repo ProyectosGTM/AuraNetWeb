@@ -36,7 +36,7 @@ export class ZonaService {
 
   private apiUrl = `${environment.API_SECURITY}/zonas`;
   updateEstatus(id: number, estatus: number): Observable<string> {
-    const url = `${this.apiUrl}/${id}/estatus`;
+    const url = `${this.apiUrl}/estatus/${id}`;
     const body = { estatus };
     return this.http.patch(url, body, { responseType: 'text' }).pipe(
       catchError(error => throwError(() => error))
