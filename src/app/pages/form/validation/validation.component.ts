@@ -65,7 +65,7 @@ export class ValidationComponent implements OnInit {
       digits: ['', [Validators.required, Validators.pattern('[0-9]+')]],
       number: ['', [Validators.required, Validators.pattern('[0-9]+')]],
       alphanum: ['', [Validators.required, Validators.pattern('[a-zA-Z0-9]+')]],
-      textarea: ['', [Validators.required]],
+      textInput: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmpwd: ['', Validators.required]
     }, {

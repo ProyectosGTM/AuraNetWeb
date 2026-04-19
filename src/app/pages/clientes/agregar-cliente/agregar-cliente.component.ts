@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, finalize, forkJoin, map, of } from 'rxjs';
@@ -26,6 +26,9 @@ export class AgregarClienteComponent implements OnInit {
   previewUrl: string | ArrayBuffer | null = null;
   tipoPersonaItems = [{ id: 1, text: 'Física' }, { id: 2, text: 'Moral' }];
 
+  /** RFC normalizado al cargar edición; si no cambia, no se envía en PATCH. */
+  private rfcAlCargarEdicion = '';
+
   constructor(
     private fb: FormBuilder,
     private modalService: NgbModal,
@@ -51,6 +54,10 @@ export class AgregarClienteComponent implements OnInit {
       if (this.idCliente) {
         this.title = 'Actualizar Cliente';
         this.obtenerClienteID();
+      } else {
+        this.title = 'Agregar Cliente';
+        this.submitButton = 'Guardar';
+        this.rfcAlCargarEdicion = '';
       }
     });
   }
@@ -66,7 +73,11 @@ export class AgregarClienteComponent implements OnInit {
 
   obtenerClienteID() {
     this.clieService.obtenerCliente(this.idCliente).subscribe((response: any) => {
+      console.log('[Cliente] GET cliente — respuesta API', response);
+
       const d = response?.data ?? {};
+
+      this.rfcAlCargarEdicion = this.normalizeRfc(d.rfc);
 
       this.clienteForm.patchValue({
         idPadre: Number(d.idPadre ?? 0),
@@ -117,7 +128,56 @@ export class AgregarClienteComponent implements OnInit {
       }
 
       this.onTipoPersonaChange(null);
+      this.clienteForm.get('rfc')?.updateValueAndValidity({ emitEvent: false });
     });
+  }
+
+  /** Mensajes para controles inválidos (no solo `required`; p. ej. email, maxlength en RFC). */
+  private collectInvalidFieldMessages(etiquetas: Record<string, string>): string[] {
+    const lines: string[] = [];
+    Object.keys(this.clienteForm.controls).forEach((key) => {
+      const c = this.clienteForm.get(key);
+      if (!c?.invalid || !c.errors) return;
+      const label = etiquetas[key] || key;
+      lines.push(...this.formatControlErrors(label, c.errors));
+    });
+    return lines;
+  }
+
+  private formatControlErrors(label: string, errors: ValidationErrors): string[] {
+    const out: string[] = [];
+    if (errors['required']) {
+      out.push(`${label}: obligatorio`);
+    }
+    if (errors['email']) {
+      out.push(`${label}: formato de correo no válido`);
+    }
+    if (errors['minlength']) {
+      const m = errors['minlength'];
+      out.push(`${label}: mínimo ${m.requiredLength} caracteres`);
+    }
+    if (errors['maxlength']) {
+      const m = errors['maxlength'];
+      out.push(`${label}: máximo ${m.requiredLength} caracteres (tiene ${m.actualLength})`);
+    }
+    if (errors['invalidDimensions']) {
+      out.push(`${label}: dimensiones de imagen inválidas`);
+    }
+    if (errors['maxSize']) {
+      out.push(`${label}: archivo demasiado grande`);
+    }
+    if (errors['invalid']) {
+      out.push(`${label}: archivo o valor no válido`);
+    }
+    if (errors['uploadFailed']) {
+      out.push(`${label}: error al subir el archivo`);
+    }
+    const known = ['required', 'email', 'minlength', 'maxlength', 'invalidDimensions', 'maxSize', 'invalid', 'uploadFailed'];
+    const extra = Object.keys(errors).filter((k) => !known.includes(k));
+    for (const k of extra) {
+      out.push(`${label}: ${k} → ${JSON.stringify(errors[k])}`);
+    }
+    return out.length ? out : [`${label}: revisar validación`];
   }
 
   onFileSelected(event: any) {
@@ -146,15 +206,12 @@ export class AgregarClienteComponent implements OnInit {
   }
 
   onTipoPersonaChange(_event: any) {
-    const value: number | null = this.clienteForm.get('tipoPersona')!.value;
+    const raw = this.clienteForm.get('tipoPersona')?.value;
+    const value = raw != null && raw !== '' ? Number(raw) : null;
 
     if (value === 1) {
-      this.clienteForm
-        .get('apellidoPaterno')
-        ?.setValidators([Validators.required]);
-      this.clienteForm
-        .get('apellidoMaterno')
-        ?.setValidators([Validators.required]);
+      this.clienteForm.get('apellidoPaterno')?.setValidators([Validators.required]);
+      this.clienteForm.get('apellidoMaterno')?.clearValidators();
     } else if (value === 2) {
       this.clienteForm.get('apellidoPaterno')?.clearValidators();
       this.clienteForm.get('apellidoMaterno')?.clearValidators();
@@ -162,16 +219,25 @@ export class AgregarClienteComponent implements OnInit {
         apellidoPaterno: null,
         apellidoMaterno: null,
       });
+    } else {
+      this.clienteForm.get('apellidoPaterno')?.clearValidators();
+      this.clienteForm.get('apellidoMaterno')?.clearValidators();
     }
 
     this.clienteForm.get('apellidoPaterno')?.updateValueAndValidity();
     this.clienteForm.get('apellidoMaterno')?.updateValueAndValidity();
   }
 
+  private normalizeRfc(v: unknown): string {
+    return String(v ?? '')
+      .replace(/[^A-Za-z0-9]/g, '')
+      .toUpperCase();
+  }
+
   sanitizeInput(event: any): void {
     const inputElement = event.target as HTMLInputElement;
     const sanitizedValue = inputElement.value.replace(/[^A-Za-z0-9]/g, '');
-    inputElement.value = sanitizedValue.slice(0, 13);
+    inputElement.value = sanitizedValue.slice(0, 20);
     this.clienteForm
       .get('rfc')
       ?.setValue(inputElement.value, { emitEvent: false });
@@ -199,7 +265,7 @@ export class AgregarClienteComponent implements OnInit {
       actaConstitutiva: [null, Validators.required],
       nombre: ['', Validators.required],
       apellidoPaterno: ['', Validators.required],
-      apellidoMaterno: ['', Validators.required],
+      apellidoMaterno: [null],
       telefono: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
       estado: ['', Validators.required],
@@ -234,7 +300,7 @@ export class AgregarClienteComponent implements OnInit {
     const tipo = Number(this.clienteForm.get('tipoPersona')?.value ?? null);
     if (tipo === 1) {
       this.clienteForm.get('apellidoPaterno')?.setValidators([Validators.required]);
-      this.clienteForm.get('apellidoMaterno')?.setValidators([Validators.required]);
+      this.clienteForm.get('apellidoMaterno')?.clearValidators();
     } else if (tipo === 2) {
       this.clienteForm.get('apellidoPaterno')?.clearValidators();
       this.clienteForm.get('apellidoMaterno')?.clearValidators();
@@ -271,12 +337,10 @@ export class AgregarClienteComponent implements OnInit {
         correoEncargado: 'Email del Encargado',
       };
 
-      const camposFaltantes: string[] = [];
-      Object.keys(this.clienteForm.controls).forEach((key) => {
-        const control = this.clienteForm.get(key);
-        if (control?.invalid && control.errors?.['required']) {
-          camposFaltantes.push(etiquetas[key] || key);
-        }
+      const camposFaltantes = this.collectInvalidFieldMessages(etiquetas);
+      console.warn('[Cliente] Formulario inválido (agregar)', {
+        errors: camposFaltantes,
+        raw: this.clienteForm.getRawValue(),
       });
 
       const lista = camposFaltantes
@@ -290,14 +354,13 @@ export class AgregarClienteComponent implements OnInit {
         .join('');
 
       Swal.fire({
-        title: '¡Faltan campos obligatorios!',
+        title: 'Revisa el formulario',
         background: '#0d121d',
         html: `
         <p style="text-align:center;font-size:15px;margin-bottom:16px;color:white">
-          Los siguientes <strong>campos obligatorios</strong> están vacíos.<br>
-          Por favor complétalos antes de continuar:
+          Hay campos con errores de validación. Corrígelos antes de continuar:
         </p>
-        <div style="max-height:350px;overflow-y:auto;">${lista}</div>
+        <div style="max-height:350px;overflow-y:auto;">${lista || '<p style="color:#fff">Sin detalle (revisa la consola).</p>'}</div>
       `,
         icon: 'error',
         confirmButtonText: 'Entendido',
@@ -312,12 +375,12 @@ export class AgregarClienteComponent implements OnInit {
     const logoForm = logoFormRaw && logoFormRaw !== this.DEFAULT_LOGO_URL ? logoFormRaw : '';
     const logoPadre = this.getLogotipoPadre();
 
-    const payload = {
-      ...v,
+    const { estatus, ...vSinEstatus } = v;
+    const payload: Record<string, unknown> = {
+      ...vSinEstatus,
       tipoPersona: v.tipoPersona != null ? Number(v.tipoPersona) : null,
       logotipo: logoForm || logoPadre || null,
     };
-
 
     this.clieService.agregarCliente(payload).subscribe(
       () => {
@@ -363,7 +426,7 @@ export class AgregarClienteComponent implements OnInit {
     const tipo = Number(this.clienteForm.get('tipoPersona')?.value ?? null);
     if (tipo === 1) {
       this.clienteForm.get('apellidoPaterno')?.setValidators([Validators.required]);
-      this.clienteForm.get('apellidoMaterno')?.setValidators([Validators.required]);
+      this.clienteForm.get('apellidoMaterno')?.clearValidators();
     } else if (tipo === 2) {
       this.clienteForm.get('apellidoPaterno')?.clearValidators();
       this.clienteForm.get('apellidoMaterno')?.clearValidators();
@@ -400,12 +463,10 @@ export class AgregarClienteComponent implements OnInit {
         correoEncargado: 'Email del Encargado',
       };
 
-      const camposFaltantes: string[] = [];
-      Object.keys(this.clienteForm.controls).forEach((key) => {
-        const control = this.clienteForm.get(key);
-        if (control?.invalid && control.errors?.['required']) {
-          camposFaltantes.push(etiquetas[key] || key);
-        }
+      const camposFaltantes = this.collectInvalidFieldMessages(etiquetas);
+      console.warn('[Cliente] Formulario inválido (actualizar)', {
+        errors: camposFaltantes,
+        raw: this.clienteForm.getRawValue(),
       });
 
       const lista = camposFaltantes
@@ -418,14 +479,13 @@ export class AgregarClienteComponent implements OnInit {
         .join('');
 
       Swal.fire({
-        title: '¡Faltan campos obligatorios!',
+        title: 'Revisa el formulario',
         background: '#0d121d',
         html: `
         <p style="text-align:center;font-size:15px;margin-bottom:16px;color:white">
-          Los siguientes <strong>campos obligatorios</strong> están vacíos.<br>
-          Por favor complétalos antes de continuar:
+          Hay campos con errores de validación. Corrígelos antes de continuar:
         </p>
-        <div style="max-height:350px;overflow-y:auto;">${lista}</div>
+        <div style="max-height:350px;overflow-y:auto;">${lista || '<p style="color:#fff">Sin detalle (revisa la consola).</p>'}</div>
       `,
         icon: 'error',
         confirmButtonText: 'Entendido',
@@ -434,7 +494,7 @@ export class AgregarClienteComponent implements OnInit {
       return;
     }
 
-    const v = this.clienteForm.value;
+    const v = this.clienteForm.getRawValue();
 
     const urls$ = forkJoin({
       logotipo: this.resolveUrlForField('logotipo', v.logotipo),
@@ -451,7 +511,7 @@ export class AgregarClienteComponent implements OnInit {
           const logoUpload = logoUploadRaw && logoUploadRaw !== this.DEFAULT_LOGO_URL ? logoUploadRaw : '';
           const logoPadre = this.getLogotipoPadre();
 
-          const payload = {
+          const payload: Record<string, unknown> = {
             ...v,
             tipoPersona: v.tipoPersona != null ? Number(v.tipoPersona) : null,
             logotipo: logoUpload || logoPadre || null,
@@ -459,6 +519,13 @@ export class AgregarClienteComponent implements OnInit {
             comprobanteDomicilio: u.comprobanteDomicilio,
             actaConstitutiva: u.actaConstitutiva,
           };
+
+          const rfcIgualAlCargado =
+            this.normalizeRfc(v.rfc) === this.normalizeRfc(this.rfcAlCargarEdicion);
+          if (rfcIgualAlCargado) {
+            delete payload['rfc'];
+          }
+          delete payload['estatus'];
 
           this.clieService.actualizarCliente(this.idCliente, payload).subscribe(
             () => {

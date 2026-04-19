@@ -203,9 +203,13 @@
         </div>
 
         <div class="recarga-actions">
-          <button type="button" class="recarga-btn recarga-btn--cancel" (click)="limpiarFormulario()">
+          <button
+            type="button"
+            class="recarga-btn recarga-btn--cancel"
+            *ngIf="hayDatosEnSelectsRecarga"
+            (click)="limpiarFormulario()">
             <i class="fas fa-times"></i>
-            <span>Cancelar</span>
+            <span>Limpiar</span>
           </button>
           <button type="button" class="recarga-btn recarga-btn--confirm" (click)="procesarRecarga()" [disabled]="recargaForm.invalid || procesando">
             <i class="fas fa-check" *ngIf="!procesando"></i>
@@ -215,10 +219,12 @@
         </div>
       </div>
 
-      <div class="recarga-actions recarga-actions--single" *ngIf="!cajaSeleccionada || !monederoSeleccionado || !recargaForm.get('monto')?.value || montoFocused">
+      <div
+        class="recarga-actions recarga-actions--single"
+        *ngIf="hayDatosEnSelectsRecarga && (!cajaSeleccionada || !monederoSeleccionado || !recargaForm.get('monto')?.value || montoFocused)">
         <button type="button" class="recarga-btn recarga-btn--cancel" (click)="limpiarFormulario()">
-          <i class="fas fa-times"></i>
-          <span>Cancelar</span>
+          <i class="fas fa-refresh"></i>
+          <span>Limpiar</span>
         </button>
       </div>
     </form>

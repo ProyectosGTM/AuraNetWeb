@@ -18,8 +18,17 @@ export class ClientesService {
 		return this.http.get(`${environment.API_SECURITY}/clientes/list`);
 	}
 
-  agregarCliente(data: FormData) {
-    return this.http.post(environment.API_SECURITY + '/clientes', data);
+  agregarCliente(data: any) {
+    const body = data && typeof data === 'object' && !Array.isArray(data) ? { ...data } : data;
+    if (body && typeof body === 'object') {
+      delete body.estatus;
+      if (Number(body.tipoPersona) === 2) {
+        // Persona moral: el API espera el texto "NULL", no el literal JSON null
+        body.apellidoPaterno = 'null';
+        body.apellidoMaterno = 'null';
+      }
+    }
+    return this.http.post(environment.API_SECURITY + '/clientes', body);
   }
 
   eliminarCliente(idCliente: Number) {
@@ -31,7 +40,17 @@ export class ClientesService {
     }
 
   actualizarCliente(idCliente: number, saveForm: any): Observable<any> {
-    return this.http.put(`${environment.API_SECURITY}/clientes/` + idCliente, saveForm);
+    const body =
+      saveForm && typeof saveForm === 'object' && !Array.isArray(saveForm)
+        ? (({ estatus, ...rest }) => rest)(saveForm)
+        : saveForm;
+    if (body && typeof body === 'object') {
+      if (Number(body.tipoPersona) === 2) {
+        body.apellidoPaterno = 'null';
+        body.apellidoMaterno = 'null';
+      }
+    }
+    return this.http.put(`${environment.API_SECURITY}/clientes/` + idCliente, body);
   }
 
   private apiUrl = `${environment.API_SECURITY}/clientes`;

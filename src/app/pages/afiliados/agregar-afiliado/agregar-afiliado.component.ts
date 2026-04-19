@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { AfiliadosService } from 'src/app/shared/services/afiliados.service';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
+import { FormularioValidacionSwalService } from 'src/app/shared/services/formulario-validacion-swal.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import { forkJoin } from 'rxjs';
@@ -31,6 +33,21 @@ export class AgregarAfiliadoComponent implements OnInit {
 
   afiliadoForm: FormGroup;
 
+  /** Etiquetas para el Swal de validación (mismo patrón que otros módulos). */
+  private readonly etiquetasCamposAfiliado: Record<string, string> = {
+    idSala: 'Sala',
+    idTipoIdentificacion: 'Tipo de identificación',
+    numeroIdentificacion: 'Número de identificación',
+    nombre: 'Nombre',
+    apellidoPaterno: 'Apellido paterno',
+    apellidoMaterno: 'Apellido materno',
+    fechaNacimiento: 'Fecha de nacimiento',
+    sexo: 'Sexo',
+    idEstatusAfiliado: 'Estatus del afiliado',
+    email: 'Correo electrónico',
+    telefonoCelular: 'Teléfono celular',
+  };
+
   constructor(
     private fb: FormBuilder,
     private route: Router,
@@ -38,6 +55,8 @@ export class AgregarAfiliadoComponent implements OnInit {
     private afiliadosService: AfiliadosService,
     private salasService: SalaService,
     private cajasService: CajasService,
+    private rolAcceso: RolAccesoService,
+    private formularioValidacionSwal: FormularioValidacionSwalService,
   ) { }
 
   ngOnInit(): void {
@@ -208,15 +227,12 @@ export class AgregarAfiliadoComponent implements OnInit {
   }
 
   guardar() {
-    if (this.afiliadoForm.invalid) {
-      Swal.fire({
-        title: '¡Atención!',
-        text: 'Por favor complete todos los campos requeridos.',
-        icon: 'warning',
-        background: '#0d121d',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'Confirmar',
-      });
+    if (
+      this.formularioValidacionSwal.resaltarYAlertarSiInvalido(
+        this.afiliadoForm,
+        this.etiquetasCamposAfiliado
+      )
+    ) {
       return;
     }
 
@@ -250,6 +266,13 @@ export class AgregarAfiliadoComponent implements OnInit {
         }
       });
     } else {
+      const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+      if (!this.rolAcceso.puedeRealizarAccion('registrarAfiliado', rolUsuario)) {
+        this.loading = false;
+        this.rolAcceso.mostrarAccesoDenegado('registrarAfiliado');
+        return;
+      }
+
       this.afiliadosService.agregarAfiliado(payload).subscribe({
         next: (response) => {
           this.loading = false;

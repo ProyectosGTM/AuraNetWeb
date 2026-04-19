@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { ClientesService } from 'src/app/shared/services/clientes.service';
@@ -249,7 +249,7 @@ export class AgregarSalaComponent implements OnInit {
       fechaInicioContrato: [null],
       fechaFinContrato: [null],
       idEstatusLicencia: [null],
-      idCliente: [null],
+      idCliente: [null, Validators.required],
     });
   }
 
@@ -1015,7 +1015,7 @@ export class AgregarSalaComponent implements OnInit {
       capacidadPersonas: 0,
       idMonedaPrincipal: 0,
       idEstatusLicencia: 0,
-      idCliente: 0
+      idCliente: null
     });
     
     // Limpiar previews de imágenes
@@ -1069,6 +1069,14 @@ export class AgregarSalaComponent implements OnInit {
       fechaInicioContrato: v.fechaInicioContrato ?? null,
       fechaFinContrato: v.fechaFinContrato ?? null,
       idEstatusLicencia: Number(v.idEstatusLicencia) || 0,
+      idCliente: (() => {
+        const raw = v.idCliente;
+        if (raw === null || raw === undefined || raw === '') {
+          return 0;
+        }
+        const n = Number(raw);
+        return Number.isFinite(n) ? Math.trunc(n) : 0;
+      })(),
     };
   }
 

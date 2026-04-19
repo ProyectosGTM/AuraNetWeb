@@ -270,6 +270,14 @@ export class RecargaComponent implements OnInit {
     return this.montoFocused ? this.formatMontoWhileTyping(val) : this.formatMontoFull(val);
   }
 
+  /** True si Caja o Monedero tienen valor (para mostrar el botón Limpiar). */
+  get hayDatosEnSelectsRecarga(): boolean {
+    const idCaja = this.recargaForm.get('idCaja')?.value;
+    const idMonedero = this.recargaForm.get('idMonedero')?.value;
+    const tiene = (v: unknown) => v != null && v !== '';
+    return tiene(idCaja) || tiene(idMonedero);
+  }
+
   formatearFechaHora(fecha: string | null): string {
     if (!fecha) return 'Sin registro';
     try {

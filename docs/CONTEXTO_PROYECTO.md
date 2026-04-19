@@ -21,6 +21,9 @@
 **Template Base:** Minible - Admin & Dashboard Template  
 **Versión:** 3.1.0
 
+### Regla Operativa Prioritaria
+En AuraNet, **no se debe modificar ni mejorar código ya establecido** (incluyendo refactors, optimizaciones o cambios de estilo) **si no existe una instrucción explícita** para hacerlo.
+
 ### Descripción
 AuraNet es una aplicación de administración y gestión para un sistema de puntos de venta (POS) que incluye gestión de clientes, salas, zonas, máquinas, monederos, transacciones, y más. El sistema utiliza un diseño moderno con tema oscuro y componentes interactivos.
 
@@ -1050,5 +1053,5 @@ componente/
 
 ---
 
-**Última actualización:** 2026-03-13  
-**Versión del documento:** 1.1
+**Última actualización:** 2026-03-24  
+**Versión del documento:** 1.2
