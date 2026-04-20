@@ -1,5 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
+import { AuthenticationService } from 'src/app/core/services/auth.service';
+import { User } from 'src/app/entities/User';
+import { ClientesService } from 'src/app/shared/services/clientes.service';
+import { DashboardService } from 'src/app/shared/services/dashboard.service';
+import Swal from 'sweetalert2';
+import { DashboardKpisRequest, DashboardKpisResponse } from './dashboard-kpis.model';
+
+type ClienteOption = { id: number; text: string };
 
 @Component({
   selector: 'app-default',
@@ -8,131 +17,210 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
   animations: [fadeInRightAnimation],
 })
 export class DefaultComponent implements OnInit {
-
   loading = false;
+  lastUpdated: Date | null = null;
+  data: DashboardKpisResponse | null = null;
 
-  // Datos falsos pero creíbles
-  resumenOperativo = {
-    totalAfiliados: 87,
-    afiliadosActivos: 76,
-    afiliadosInactivos: 11,
-    totalSalas: 5,
-    salasOperativas: 4,
-    salasMantenimiento: 1,
-    totalZonas: 8,
-    totalMaquinas: 42,
-    maquinasOperativas: 38,
-    maquinasFueraServicio: 4,
-    totalCajas: 6,
-    cajasAbiertas: 5,
-    cajasCerradas: 1,
-    totalMonederos: 123,
-    monederosActivos: 108,
-    monederosInactivos: 15,
-    totalTurnos: 18,
-    turnosAbiertos: 3,
-    turnosCerrados: 15,
-    totalTesoreria: 5,
-    tesoreriaAbierta: 4,
-    tesoreriaCerrada: 1,
-    totalTransacciones: 234,
-    transaccionesHoy: 18,
-    totalClientes: 56,
-    clientesActivos: 48,
-    clientesInactivos: 8
-  };
+  filterForm: FormGroup;
+  listaClientes: ClienteOption[] = [];
 
-  // Datos para gráficas
-  transaccionesPorTipo: any[] = [
-    { argument: 'Recargas', value: 42 },
-    { argument: 'Juegos', value: 56 },
-    { argument: 'Premios', value: 18 },
-    { argument: 'Retiros', value: 12 },
-    { argument: 'Transferencias', value: 9 },
-    { argument: 'Depósitos', value: 34 },
-    { argument: 'Consultas', value: 28 },
-    { argument: 'Cancelaciones', value: 7 }
-  ];
-  
-  // Verificar que los datos estén disponibles
-  get datosTransacciones() {
-    return this.transaccionesPorTipo;
-  }
-  
-  distribucionMonederos: any[] = [
-    { argument: 'Activos', value: 108 },
-    { argument: 'Inactivos', value: 15 },
-    { argument: 'Con Saldo', value: 78 },
-    { argument: 'Sin Saldo', value: 30 }
-  ];
-  
-  actividadPorHora: any[] = [
-    { argument: '00:00', recargas: 1, juegos: 2, premios: 0 },
-    { argument: '02:00', recargas: 0, juegos: 1, premios: 0 },
-    { argument: '04:00', recargas: 0, juegos: 0, premios: 0 },
-    { argument: '06:00', recargas: 1, juegos: 3, premios: 0 },
-    { argument: '08:00', recargas: 2, juegos: 4, premios: 1 },
-    { argument: '10:00', recargas: 3, juegos: 6, premios: 1 },
-    { argument: '12:00', recargas: 4, juegos: 7, premios: 2 },
-    { argument: '14:00', recargas: 5, juegos: 8, premios: 2 },
-    { argument: '16:00', recargas: 4, juegos: 7, premios: 1 },
-    { argument: '18:00', recargas: 3, juegos: 5, premios: 1 },
-    { argument: '20:00', recargas: 2, juegos: 4, premios: 0 },
-    { argument: '22:00', recargas: 1, juegos: 2, premios: 0 }
-  ];
-  
-  saldoPorSala: any[] = [
-    { argument: 'Sala Diamante', value: 18500 },
-    { argument: 'Sala Platinum', value: 14200 },
-    { argument: 'Sala Gold', value: 9800 },
-    { argument: 'Sala Silver', value: 7600 },
-    { argument: 'Sala Bronze', value: 5400 }
-  ];
-  
-  movimientosRecientes: any[] = [
-    { tipo: 'Recarga', monto: 150, sala: 'Sala Diamante', hora: '15:42', icon: 'fa-arrow-up', color: '#34c38f' },
-    { tipo: 'Juego', monto: 85, sala: 'Sala Platinum', hora: '15:28', icon: 'fa-gamepad', color: '#5b73e8' },
-    { tipo: 'Premio', monto: 320, sala: 'Sala Gold', hora: '15:15', icon: 'fa-gift', color: '#f1b44c' },
-    { tipo: 'Retiro', monto: 200, sala: 'Sala Silver', hora: '15:05', icon: 'fa-arrow-down', color: '#e40041' },
-    { tipo: 'Depósito', monto: 120, sala: 'Sala Bronze', hora: '14:58', icon: 'fa-arrow-up', color: '#50a5f1' },
-    { tipo: 'Transferencia', monto: 75, sala: 'Sala Diamante', hora: '14:45', icon: 'fa-exchange-alt', color: '#6f42c1' }
-  ];
-  
-  topSalas: any[] = [
-    { nombre: 'Sala Diamante', transacciones: 42, saldo: 18500, maquinas: 12 },
-    { nombre: 'Sala Platinum', transacciones: 35, saldo: 14200, maquinas: 9 },
-    { nombre: 'Sala Gold', transacciones: 28, saldo: 9800, maquinas: 8 },
-    { nombre: 'Sala Silver', transacciones: 22, saldo: 7600, maquinas: 7 },
-    { nombre: 'Sala Bronze', transacciones: 18, saldo: 5400, maquinas: 6 }
-  ];
+  /** Se envía al API; no se muestra en pantalla. Atajos de fecha lo ajustan; al editar fechas manualmente vuelve a 0. */
+  private filtroApi = 0;
 
-  // Configuración de colores
-  colors = {
-    primary: '#5b73e8',
-    success: '#34c38f',
-    warning: '#f1b44c',
-    danger: '#e40041',
-    info: '#50a5f1'
-  };
-
-  constructor() {
-    // Los datos ya están inicializados directamente en las propiedades
+  constructor(
+    private readonly dashboardService: DashboardService,
+    private readonly auth: AuthenticationService,
+    private readonly clientesService: ClientesService,
+    private readonly fb: FormBuilder,
+  ) {
+    const semana = this.rangoSemanaActual();
+    const idDef = this.resolverIdCliente();
+    this.listaClientes = [{ id: idDef, text: 'Cliente actual' }];
+    this.filtroApi = 2;
+    this.filterForm = this.fb.group({
+      fechaInicio: [semana.inicio],
+      fechaFin: [semana.fin],
+      idCliente: [idDef],
+    });
   }
 
-  ngOnInit() {
-    // Los datos ya están inicializados directamente
+  ngOnInit(): void {
+    this.filterForm.get('fechaInicio')?.valueChanges.subscribe(() => {
+      this.filtroApi = 0;
+    });
+    this.filterForm.get('fechaFin')?.valueChanges.subscribe(() => {
+      this.filtroApi = 0;
+    });
+    this.cargarClientes();
+    this.cargarKpis();
   }
 
-  formatearNumero(numero: number): string {
-    return numero.toLocaleString('es-MX');
+  cargarClientes(): void {
+    this.clientesService.obtenerClientes().subscribe({
+      next: (response) => {
+        const mapped = (response?.data || [])
+          .map((c: Record<string, unknown>) => ({
+            id: Number(c['id'] ?? c['Id'] ?? 0),
+            text: String(c['nombre'] ?? c['nombreComercial'] ?? '').trim() || `Cliente ${c['id']}`,
+          }))
+          .filter((c: ClienteOption) => c.id > 0);
+        const cur = Number(this.filterForm.get('idCliente')?.value);
+        if (cur > 0 && !mapped.some((c) => c.id === cur)) {
+          mapped.unshift({ id: cur, text: `Cliente ${cur}` });
+        }
+        this.listaClientes = mapped.length ? mapped : [{ id: this.resolverIdCliente(), text: 'Cliente actual' }];
+      },
+      error: () => {
+        const idDef = this.resolverIdCliente();
+        this.listaClientes = [{ id: idDef, text: 'Cliente actual' }];
+      },
+    });
   }
 
-  formatearMoneda(valor: number): string {
-    return `$${valor.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  resolverIdCliente(): number {
+    try {
+      const u = this.auth.getUser() as User | null;
+      if (!u) return 1;
+      const nested = u.user as { idCliente?: unknown } | undefined;
+      const raw = u.idCliente ?? nested?.idCliente;
+      if (raw != null && raw !== '') {
+        const n = Number(raw);
+        if (!Number.isNaN(n) && n > 0) return n;
+      }
+    } catch {
+      /* Sin sesión o user inválido */
+    }
+    return 1;
   }
 
-  calcularPorcentaje(actual: number, total: number): number {
-    if (total === 0) return 0;
-    return Math.round((actual / total) * 100);
+  rangoSemanaActual(): { inicio: string; fin: string } {
+    const ahora = new Date();
+    const dia = ahora.getDay();
+    const offsetLunes = dia === 0 ? -6 : 1 - dia;
+    const lunes = new Date(ahora);
+    lunes.setDate(ahora.getDate() + offsetLunes);
+    lunes.setHours(0, 0, 0, 0);
+    const domingo = new Date(lunes);
+    domingo.setDate(lunes.getDate() + 6);
+    return { inicio: this.toYmd(lunes), fin: this.toYmd(domingo) };
+  }
+
+  toYmd(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  presetSemanaActual(): void {
+    const s = this.rangoSemanaActual();
+    this.filtroApi = 2;
+    this.filterForm.patchValue({ fechaInicio: s.inicio, fechaFin: s.fin }, { emitEvent: false });
+    this.cargarKpis();
+  }
+
+  presetHoy(): void {
+    const d = new Date();
+    const ymd = this.toYmd(d);
+    this.filtroApi = 1;
+    this.filterForm.patchValue({ fechaInicio: ymd, fechaFin: ymd }, { emitEvent: false });
+    this.cargarKpis();
+  }
+
+  presetMesActual(): void {
+    const d = new Date();
+    const ini = new Date(d.getFullYear(), d.getMonth(), 1);
+    const fin = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    this.filtroApi = 3;
+    this.filterForm.patchValue({ fechaInicio: this.toYmd(ini), fechaFin: this.toYmd(fin) }, { emitEvent: false });
+    this.cargarKpis();
+  }
+
+  cargarKpis(): void {
+    const v = this.filterForm.getRawValue();
+    const body: DashboardKpisRequest = {
+      fechaInicio: v.fechaInicio,
+      fechaFin: v.fechaFin,
+      filtro: this.filtroApi,
+      idCliente: Number(v.idCliente),
+    };
+
+    this.loading = true;
+    this.dashboardService.postKpis(body).subscribe({
+      next: (resp) => {
+        const payload = (resp && (resp as { data?: DashboardKpisResponse }).data)
+          ? (resp as { data: DashboardKpisResponse }).data
+          : (resp as DashboardKpisResponse);
+        this.data = payload ?? null;
+        this.lastUpdated = new Date();
+        this.loading = false;
+      },
+      error: (err) => {
+        this.loading = false;
+        const msg = err?.error?.message || err?.message || 'No se pudieron cargar los datos del tablero.';
+        Swal.fire({
+          title: 'Error',
+          text: msg,
+          icon: 'error',
+          background: '#0d121d',
+          color: '#fff',
+          confirmButtonColor: '#e40041',
+        });
+      },
+    });
+  }
+
+  etiquetaGranularidad(): string {
+    const g = this.data?.periodo?.granularidad;
+    if (!g) return '—';
+    return g.charAt(0).toUpperCase() + g.slice(1);
+  }
+
+  get serieIngresos(): { periodo: string; valor: number }[] {
+    const raw = this.data?.tendencias?.ingresos ?? [];
+    return raw.map((row: Record<string, unknown>, i: number) => {
+      const periodo = String(
+        row['periodo'] ?? row['fecha'] ?? row['mes'] ?? row['etiqueta'] ?? row['label'] ?? `P${i + 1}`,
+      );
+      const valor = Number(row['valor'] ?? row['monto'] ?? row['ingreso'] ?? row['total'] ?? 0);
+      return { periodo, valor: Number.isFinite(valor) ? valor : 0 };
+    });
+  }
+
+  formatearMoneda(valor: number | null | undefined): string {
+    const n = Number(valor ?? 0);
+    return n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 2 });
+  }
+
+  formatearNumero(valor: number | null | undefined): string {
+    return Number(valor ?? 0).toLocaleString('es-MX', { maximumFractionDigits: 2 });
+  }
+
+  formatearEntero(valor: number | null | undefined): string {
+    return Math.round(Number(valor ?? 0)).toLocaleString('es-MX');
+  }
+
+  formatearHoraActualizacion(): string {
+    if (!this.lastUpdated) return '';
+    return this.lastUpdated.toLocaleString('es-MX', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  textoFilaGenerica(row: Record<string, unknown>): string {
+    const nombre =
+      row['nombre'] ??
+      row['nombreMaquina'] ??
+      row['maquina'] ??
+      row['descripcion'] ??
+      row['estatus'] ??
+      row['nombreEstatus'] ??
+      '—';
+    const extra = row['totalApuestas'] ?? row['apuestas'] ?? row['cantidad'] ?? row['total'] ?? '';
+    const extraStr = extra !== '' && extra != null ? ` · ${extra}` : '';
+    return `${String(nombre)}${extraStr}`;
   }
 }

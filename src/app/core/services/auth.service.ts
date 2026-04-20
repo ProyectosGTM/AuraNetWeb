@@ -84,10 +84,7 @@ export class AuthenticationService extends BaseServicesService {
     } catch (error) {
         console.error('Error during logout:', error);
     }
-}
-
-
-  
+  }
 
   private setStorageToken(value: any): void {
     let _value = JSON.stringify(value);
@@ -108,14 +105,14 @@ export class AuthenticationService extends BaseServicesService {
 
   updateUsuario(id: string, form: any): Observable<any> {
     return this.http.put<any>(
-      `${environment.API_SECURITY}/api/controlusuarios/${id}`,
+      `${environment.API_SECURITY}/controlusuarios/${id}`,
       form
     );
   }
 
   getUsuarioControl(id: string): Observable<any> {
     return this.http.get<any>(
-      `${environment.API_SECURITY}/api/controlusuarios/${id}`
+      `${environment.API_SECURITY}/controlusuarios/${id}`
     );
   }
   private setStoragePermissions(permissions: Array<string>): void {

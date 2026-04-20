@@ -37,58 +37,114 @@
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">
-                        <div class="action-buttons-card">
+                        <div class="action-buttons-card promo-acciones-card">
                             <div class="action-buttons-header">
                                 <h5 class="action-buttons-title">
-                                    <i class="fas fa-bolt"></i>
-                                    <span>Acciones Rápidas</span>
+                                    <i class="fas fa-th-large"></i>
+                                    <span>Centro de Operaciones</span>
                                 </h5>
                             </div>
-                            <div class="action-buttons-content">
-                                <button (click)="abrirTesoreria()" type="button" class="btn-action-large btn-boveda-abrir">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-door-open"></i>
+
+                            <nav class="promo-tabs-nav w-100" role="tablist" aria-label="Acciones de bóveda agrupadas">
+                                <div class="row row-cols-1 row-cols-sm-2 g-2 mx-0 w-100 promo-tabs-row">
+                                    <div class="col d-flex">
+                                        <button
+                                            type="button"
+                                            role="tab"
+                                            [attr.aria-selected]="esTabAcciones('apertura')"
+                                            class="promo-tab w-100"
+                                            [class.promo-tab--active]="esTabAcciones('apertura')"
+                                            (click)="setTabAcciones('apertura')"
+                                            title="Abrir o cerrar tesorería de sala"
+                                        >
+                                            <span class="promo-tab-inner">
+                                                <i class="fas fa-door-open" aria-hidden="true"></i>
+                                                <span class="promo-tab-caption">Apertura y cierre</span>
+                                            </span>
+                                        </button>
                                     </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Abrir Bóveda</span>
-                                        <span class="btn-action-desc">Iniciar nueva tesorería de sala</span>
+                                    <div class="col d-flex">
+                                        <button
+                                            type="button"
+                                            role="tab"
+                                            [attr.aria-selected]="esTabAcciones('efectivo')"
+                                            class="promo-tab w-100"
+                                            [class.promo-tab--active]="esTabAcciones('efectivo')"
+                                            (click)="setTabAcciones('efectivo')"
+                                            title="Reponer o retirar efectivo"
+                                        >
+                                            <span class="promo-tab-inner">
+                                                <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
+                                                <span class="promo-tab-caption">Efectivo en bóveda</span>
+                                            </span>
+                                        </button>
                                     </div>
-                                </button>
-                                <button (click)="cerrarTesoreria()" type="button" class="btn-action-large btn-boveda-cerrar"
-                                    [disabled]="loadingAcciones">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-door-closed"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Cerrar Bóveda</span>
-                                        <span class="btn-action-desc">Finalizar tesorería activa</span>
-                                    </div>
-                                </button>
-                                <button (click)="reponerTesoreria()" type="button" class="btn-action-large btn-boveda-reponer"
-                                    [disabled]="loadingAcciones">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-arrow-up"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Reponer Efectivo</span>
-                                        <span class="btn-action-desc">Ingresar efectivo a bóveda</span>
-                                    </div>
-                                </button>
-                                <button (click)="retirarTesoreria()" type="button" class="btn-action-large btn-boveda-retirar"
-                                    [disabled]="loadingAcciones">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-arrow-down"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Retirar Efectivo</span>
-                                        <span class="btn-action-desc">Extraer efectivo de bóveda</span>
-                                    </div>
-                                </button>
+                                </div>
+                            </nav>
+
+                            <div class="promo-tab-panel-outer">
+                                <div class="promo-tab-panel" [@promoTabPanel]="tabAcciones">
+                                    <ng-container [ngSwitch]="tabAcciones">
+                                        <div *ngSwitchCase="'apertura'" class="row g-3 promo-tab-cards">
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="abrirTesoreria()" type="button" class="btn-action-large btn-boveda-abrir w-100 align-self-stretch">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-door-open"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Abrir Bóveda</span>
+                                                        <span class="btn-action-desc">Iniciar nueva tesorería de sala</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="cerrarTesoreria()" type="button" class="btn-action-large btn-boveda-cerrar w-100 align-self-stretch"
+                                                    [disabled]="loadingAcciones">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-door-closed"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Cerrar Bóveda</span>
+                                                        <span class="btn-action-desc">Finalizar tesorería activa</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div *ngSwitchCase="'efectivo'" class="row g-3 promo-tab-cards">
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="reponerTesoreria()" type="button" class="btn-action-large btn-boveda-reponer w-100 align-self-stretch"
+                                                    [disabled]="loadingAcciones">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-arrow-up"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Reponer Efectivo</span>
+                                                        <span class="btn-action-desc">Ingresar efectivo a bóveda</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="retirarTesoreria()" type="button" class="btn-action-large btn-boveda-retirar w-100 align-self-stretch"
+                                                    [disabled]="loadingAcciones">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-arrow-down"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Retirar Efectivo</span>
+                                                        <span class="btn-action-desc">Extraer efectivo de bóveda</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="row mt-3 gy-4">
+                    <div class="boveda-grid-wrapper">
                     <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
                         [showColumnLines]="true" [dataSource]="listaTesoreria" [showRowLines]="true" [rowAlternationEnabled]="'true'"[keyExpr]="'id'" [width]="'100%'"
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
@@ -191,6 +247,7 @@
                             </span>
                         </div>
                     </dx-data-grid>
+                    </div>
                 </div>
             </div>
         </div>

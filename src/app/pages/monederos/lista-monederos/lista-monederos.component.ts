@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,11 +12,21 @@ import { TransaccionesService } from 'src/app/shared/services/transacciones.serv
 import { TurnosService } from 'src/app/shared/services/turnos.service';
 import Swal from 'sweetalert2';
 
+/** Pestañas del panel Centro de Operaciones (mismo patrón que Promociones). */
+export type TabAccionesMonederos = 'movimientos' | 'transferencias' | 'administracion';
+
+const promoTabPanelAnimation = trigger('promoTabPanel', [
+  transition('* => *', [
+    style({ opacity: 0, transform: 'translateY(10px)' }),
+    animate('260ms cubic-bezier(0.33, 1, 0.68, 1)', style({ opacity: 1, transform: 'translateY(0)' })),
+  ]),
+]);
+
 @Component({
   selector: 'app-lista-monederos',
   templateUrl: './lista-monederos.component.html',
   styleUrl: './lista-monederos.component.scss',
-  animations: [fadeInRightAnimation],
+  animations: [fadeInRightAnimation, promoTabPanelAnimation],
 })
 export class ListaMonederosComponent {
   public mensajeAgrupar: string = 'Arrastre un encabezado de columna aquí para agrupar por esa columna';
@@ -35,6 +46,9 @@ export class ListaMonederosComponent {
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
   public listaEstatusMonedero: any[] = [];
+
+  /** Pestaña visible del panel de acciones rápidas. */
+  tabAcciones: TabAccionesMonederos = 'movimientos';
 
   @ViewChild('modalCargarMonedero', { static: false }) modalCargarMonedero!: TemplateRef<any>;
   @ViewChild('modalDescargarMonedero', { static: false }) modalDescargarMonedero!: TemplateRef<any>;
@@ -151,6 +165,14 @@ export class ListaMonederosComponent {
   ngOnInit() {
     this.cargarEstatusMonedero();
     this.setupDataSource();
+  }
+
+  setTabAcciones(tab: TabAccionesMonederos): void {
+    this.tabAcciones = tab;
+  }
+
+  esTabAcciones(tab: TabAccionesMonederos): boolean {
+    return this.tabAcciones === tab;
   }
 
   cargarEstatusMonedero() {

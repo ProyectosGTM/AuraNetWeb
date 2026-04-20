@@ -48,19 +48,7 @@ export const MENU: MenuItem[] = [
     { id: 38, label: 'Ap. Turnos', icon: 'uil-clock', link: '/turnos' },
     { id: 11, label: 'Monederos', icon: 'uil-moneybag-alt', link: '/monederos' },
     { id: 41, label: 'Transacciones', icon: 'uil-exchange-alt', link: '/transacciones' },
-    {
-        id: 50,
-        label: 'Promociones',
-        icon: 'uil-gift',
-        subItems: [
-            { id: 51, label: 'Catálogo', link: '/promociones/catalogo' },
-            { id: 52, label: 'Por afiliado', link: '/promociones/por-afiliado' },
-            { id: 53, label: 'Por monedero', link: '/promociones/por-monedero' },
-            { id: 54, label: 'Rollover', link: '/promociones/rollover' },
-            { id: 55, label: 'Pendientes de conversión', link: '/promociones/pendientes-conversion' },
-            { id: 56, label: 'Reportes', link: '/promociones/reportes' }
-        ]
-    },
+    { id: 50, label: 'Promociones', icon: 'uil-gift', link: '/promociones' },
     { id: 27, label: 'Monitoreo', icon: 'uil-map', link: '/monitoreo' },
     // --- AGRUPADO: Saldo no debitado / Premios entregados / Venta Acumulada (Promociones movido a ítem propio)
     {

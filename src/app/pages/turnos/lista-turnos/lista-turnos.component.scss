@@ -1,5 +1,70 @@
 // Estilos para lista turnos (usando los estilos globales del sistema)
 
+/** CTA junto a Restablecer: abre el modal de turnos activos. */
+.btn-turnos-activos-cta {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 2px solid rgba(80, 165, 241, 0.95);
+  background: linear-gradient(135deg, rgba(80, 165, 241, 0.55) 0%, rgba(61, 139, 217, 0.38) 100%);
+  box-shadow:
+    0 0 0 1px rgba(80, 165, 241, 0.35),
+    0 4px 22px rgba(80, 165, 241, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #fff;
+  animation: btnTurnosActivosGlow 2.4s ease-in-out infinite;
+
+  i {
+    color: #fff !important;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(186, 230, 253, 0.95);
+    box-shadow:
+      0 0 0 2px rgba(80, 165, 241, 0.55),
+      0 8px 30px rgba(80, 165, 241, 0.6);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(80, 165, 241, 0.65);
+  }
+}
+
+.btn-turnos-activos-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  margin-left: 6px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  line-height: 1;
+}
+
+@keyframes btnTurnosActivosGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(80, 165, 241, 0.35),
+      0 4px 22px rgba(80, 165, 241, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(80, 165, 241, 0.7),
+      0 6px 34px rgba(80, 165, 241, 0.75),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+}
+
 .turnos-grid-wrapper {
   width: 100%;
   min-width: 0;
@@ -28,7 +93,7 @@
 
     .monto-icon {
       font-size: 12px;
-    }f
+    }
 
     .monto-value {
       font-size: 12px;
@@ -115,6 +180,117 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+}
+
+/* Mismo patrón de pestañas que Promociones (Centro de Operaciones). */
+.promo-acciones-card {
+  overflow: hidden;
+}
+
+.promo-tabs-nav {
+  margin: 0 0 4px;
+  padding: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.promo-tabs-row {
+  flex: 1 1 100%;
+}
+
+.promo-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: #9ca3af;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  line-height: 1.3;
+  transition:
+    color 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.18s ease;
+
+  .promo-tab-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+  }
+
+  .promo-tab-caption {
+    flex: 0 1 auto;
+    text-align: left;
+    white-space: normal;
+  }
+
+  i {
+    flex-shrink: 0;
+    font-size: 14px;
+    color: #50a5f1;
+    transition: color 0.22s ease;
+  }
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(80, 165, 241, 0.45);
+    background: rgba(80, 165, 241, 0.1);
+    box-shadow: 0 0 22px rgba(80, 165, 241, 0.18);
+    transform: translateY(-1px);
+
+    i {
+      color: #7ebef9;
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(80, 165, 241, 0.65), 0 0 20px rgba(80, 165, 241, 0.25);
+  }
+
+  &.promo-tab--active {
+    color: #fff;
+    border-color: rgba(80, 165, 241, 0.85);
+    background: linear-gradient(135deg, rgba(80, 165, 241, 0.28) 0%, rgba(61, 139, 217, 0.14) 100%);
+    box-shadow:
+      0 0 28px rgba(80, 165, 241, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+    i {
+      color: #fff;
+    }
+  }
+}
+
+@media (min-width: 992px) {
+  .promo-tab {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+}
+
+.promo-tab-panel-outer {
+  min-height: 100%;
+  padding-top: 8px;
+}
+
+.promo-tab-panel {
+  will-change: opacity, transform;
+}
+
+.promo-tab-cards {
+  margin-top: 10px;
+  margin-bottom: 0;
 }
 
 // Turnos Activos (GET /pos/turnos/activos) - Resaltado y con scroll
@@ -375,6 +551,28 @@
       }
     }
   }
+}
+
+.turnos-activos-card.turnos-activos-card--modal {
+  margin-bottom: 0;
+
+  .turnos-activos-body {
+    max-height: min(520px, 58vh);
+  }
+}
+
+.turnos-activos-badge--header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #e0f2fe;
+  background: rgba(80, 165, 241, 0.35);
+  border: 1px solid rgba(80, 165, 241, 0.55);
 }
 
 // Filtros (consulta filtrada)
@@ -1140,6 +1338,20 @@
 
     &.modal-accion-header--corte-parcial .modal-title i {
       color: #50a5f1;
+    }
+
+    &.modal-accion-header--turnos-activos::before {
+      background: linear-gradient(180deg, #50a5f1, #2563eb);
+    }
+
+    &.modal-accion-header--turnos-activos .modal-title {
+      flex: 1;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    &.modal-accion-header--turnos-activos .modal-title i {
+      color: #7dd3fc;
     }
   }
 

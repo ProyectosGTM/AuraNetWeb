@@ -19,7 +19,7 @@ export class UsuariosService {
 	}
 
   obtenerUsuariosRolOperador(idCliente: number): Observable <any>{
-    return this.http.get<any>(`${environment.API_SECURITY}/usuarios/list/rol/operador/${idCliente}`)
+    return this.http.get<any>(`${environment.API_SECURITY}/usuarios/list/cliente/${idCliente}/rol`)
   }
 
   agregarUsuario(data: FormData) {
@@ -43,7 +43,7 @@ export class UsuariosService {
   }
 
   actualizarContrasena(idUsuario: number, data: any): Observable<any> {
-    return this.http.put(`${environment.API_SECURITY}/usuarios/actualizar/contrasena/` + idUsuario, data);
+    return this.http.patch(`${environment.API_SECURITY}/usuarios/actualizar/contrasena/` + idUsuario, data);
   }
 
   private apiUrl = `${environment.API_SECURITY}/usuarios`;

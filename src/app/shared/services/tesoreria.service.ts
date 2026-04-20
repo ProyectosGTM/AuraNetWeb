@@ -14,8 +14,12 @@ export class TesoreriaService {
     return this.http.get(`${environment.API_SECURITY}/tesorerias/${page}/${pageSize}`);
   }
 
+  /**
+   * Lista “completa” vía paginado: el OpenAPI publicado no expone `GET /tesorerias/list`
+   * (solo `GET /tesorerias/{page}/{limit}` entre los listados de tesorerías).
+   */
   obtenerTesoreria(): Observable<any> {
-    return this.http.get(`${environment.API_SECURITY}/tesorerias/list`);
+    return this.obtenerTesoreriaData(1, 10000);
   }
 
   agregarTesoreria(data: any) {

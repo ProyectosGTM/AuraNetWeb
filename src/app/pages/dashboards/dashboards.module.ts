@@ -15,6 +15,7 @@ import { DefaultComponent } from './default/default.component';
 
 @NgModule({
   declarations: [DefaultComponent],
+  exports: [DefaultComponent],
   imports: [
     CommonModule,
     FormsModule,

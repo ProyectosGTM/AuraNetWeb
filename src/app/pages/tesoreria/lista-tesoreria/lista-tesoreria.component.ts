@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,11 +10,21 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import Swal from 'sweetalert2';
 
+/** Pestañas del panel Centro de Operaciones (mismo patrón que Promociones). */
+export type TabAccionesBoveda = 'apertura' | 'efectivo';
+
+const promoTabPanelAnimation = trigger('promoTabPanel', [
+  transition('* => *', [
+    style({ opacity: 0, transform: 'translateY(10px)' }),
+    animate('260ms cubic-bezier(0.33, 1, 0.68, 1)', style({ opacity: 1, transform: 'translateY(0)' })),
+  ]),
+]);
+
 @Component({
   selector: 'app-lista-tesoreria',
   templateUrl: './lista-tesoreria.component.html',
   styleUrl: './lista-tesoreria.component.scss',
-  animations: [fadeInRightAnimation],
+  animations: [fadeInRightAnimation, promoTabPanelAnimation],
 })
 export class ListaTesoreriaComponent {
   public mensajeAgrupar: string = 'Arrastre un encabezado de columna aquí para agrupar por esa columna';
@@ -32,6 +43,9 @@ export class ListaTesoreriaComponent {
   isGrouped: boolean = false;
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
+
+  /** Pestaña visible del panel de acciones rápidas. */
+  tabAcciones: TabAccionesBoveda = 'apertura';
 
   @ViewChild('modalResumen', { static: false }) modalResumen!: TemplateRef<any>;
   @ViewChild('modalHistorial', { static: false }) modalHistorial!: TemplateRef<any>;
@@ -86,6 +100,14 @@ export class ListaTesoreriaComponent {
 
   ngOnInit() {
     this.setupDataSource();
+  }
+
+  setTabAcciones(tab: TabAccionesBoveda): void {
+    this.tabAcciones = tab;
+  }
+
+  esTabAcciones(tab: TabAccionesBoveda): boolean {
+    return this.tabAcciones === tab;
   }
 
   agregar() {

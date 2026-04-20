@@ -1,0 +1,473 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm" *ngIf="vista !== 'detalle'">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-gift"></i>
+            </div>
+            <div>
+              <h4 class="title-title">Promociones</h4>
+              <p class="title-subtitle">
+                Control y consulta de promociones en una sola pantalla
+              </p>
+            </div>
+          </div>
+          <div class="title-actions">
+            <div class="title-tagline">
+              <span class="line"></span>
+              <span class="text">Gestión de promociones</span>
+            </div>
+            <div class="title-buttons">
+              <button (click)="toggleExpandGroups()" type="button" class="btn-title btn-title--ghost">
+                <i class="fas fa-expand"></i>
+                <span>Contraer Grid</span>
+              </button>
+              <button (click)="limpiarFiltrosGrid()" type="button" class="btn-title btn-title--danger">
+                <i class="fas fa-sync-alt"></i>
+                <span>Restablecer</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="row mt-3">
+          <div class="col-12">
+            <div class="turnos-activos-card">
+              <div class="turnos-activos-header">
+                <h5 class="turnos-activos-title">
+                  <i class="fas fa-clock"></i>
+                  <span>Vista de consulta</span>
+                  <span class="turnos-activos-badge">{{ etiquetaVistaActual() }}</span>
+                </h5>
+              </div>
+              <div class="turnos-activos-body">
+                <div class="turnos-activos-empty">
+                  <i class="fas fa-info-circle"></i>
+                  <span>{{ mensajeTarjetaContexto() }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
+
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="action-buttons-card promo-acciones-card">
+              <div class="action-buttons-header">
+                <h5 class="action-buttons-title">
+                  <i class="fas fa-th-large"></i>
+                  <span>Centro de Operaciones</span>
+                </h5>
+              </div>
+
+              <nav class="promo-tabs-nav w-100" role="tablist" aria-label="Consultas agrupadas por tipo">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-2 mx-0 w-100 promo-tabs-row">
+                  <div class="col d-flex">
+                    <button
+                      type="button"
+                      role="tab"
+                      [attr.aria-selected]="esTabAcciones('catalogo')"
+                      class="promo-tab w-100"
+                      [class.promo-tab--active]="esTabAcciones('catalogo')"
+                      (click)="setTabAcciones('catalogo')"
+                      title="Listado general del catálogo"
+                    >
+                      <span class="promo-tab-inner">
+                        <i class="fas fa-list" aria-hidden="true"></i>
+                        <span class="promo-tab-caption">Listado general</span>
+                      </span>
+                    </button>
+                  </div>
+                  <div class="col d-flex">
+                    <button
+                      type="button"
+                      role="tab"
+                      [attr.aria-selected]="esTabAcciones('estado')"
+                      class="promo-tab w-100"
+                      [class.promo-tab--active]="esTabAcciones('estado')"
+                      (click)="setTabAcciones('estado')"
+                      title="Vigentes, por vencer, rollover y cron de expiración"
+                    >
+                      <span class="promo-tab-inner">
+                        <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                        <span class="promo-tab-caption">Vigencia y programación</span>
+                      </span>
+                    </button>
+                  </div>
+                  <div class="col d-flex">
+                    <button
+                      type="button"
+                      role="tab"
+                      [attr.aria-selected]="esTabAcciones('conversion')"
+                      class="promo-tab w-100"
+                      [class.promo-tab--active]="esTabAcciones('conversion')"
+                      (click)="setTabAcciones('conversion')"
+                      title="Pendientes de conversión e historial de rollover"
+                    >
+                      <span class="promo-tab-inner">
+                        <i class="fas fa-random" aria-hidden="true"></i>
+                        <span class="promo-tab-caption">Conversiones e historial</span>
+                      </span>
+                    </button>
+                  </div>
+                  <div class="col d-flex">
+                    <button
+                      type="button"
+                      role="tab"
+                      [attr.aria-selected]="esTabAcciones('reportes')"
+                      class="promo-tab w-100"
+                      [class.promo-tab--active]="esTabAcciones('reportes')"
+                      (click)="setTabAcciones('reportes')"
+                      title="Reporte con rango de fechas"
+                    >
+                      <span class="promo-tab-inner">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span class="promo-tab-caption">Reporte por fechas</span>
+                      </span>
+                    </button>
+                  </div>
+                  <div class="col d-flex">
+                    <button
+                      type="button"
+                      role="tab"
+                      [attr.aria-selected]="esTabAcciones('relacion')"
+                      class="promo-tab w-100"
+                      [class.promo-tab--active]="esTabAcciones('relacion')"
+                      (click)="setTabAcciones('relacion')"
+                      title="Consultas filtradas por afiliado o por monedero"
+                    >
+                      <span class="promo-tab-inner">
+                        <i class="fas fa-user-tag" aria-hidden="true"></i>
+                        <span class="promo-tab-caption">Afiliado y monedero</span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </nav>
+
+              <div class="promo-tab-panel-outer">
+                <div class="promo-tab-panel" [@promoTabPanel]="tabAcciones">
+                  <ng-container [ngSwitch]="tabAcciones">
+                    <div *ngSwitchCase="'catalogo'" class="row g-3 promo-tab-cards">
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('todas')" type="button" class="btn-action-large btn-promo-teal w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('todas')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-list"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Catálogo completo</span>
+                            <span class="btn-action-desc">Ver todo el catálogo de promociones</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div *ngSwitchCase="'estado'" class="row g-3 promo-tab-cards">
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('vigentes')" type="button" class="btn-action-large btn-promo-orange w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('vigentes')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-check-circle"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Vigentes</span>
+                            <span class="btn-action-desc">Solo promociones vigentes a la fecha</span>
+                          </div>
+                        </button>
+                      </div>
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('por_vencer')" type="button" class="btn-action-large btn-promo-green w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('por_vencer')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-hourglass-half"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Por vencer</span>
+                            <span class="btn-action-desc">Promociones próximas a vencer</span>
+                          </div>
+                        </button>
+                      </div>
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('rollover_estado')" type="button" class="btn-action-large btn-promo-sky w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('rollover_estado')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-chart-line"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Rollover (estado)</span>
+                            <span class="btn-action-desc">Estado de rollover de la promoción</span>
+                          </div>
+                        </button>
+                      </div>
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('cron_expirar')" type="button" class="btn-action-large btn-promo-purple w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('cron_expirar')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-clock"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Cron expirar</span>
+                            <span class="btn-action-desc">Estado de la expiración automática programada</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div *ngSwitchCase="'conversion'" class="row g-3 promo-tab-cards">
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('pendientes')" type="button" class="btn-action-large btn-promo-gold w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('pendientes')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Pendientes de conversión</span>
+                            <span class="btn-action-desc">Casos pendientes de conversión</span>
+                          </div>
+                        </button>
+                      </div>
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('rollover_historial')" type="button" class="btn-action-large btn-promo-amber w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('rollover_historial')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-history"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Historial rollover</span>
+                            <span class="btn-action-desc">Historial de movimientos de rollover</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div *ngSwitchCase="'reportes'" class="row g-3 promo-tab-cards">
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('reporte')" type="button" class="btn-action-large btn-promo-blue w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('reporte')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-chart-bar"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Reporte</span>
+                            <span class="btn-action-desc">Reporte con rango de fechas opcional</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div *ngSwitchCase="'relacion'" class="row g-3 promo-tab-cards">
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('por_afiliado')" type="button" class="btn-action-large btn-promo-red w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('por_afiliado')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-user"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Por afiliado</span>
+                            <span class="btn-action-desc">Promociones asociadas a un afiliado</span>
+                          </div>
+                        </button>
+                      </div>
+                      <div class="col-12 col-md-6 col-xl-4 d-flex">
+                        <button (click)="setVista('por_monedero')" type="button" class="btn-action-large btn-promo-teal-dark w-100 align-self-stretch" [class.btn-promo-vista--activa]="claseActivaCard('por_monedero')">
+                          <div class="btn-action-icon">
+                            <i class="fas fa-wallet"></i>
+                          </div>
+                          <div class="btn-action-text">
+                            <span class="btn-action-label">Por monedero</span>
+                            <span class="btn-action-desc">Promociones ligadas a un monedero</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3" *ngIf="vista === 'reporte'">
+          <div class="col-12">
+            <div class="filtros-turnos-card">
+              <div class="filtros-turnos-header">
+                <h6 class="filtros-turnos-title"><i class="fas fa-filter"></i> Filtros</h6>
+              </div>
+              <form [formGroup]="formReporte" class="filtros-turnos-form">
+                <div class="row g-2 align-items-end">
+                  <div class="col-12 col-md-4">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha desde (opcional)</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar"></i>
+                        <input class="sleek-control" type="date" formControlName="fechaDesde" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha hasta (opcional)</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar"></i>
+                        <input class="sleek-control" type="date" formControlName="fechaHasta" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-4 d-flex align-items-end">
+                    <button (click)="consultarReporte()" type="button" class="btn-title btn-title--primary">
+                      <i class="fas fa-search"></i>
+                      <span>Consultar reporte</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3" *ngIf="necesitaParametro()">
+          <div class="col-12">
+            <div class="filtros-turnos-card">
+              <div class="filtros-turnos-header">
+                <h6 class="filtros-turnos-title"><i class="fas fa-filter"></i> Filtros</h6>
+              </div>
+              <form [formGroup]="formParam" class="filtros-turnos-form">
+                <div class="row g-2 align-items-end">
+                  <div class="col-12 col-md-4">
+                    <label class="field">
+                      <span class="field-label text-white">{{ etiquetaParametro() }}</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-hashtag"></i>
+                        <input class="sleek-control" type="number" min="1" formControlName="id" placeholder="Ej. 12" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-4 d-flex align-items-end">
+                    <button (click)="consultarConParametro()" type="button" class="btn-title btn-title--primary">
+                      <i class="fas fa-search"></i>
+                      <span>Consultar</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3" *ngIf="vista === 'cron_expirar'">
+          <div class="col-12">
+            <div class="filtros-turnos-card">
+              <div class="filtros-turnos-header">
+                <h6 class="filtros-turnos-title"><i class="fas fa-filter"></i> Filtros</h6>
+              </div>
+              <div class="filtros-turnos-form">
+                <div class="form-indication form-indication--info">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Consulta de solo lectura del resultado de la expiración automática.</span>
+                </div>
+                <div *ngIf="loading" class="historial-loading">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <div>Cargando…</div>
+                </div>
+                <pre *ngIf="payloadJson" class="readonly-json text-white mb-0">{{ payloadJson }}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3 gy-4" *ngIf="vista !== 'cron_expirar'">
+          <div class="promociones-grid-wrapper">
+            <dx-data-grid
+              #dataGrid
+              [dataSource]="listaPromociones"
+              [columnHidingEnabled]="true"
+              [showBorders]="true"
+              [showColumnLines]="true"
+              [showRowLines]="true"
+              [rowAlternationEnabled]="true"
+              [keyExpr]="'id'"
+              [width]="'100%'"
+              [remoteOperations]="{ paging: true }"
+              [paging]="{ pageSize: pageSize }"
+              [pager]="dxPagerOptions"
+            >
+              <dxo-search-panel [visible]="true" [width]="200" placeholder="Buscar..."></dxo-search-panel>
+              <dxo-pager [showPageSizeSelector]="false" [showInfo]="true"></dxo-pager>
+              <dxo-group-panel [emptyPanelText]="mensajeAgrupar" [visible]="true"></dxo-group-panel>
+              <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
+              <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
+              <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+
+              <ng-container *ngIf="modoColumnas === 'promo'">
+                <dxi-column caption="Acciones" [width]="130" cellTemplate="accionesTpl" alignment="center"></dxi-column>
+                <dxi-column dataField="nombre" caption="Nombre" dataType="string" [allowSearch]="true"></dxi-column>
+                <dxi-column dataField="fechaInicioFormateada" caption="Inicio" dataType="string"></dxi-column>
+                <dxi-column dataField="fechaFinFormateada" caption="Fin" dataType="string"></dxi-column>
+                <dxi-column dataField="codigo" caption="Código" dataType="string" [allowSearch]="true"></dxi-column>
+                <dxi-column dataField="estatus" caption="Estatus" dataType="string" [allowSearch]="true"></dxi-column>
+              </ng-container>
+
+              <ng-container *ngIf="modoColumnas === 'kv'">
+                <dxi-column dataField="campo" caption="Campo" dataType="string" [allowSearch]="true"></dxi-column>
+                <dxi-column dataField="valor" caption="Valor" dataType="string" [allowSearch]="true"></dxi-column>
+              </ng-container>
+
+              <div *dxTemplate="let cell of 'accionesTpl'">
+                <button
+                  *ngIf="modoColumnas === 'promo' && cell.data?.id != null"
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="verDetallePromocion(cell.data.id)"
+                >
+                  <i class="fas fa-eye"></i> Ver
+                </button>
+              </div>
+            </dx-data-grid>
+          </div>
+        </div>
+      </div>
+
+      <div class="title-banner-card shadow-sm" *ngIf="vista === 'detalle'">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-gift"></i>
+            </div>
+            <div>
+              <h4 class="title-title">Detalle de promoción</h4>
+              <p class="title-subtitle" *ngIf="promocionDetalle">{{ promocionDetalle.nombre ? promocionDetalle.nombre : 'Sin nombre' }}</p>
+            </div>
+          </div>
+          <div class="title-actions">
+            <div class="title-tagline">
+              <span class="line"></span>
+              <span class="text">Solo lectura</span>
+            </div>
+            <div class="title-buttons">
+              <button (click)="volverListado()" type="button" class="btn-title btn-title--ghost">
+                <i class="fas fa-arrow-left"></i>
+                <span>Volver al listado</span>
+              </button>
+              <button (click)="irRolloverDesdeDetalle()" *ngIf="promocionDetalle" type="button" class="btn-title btn-title--primary">
+                <i class="fas fa-chart-line"></i>
+                <span>Ver rollover</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12">
+            <div *ngIf="loadingDetalle" class="historial-loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              <div>Cargando…</div>
+            </div>
+            <div *ngIf="errorDetalle" class="alert alert-danger mb-0">{{ errorDetalle }}</div>
+            <div *ngIf="!loadingDetalle && !errorDetalle && promocionDetalle" class="readonly-json-wrap">
+              <pre class="readonly-json text-white mb-0">{{ promocionDetalle | json }}</pre>
+              <p class="mt-3 mb-0 small text-muted">
+                Inicio: {{ formatearFecha(promocionDetalle.fechaInicio) }} — Fin: {{ formatearFecha(promocionDetalle.fechaFin) }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

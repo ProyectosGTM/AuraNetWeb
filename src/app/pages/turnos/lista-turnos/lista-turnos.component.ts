@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,11 +18,21 @@ import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
 
+/** Pestañas del panel de acciones POS (misma UX que Promociones). */
+export type TabTurnosPanel = 'apertura' | 'efectivo' | 'control' | 'corte';
+
+const turnoTabPanelAnimation = trigger('turnoTabPanel', [
+  transition('* => *', [
+    style({ opacity: 0, transform: 'translateY(10px)' }),
+    animate('260ms cubic-bezier(0.33, 1, 0.68, 1)', style({ opacity: 1, transform: 'translateY(0)' })),
+  ]),
+]);
+
 @Component({
   selector: 'app-lista-turnos',
   templateUrl: './lista-turnos.component.html',
   styleUrl: './lista-turnos.component.scss',
-  animations: [fadeInRightAnimation],
+  animations: [fadeInRightAnimation, turnoTabPanelAnimation],
 })
 export class ListaTurnosComponent {
   public mensajeAgrupar: string = 'Arrastre un encabezado de columna aquí para agrupar por esa columna';
@@ -41,6 +52,9 @@ export class ListaTurnosComponent {
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
 
+  /** Pestaña visible (por defecto apertura / cierre). */
+  tabTurnos: TabTurnosPanel = 'apertura';
+
   @ViewChild('modalAbrirTurno', { static: false }) modalAbrirTurno!: TemplateRef<any>;
   @ViewChild('modalCerrarTurno', { static: false }) modalCerrarTurno!: TemplateRef<any>;
   @ViewChild('modalReponerTurno', { static: false }) modalReponerTurno!: TemplateRef<any>;
@@ -51,6 +65,7 @@ export class ListaTurnosComponent {
   @ViewChild('modalSuspenderTurno', { static: false }) modalSuspenderTurno!: TemplateRef<any>;
   @ViewChild('modalReactivarTurno', { static: false }) modalReactivarTurno!: TemplateRef<any>;
   @ViewChild('modalCorteParcial', { static: false }) modalCorteParcial!: TemplateRef<any>;
+  @ViewChild('modalTurnosActivos', { static: false }) modalTurnosActivos!: TemplateRef<any>;
   private modalRef?: NgbModalRef;
 
   // Turnos activos (GET /pos/turnos/activos)
@@ -194,6 +209,14 @@ export class ListaTurnosComponent {
     this.cargarListasParaFiltros();
   }
 
+  setTabTurnos(tab: TabTurnosPanel): void {
+    this.tabTurnos = tab;
+  }
+
+  esTabTurnos(tab: TabTurnosPanel): boolean {
+    return this.tabTurnos === tab;
+  }
+
   cargarListasParaFiltros() {
     forkJoin({
       cajas: this.cajasService.obtenerCajas(),
@@ -242,6 +265,17 @@ export class ListaTurnosComponent {
         this.loadingTurnosActivos = false;
         this.turnosActivos = [];
       }
+    });
+  }
+
+  abrirModalTurnosActivos(): void {
+    this.cargarTurnosActivos();
+    this.modalRef = this.modalService.open(this.modalTurnosActivos, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-turnos-activos',
+      centered: true,
+      backdrop: true,
+      keyboard: true,
     });
   }
 

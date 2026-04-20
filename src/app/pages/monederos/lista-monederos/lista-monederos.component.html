@@ -35,71 +35,148 @@
                         </div>
                     </div>
                 </div>
-                <!-- Sección de Acciones POST -->
                 <div class="row mt-3">
                     <div class="col-12">
-                        <div class="action-buttons-card">
+                        <div class="action-buttons-card promo-acciones-card">
                             <div class="action-buttons-header">
                                 <h5 class="action-buttons-title">
-                                    <i class="fas fa-bolt"></i>
-                                    <span>Acciones Rápidas</span>
+                                    <i class="fas fa-th-large"></i>
+                                    <span>Centro de Operaciones</span>
                                 </h5>
                             </div>
-                            <div class="action-buttons-content">
-                                <button (click)="cargarMonedero()" type="button" class="btn-action-large btn-monederos-cargar">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-arrow-up"></i>
+
+                            <nav class="promo-tabs-nav w-100" role="tablist" aria-label="Acciones de monederos agrupadas">
+                                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2 mx-0 w-100 promo-tabs-row">
+                                    <div class="col d-flex">
+                                        <button
+                                            type="button"
+                                            role="tab"
+                                            [attr.aria-selected]="esTabAcciones('movimientos')"
+                                            class="promo-tab w-100"
+                                            [class.promo-tab--active]="esTabAcciones('movimientos')"
+                                            (click)="setTabAcciones('movimientos')"
+                                            title="Cargar, descargar y consultar saldo"
+                                        >
+                                            <span class="promo-tab-inner">
+                                                <i class="fas fa-wallet" aria-hidden="true"></i>
+                                                <span class="promo-tab-caption">Movimientos de saldo</span>
+                                            </span>
+                                        </button>
                                     </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Cargar Efectivo</span>
-                                        <span class="btn-action-desc">Agregar saldo a monedero</span>
+                                    <div class="col d-flex">
+                                        <button
+                                            type="button"
+                                            role="tab"
+                                            [attr.aria-selected]="esTabAcciones('transferencias')"
+                                            class="promo-tab w-100"
+                                            [class.promo-tab--active]="esTabAcciones('transferencias')"
+                                            (click)="setTabAcciones('transferencias')"
+                                            title="Traspaso entre monederos"
+                                        >
+                                            <span class="promo-tab-inner">
+                                                <i class="fas fa-exchange-alt" aria-hidden="true"></i>
+                                                <span class="promo-tab-caption">Entre monederos</span>
+                                            </span>
+                                        </button>
                                     </div>
-                                </button>
-                                <button (click)="descargarMonedero()" type="button" class="btn-action-large btn-monederos-descargar">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-arrow-down"></i>
+                                    <div class="col d-flex">
+                                        <button
+                                            type="button"
+                                            role="tab"
+                                            [attr.aria-selected]="esTabAcciones('administracion')"
+                                            class="promo-tab w-100"
+                                            [class.promo-tab--active]="esTabAcciones('administracion')"
+                                            (click)="setTabAcciones('administracion')"
+                                            title="Consultas por afiliado y ajustes"
+                                        >
+                                            <span class="promo-tab-inner">
+                                                <i class="fas fa-user-cog" aria-hidden="true"></i>
+                                                <span class="promo-tab-caption">Consultas y ajustes</span>
+                                            </span>
+                                        </button>
                                     </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Descargar Efectivo</span>
-                                        <span class="btn-action-desc">Retirar saldo de monedero</span>
-                                    </div>
-                                </button>
-                                <button (click)="consultarSaldo()" type="button" class="btn-action-large btn-monederos-consultar">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-search-dollar"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Consultar Saldo</span>
-                                        <span class="btn-action-desc">Ver saldo por número</span>
-                                    </div>
-                                </button>
-                                <button (click)="traspasoMonedero()" type="button" class="btn-action-large btn-monederos-traspaso">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-exchange-alt"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Traspasar Saldo</span>
-                                        <span class="btn-action-desc">Entre monederos del mismo afiliado</span>
-                                    </div>
-                                </button>
-                                <button (click)="verMonederosPorAfiliado()" type="button" class="btn-action-large btn-monederos-afiliado">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-users"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Monederos por Afiliado</span>
-                                        <span class="btn-action-desc">Ver monederos de un afiliado</span>
-                                    </div>
-                                </button>
-                                <button (click)="ajusteMonedero()" type="button" class="btn-action-large btn-monederos-ajuste">
-                                    <div class="btn-action-icon">
-                                        <i class="fas fa-balance-scale"></i>
-                                    </div>
-                                    <div class="btn-action-text">
-                                        <span class="btn-action-label">Ajustar Saldo</span>
-                                        <span class="btn-action-desc">Ajuste manual (solo Gerente)</span>
-                                    </div>
-                                </button>
+                                </div>
+                            </nav>
+
+                            <div class="promo-tab-panel-outer">
+                                <div class="promo-tab-panel" [@promoTabPanel]="tabAcciones">
+                                    <ng-container [ngSwitch]="tabAcciones">
+                                        <div *ngSwitchCase="'movimientos'" class="row g-3 promo-tab-cards">
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="cargarMonedero()" type="button" class="btn-action-large btn-monederos-cargar w-100 align-self-stretch">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-arrow-up"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Cargar Efectivo</span>
+                                                        <span class="btn-action-desc">Agregar saldo a monedero</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="descargarMonedero()" type="button" class="btn-action-large btn-monederos-descargar w-100 align-self-stretch">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-arrow-down"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Descargar Efectivo</span>
+                                                        <span class="btn-action-desc">Retirar saldo de monedero</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="consultarSaldo()" type="button" class="btn-action-large btn-monederos-consultar w-100 align-self-stretch">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-search-dollar"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Consultar Saldo</span>
+                                                        <span class="btn-action-desc">Ver saldo por número</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div *ngSwitchCase="'transferencias'" class="row g-3 promo-tab-cards">
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="traspasoMonedero()" type="button" class="btn-action-large btn-monederos-traspaso w-100 align-self-stretch">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-exchange-alt"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Traspasar Saldo</span>
+                                                        <span class="btn-action-desc">Entre monederos del mismo afiliado</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div *ngSwitchCase="'administracion'" class="row g-3 promo-tab-cards">
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="verMonederosPorAfiliado()" type="button" class="btn-action-large btn-monederos-afiliado w-100 align-self-stretch">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-users"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Monederos por Afiliado</span>
+                                                        <span class="btn-action-desc">Ver monederos de un afiliado</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="ajusteMonedero()" type="button" class="btn-action-large btn-monederos-ajuste w-100 align-self-stretch">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-balance-scale"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Ajustar Saldo</span>
+                                                        <span class="btn-action-desc">Ajuste manual (solo Gerente)</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </div>
                             </div>
                         </div>
                     </div>

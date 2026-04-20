@@ -1,0 +1,522 @@
+// Misma jerarquía visual que Turnos: tarjeta azul superior, filtros-turnos-card, acciones con color por fila, grid envuelto.
+
+.turnos-activos-card {
+  background: linear-gradient(135deg, rgba(80, 165, 241, 0.15) 0%, rgba(80, 165, 241, 0.08) 100%);
+  border: 2px solid rgba(80, 165, 241, 0.4);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(80, 165, 241, 0.15);
+  overflow: hidden;
+
+  .turnos-activos-header {
+    background: linear-gradient(135deg, rgba(80, 165, 241, 0.2) 0%, rgba(80, 165, 241, 0.1) 100%);
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(80, 165, 241, 0.3);
+  }
+
+  .turnos-activos-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    i {
+      color: #50a5f1;
+      font-size: 18px;
+    }
+
+    .turnos-activos-badge {
+      background: rgba(80, 165, 241, 0.3);
+      border: 1px solid rgba(80, 165, 241, 0.5);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #50a5f1;
+      margin-left: auto;
+    }
+  }
+
+  .turnos-activos-body {
+    padding: 12px 18px;
+    min-height: 80px;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #3d8bd9 0%, #2e7ac7 100%);
+    }
+  }
+
+  .turnos-activos-empty {
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 0;
+    font-size: 14px;
+
+    i {
+      font-size: 18px;
+      opacity: 0.6;
+    }
+  }
+}
+
+.filtros-turnos-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+
+  .filtros-turnos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .filtros-turnos-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+
+    i {
+      color: #50a5f1;
+      margin-right: 6px;
+    }
+  }
+
+  .filtros-turnos-form {
+    .form-control-sm {
+      min-width: 150px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 13px;
+
+      &:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(80, 165, 241, 0.5);
+        color: #fff;
+        box-shadow: 0 0 0 0.2rem rgba(80, 165, 241, 0.25);
+      }
+    }
+  }
+}
+
+.promociones-grid-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 992px) {
+  .promociones-grid-wrapper {
+    margin: 0 -0.75rem;
+    padding: 0 0.75rem;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .promociones-grid-wrapper {
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem;
+  }
+}
+
+.action-buttons-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 0;
+}
+
+.action-buttons-header {
+  margin-bottom: 16px;
+
+  .action-buttons-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i {
+      color: #50a5f1;
+    }
+  }
+}
+
+.promo-acciones-card {
+  overflow: hidden;
+}
+
+.promo-tabs-nav {
+  margin: 0 0 4px;
+  padding: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.promo-tabs-row {
+  flex: 1 1 100%;
+}
+
+.promo-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: #9ca3af;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  line-height: 1.3;
+  transition:
+    color 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.18s ease;
+
+  .promo-tab-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+  }
+
+  .promo-tab-caption {
+    flex: 0 1 auto;
+    text-align: left;
+    white-space: normal;
+  }
+
+  i {
+    flex-shrink: 0;
+    font-size: 14px;
+    color: #50a5f1;
+    transition: color 0.22s ease;
+  }
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(80, 165, 241, 0.45);
+    background: rgba(80, 165, 241, 0.1);
+    box-shadow: 0 0 22px rgba(80, 165, 241, 0.18);
+    transform: translateY(-1px);
+
+    i {
+      color: #7ebef9;
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(80, 165, 241, 0.65), 0 0 20px rgba(80, 165, 241, 0.25);
+  }
+
+  &.promo-tab--active {
+    color: #fff;
+    border-color: rgba(80, 165, 241, 0.85);
+    background: linear-gradient(135deg, rgba(80, 165, 241, 0.28) 0%, rgba(61, 139, 217, 0.14) 100%);
+    box-shadow:
+      0 0 28px rgba(80, 165, 241, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+    i {
+      color: #fff;
+    }
+  }
+}
+
+@media (min-width: 992px) {
+  .promo-tab {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+}
+
+.promo-tab-panel-outer {
+  min-height: 100%;
+  padding-top: 8px;
+}
+
+.promo-tab-panel {
+  will-change: opacity, transform;
+}
+
+.promo-tab-cards {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.btn-action-large {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .btn-action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    .btn-action-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .btn-action-desc {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  }
+
+  /* Misma paleta que lista-turnos (btn-turnos-*) */
+  &.btn-promo-teal {
+    border-color: rgba(0, 172, 193, 0.5);
+    background: rgba(0, 172, 193, 0.12);
+    .btn-action-icon {
+      background: #00acc1;
+    }
+    &:hover {
+      background: rgba(0, 172, 193, 0.22);
+      border-color: #00acc1;
+    }
+  }
+
+  &.btn-promo-orange {
+    border-color: rgba(255, 109, 0, 0.5);
+    background: rgba(255, 109, 0, 0.12);
+    .btn-action-icon {
+      background: #ff6d00;
+    }
+    &:hover {
+      background: rgba(255, 109, 0, 0.22);
+      border-color: #ff6d00;
+    }
+  }
+
+  &.btn-promo-green {
+    border-color: rgba(0, 200, 83, 0.5);
+    background: rgba(0, 200, 83, 0.12);
+    .btn-action-icon {
+      background: #00c853;
+    }
+    &:hover {
+      background: rgba(0, 200, 83, 0.22);
+      border-color: #00c853;
+    }
+  }
+
+  &.btn-promo-gold {
+    border-color: rgba(255, 152, 0, 0.5);
+    background: rgba(255, 152, 0, 0.12);
+    .btn-action-icon {
+      background: #ff9800;
+    }
+    &:hover {
+      background: rgba(255, 152, 0, 0.22);
+      border-color: #ff9800;
+    }
+  }
+
+  &.btn-promo-blue {
+    border-color: rgba(41, 121, 255, 0.5);
+    background: rgba(41, 121, 255, 0.12);
+    .btn-action-icon {
+      background: #2979ff;
+    }
+    &:hover {
+      background: rgba(41, 121, 255, 0.22);
+      border-color: #2979ff;
+    }
+  }
+
+  &.btn-promo-red {
+    border-color: rgba(198, 40, 40, 0.6);
+    background: rgba(198, 40, 40, 0.12);
+    .btn-action-icon {
+      background: #c62828;
+    }
+    &:hover {
+      background: rgba(198, 40, 40, 0.22);
+      border-color: #c62828;
+    }
+  }
+
+  &.btn-promo-teal-dark {
+    border-color: rgba(0, 150, 136, 0.5);
+    background: rgba(0, 150, 136, 0.12);
+    .btn-action-icon {
+      background: #009688;
+    }
+    &:hover {
+      background: rgba(0, 150, 136, 0.22);
+      border-color: #009688;
+    }
+  }
+
+  &.btn-promo-sky {
+    border-color: rgba(80, 165, 241, 0.5);
+    background: rgba(80, 165, 241, 0.12);
+    .btn-action-icon {
+      background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
+    }
+    &:hover {
+      background: rgba(80, 165, 241, 0.22);
+      border-color: #50a5f1;
+    }
+  }
+
+  &.btn-promo-amber {
+    border-color: rgba(241, 180, 76, 0.5);
+    background: rgba(241, 180, 76, 0.12);
+    .btn-action-icon {
+      background: linear-gradient(135deg, #f1b44c 0%, #e0a038 100%);
+    }
+    &:hover {
+      background: rgba(241, 180, 76, 0.22);
+      border-color: #f1b44c;
+    }
+  }
+
+  &.btn-promo-purple {
+    border-color: rgba(103, 58, 183, 0.5);
+    background: rgba(103, 58, 183, 0.12);
+    .btn-action-icon {
+      background: #673ab7;
+    }
+    &:hover {
+      background: rgba(103, 58, 183, 0.22);
+      border-color: #673ab7;
+    }
+  }
+
+  &.btn-promo-vista--activa {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.45), 0 8px 24px rgba(0, 0, 0, 0.35);
+    filter: brightness(1.1);
+  }
+
+  &.w-100 {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+  }
+}
+
+.historial-loading {
+  text-align: center;
+  padding: 28px 0;
+  color: rgba(255, 255, 255, 0.85);
+
+  i {
+    font-size: 22px;
+  }
+
+  div {
+    margin-top: 10px;
+    color: #9ca3af;
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
+
+.readonly-json-wrap {
+  padding: 0 4px 16px;
+}
+
+.readonly-json {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  max-height: 480px;
+  overflow: auto;
+}
+
+@media (max-width: 768px) {
+  .promo-tab {
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+
+  .promo-tab-panel-outer {
+    min-height: 100%;
+  }
+}
+
+// Acento azul como el resto del módulo Turnos (el global usa #ab0033 en el pager).
+:host ::ng-deep {
+  .dx-pager .dx-page-sizes .dx-selection,
+  .dx-pager .dx-pages .dx-selection {
+    background-color: #50a5f1 !important;
+    border-color: #50a5f1 !important;
+    color: #fff !important;
+  }
+}
