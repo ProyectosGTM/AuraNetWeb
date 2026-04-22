@@ -70,7 +70,7 @@ export class MonederosServices {
 
   /** POST monederos/traspaso - Traspasar saldo entre monederos del mismo afiliado */
   traspasoMonedero(payload: {
-    idTurnoCaja: number;
+    idCaja: number;
     idMonederoOrigen: number;
     idMonederoDestino: number;
     monto: number;

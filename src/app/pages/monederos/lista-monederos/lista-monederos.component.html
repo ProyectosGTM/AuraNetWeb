@@ -103,17 +103,6 @@
                                     <ng-container [ngSwitch]="tabAcciones">
                                         <div *ngSwitchCase="'movimientos'" class="row g-3 promo-tab-cards">
                                             <div class="col-12 col-md-6 col-xl-4 d-flex">
-                                                <button (click)="cargarMonedero()" type="button" class="btn-action-large btn-monederos-cargar w-100 align-self-stretch">
-                                                    <div class="btn-action-icon">
-                                                        <i class="fas fa-arrow-up"></i>
-                                                    </div>
-                                                    <div class="btn-action-text">
-                                                        <span class="btn-action-label">Cargar Efectivo</span>
-                                                        <span class="btn-action-desc">Agregar saldo a monedero</span>
-                                                    </div>
-                                                </button>
-                                            </div>
-                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
                                                 <button (click)="descargarMonedero()" type="button" class="btn-action-large btn-monederos-descargar w-100 align-self-stretch">
                                                     <div class="btn-action-icon">
                                                         <i class="fas fa-arrow-down"></i>
@@ -288,25 +277,25 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication">
             <i class="fas fa-arrow-up"></i>
-            <span>Agrega efectivo al monedero desde una caja. Requiere turno de caja abierto.</span>
+            <span>Agrega efectivo al monedero desde una caja.</span>
         </div>
         <form [formGroup]="cargarMonederoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Turno de Caja *</span>
+                        <span class="field-label text-white">Caja *</span>
                         <dx-select-box
-                            [dataSource]="listaTurnos"
+                            [dataSource]="listaCajasCargar"
                             displayExpr="text"
                             valueExpr="id"
-                            formControlName="idTurnoCaja"
-                            placeholder="Selecciona un turno..."
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
                             searchEnabled="true"
                             searchMode="contains"
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-turno">
                         </dx-select-box>
-                        <div *ngIf="listaTurnos.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
+                        <div *ngIf="listaCajasCargar.length === 0" class="text-muted small mt-1">No hay cajas disponibles</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -363,25 +352,25 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--warning">
             <i class="fas fa-arrow-down"></i>
-            <span>Retira efectivo del monedero hacia la caja. Requiere turno de caja abierto y saldo disponible.</span>
+            <span>Retira efectivo del monedero hacia la caja. Requiere saldo disponible en el monedero.</span>
         </div>
         <form [formGroup]="descargarMonederoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Turno de Caja *</span>
+                        <span class="field-label text-white">Caja *</span>
                         <dx-select-box
-                            [dataSource]="listaTurnosDescargar"
+                            [dataSource]="listaCajasDescargar"
                             displayExpr="text"
                             valueExpr="id"
-                            formControlName="idTurnoCaja"
-                            placeholder="Selecciona un turno..."
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
                             searchEnabled="true"
                             searchMode="contains"
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-turno">
                         </dx-select-box>
-                        <div *ngIf="listaTurnosDescargar.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
+                        <div *ngIf="listaCajasDescargar.length === 0" class="text-muted small mt-1">No hay cajas disponibles</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -925,7 +914,7 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication">
             <i class="fas fa-exchange-alt"></i>
-            <span>Traspasa saldo EFECTIVO entre dos monederos del mismo afiliado. Requiere turno de caja abierto.</span>
+            <span>Traspasa saldo EFECTIVO entre dos monederos del mismo afiliado desde una caja.</span>
         </div>
         <form [formGroup]="traspasoMonederoForm">
             <div class="row g-3">
@@ -948,19 +937,19 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Turno de Caja *</span>
+                        <span class="field-label text-white">Caja *</span>
                         <dx-select-box
-                            [dataSource]="listaTurnosTraspaso"
+                            [dataSource]="listaCajasTraspaso"
                             displayExpr="text"
                             valueExpr="id"
-                            formControlName="idTurnoCaja"
-                            placeholder="Selecciona un turno..."
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
                             searchEnabled="true"
                             searchMode="contains"
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-turno">
                         </dx-select-box>
-                        <div *ngIf="listaTurnosTraspaso.length === 0" class="text-muted small mt-1">No hay turnos disponibles</div>
+                        <div *ngIf="listaCajasTraspaso.length === 0" class="text-muted small mt-1">No hay cajas disponibles</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -1056,13 +1045,21 @@
             <h6 class="text-white mb-3"><i class="fas fa-wallet"></i> Monederos del afiliado</h6>
             <div class="monederos-afiliado-list">
                 <div class="monedero-afiliado-item" *ngFor="let m of listaMonederosAfiliado">
-                    <div class="monedero-afiliado-numero">{{ m.numeroMonedero || m.alias || 'Sin número' }}</div>
-                    <div class="monedero-afiliado-alias text-muted small">{{ m.alias || '—' }}</div>
-                    <div class="monedero-afiliado-estatus">
-                        <span class="estatus-badge" [ngClass]="m.estatus === 1 ? 'estatus-activo-badge' : 'estatus-inactivo-badge'">
-                            {{ m.estatus === 1 ? 'Activo' : 'Inactivo' }}
-                        </span>
+                    <div class="monedero-afiliado-card-head">
+                        <div class="monedero-afiliado-title">{{ monederoAfiliadoTitulo(m) }}</div>
+                        <div class="monedero-afiliado-badges">
+                            <span *ngIf="monederoAfiliadoEsPrincipal(m)" class="estatus-badge estatus-principal-badge">Principal</span>
+                            <span class="estatus-badge" [ngClass]="monederoAfiliadoEstatusActivo(m) ? 'estatus-activo-badge' : 'estatus-inactivo-badge'">
+                                {{ monederoAfiliadoEstatusTexto(m) }}
+                            </span>
+                        </div>
                     </div>
+                    <dl class="monedero-afiliado-dl">
+                        <ng-container *ngFor="let row of monederoAfiliadoFilasDetalle(m)">
+                            <dt>{{ row.label }}</dt>
+                            <dd>{{ row.value }}</dd>
+                        </ng-container>
+                    </dl>
                 </div>
             </div>
         </div>

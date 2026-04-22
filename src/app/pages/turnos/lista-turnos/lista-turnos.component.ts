@@ -10,7 +10,6 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { TransaccionesService } from 'src/app/shared/services/transacciones.service';
-import { TurnosActivosService } from 'src/app/shared/services/turnos-activos.service';
 import { TurnosService } from 'src/app/shared/services/turnos.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
@@ -18,7 +17,7 @@ import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
 
-/** Pestañas del panel de acciones POS (misma UX que Promociones). */
+/** Pesta?as del panel de acciones POS (misma UX que Promociones). */
 export type TabTurnosPanel = 'apertura' | 'efectivo' | 'control' | 'corte';
 
 const turnoTabPanelAnimation = trigger('turnoTabPanel', [
@@ -35,7 +34,7 @@ const turnoTabPanelAnimation = trigger('turnoTabPanel', [
   animations: [fadeInRightAnimation, turnoTabPanelAnimation],
 })
 export class ListaTurnosComponent {
-  public mensajeAgrupar: string = 'Arrastre un encabezado de columna aquí para agrupar por esa columna';
+  public mensajeAgrupar: string = 'Arrastre un encabezado de columna aqu? para agrupar por esa columna';
   public listaTurnos: any;
   public showFilterRow: boolean;
   public showHeaderFilter: boolean;
@@ -52,7 +51,7 @@ export class ListaTurnosComponent {
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
 
-  /** Pestaña visible (por defecto apertura / cierre). */
+  /** Pesta?a visible (por defecto apertura / cierre). */
   tabTurnos: TabTurnosPanel = 'apertura';
 
   @ViewChild('modalAbrirTurno', { static: false }) modalAbrirTurno!: TemplateRef<any>;
@@ -100,15 +99,15 @@ export class ListaTurnosComponent {
   public listaTesoreria: any[] = [];
   public listaEstatusTurno: SelectItem[] = [];
 
-  // Formulario para cerrar turno
+  // Formulario para cerrar turno (select de caja desde GET /cajas/list)
   cerrarTurnoForm: FormGroup;
-  public listaTurnosActivos: any[] = [];
+  public listaCajasCerrarTurno: SelectItem[] = [];
 
-  // Reponer efectivo (Tesorería -> Caja)
+  // Reponer efectivo (Tesorer?a -> Caja)
   reponerTurnoForm: FormGroup;
   listaCajasReponer: { id: number; text: string }[] = [];
 
-  // Retirar efectivo (Caja -> Tesorería)
+  // Retirar efectivo (Caja -> Tesorer?a)
   retirarTurnoForm: FormGroup;
   listaCajasRetirar: { id: number; text: string }[] = [];
 
@@ -119,7 +118,6 @@ export class ListaTurnosComponent {
   // Reactivar turno (POST /pos/turnos/reactivar)
   reactivarTurnoForm: FormGroup;
   listaCajasReactivar: { id: number; text: string }[] = [];
-  idEstatusSuspendido: number | null = null;
 
   // Corte parcial (POST /pos/turnos/corte-parcial)
   corteParcialForm: FormGroup;
@@ -139,7 +137,6 @@ export class ListaTurnosComponent {
     private cajasService: CajasService,
     private tesoreriaService: TesoreriaService,
     private transaccionesService: TransaccionesService,
-    private turnosActivosService: TurnosActivosService,
     private usuariosService: UsuariosService,
     private salasService: SalaService,
   ) {
@@ -153,7 +150,7 @@ export class ListaTurnosComponent {
     });
 
     this.cerrarTurnoForm = this.fb.group({
-      idTurno: [null, Validators.required],
+      idCaja: [null, Validators.required],
       fondoContado: ['', [Validators.required, Validators.min(0)]],
       observaciones: ['']
     });
@@ -235,10 +232,6 @@ export class ListaTurnosComponent {
           id: Number(e.id),
           text: e.nombre || e.nombreEstatusTurno || ''
         }));
-        const suspendido = estatusData.find((e: any) =>
-          (e.codigoEstatusTurno || e.codigo || e.nombre || '').toString().toUpperCase().includes('SUSPENDIDO')
-        );
-        this.idEstatusSuspendido = suspendido ? Number(suspendido.id) : null;
         const salasData = r.salas?.data || [];
         this.listaSalasParaFiltro = salasData.map((s: any) => ({
           id: Number(s.id),
@@ -558,7 +551,7 @@ export class ListaTurnosComponent {
           console.error('Error en la solicitud de datos:', err);
           Swal.fire({
             title: '¡Error!',
-            text: 'No se pudo obtener la información de turnos.',
+            text: 'No se pudo obtener la informaci?n de turnos.',
             icon: 'error',
             background: '#0d121d',
             confirmButtonColor: '#3085d6',
@@ -612,12 +605,16 @@ export class ListaTurnosComponent {
     }).subscribe({
       next: (responses) => {
         const cajasData = responses.cajas.data || [];
-        const cajasAbiertas = cajasData.filter((c: any) => Number(c.idEstatusCaja) === 2);
-        this.listaCajas = cajasAbiertas.map((c: any) => ({
-          ...c,
-          id: Number(c.id),
-          text: `${c.codigo || ''} - ${c.nombre || ''}`.trim()
-        }));
+        this.listaCajas = cajasData
+          .filter((c: any) => {
+            const estatus = Number(c.idEstatusCaja);
+            return estatus === 1 || estatus === 2;
+          })
+          .map((c: any) => ({
+            ...c,
+            id: Number(c.id),
+            text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || `Caja ${c.id}`,
+          }));
 
         this.listaTesoreria = (responses.tesoreria.data || []).map((t: any) => ({
           ...t,
@@ -726,20 +723,11 @@ export class ListaTurnosComponent {
   }
 
   cerrarTurno() {
-    // Cargar lista de turnos
-    this.turnosService.obtenerTurnos().subscribe({
+    this.cerrarTurnoForm.reset({ idCaja: null, fondoContado: '', observaciones: '' });
+    this.listaCajasCerrarTurno = [];
+    this.cajasService.obtenerCajas().subscribe({
       next: (response) => {
-        const turnosData = response?.data || [];
-        if (Array.isArray(turnosData) && turnosData.length > 0) {
-          this.listaTurnosActivos = turnosData.map((t: any) => ({
-            ...t,
-            id: Number(t.id),
-            text: `Turno #${t.id} - ${t.codigoCaja || ''} - ${this.formatearFechaHora(t.fechaApertura) || ''}`
-          }));
-        } else {
-          this.listaTurnosActivos = [];
-        }
-
+        this.listaCajasCerrarTurno = this.mapearCajasDisponiblesReponer(response);
         this.modalRef = this.modalService.open(this.modalCerrarTurno, {
           size: 'lg',
           windowClass: 'modal-holder modal-cerrar-turno',
@@ -748,10 +736,10 @@ export class ListaTurnosComponent {
           keyboard: true
         });
       },
-      error: (error) => {
+      error: () => {
         Swal.fire({
           title: '¡Error!',
-          text: 'No se pudieron cargar los turnos.',
+          text: 'No se pudieron cargar las cajas.',
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -799,18 +787,33 @@ export class ListaTurnosComponent {
       });
       return;
     }
-    this.listaCajasReponer = [{
-      id: Number(row.idCaja),
-      text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''} (Turno #${row.id})`.trim() || `Caja ${row.idCaja}`
-    }];
-    this.reponerTurnoForm.reset({ idCaja: row.idCaja, monto: '', motivo: '' });
-    this.reponerTurnoForm.patchValue({ idCaja: row.idCaja });
+    const idPre = Number(row.idCaja);
+    this.reponerTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
+    this.listaCajasReponer = [];
     this.modalRef = this.modalService.open(this.modalReponerTurno, {
       size: 'lg',
       windowClass: 'modal-holder modal-reponer-turno',
       centered: true,
       backdrop: 'static',
       keyboard: true
+    });
+    this.cajasService.obtenerCajas().subscribe({
+      next: (response) => {
+        this.listaCajasReponer = this.mapearCajasDisponiblesReponer(response);
+        if (this.listaCajasReponer.some((c) => c.id === idPre)) {
+          this.reponerTurnoForm.patchValue({ idCaja: idPre });
+        }
+      },
+      error: () => {
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudieron cargar las cajas.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
     });
   }
 
@@ -826,18 +829,33 @@ export class ListaTurnosComponent {
       });
       return;
     }
-    this.listaCajasRetirar = [{
-      id: Number(row.idCaja),
-      text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''} (Turno #${row.id})`.trim() || `Caja ${row.idCaja}`
-    }];
-    this.retirarTurnoForm.reset({ idCaja: row.idCaja, monto: '', motivo: '' });
-    this.retirarTurnoForm.patchValue({ idCaja: row.idCaja });
+    const idPre = Number(row.idCaja);
+    this.retirarTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
+    this.listaCajasRetirar = [];
     this.modalRef = this.modalService.open(this.modalRetirarTurno, {
       size: 'lg',
       windowClass: 'modal-holder modal-retirar-turno',
       centered: true,
       backdrop: 'static',
       keyboard: true
+    });
+    this.cajasService.obtenerCajas().subscribe({
+      next: (response) => {
+        this.listaCajasRetirar = this.mapearCajasDisponiblesReponer(response);
+        if (this.listaCajasRetirar.some((c) => c.id === idPre)) {
+          this.retirarTurnoForm.patchValue({ idCaja: idPre });
+        }
+      },
+      error: () => {
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudieron cargar las cajas.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
     });
   }
 
@@ -892,28 +910,14 @@ export class ListaTurnosComponent {
       keyboard: true
     });
 
-    this.turnosActivosService.obtenerTurnosActivos().subscribe({
+    this.cajasService.obtenerCajas().subscribe({
       next: (response) => {
-        const turnosData = response?.data ?? response;
-        const turnos = Array.isArray(turnosData) ? turnosData : [];
-        const seen = new Set<number>();
-        this.listaCajasReponer = turnos
-          .filter((t: any) => {
-            if (t?.idCaja == null) return false;
-            const id = Number(t.idCaja);
-            if (seen.has(id)) return false;
-            seen.add(id);
-            return true;
-          })
-          .map((t: any) => ({
-            id: Number(t.idCaja),
-            text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
-          }));
+        this.listaCajasReponer = this.mapearCajasDisponiblesReponer(response);
       },
-      error: (error) => {
+      error: () => {
         Swal.fire({
           title: '¡Error!',
-          text: error?.error?.message || 'No se pudieron cargar los turnos activos.',
+          text: 'No se pudieron cargar las cajas.',
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -921,6 +925,23 @@ export class ListaTurnosComponent {
         });
       }
     });
+  }
+
+  /**
+   * GET /cajas/list: cajas operativas (idEstatusCaja 1 o 2). Reponer y corte parcial.
+   */
+  private mapearCajasDisponiblesReponer(response: any): { id: number; text: string }[] {
+    const raw = response?.data ?? response ?? [];
+    const arr = Array.isArray(raw) ? raw : [];
+    return arr
+      .filter((c: any) => {
+        const estatus = Number(c.idEstatusCaja);
+        return estatus === 1 || estatus === 2;
+      })
+      .map((c: any) => ({
+        id: Number(c.id),
+        text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || `Caja ${c.id}`,
+      }));
   }
 
   suspenderTurno() {
@@ -933,28 +954,14 @@ export class ListaTurnosComponent {
       backdrop: 'static',
       keyboard: true
     });
-    this.turnosActivosService.obtenerTurnosActivos().subscribe({
+    this.cajasService.obtenerCajas().subscribe({
       next: (response) => {
-        const turnosData = response?.data ?? response;
-        const turnos = Array.isArray(turnosData) ? turnosData : [];
-        const seen = new Set<number>();
-        this.listaCajasSuspender = turnos
-          .filter((t: any) => {
-            if (t?.idCaja == null) return false;
-            const id = Number(t.idCaja);
-            if (seen.has(id)) return false;
-            seen.add(id);
-            return true;
-          })
-          .map((t: any) => ({
-            id: Number(t.idCaja),
-            text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
-          }));
+        this.listaCajasSuspender = this.mapearCajasDisponiblesReponer(response);
       },
       error: (error) => {
         Swal.fire({
           title: '¡Error!',
-          text: error?.error?.message || 'No se pudieron cargar los turnos activos.',
+          text: error?.error?.message || 'No se pudieron cargar las cajas.',
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -965,14 +972,44 @@ export class ListaTurnosComponent {
   }
 
   abrirModalSuspenderDesdeFila(row: any) {
-    this.suspenderTurnoForm.reset({ idCaja: row.idCaja, motivo: '', efectivoContado: '' });
-    this.listaCajasSuspender = [{ id: Number(row.idCaja), text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''}`.trim() || `Caja ${row.idCaja}` }];
+    if (!row?.idCaja) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'No hay caja asociada a este turno.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Cerrar',
+      });
+      return;
+    }
+    const idPre = Number(row.idCaja);
+    this.suspenderTurnoForm.reset({ idCaja: null, motivo: '', efectivoContado: '' });
+    this.listaCajasSuspender = [];
     this.modalRef = this.modalService.open(this.modalSuspenderTurno, {
       size: 'lg',
       windowClass: 'modal-holder modal-suspender-turno',
       centered: true,
       backdrop: 'static',
       keyboard: true
+    });
+    this.cajasService.obtenerCajas().subscribe({
+      next: (response) => {
+        this.listaCajasSuspender = this.mapearCajasDisponiblesReponer(response);
+        if (this.listaCajasSuspender.some((c) => c.id === idPre)) {
+          this.suspenderTurnoForm.patchValue({ idCaja: idPre });
+        }
+      },
+      error: () => {
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudieron cargar las cajas.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
     });
   }
 
@@ -996,7 +1033,7 @@ export class ListaTurnosComponent {
     this.turnosService.suspenderTurno(payload).subscribe({
       next: () => {
         Swal.fire({
-          title: '¡Operación exitosa!',
+          title: '¡Operación Exitosa!',
           text: 'El turno se ha suspendido correctamente.',
           icon: 'success',
           background: '#0d121d',
@@ -1032,40 +1069,22 @@ export class ListaTurnosComponent {
       backdrop: 'static',
       keyboard: true
     });
-    if (this.idEstatusSuspendido != null) {
-      this.turnosService.obtenerTurnosConsultaFiltrada({ idEstatusTurno: this.idEstatusSuspendido, limit: 500 }).subscribe({
-        next: (response) => {
-          const data = response?.data ?? response;
-          const turnos = Array.isArray(data) ? data : (data?.rows ? data.rows : []);
-          const seen = new Set<number>();
-          this.listaCajasReactivar = turnos
-            .filter((t: any) => {
-              if (t?.idCaja == null) return false;
-              const id = Number(t.idCaja);
-              if (seen.has(id)) return false;
-              seen.add(id);
-              return true;
-            })
-            .map((t: any) => ({
-              id: Number(t.idCaja),
-              text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
-            }));
-          if (this.listaCajasReactivar.length === 0) {
-            Swal.fire({
-              title: 'Sin turnos suspendidos',
-              text: 'No hay turnos suspendidos para reactivar.',
-              icon: 'info',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Cerrar',
-            });
-          }
-        },
-        error: () => {
-          this.listaCajasReactivar = [];
-        }
-      });
-    }
+    this.cajasService.obtenerCajas().subscribe({
+      next: (response) => {
+        this.listaCajasReactivar = this.mapearCajasDisponiblesReponer(response);
+      },
+      error: () => {
+        this.listaCajasReactivar = [];
+        Swal.fire({
+          title: '¡Error!',
+          text: 'No se pudieron cargar las cajas.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
   }
 
   abrirModalReactivarDesdeFila(row: any) {
@@ -1080,12 +1099,9 @@ export class ListaTurnosComponent {
       });
       return;
     }
-    this.listaCajasReactivar = [{
-      id: Number(row.idCaja),
-      text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''} (Turno #${row.id})`.trim() || `Caja ${row.idCaja}`
-    }];
-    this.reactivarTurnoForm.reset({ idCaja: row.idCaja, observaciones: '' });
-    this.reactivarTurnoForm.patchValue({ idCaja: row.idCaja });
+    const idPre = Number(row.idCaja);
+    this.reactivarTurnoForm.reset({ idCaja: null, observaciones: '' });
+    this.listaCajasReactivar = [];
     this.modalRef = this.modalService.open(this.modalReactivarTurno, {
       size: 'lg',
       windowClass: 'modal-holder modal-reactivar-turno',
@@ -1093,13 +1109,31 @@ export class ListaTurnosComponent {
       backdrop: 'static',
       keyboard: true
     });
+    this.cajasService.obtenerCajas().subscribe({
+      next: (response) => {
+        this.listaCajasReactivar = this.mapearCajasDisponiblesReponer(response);
+        if (this.listaCajasReactivar.some((c) => c.id === idPre)) {
+          this.reactivarTurnoForm.patchValue({ idCaja: idPre });
+        }
+      },
+      error: () => {
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudieron cargar las cajas.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
+    });
   }
 
   guardarReactivarTurno() {
     if (this.reactivarTurnoForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
-        text: 'Seleccione la caja con turno suspendido.',
+        text: 'Seleccione la caja.',
         icon: 'warning',
         background: '#0d121d',
         confirmButtonColor: '#3085d6',
@@ -1114,7 +1148,7 @@ export class ListaTurnosComponent {
     this.turnosService.reactivarTurno(payload).subscribe({
       next: () => {
         Swal.fire({
-          title: '¡Operación exitosa!',
+          title: '¡Operación Exitosa!',
           text: 'El turno se ha reactivado correctamente.',
           icon: 'success',
           background: '#0d121d',
@@ -1150,36 +1184,20 @@ export class ListaTurnosComponent {
       backdrop: 'static',
       keyboard: true
     });
-    this.turnosActivosService.obtenerTurnosActivos().subscribe({
+    this.cajasService.obtenerCajas().subscribe({
       next: (response) => {
-        const turnosData = response?.data ?? response;
-        const turnos = Array.isArray(turnosData) ? turnosData : [];
-        const seen = new Set<number>();
-        this.listaCajasCorteParcial = turnos
-          .filter((t: any) => {
-            if (t?.idCaja == null) return false;
-            const id = Number(t.idCaja);
-            if (seen.has(id)) return false;
-            seen.add(id);
-            return true;
-          })
-          .map((t: any) => ({
-            id: Number(t.idCaja),
-            text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
-          }));
-        if (this.listaCajasCorteParcial.length === 0) {
-          Swal.fire({
-            title: 'Sin turnos abiertos',
-            text: 'No hay turnos abiertos para realizar corte parcial.',
-            icon: 'info',
-            background: '#0d121d',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Cerrar',
-          });
-        }
+        this.listaCajasCorteParcial = this.mapearCajasDisponiblesReponer(response);
       },
       error: () => {
         this.listaCajasCorteParcial = [];
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudieron cargar las cajas.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
       }
     });
   }
@@ -1196,18 +1214,33 @@ export class ListaTurnosComponent {
       });
       return;
     }
-    this.listaCajasCorteParcial = [{
-      id: Number(row.idCaja),
-      text: `${row.codigoCaja || ''} - ${row.nombreCaja || ''} (Turno #${row.id})`.trim() || `Caja ${row.idCaja}`
-    }];
-    this.corteParcialForm.reset({ idCaja: row.idCaja, efectivoContado: '', observaciones: '' });
-    this.corteParcialForm.patchValue({ idCaja: row.idCaja });
+    const idPre = Number(row.idCaja);
+    this.corteParcialForm.reset({ idCaja: null, efectivoContado: '', observaciones: '' });
+    this.listaCajasCorteParcial = [];
     this.modalRef = this.modalService.open(this.modalCorteParcial, {
       size: 'lg',
       windowClass: 'modal-holder modal-corte-parcial',
       centered: true,
       backdrop: 'static',
       keyboard: true
+    });
+    this.cajasService.obtenerCajas().subscribe({
+      next: (response) => {
+        this.listaCajasCorteParcial = this.mapearCajasDisponiblesReponer(response);
+        if (this.listaCajasCorteParcial.some((c) => c.id === idPre)) {
+          this.corteParcialForm.patchValue({ idCaja: idPre });
+        }
+      },
+      error: () => {
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudieron cargar las cajas.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+      }
     });
   }
 
@@ -1231,7 +1264,7 @@ export class ListaTurnosComponent {
     this.turnosService.corteParcial(payload).subscribe({
       next: () => {
         Swal.fire({
-          title: '¡Operación exitosa!',
+          title: '¡Operación Exitosa!',
           text: 'Se ha generado el corte parcial (Corte X) correctamente.',
           icon: 'success',
           background: '#0d121d',
@@ -1268,28 +1301,14 @@ export class ListaTurnosComponent {
       keyboard: true
     });
 
-    this.turnosActivosService.obtenerTurnosActivos().subscribe({
+    this.cajasService.obtenerCajas().subscribe({
       next: (response) => {
-        const turnosData = response?.data ?? response;
-        const turnos = Array.isArray(turnosData) ? turnosData : [];
-        const seen = new Set<number>();
-        this.listaCajasRetirar = turnos
-          .filter((t: any) => {
-            if (t?.idCaja == null) return false;
-            const id = Number(t.idCaja);
-            if (seen.has(id)) return false;
-            seen.add(id);
-            return true;
-          })
-          .map((t: any) => ({
-            id: Number(t.idCaja),
-            text: `${t.codigoCaja || ''} - ${t.nombreCaja || ''} (Turno #${t.id})`.trim() || `Caja ${t.idCaja}`
-          }));
+        this.listaCajasRetirar = this.mapearCajasDisponiblesReponer(response);
       },
       error: (error) => {
         Swal.fire({
           title: '¡Error!',
-          text: error?.error?.message || 'No se pudieron cargar los turnos activos.',
+          text: error?.error?.message || 'No se pudieron cargar las cajas.',
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -1361,10 +1380,11 @@ export class ListaTurnosComponent {
       return;
     }
 
+    const motivo = (this.reponerTurnoForm.value.motivo || '').trim();
     const payload = {
       idCaja: Number(this.reponerTurnoForm.value.idCaja),
       monto: Number(this.reponerTurnoForm.value.monto),
-      motivo: (this.reponerTurnoForm.value.motivo || '').trim()
+      motivo
     };
 
     this.turnosService.reponerTurno(payload).subscribe({
@@ -1410,13 +1430,11 @@ export class ListaTurnosComponent {
       return;
     }
 
-    const idTurnoSeleccionado = Number(this.cerrarTurnoForm.value.idTurno);
-    const turno = this.listaTurnosActivos.find((t: any) => Number(t.id) === idTurnoSeleccionado);
-    const idCaja = turno?.idCaja != null ? Number(turno.idCaja) : null;
-    if (idCaja == null) {
+    const idCaja = Number(this.cerrarTurnoForm.value.idCaja);
+    if (idCaja == null || Number.isNaN(idCaja)) {
       Swal.fire({
         title: '¡Error!',
-        text: 'No se pudo obtener la caja del turno seleccionado.',
+        text: 'Seleccione una caja v?lida.',
         icon: 'error',
         background: '#0d121d',
         confirmButtonColor: '#3085d6',
@@ -1466,12 +1484,7 @@ export class ListaTurnosComponent {
     this.consultarSaldoCajaForm.reset();
     this.cajasService.obtenerCajas().subscribe({
       next: (resp) => {
-        const cajasData = resp.data || [];
-        const cajasAbiertas = cajasData.filter((c: any) => Number(c.idEstatusCaja) === 2);
-        this.listaCajasSaldo = cajasAbiertas.map((c: any) => ({
-          id: Number(c.id),
-          text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Sin nombre'
-        }));
+        this.listaCajasSaldo = this.mapearCajasDisponiblesReponer(resp);
         this.modalRef = this.modalService.open(this.modalConsultarSaldoCaja, {
           size: 'lg',
           windowClass: 'modal-holder modal-consultar-saldo-caja',

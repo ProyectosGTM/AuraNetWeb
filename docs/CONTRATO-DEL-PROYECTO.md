@@ -122,7 +122,7 @@ Los siguientes ítems aparecen en el menú (`src/app/layouts/sidebar/menu.ts`) p
 
 - Los servicios de dominio viven en `src/app/shared/services/` (por ejemplo: `ModulosService`, `PermisosService`, `RolesService`, `UsuariosService`, `ClientesService`, `SalaService`, `ZonaService`, `CajasService`, `TesoreriaService`, `MonederosServices`, `TurnosService`, `TransaccionesService`, `BitacoraService`).
 - Patrón de métodos: `obtener*()` / `obtener*Data(page, take)` para listados; `obtener*(id)` para edición; `crear*` / `actualizar*` para persistencia; `updateEstatus(id, estatus)` para activar/desactivar donde aplique.
-- Algunos servicios son compartidos entre módulos (por ejemplo `CajasService` en recarga, turnos y afiliados; `TurnosService` en turnos y monederos).
+- Algunos servicios son compartidos entre módulos (por ejemplo `CajasService` en recarga, turnos, afiliados y operaciones de monederos en UI; `TurnosService` en turnos).
 
 ---
 

@@ -18,9 +18,10 @@
   <!-- Formulario principal -->
   <div class="recarga-flow" [class.recarga-flow--ready]="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value">
     <form [formGroup]="recargaForm">
-      <div class="recarga-cards">
+      <div class="row g-4 recarga-cards">
         <!-- Caja -->
-        <div class="recarga-card recarga-card--caja">
+        <div class="col-12 col-lg-4">
+          <div class="recarga-card recarga-card--caja h-100">
           <div class="recarga-card-glow recarga-card-glow--caja"></div>
           <div class="recarga-card-header">
             <div class="recarga-card-icon recarga-card-icon--caja">
@@ -67,10 +68,12 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Monedero -->
-        <div class="recarga-card recarga-card--monedero">
+        <div class="col-12 col-lg-4">
+          <div class="recarga-card recarga-card--monedero h-100">
           <div class="recarga-card-glow recarga-card-glow--monedero"></div>
           <div class="recarga-card-header">
             <div class="recarga-card-icon recarga-card-icon--monedero">
@@ -116,10 +119,12 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Monto -->
-        <div class="recarga-card recarga-card--monto">
+        <div class="col-12 col-lg-4">
+          <div class="recarga-card recarga-card--monto h-100">
           <div class="recarga-card-glow recarga-card-glow--monto"></div>
           <div class="recarga-card-header">
             <div class="recarga-card-icon recarga-card-icon--monto">
@@ -147,22 +152,23 @@
               </div>
             </label>
             <div class="recarga-quick">
-              <button type="button" class="recarga-quick-btn" (click)="setMontoRapido(100)">
+              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(100)">
                 <span class="recarga-quick-val">$100</span>
               </button>
-              <button type="button" class="recarga-quick-btn" (click)="setMontoRapido(500)">
+              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(500)">
                 <span class="recarga-quick-val">$500</span>
               </button>
-              <button type="button" class="recarga-quick-btn" (click)="setMontoRapido(1000)">
+              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(1000)">
                 <span class="recarga-quick-val">$1,000</span>
               </button>
-              <button type="button" class="recarga-quick-btn" (click)="setMontoRapido(2000)">
+              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(2000)">
                 <span class="recarga-quick-val">$2,000</span>
               </button>
-              <button type="button" class="recarga-quick-btn" (click)="setMontoRapido(5000)">
+              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(5000)">
                 <span class="recarga-quick-val">$5,000</span>
               </button>
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -183,22 +189,28 @@
               <span>Validado</span>
             </div>
           </div>
-          <div class="recarga-confirm-grid">
-            <div class="recarga-confirm-tile">
+          <div class="row g-3 recarga-confirm-grid">
+            <div class="col-12 col-lg-4">
+              <div class="recarga-confirm-tile h-100">
               <span class="recarga-confirm-tile-label"><i class="fas fa-cash-register"></i> Caja</span>
               <span class="recarga-confirm-tile-main">{{ cajaSeleccionada.codigo || '—' }}</span>
               <span class="recarga-confirm-tile-sub">{{ cajaSeleccionada.nombre || '—' }}</span>
             </div>
-            <div class="recarga-confirm-tile">
+              </div>
+            <div class="col-12 col-lg-4">
+              <div class="recarga-confirm-tile h-100">
               <span class="recarga-confirm-tile-label"><i class="fas fa-wallet"></i> Monedero</span>
               <span class="recarga-confirm-tile-main">{{ monederoSeleccionado.numeroMonedero || '—' }}</span>
               <span class="recarga-confirm-tile-sub">{{ monederoSeleccionado.alias || '—' }}</span>
             </div>
-            <div class="recarga-confirm-tile recarga-confirm-tile--monto">
+              </div>
+            <div class="col-12 col-lg-4">
+              <div class="recarga-confirm-tile recarga-confirm-tile--monto h-100">
               <span class="recarga-confirm-tile-label"><i class="fas fa-coins"></i> Monto</span>
               <span class="recarga-confirm-tile-main recarga-confirm-tile-main--big">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</span>
               <span class="recarga-confirm-tile-sub">Carga inmediata</span>
             </div>
+              </div>
           </div>
         </div>
 

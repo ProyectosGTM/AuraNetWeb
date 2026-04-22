@@ -5,6 +5,98 @@
 
 // Rating
 
+/* ===========================
+   Tooltips (ng-bootstrap)
+   - Más notorios (contraste/sombra/borde)
+   - Sin “sticky” en click (config en AppModule)
+   =========================== */
+.aura-tooltip {
+  opacity: 1 !important;
+  transition: none !important;
+}
+
+.aura-tooltip.tooltip {
+  transition: none !important;
+}
+
+.aura-tooltip.tooltip.show {
+  transition: none !important;
+}
+
+.aura-tooltip .tooltip-inner {
+  background: rgba(13, 18, 29, 0.98) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(228, 0, 65, 0.55) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(228, 0, 65, 0.18) inset !important;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+  text-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+  position: relative;
+  overflow: hidden;
+}
+
+.aura-tooltip .tooltip-inner::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, rgba(228, 0, 65, 1) 0%, rgba(255, 26, 91, 0.55) 100%);
+  box-shadow: 0 0 0 1px rgba(228, 0, 65, 0.22);
+  opacity: 0.95;
+}
+
+.aura-tooltip .tooltip-inner::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -60%;
+  width: 55%;
+  height: 180%;
+  background: linear-gradient(90deg, rgba(228, 0, 65, 0) 0%, rgba(228, 0, 65, 0.12) 50%, rgba(228, 0, 65, 0) 100%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.aura-tooltip.bs-tooltip-top .tooltip-arrow::before,
+.aura-tooltip.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
+  border-top-color: rgba(13, 18, 29, 0.98) !important;
+}
+
+.aura-tooltip.bs-tooltip-top .tooltip-arrow::after,
+.aura-tooltip.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 0;
+  height: 0;
+  border-left: 0.4rem solid transparent;
+  border-right: 0.4rem solid transparent;
+  border-top: 0.4rem solid rgba(228, 0, 65, 0.55);
+  transform: translateY(1px);
+}
+
+.aura-tooltip.bs-tooltip-bottom .tooltip-arrow::before,
+.aura-tooltip.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::before {
+  border-bottom-color: rgba(13, 18, 29, 0.98) !important;
+}
+
+.aura-tooltip.bs-tooltip-start .tooltip-arrow::before,
+.aura-tooltip.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before {
+  border-left-color: rgba(13, 18, 29, 0.98) !important;
+}
+
+.aura-tooltip.bs-tooltip-end .tooltip-arrow::before,
+.aura-tooltip.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before {
+  border-right-color: rgba(13, 18, 29, 0.98) !important;
+}
+
 .dx-pager .dx-page-sizes .dx-selection, .dx-pager .dx-pages .dx-selection {
     cursor: inherit;
     text-shadow: none;

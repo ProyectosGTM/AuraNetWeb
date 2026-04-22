@@ -616,7 +616,7 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-caja">
                         </dx-select-box>
-                        <div *ngIf="listaCajas.length === 0" class="text-muted small mt-1">No hay cajas disponibles. Las cajas no están abiertas.</div>
+                        <div *ngIf="listaCajas.length === 0" class="text-muted small mt-1">No hay cajas en catálogo con estatus operativo (1 o 2).</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -694,7 +694,7 @@
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Caja con turno activo *</span>
+                        <span class="field-label text-white">Caja *</span>
                         <dx-select-box
                             [dataSource]="listaCajasReponer"
                             displayExpr="text"
@@ -706,7 +706,7 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-caja">
                         </dx-select-box>
-                        <div *ngIf="listaCajasReponer.length === 0" class="text-muted small mt-1">No hay cajas con turnos activos</div>
+                        <div *ngIf="listaCajasReponer.length === 0" class="text-muted small mt-1">No hay cajas en catálogo (listado /cajas/list). Verifica cajas operativas o abre turno.</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -774,7 +774,7 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-caja">
                         </dx-select-box>
-                        <div *ngIf="listaCajasRetirar.length === 0" class="text-muted small mt-1">No hay cajas con turnos activos</div>
+                        <div *ngIf="listaCajasRetirar.length === 0" class="text-muted small mt-1">No hay cajas en catálogo (/cajas/list) con estatus operativo (1 o 2).</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -842,7 +842,7 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-caja">
                         </dx-select-box>
-                        <div *ngIf="listaCajasSuspender.length === 0" class="text-muted small mt-1">No hay cajas con turnos activos</div>
+                        <div *ngIf="listaCajasSuspender.length === 0" class="text-muted small mt-1">No hay cajas en catálogo (/cajas/list) con estatus operativo (1 o 2).</div>
                     </label>
                 </div>
                 <div class="col-12">
@@ -892,13 +892,13 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication">
             <i class="fas fa-play-circle"></i>
-            <span>Continúa un turno que fue suspendido, opcionalmente con cambio de cajero. El turno debe estar <strong>suspendido</strong>, se identifica por <strong>ID de caja</strong>. Requiere rol Jefe de Sala o Gerente.</span>
+            <span>Continúa un turno que fue suspendido (validación en servidor). La caja se elige desde el catálogo <strong>/cajas/list</strong>. Requiere rol Jefe de Sala o Gerente.</span>
         </div>
         <form [formGroup]="reactivarTurnoForm">
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Caja con turno suspendido *</span>
+                        <span class="field-label text-white">Caja *</span>
                         <dx-select-box
                             [dataSource]="listaCajasReactivar"
                             displayExpr="text"
@@ -910,7 +910,7 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-caja">
                         </dx-select-box>
-                        <div *ngIf="listaCajasReactivar.length === 0" class="text-muted small mt-1">No hay cajas con turnos suspendidos</div>
+                        <div *ngIf="listaCajasReactivar.length === 0" class="text-muted small mt-1">No hay cajas en catálogo (/cajas/list) con estatus operativo (1 o 2).</div>
                     </label>
                 </div>
                 <div class="col-12">
@@ -953,10 +953,10 @@
             <span>Genera un reporte del estado actual del turno sin cerrarlo. Compara efectivo contado vs saldo calculado. El turno debe estar <strong>abierto</strong>, se identifica por <strong>ID de caja</strong>. Requiere rol Operador, Jefe de Sala o Gerente.</span>
         </div>
         <form [formGroup]="corteParcialForm">
-            <div class="row g-3">
-                <div class="col-12">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-lg-7">
                     <label class="field">
-                        <span class="field-label text-white">Caja con turno abierto *</span>
+                        <span class="field-label text-white">Caja *</span>
                         <dx-select-box
                             [dataSource]="listaCajasCorteParcial"
                             displayExpr="text"
@@ -968,10 +968,10 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-caja">
                         </dx-select-box>
-                        <div *ngIf="listaCajasCorteParcial.length === 0" class="text-muted small mt-1">No hay cajas con turnos abiertos</div>
+                        <div *ngIf="listaCajasCorteParcial.length === 0" class="text-muted small mt-1">Sin cajas en catálogo (/cajas/list). Requiere turno abierto en la caja (API).</div>
                     </label>
                 </div>
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-lg-5">
                     <label class="field">
                         <span class="field-label text-white">Efectivo contado *</span>
                         <div class="input-sleek">
@@ -1018,25 +1018,25 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--warning">
             <i class="fas fa-door-closed"></i>
-            <span>Finaliza un turno de caja activo. Registra el fondo contado y las observaciones del cierre.</span>
+            <span>Selecciona la caja (catálogo /cajas/list) y registra el fondo contado y las observaciones del cierre.</span>
         </div>
         <form [formGroup]="cerrarTurnoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Turno Activo *</span>
+                        <span class="field-label text-white">Caja *</span>
                         <dx-select-box
-                            [dataSource]="listaTurnosActivos"
+                            [dataSource]="listaCajasCerrarTurno"
                             displayExpr="text"
                             valueExpr="id"
-                            formControlName="idTurno"
-                            placeholder="Selecciona un turno..."
+                            formControlName="idCaja"
+                            placeholder="Selecciona una caja..."
                             searchEnabled="true"
                             searchMode="contains"
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-turno">
                         </dx-select-box>
-                        <div *ngIf="listaTurnosActivos.length === 0" class="text-muted small mt-1">No hay turnos activos disponibles</div>
+                        <div *ngIf="listaCajasCerrarTurno.length === 0" class="text-muted small mt-1">No hay cajas en catálogo (/cajas/list) con estatus operativo (1 o 2).</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -1105,7 +1105,7 @@
                                 [showClearButton]="true"
                                 class="dx-select-box-custom dx-select-box-caja">
                             </dx-select-box>
-                            <div *ngIf="listaCajasSaldo.length === 0" class="text-muted small mt-1">No hay cajas disponibles. Las cajas no están abiertas.</div>
+                            <div *ngIf="listaCajasSaldo.length === 0" class="text-muted small mt-1">No hay cajas en catálogo con estatus operativo (1 o 2).</div>
                         </label>
                     </div>
                 </div>

@@ -59,8 +59,7 @@
                       <span class="field-label text-white">Marca</span>
                       <div class="input-sleek">
                         <i class="fas fa-industry"></i>
-                        <input formControlName="marca" class="sleek-control" type="text"
-                          placeholder="Marca" />
+                        <input formControlName="marca" class="sleek-control" type="text" placeholder="Marca" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
@@ -70,10 +69,39 @@
                       <span class="field-label text-white">Modelo</span>
                       <div class="input-sleek">
                         <i class="fas fa-cube"></i>
-                        <input formControlName="modelo" class="sleek-control" type="text"
-                          placeholder="Modelo" />
+                        <input formControlName="modelo" class="sleek-control" type="text" placeholder="Modelo" />
                         <span class="sleek-line"></span>
                       </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3 mt-2">
+                    <label class="field">
+                      <span class="field-label text-white">Tipo de Máquina</span>
+                      <dx-select-box [dataSource]="listaTipoMaquina" displayExpr="text" valueExpr="id"
+                        formControlName="idTipoMaquina" placeholder="Selecciona un tipo..." searchEnabled="true"
+                        searchMode="contains" [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-tipo-maquina">
+                      </dx-select-box>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3 mt-2">
+                    <label class="field">
+                      <span class="field-label text-white">Fabricante</span>
+                      <dx-select-box [dataSource]="listaFabricantes" displayExpr="text" valueExpr="id"
+                        formControlName="idFabricante" placeholder="Selecciona un fabricante..." searchEnabled="true"
+                        searchMode="contains" [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-fabricante">
+                      </dx-select-box>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-3 mt-2">
+                    <label class="field">
+                      <span class="field-label text-white">Estatus</span>
+                      <dx-select-box [dataSource]="listaEstatusMaquina" displayExpr="text" valueExpr="id"
+                        formControlName="idEstatusMaquina" placeholder="Selecciona un estatus..." searchEnabled="true"
+                        searchMode="contains" [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
                     </label>
                   </div>
                 </div>
@@ -92,15 +120,9 @@
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Cliente</span>
-                      <dx-select-box
-                        [dataSource]="listaClientes"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idCliente"
-                        placeholder="Selecciona un cliente..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
+                      <dx-select-box [dataSource]="listaClientes" displayExpr="text" valueExpr="id"
+                        formControlName="idCliente" placeholder="Selecciona un cliente..." searchEnabled="true"
+                        searchMode="contains" [showClearButton]="true"
                         class="dx-select-box-custom dx-select-box-cliente">
                       </dx-select-box>
                     </label>
@@ -108,93 +130,18 @@
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Sala</span>
-                      <dx-select-box
-                        [dataSource]="listaSalas"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idSala"
-                        placeholder="Selecciona una sala..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-sala">
+                      <dx-select-box [dataSource]="listaSalas" displayExpr="text" valueExpr="id"
+                        formControlName="idSala" placeholder="Selecciona una sala..." searchEnabled="true"
+                        searchMode="contains" [showClearButton]="true" class="dx-select-box-custom dx-select-box-sala">
                       </dx-select-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Zona</span>
-                      <dx-select-box
-                        [dataSource]="listaZonas"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idZona"
-                        placeholder="Selecciona una zona..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-zona">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Sección: Clasificación -->
-              <div class="form-section">
-                <div class="section-header">
-                  <div class="section-icon">
-                    <i class="fas fa-tags"></i>
-                  </div>
-                  <h5 class="section-title">Clasificación</h5>
-                  <div class="section-line"></div>
-                </div>
-                <div class="row mt-0">
-                  <div class="col-12 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Tipo de Máquina</span>
-                      <dx-select-box
-                        [dataSource]="listaTipoMaquina"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idTipoMaquina"
-                        placeholder="Selecciona un tipo..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-tipo-maquina">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Fabricante</span>
-                      <dx-select-box
-                        [dataSource]="listaFabricantes"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idFabricante"
-                        placeholder="Selecciona un fabricante..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-fabricante">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Estatus</span>
-                      <dx-select-box
-                        [dataSource]="listaEstatusMaquina"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idEstatusMaquina"
-                        placeholder="Selecciona un estatus..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-estatus">
+                      <dx-select-box [dataSource]="listaZonas" displayExpr="text" valueExpr="id"
+                        formControlName="idZona" placeholder="Selecciona una zona..." searchEnabled="true"
+                        searchMode="contains" [showClearButton]="true" class="dx-select-box-custom dx-select-box-zona">
                       </dx-select-box>
                     </label>
                   </div>
@@ -236,54 +183,8 @@
                       <span class="field-label text-white">Costo de Adquisición</span>
                       <div class="input-sleek">
                         <i class="fas fa-dollar-sign"></i>
-                        <input formControlName="costoAdquisicion" class="sleek-control" type="text"
-                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Sección: Dimensiones -->
-              <div class="form-section">
-                <div class="section-header">
-                  <div class="section-icon">
-                    <i class="fas fa-ruler-combined"></i>
-                  </div>
-                  <h5 class="section-title">Dimensiones</h5>
-                  <div class="section-line"></div>
-                </div>
-                <div class="row mt-0">
-                  <div class="col-12 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Ancho (metros)</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-arrows-alt-h"></i>
-                        <input formControlName="anchoMetros" class="sleek-control" type="text"
-                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Alto (metros)</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-arrows-alt-v"></i>
-                        <input formControlName="altoMetros" class="sleek-control" type="text"
-                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Profundidad (metros)</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-cube"></i>
-                        <input formControlName="profundidadMetros" class="sleek-control" type="text"
-                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
+                        <input formControlName="costoAdquisicion" class="sleek-control" type="text" placeholder="0.00"
+                          (keypress)="allowOnlyNumbers($event)" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
@@ -331,8 +232,7 @@
                           </div>
                         </div>
                         <div class="pf-actions" *ngIf="imagenPreviewUrl" (click)="$event.stopPropagation()">
-                          <button type="button" class="pf-btn pf-btn--primary"
-                            (click)="openImagenFilePicker()">
+                          <button type="button" class="pf-btn pf-btn--primary" (click)="openImagenFilePicker()">
                             <i class="fas fa-sync"></i>
                             <span>Reemplazar</span>
                           </button>
@@ -376,8 +276,7 @@
                           </div>
                         </div>
                         <div class="pf-actions" *ngIf="iconoPreviewUrl" (click)="$event.stopPropagation()">
-                          <button type="button" class="pf-btn pf-btn--primary"
-                            (click)="openIconoFilePicker()">
+                          <button type="button" class="pf-btn pf-btn--primary" (click)="openIconoFilePicker()">
                             <i class="fas fa-sync"></i>
                             <span>Reemplazar</span>
                           </button>

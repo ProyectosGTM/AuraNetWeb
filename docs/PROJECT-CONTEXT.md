@@ -162,7 +162,7 @@ Ubicación: `src/app/shared/services/`. Un servicio por entidad, con métodos co
 - `obtener*ById(id)` o `obtener*(id)` para edición.
 - `crear*` / `guardar*` / `actualizar*` para alta y edición.
 - `updateEstatus(id, estatus)` para activar/desactivar donde aplique.
-- Servicios usados en varios módulos: p. ej. `CajasService` (cajas, recarga, turnos, afiliados), `TurnosService` (turnos, monederos).
+- Servicios usados en varios módulos: p. ej. `CajasService` (cajas, recarga, turnos, afiliados y operaciones de monederos en UI), `TurnosService` (turnos).
 
 Nombres típicos: `ModulosService`, `PermisosService`, `RolesService`, `UsuariosService`, `ClientesService`, `SalaService`, `ZonaService`, `CajasService`, `TesoreriaService`, `MonederosServices`, `TurnosService`, `TransaccionesService`, `BitacoraService`.
 

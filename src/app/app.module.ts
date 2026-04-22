@@ -23,7 +23,7 @@ import { DxFileUploaderModule,
   DxScrollViewModule } from 'devextreme-angular';
 import { environment } from '../environments/environment';
 
-import { NgbNavModule, NgbAccordionModule, NgbTooltipModule, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbNavModule, NgbAccordionModule, NgbTooltipConfig, NgbTooltipModule, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CarouselModule } from 'ngx-owl-carousel-o';
 
 import { LayoutsModule } from './layouts/layouts.module';
@@ -111,7 +111,17 @@ providers: [
 
 ],
 })
-export class AppModule { constructor() {
+export class AppModule {
+  constructor(tooltipConfig: NgbTooltipConfig) {
+  // Tooltips (ng-bootstrap): evitar que se queden “pegados” por focus/click
+  tooltipConfig.triggers = 'mouseenter:mouseleave';
+  tooltipConfig.container = 'body';
+  tooltipConfig.placement = 'top';
+  tooltipConfig.tooltipClass = 'aura-tooltip';
+  tooltipConfig.openDelay = 0;
+  tooltipConfig.closeDelay = 0;
+  tooltipConfig.animation = false;
+
   // Carga los mensajes en español
   loadMessages({
     "es": {

@@ -19,7 +19,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mt-3 gy-4">
+                <div class="row mt-5 gy-0">
                     <div class="col-12 mb-3">
                         <div class="form-indication">
                             <i class="fas fa-door-open"></i>
@@ -82,8 +82,8 @@
                                                 <span>Agregar</span>
                                             </button>
                                         </div>
-                                        <div class="turnos-list" *ngIf="turnosAbrirArray.length > 0">
-                                            <div class="turno-item" *ngFor="let turno of turnosAbrirArray.controls; let i = index" [formGroup]="turno">
+                                        <div class="turnos-list" *ngIf="turnosAbrirArray.length > 0" formArrayName="turnosAbrir">
+                                            <div class="turno-item" *ngFor="let turno of turnosAbrirArray.controls; let i = index" [formGroupName]="i">
                                                 <div class="turno-row">
                                                     <span class="turno-number">#{{ i + 1 }}</span>
                                                     <div class="row g-2 turno-fields flex-grow-1">
@@ -99,6 +99,7 @@
                                                                     searchEnabled="true"
                                                                     searchMode="contains"
                                                                     [showClearButton]="true"
+                                                                    [dropDownOptions]="selectDropDownOptions"
                                                                     class="dx-select-box-custom dx-select-box-caja dx-select-box--compact">
                                                                 </dx-select-box>
                                                             </label>
@@ -120,12 +121,13 @@
                                                                     [dataSource]="listaUsuarios"
                                                                     displayExpr="text"
                                                                     valueExpr="id"
-                                                                    [formControl]="turno.controls['idUsuario']"
+                                                                    formControlName="idUsuario"
                                                                     placeholder="Usuario..."
                                                                     searchEnabled="true"
                                                                     searchMode="contains"
                                                                     [showClearButton]="true"
                                                                     acceptCustomValue="false"
+                                                                    [dropDownOptions]="selectDropDownOptions"
                                                                     class="dx-select-box-custom dx-select-box-usuario dx-select-box--compact">
                                                                 </dx-select-box>
                                                             </label>

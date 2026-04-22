@@ -5,7 +5,7 @@ import { forkJoin } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
-import { TurnosActivosService } from 'src/app/shared/services/turnos-activos.service';
+import { CajasService } from 'src/app/shared/services/cajas.service';
 import Swal from 'sweetalert2';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 
@@ -16,9 +16,14 @@ import { UsuariosService } from 'src/app/shared/services/usuario.service';
   animations: [fadeInRightAnimation],
 })
 export class AbrirBovedaComponent implements OnInit {
+  /** Popup al body: evita listas cortadas por overflow en la tarjeta de turnos. */
+  readonly selectDropDownOptions = { container: 'body', hideOnParentScroll: false };
+
   abrirTesoreriaForm: FormGroup;
   public listaSalas: any[] = [];
+  /** Cajas filtradas por la sala seleccionada (origen: GET /cajas/list). */
   public listaCajas: any[] = [];
+  private listaCajasTodas: any[] = [];
   public listaUsuarios: any[] = [];
   public mapaUsuarios: Map<string, any> = new Map();
 
@@ -27,7 +32,7 @@ export class AbrirBovedaComponent implements OnInit {
     private tesoreriaService: TesoreriaService,
     private fb: FormBuilder,
     private salasService: SalaService,
-    private turnosActivosService: TurnosActivosService,
+    private cajasService: CajasService,
     private usuService: UsuariosService,
   ) {
     this.abrirTesoreriaForm = this.fb.group({
@@ -50,9 +55,40 @@ export class AbrirBovedaComponent implements OnInit {
 
   ngOnInit() {
     this.cargarListas();
+    this.abrirTesoreriaForm.get('idSala')?.valueChanges.subscribe((idSala) => {
+      this.refrescarOpcionesCajasPorSala(idSala);
+    });
     // Agregar un turno inicial automáticamente
     this.agregarTurnoAbrir();
     this.obtenerUsuarios();
+  }
+
+  /**
+   * Actualiza el select de cajas según la sala (mismo listado que recarga /cajas/list).
+   */
+  private refrescarOpcionesCajasPorSala(idSala: number | string | null | undefined): void {
+    const sid = idSala === null || idSala === undefined || idSala === '' ? null : Number(idSala);
+    if (sid === null || Number.isNaN(sid)) {
+      // Sin sala: mostrar todas las cajas cargadas para que el select tenga datos (al elegir sala se acota).
+      this.listaCajas = [...this.listaCajasTodas];
+      this.limpiarCajasInvalidasEnTurnos(new Set(this.listaCajasTodas.map((c: any) => Number(c.id))));
+      return;
+    }
+    this.listaCajas = this.listaCajasTodas.filter((c: any) => Number(c.idSala) === sid);
+    const validIds = new Set(this.listaCajas.map((c: any) => Number(c.id)));
+    this.limpiarCajasInvalidasEnTurnos(validIds);
+  }
+
+  private limpiarCajasInvalidasEnTurnos(validIds: Set<number>): void {
+    this.turnosAbrirArray.controls.forEach((ctrl) => {
+      const idCaja = ctrl.get('idCaja')?.value;
+      if (idCaja == null || idCaja === '') {
+        return;
+      }
+      if (validIds.size === 0 || !validIds.has(Number(idCaja))) {
+        ctrl.get('idCaja')?.setValue(null, { emitEvent: false });
+      }
+    });
   }
 
   obtenerUsuarios() {
@@ -80,30 +116,28 @@ export class AbrirBovedaComponent implements OnInit {
   cargarListas() {
     forkJoin({
       salas: this.salasService.obtenerSalas(),
-      turnosActivos: this.turnosActivosService.obtenerTurnosActivos()
+      cajas: this.cajasService.obtenerCajas()
     }).subscribe({
       next: (responses) => {
         this.listaSalas = (responses.salas.data || []).map((s: any) => ({
           ...s,
-          id: Number(s.id),
+          id: Number(s.id ?? s.idSala ?? s.IdSala ?? 0),
           text: `${s.nombreSala || ''}${s.nombreComercialSala ? ' - ' + s.nombreComercialSala : ''}`.trim() || 'Sala sin nombre'
         }));
 
-        const turnosData = responses.turnosActivos?.data ?? responses.turnosActivos ?? [];
-        const turnosArray = Array.isArray(turnosData) ? turnosData : [];
-        const cajasMap = new Map<number, { id: number; text: string }>();
-        turnosArray.forEach((t: any) => {
-          const idCaja = Number(t.idCaja ?? t.caja?.id ?? t.id);
-          if (idCaja && !cajasMap.has(idCaja)) {
-            const codigo = t.codigoCaja ?? t.caja?.codigo ?? t.codigo ?? '';
-            const nombre = t.nombreCaja ?? t.caja?.nombre ?? t.nombre ?? '';
-            cajasMap.set(idCaja, {
-              id: idCaja,
-              text: `${codigo} - ${nombre}`.trim() || `Caja ${idCaja}`
-            });
-          }
+        const cajasData = responses.cajas?.data ?? responses.cajas ?? [];
+        const cajasArray = Array.isArray(cajasData) ? cajasData : [];
+        const cajasDisponibles = cajasArray.filter((c: any) => {
+          const estatus = Number(c.idEstatusCaja);
+          return estatus === 1 || estatus === 2;
         });
-        this.listaCajas = Array.from(cajasMap.values());
+        this.listaCajasTodas = cajasDisponibles.map((c: any) => ({
+          ...c,
+          id: Number(c.id),
+          idSala: Number(c.idSala ?? c.IdSala ?? 0),
+          text: `${c.nombre || ''}`.trim() || 'Caja sin nombre'
+        }));
+        this.refrescarOpcionesCajasPorSala(this.abrirTesoreriaForm.get('idSala')?.value);
       },
       error: (error) => {
         Swal.fire({

@@ -9,7 +9,7 @@ import { forkJoin, lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { MonederosServices } from 'src/app/shared/services/monederos.service';
 import { TransaccionesService } from 'src/app/shared/services/transacciones.service';
-import { TurnosService } from 'src/app/shared/services/turnos.service';
+import { CajasService } from 'src/app/shared/services/cajas.service';
 import Swal from 'sweetalert2';
 
 /** Pestañas del panel Centro de Operaciones (mismo patrón que Promociones). */
@@ -66,12 +66,12 @@ export class ListaMonederosComponent {
 
   // Formulario para cargar monedero
   cargarMonederoForm: FormGroup;
-  public listaTurnos: any[] = [];
+  public listaCajasCargar: any[] = [];
   public listaMonederosDisponibles: any[] = [];
 
   // Formulario para descargar monedero
   descargarMonederoForm: FormGroup;
-  public listaTurnosDescargar: any[] = [];
+  public listaCajasDescargar: any[] = [];
   public listaMonederosDisponiblesDescargar: any[] = [];
 
   // Formulario y datos para consultar saldo
@@ -87,7 +87,7 @@ export class ListaMonederosComponent {
   // Formulario para traspaso
   traspasoMonederoForm: FormGroup;
   public listaAfiliadosTraspaso: any[] = [];
-  public listaTurnosTraspaso: any[] = [];
+  public listaCajasTraspaso: any[] = [];
   public listaMonederosTraspaso: any[] = [];
 
   // Formulario para monederos por afiliado
@@ -115,17 +115,17 @@ export class ListaMonederosComponent {
     private transaccionesService: TransaccionesService,
     private modalService: NgbModal,
     private fb: FormBuilder,
-    private turnosService: TurnosService,
+    private cajasService: CajasService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
     this.cargarMonederoForm = this.fb.group({
-      idTurnoCaja: [null, Validators.required],
+      idCaja: [null, Validators.required],
       idMonedero: [null, Validators.required],
       monto: ['', [Validators.required, Validators.min(0.01)]]
     });
     this.descargarMonederoForm = this.fb.group({
-      idTurnoCaja: [null, Validators.required],
+      idCaja: [null, Validators.required],
       idMonedero: [null, Validators.required],
       monto: ['', [Validators.required, Validators.min(0.01)]]
     });
@@ -139,7 +139,7 @@ export class ListaMonederosComponent {
     });
     this.traspasoMonederoForm = this.fb.group({
       idAfiliado: [null, Validators.required],
-      idTurnoCaja: [null, Validators.required],
+      idCaja: [null, Validators.required],
       idMonederoOrigen: [null, Validators.required],
       idMonederoDestino: [null, Validators.required],
       monto: ['', [Validators.required, Validators.min(0.01)]]
@@ -714,18 +714,30 @@ export class ListaMonederosComponent {
     this.isGrouped = false;
   }
 
+  /** Cajas activas u operativas para selects POS (mismo criterio que Recarga). */
+  private mapearCajasDisponiblesParaSelect(respCajas: any): any[] {
+    const cajasData = respCajas?.data ?? respCajas ?? [];
+    const arr = Array.isArray(cajasData) ? cajasData : [];
+    return arr
+      .filter((c: any) => {
+        const estatus = Number(c.idEstatusCaja);
+        return estatus === 1 || estatus === 2;
+      })
+      .map((c: any) => ({
+        ...c,
+        id: Number(c.id),
+        text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Caja sin nombre'
+      }));
+  }
+
   cargarMonedero() {
     // Cargar listas necesarias
     forkJoin({
-      turnos: this.turnosService.obtenerTurnos(),
+      cajas: this.cajasService.obtenerCajas(),
       monederos: this.monederosService.obtenerMonederos()
     }).subscribe({
       next: (responses) => {
-        this.listaTurnos = (responses.turnos.data || []).map((t: any) => ({
-          ...t,
-          id: Number(t.id),
-          text: `Turno #${t.id} - ${t.codigoCaja || ''} - ${this.formatearFechaHora(t.fechaApertura) || ''}`
-        }));
+        this.listaCajasCargar = this.mapearCajasDisponiblesParaSelect(responses.cajas);
 
         this.listaMonederosDisponibles = (responses.monederos.data || []).map((m: any) => {
           const nombreCompletoAfiliado = `${m?.nombreAfiliado || ''} ${m?.apellidoPaternoAfiliado || ''} ${m?.apellidoMaternoAfiliado || ''}`.trim() || 'Sin afiliado';
@@ -772,7 +784,7 @@ export class ListaMonederosComponent {
     }
 
     const payload = {
-      idTurnoCaja: this.cargarMonederoForm.value.idTurnoCaja,
+      idCaja: this.cargarMonederoForm.value.idCaja,
       idMonedero: this.cargarMonederoForm.value.idMonedero,
       monto: Number(this.cargarMonederoForm.value.monto)
     };
@@ -826,15 +838,11 @@ export class ListaMonederosComponent {
   descargarMonedero() {
     // Cargar listas necesarias
     forkJoin({
-      turnos: this.turnosService.obtenerTurnos(),
+      cajas: this.cajasService.obtenerCajas(),
       monederos: this.monederosService.obtenerMonederos()
     }).subscribe({
       next: (responses) => {
-        this.listaTurnosDescargar = (responses.turnos.data || []).map((t: any) => ({
-          ...t,
-          id: Number(t.id),
-          text: `Turno #${t.id} - ${t.codigoCaja || ''} - ${this.formatearFechaHora(t.fechaApertura) || ''}`
-        }));
+        this.listaCajasDescargar = this.mapearCajasDisponiblesParaSelect(responses.cajas);
 
         this.listaMonederosDisponiblesDescargar = (responses.monederos.data || []).map((m: any) => {
           const nombreCompletoAfiliado = `${m?.nombreAfiliado || ''} ${m?.apellidoPaternoAfiliado || ''} ${m?.apellidoMaternoAfiliado || ''}`.trim() || 'Sin afiliado';
@@ -963,7 +971,7 @@ export class ListaMonederosComponent {
     }
 
     const payload = {
-      idTurnoCaja: this.descargarMonederoForm.value.idTurnoCaja,
+      idCaja: this.descargarMonederoForm.value.idCaja,
       idMonedero: this.descargarMonederoForm.value.idMonedero,
       monto: Number(this.descargarMonederoForm.value.monto)
     };
@@ -997,18 +1005,14 @@ export class ListaMonederosComponent {
   traspasoMonedero() {
     forkJoin({
       afiliados: this.monederosService.obtenerAfiliados(),
-      turnos: this.turnosService.obtenerTurnos()
+      cajas: this.cajasService.obtenerCajas()
     }).subscribe({
       next: (responses) => {
         this.listaAfiliadosTraspaso = (responses.afiliados.data || []).map((a: any) => {
           const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();
           return { ...a, id: Number(a.id), text: text || 'Sin nombre' };
         });
-        this.listaTurnosTraspaso = (responses.turnos.data || []).map((t: any) => ({
-          ...t,
-          id: Number(t.id),
-          text: `Turno #${t.id} - ${t.codigoCaja || ''} - ${this.formatearFechaHora(t.fechaApertura) || ''}`
-        }));
+        this.listaCajasTraspaso = this.mapearCajasDisponiblesParaSelect(responses.cajas);
         this.listaMonederosTraspaso = [];
         this.traspasoMonederoForm.patchValue({ idMonederoOrigen: null, idMonederoDestino: null });
         this.modalRef = this.modalService.open(this.modalTraspaso, {
@@ -1080,7 +1084,7 @@ export class ListaMonederosComponent {
       return;
     }
     const payload = {
-      idTurnoCaja: Number(vals.idTurnoCaja),
+      idCaja: Number(vals.idCaja),
       idMonederoOrigen: Number(vals.idMonederoOrigen),
       idMonederoDestino: Number(vals.idMonederoDestino),
       monto: Number(vals.monto)
@@ -1142,6 +1146,126 @@ export class ListaMonederosComponent {
         });
       }
     });
+  }
+
+  /** Etiqueta de estatus para modal "Monederos por afiliado" (API puede enviar texto o id numérico). */
+  monederoAfiliadoEstatusTexto(m: any): string {
+    if (!m) return '—';
+    const raw = m.estatus ?? m.nombreEstatusMonedero ?? m.idEstatusMonedero;
+    if (typeof raw === 'string' && raw.trim()) return raw.trim();
+    if (raw !== undefined && raw !== null && raw !== '') {
+      return this.monederoAfiliadoEstatusActivo(m) ? 'Activo' : 'Inactivo';
+    }
+    return '—';
+  }
+
+  monederoAfiliadoEstatusActivo(m: any): boolean {
+    if (!m) return false;
+    const raw = m.estatus ?? m.idEstatusMonedero ?? m.nombreEstatusMonedero;
+    if (raw === undefined || raw === null || raw === '') return false;
+    if (typeof raw === 'string') {
+      const t = raw.toLowerCase().trim();
+      return t === 'activo';
+    }
+    return Number(raw) === 1;
+  }
+
+  monederoAfiliadoTitulo(m: any): string {
+    const num = (m?.numeroMonedero ?? m?.numero ?? '').toString().trim();
+    const alias = (m?.alias ?? '').toString().trim();
+    if (num && alias) return `${num} · ${alias}`;
+    return num || alias || 'Monedero';
+  }
+
+  monederoAfiliadoEsPrincipal(m: any): boolean {
+    const v = m?.esPrincipal;
+    if (typeof v === 'boolean') return v;
+    if (typeof v === 'string') {
+      const t = v.toLowerCase().trim();
+      return t === 'true' || t === '1' || t === 'sí' || t === 'si';
+    }
+    return Number(v) === 1;
+  }
+
+  monederoAfiliadoFilasDetalle(m: any): { label: string; value: string }[] {
+    const rows: { label: string; value: string }[] = [];
+    const fc = m?.fechaCreacion ?? m?.fechaAlta ?? m?.fechaRegistro;
+    rows.push({
+      label: 'Fecha de alta',
+      value: fc ? this.formatearFechaHoraCompleta(String(fc)) : '—'
+    });
+    for (const line of this.monederoAfiliadoLineasSaldo(m)) {
+      rows.push({ label: line.label, value: line.valor });
+    }
+    return rows;
+  }
+
+  /** Saldos anidados (`saldos`) o campos en raíz; omite claves que parezcan identificadores. */
+  monederoAfiliadoLineasSaldo(m: any): { label: string; valor: string }[] {
+    const out: { label: string; valor: string }[] = [];
+    const seen = new Set<string>();
+
+    const add = (dedupeKey: string, label: string, valor: string) => {
+      const k = dedupeKey.toLowerCase();
+      if (seen.has(k)) return;
+      seen.add(k);
+      out.push({ label, valor });
+    };
+
+    const s = m?.saldos;
+    if (s && typeof s === 'object' && !Array.isArray(s)) {
+      for (const key of Object.keys(s)) {
+        if (/^id/i.test(key)) continue;
+        const raw = (s as any)[key];
+        if (raw === undefined || raw === null || raw === '') continue;
+        const label = this.etiquetaSaldoAfiliado(key) ?? this.humanizarClaveCampoAfiliado(key);
+        add(key, label, this.formatearValorCampoSaldoAfiliado(key, raw));
+      }
+    }
+
+    const tryRoot = (field: string, label: string, dedupe: string) => {
+      if (m[field] === undefined || m[field] === null || m[field] === '') return;
+      add(dedupe, label, this.formatearValorCampoSaldoAfiliado(field, m[field]));
+    };
+
+    tryRoot('saldoEfectivo', 'Efectivo', 'efectivo');
+    tryRoot('saldoPromocional', 'Promocional', 'promocional');
+    tryRoot('saldoPuntos', 'Puntos', 'puntos');
+
+    return out;
+  }
+
+  private etiquetaSaldoAfiliado(key: string): string | null {
+    const map: Record<string, string> = {
+      efectivo: 'Efectivo',
+      promocional: 'Promocional',
+      puntos: 'Puntos',
+      totalJugable: 'Total jugable',
+      redimible: 'Redimible',
+      saldoEfectivo: 'Efectivo',
+      saldoPromocional: 'Promocional',
+      saldoPuntos: 'Puntos',
+      total: 'Total'
+    };
+    return map[key] ?? null;
+  }
+
+  private humanizarClaveCampoAfiliado(key: string): string {
+    if (!key) return key;
+    const spaced = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+    return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+  }
+
+  private formatearValorCampoSaldoAfiliado(key: string, raw: any): string {
+    if (typeof raw === 'boolean') return raw ? 'Sí' : 'No';
+    if (typeof raw === 'string' && raw.trim() !== '' && Number.isNaN(Number(raw))) return raw;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return String(raw);
+    const kl = key.toLowerCase();
+    if (kl.includes('punto')) {
+      return n.toLocaleString('es-MX', { maximumFractionDigits: 0 });
+    }
+    return this.formatearMoneda(n);
   }
 
   onAfiliadoChangeMonederos(event: any) {

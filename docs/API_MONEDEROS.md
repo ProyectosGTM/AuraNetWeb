@@ -343,7 +343,7 @@ updateEstatus(id: number, estatus: number): Observable<string> {
 **Body (JSON):**
 ```json
 {
-  "idTurnoCaja": 1,
+  "idCaja": 1,
   "idMonedero": 123,
   "monto": 500.00,
   "idTipoSaldo": 1,
@@ -356,7 +356,7 @@ updateEstatus(id: number, estatus: number): Observable<string> {
 {
   "id": 1,
   "idMonedero": 123,
-  "idTurnoCaja": 1,
+  "idCaja": 1,
   "monto": 500.00,
   "saldoAnterior": 0.00,
   "saldoNuevo": 500.00,
@@ -382,7 +382,7 @@ cargarMonedero(data: any): Observable<any> {
 **Body (JSON):**
 ```json
 {
-  "idTurnoCaja": 1,
+  "idCaja": 1,
   "idMonedero": 123,
   "monto": 200.00,
   "idTipoSaldo": 1,
@@ -395,7 +395,7 @@ cargarMonedero(data: any): Observable<any> {
 {
   "id": 2,
   "idMonedero": 123,
-  "idTurnoCaja": 1,
+  "idCaja": 1,
   "monto": 200.00,
   "saldoAnterior": 500.00,
   "saldoNuevo": 300.00,
@@ -494,7 +494,7 @@ cambiarEstatus(payload: {
 **Body (JSON):**
 ```json
 {
-  "idTurnoCaja": 1,
+  "idCaja": 1,
   "idMonederoOrigen": 123,
   "idMonederoDestino": 124,
   "monto": 100.00
@@ -514,7 +514,7 @@ cambiarEstatus(payload: {
 **Uso en Angular:**
 ```typescript
 traspasoMonedero(payload: {
-  idTurnoCaja: number;
+  idCaja: number;
   idMonederoOrigen: number;
   idMonederoDestino: number;
   monto: number;
@@ -929,7 +929,7 @@ Authorization: Bearer {token}
 
 ### Permisos
 
-- **Operaciones POS:** Requieren turno de caja activo
+- **Operaciones POS (cargar/descargar/traspaso en UI):** Requieren selección de caja (`idCaja`)
 - **Ajustes de Saldo:** Requieren rol de GERENTE
 - **Reemplazo de Monedero:** Requiere justificación y aprobación
 
@@ -955,6 +955,6 @@ Authorization: Bearer {token}
 
 ---
 
-**Última actualización:** 2024  
+**Última actualización:** 2026-04-22  
 **Versión del documento:** 1.0  
 **Basado en:** Swagger API Documentation

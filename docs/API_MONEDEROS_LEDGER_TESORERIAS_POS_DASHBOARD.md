@@ -96,7 +96,7 @@
 - **Body (JSON):**
 ```json
 {
-  "idTurnoCaja": 1,
+  "idCaja": 1,
   "idMonederoOrigen": 123,
   "idMonederoDestino": 124,
   "monto": 100.00
@@ -741,7 +741,7 @@ Ejemplo de `body` para corte parcial:
 - **Body (JSON):**
 ```json
 {
-  "idTurnoCaja": 50,
+  "idCaja": 50,
   "idMonedero": 123,
   "monto": 500.00,
   "idTipoSaldo": 1,
@@ -753,7 +753,7 @@ Ejemplo de `body` para corte parcial:
 {
   "id": 1,
   "idMonedero": 123,
-  "idTurnoCaja": 50,
+  "idCaja": 50,
   "monto": 500.00,
   "saldoAnterior": 0.00,
   "saldoNuevo": 500.00,
@@ -770,7 +770,7 @@ Ejemplo de `body` para corte parcial:
 - **Body (JSON):**
 ```json
 {
-  "idTurnoCaja": 50,
+  "idCaja": 50,
   "idMonedero": 123,
   "monto": 200.00,
   "idTipoSaldo": 1,
