@@ -28,6 +28,7 @@ export class AgregarSalaComponent implements OnInit {
   public idMonedaItems: SelectItem[] = [];
   public idEstatusLicItems: SelectItem[] = [];
   salaForm: FormGroup;
+  private pendingSubmitAfterLocation = false;
 
   constructor(
     private fb: FormBuilder,
@@ -164,8 +165,8 @@ export class AgregarSalaComponent implements OnInit {
           numeroInterior: data.numeroInteriorSala ?? '',
           codigoPostal: data.codigoPostalSala ?? '',
           referencias: data.referenciasSala ?? '',
-          latitud: Number(data.latitudSala ?? 0),
-          longitud: Number(data.longitudSala ?? 0),
+          latitud: this.toCoord8(data.latitudSala ?? 0),
+          longitud: this.toCoord8(data.longitudSala ?? 0),
           metrosCuadrados: Number(data.metrosCuadradosSala ?? 0),
           numeroNiveles: Number(data.numeroNivelesSala ?? 0),
           capacidadPersonas: Number(data.capacidadPersonasSala ?? 0),
@@ -179,6 +180,7 @@ export class AgregarSalaComponent implements OnInit {
           idEstatusLicencia: Number(data.idEstatusLicencia ?? 0),
           motivoSuspension: data.motivoSuspension ?? '',
           idCliente: Number(data.idCliente ?? 0),
+          motivoSuspension: data.motivoSuspension ?? null,
         });
 
         // Cargar imágenes si existen
@@ -203,8 +205,8 @@ export class AgregarSalaComponent implements OnInit {
 
         // Establecer coordenadas para el mapa si existen
         if (data.latitudSala && data.longitudSala) {
-          this.selectedLat = Number(data.latitudSala);
-          this.selectedLng = Number(data.longitudSala);
+          this.selectedLat = this.toCoord8(data.latitudSala);
+          this.selectedLng = this.toCoord8(data.longitudSala);
         }
       },
       error: (error) => {
@@ -223,6 +225,7 @@ export class AgregarSalaComponent implements OnInit {
 
   initForm(): void {
     this.salaForm = this.fb.group({
+<<<<<<< HEAD
       nombre: ['', Validators.required],
       nombreComercial: ['', Validators.required],
       descripcion: ['', Validators.required],
@@ -252,7 +255,37 @@ export class AgregarSalaComponent implements OnInit {
       fechaFinContrato: [null, Validators.required],
       idEstatusLicencia: [null, Validators.required],
       motivoSuspension: [''],
+=======
+      nombre: [''],
+      nombreComercial: [''],
+      descripcion: [''],
+      logotipo: [''],
+      direccion: [''],
+      pais: ['MEX'],
+      estado: [''],
+      municipio: [''],
+      colonia: [''],
+      calle: [''],
+      numeroExterior: [''],
+      numeroInterior: [''],
+      codigoPostal: [''],
+      referencias: [''],
+      latitud: [0],
+      longitud: [0],
+      metrosCuadrados: [null],
+      numeroNiveles: [null],
+      capacidadPersonas: [null],
+      planoArquitectonico: [''],
+      planoDistribucion: [''],
+      licenciaOperacion: [''],
+      fechaVencimientoLicencia: [null],
+      idMonedaPrincipal: [null],
+      fechaInicioContrato: [null],
+      fechaFinContrato: [null],
+      idEstatusLicencia: [null],
+>>>>>>> 7561ab3 ([Fix]Salas y cajas)
       idCliente: [null, Validators.required],
+      motivoSuspension: [null],
     });
   }
 
@@ -387,7 +420,10 @@ export class AgregarSalaComponent implements OnInit {
     this.logotipoFileName = file.name;
     this.loadPreview(file, (url) => (this.logotipoPreviewUrl = url));
     this.logotipoFile = file;
-    this.salaForm.patchValue({ logotipo: file });
+    // El body del API espera URL (string), no File
+    if (typeof this.salaForm.get('logotipo')?.value !== 'string') {
+      this.salaForm.patchValue({ logotipo: '' });
+    }
     this.salaForm.get('logotipo')?.setErrors(null);
     this.uploadLogotipoAuto();
   }
@@ -438,7 +474,10 @@ export class AgregarSalaComponent implements OnInit {
     this.licenciaFileName = file.name;
     this.loadPreview(file, (url) => (this.licenciaPreviewUrl = url));
     this.licenciaFile = file;
-    this.salaForm.patchValue({ licenciaOperacion: file });
+    // El body del API espera URL (string), no File
+    if (typeof this.salaForm.get('licenciaOperacion')?.value !== 'string') {
+      this.salaForm.patchValue({ licenciaOperacion: '' });
+    }
     this.salaForm.get('licenciaOperacion')?.setErrors(null);
     this.uploadLicenciaAuto();
   }
@@ -563,7 +602,10 @@ export class AgregarSalaComponent implements OnInit {
     this.loadPlanoPreview(file, (url) => (this.planoPreviewUrl = url));
     this.planoFile = file;
 
-    this.salaForm.patchValue({ planoArquitectonico: file });
+    // El body del API espera URL (string), no File
+    if (typeof this.salaForm.get('planoArquitectonico')?.value !== 'string') {
+      this.salaForm.patchValue({ planoArquitectonico: '' });
+    }
     this.salaForm.get('planoArquitectonico')?.setErrors(null);
 
     this.uploadPlanoAuto();
@@ -651,7 +693,10 @@ export class AgregarSalaComponent implements OnInit {
     this.loadPlanoPreview(file, (url) => (this.planoDistribucionPreviewUrl = url));
     this.planoDistribucionFile = file;
 
-    this.salaForm.patchValue({ planoDistribucion: file });
+    // El body del API espera URL (string), no File
+    if (typeof this.salaForm.get('planoDistribucion')?.value !== 'string') {
+      this.salaForm.patchValue({ planoDistribucion: '' });
+    }
     this.salaForm.get('planoDistribucion')?.setErrors(null);
 
     this.uploadPlanoDistribucionAuto();
@@ -748,73 +793,10 @@ export class AgregarSalaComponent implements OnInit {
       return;
     }
 
-    // Si falta ubicación, abrir mapa (como antes en alta de sala)
-    const lat = this.salaForm.get('latitud')?.value;
-    const lng = this.salaForm.get('longitud')?.value;
-    const hasLatLng =
-      lat !== null && lat !== undefined && lat !== '' &&
-      lng !== null && lng !== undefined && lng !== '';
-    if (!hasLatLng) {
-      this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
-      this.loading = true;
-      this.abrirModalUbicacion();
-      return;
-    }
-
-    // Si estamos editando (idSala existe), preguntar si quiere cambiar la ubicación
-    if (this.idSala) {
-      const latitudActual = Number(this.salaForm.get('latitud')?.value);
-      const longitudActual = Number(this.salaForm.get('longitud')?.value);
-      
-      // Si ya tiene coordenadas, preguntar si quiere cambiarlas
-      if (latitudActual && longitudActual) {
-        Swal.fire({
-          title: '<div style="display: flex; align-items: center; gap: 12px; justify-content: center; flex-wrap: wrap;"><i class="fas fa-map-marker-alt" style="color: #f59e0b; font-size: 24px;"></i><span style="color: #fff; font-size: 18px; font-weight: 500;">¿Cambiar ubicación?</span></div>',
-          html: '<p style="color: rgba(255, 255, 255, 0.8); text-align: center; margin: 16px 0;">Esta sala ya tiene una ubicación registrada. ¿Deseas cambiar la ubicación o mantener la actual?</p>',
-          background: '#0d121d',
-          showCancelButton: true,
-          confirmButtonColor: '#f59e0b',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: '<i class="fas fa-map-marker-alt"></i> Cambiar ubicación',
-          cancelButtonText: '<i class="fas fa-check"></i> Mantener actual',
-          customClass: {
-            popup: 'map-modal-popup',
-            title: 'map-modal-title',
-            htmlContainer: 'map-modal-html'
-          }
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // Usuario quiere cambiar la ubicación - abrir mapa
-            this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
-            this.loading = true;
-            this.abrirModalUbicacion();
-          } else if (result.dismiss === Swal.DismissReason.cancel) {
-            // Usuario quiere mantener la ubicación actual - enviar directamente
-            this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
-            this.loading = true;
-            if (this.idSala) {
-              this.actualizarSala();
-            } else {
-              this.agregarSala();
-            }
-          } else {
-            // Usuario cerró el modal sin seleccionar
-            this.submitButton = this.idSala ? 'Actualizar' : 'Guardar';
-            this.loading = false;
-          }
-        });
-      } else {
-        // No tiene coordenadas, abrir mapa directamente
-        this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
-        this.loading = true;
-        this.abrirModalUbicacion();
-      }
-    } else {
-      // Es nueva sala, abrir mapa directamente
-      this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
-      this.loading = true;
-      this.abrirModalUbicacion();
-    }
+    // Flujo deseado: solo al cumplir obligatorios y presionar Guardar se abre el modal.
+    // En el modal se habilita Guardar cuando el usuario selecciona ubicación.
+    this.pendingSubmitAfterLocation = true;
+    this.abrirModalUbicacion();
   }
 
   private abrirModalUbicacion(): void {
@@ -822,7 +804,7 @@ export class AgregarSalaComponent implements OnInit {
       <div class="map-modal-container">
         <div id="map-modal" style="width: 100%; height: 450px; border-radius: 12px; overflow: hidden; margin: 16px 0;"></div>
         <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-          <button id="btn-guardar-ubicacion" type="button" class="btn-alt btn-alt--success" style="display: none;">
+          <button id="btn-guardar-ubicacion" type="button" class="btn-alt btn-alt--success" disabled style="opacity: .6; cursor: not-allowed;">
             <i class="fas fa-check"></i>
             <span>Guardar</span>
           </button>
@@ -872,13 +854,19 @@ export class AgregarSalaComponent implements OnInit {
   private selectedLat: number = 0;
   private selectedLng: number = 0;
 
+  private toCoord8(value: any): number {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return 0;
+    return Number(n.toFixed(8));
+  }
+
   private createMap(): void {
     const mapElement = document.getElementById('map-modal');
     if (!mapElement) return;
 
     // Usar ubicación actual del formulario o centro de México
-    const currentLat = Number(this.salaForm.get('latitud')?.value) || 19.4326;
-    const currentLng = Number(this.salaForm.get('longitud')?.value) || -99.1332;
+    const currentLat = this.toCoord8(this.salaForm.get('latitud')?.value) || 19.4326;
+    const currentLng = this.toCoord8(this.salaForm.get('longitud')?.value) || -99.1332;
 
     this.mapInstance = new window.google.maps.Map(mapElement, {
       center: { lat: currentLat, lng: currentLng },
@@ -930,8 +918,8 @@ export class AgregarSalaComponent implements OnInit {
     // Agregar listener para clicks en el mapa
     this.mapInstance.addListener('click', (event: google.maps.MapMouseEvent) => {
       if (event.latLng) {
-        const lat = event.latLng.lat();
-        const lng = event.latLng.lng();
+        const lat = this.toCoord8(event.latLng.lat());
+        const lng = this.toCoord8(event.latLng.lng());
         this.addMarker(lat, lng);
         this.selectedLat = lat;
         this.selectedLng = lng;
@@ -990,7 +978,10 @@ export class AgregarSalaComponent implements OnInit {
   private enableSaveButton(): void {
     const btnGuardar = document.getElementById('btn-guardar-ubicacion');
     if (btnGuardar) {
-      btnGuardar.style.display = 'inline-flex';
+      const b = btnGuardar as HTMLButtonElement;
+      b.disabled = false;
+      b.style.opacity = '1';
+      b.style.cursor = 'pointer';
     }
   }
 
@@ -1001,6 +992,8 @@ export class AgregarSalaComponent implements OnInit {
 
       if (btnGuardar) {
         btnGuardar.addEventListener('click', () => {
+          const b = btnGuardar as HTMLButtonElement;
+          if (b.disabled) return;
           this.confirmarUbicacion();
         });
       }
@@ -1016,41 +1009,41 @@ export class AgregarSalaComponent implements OnInit {
   private confirmarUbicacion(): void {
     if (this.selectedLat && this.selectedLng) {
       this.salaForm.patchValue({
-        latitud: this.selectedLat,
-        longitud: this.selectedLng
+        latitud: this.toCoord8(this.selectedLat),
+        longitud: this.toCoord8(this.selectedLng)
       });
     }
 
     Swal.close();
 
-    // Ejecutar el servicio
+    // Ejecutar el servicio (solo se llega aquí cuando el usuario ya seleccionó ubicación)
+    this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
+    this.loading = true;
     if (this.idSala) this.actualizarSala();
     else this.agregarSala();
   }
 
   private cancelarUbicacion(): void {
     Swal.close();
-    // Restaurar estado del botón y loading
+    // Restaurar estado del botón y loading (no enviar)
     this.submitButton = this.idSala ? 'Actualizar' : 'Guardar';
     this.loading = false;
-    // NO limpiar el formulario si estamos editando
-    if (!this.idSala) {
-      this.limpiarFormulario();
-    }
+    // No limpiar el formulario; el usuario solo canceló la selección de ubicación
   }
 
   private limpiarFormulario(): void {
     this.salaForm.reset();
     this.salaForm.patchValue({
-      pais: 'México',
+      pais: 'MEX',
       latitud: 0,
       longitud: 0,
-      metrosCuadrados: 0,
-      numeroNiveles: 0,
-      capacidadPersonas: 0,
-      idMonedaPrincipal: 0,
-      idEstatusLicencia: 0,
-      idCliente: null
+      metrosCuadrados: null,
+      numeroNiveles: null,
+      capacidadPersonas: null,
+      idMonedaPrincipal: null,
+      idEstatusLicencia: null,
+      idCliente: null,
+      motivoSuspension: null
     });
     
     // Limpiar previews de imágenes
@@ -1076,6 +1069,7 @@ export class AgregarSalaComponent implements OnInit {
 
   private buildPayloadSala(): any {
     const v = this.salaForm.getRawValue();
+<<<<<<< HEAD
     const toNumber = (val: unknown): number | null => {
       if (val === null || val === undefined || val === '') return null;
       if (typeof val === 'number') return Number.isFinite(val) ? val : null;
@@ -1087,11 +1081,22 @@ export class AgregarSalaComponent implements OnInit {
 
     const lat = toNumber(v.latitud);
     const lng = toNumber(v.longitud);
+=======
+    const toNumOrNull = (value: any): number | null => {
+      if (value === null || value === undefined || value === '') return null;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    };
+    const toIntOrNull = (value: any): number | null => {
+      const n = toNumOrNull(value);
+      return n === null ? null : Math.trunc(n);
+    };
+>>>>>>> 7561ab3 ([Fix]Salas y cajas)
     return {
       nombre: v.nombre ?? '',
       nombreComercial: v.nombreComercial ?? '',
       descripcion: v.descripcion ?? '',
-      logotipo: v.logotipo ?? '',
+      logotipo: typeof v.logotipo === 'string' ? v.logotipo : '',
       direccion: v.direccion ?? '',
       pais: v.pais ?? '',
       estado: v.estado ?? '',
@@ -1102,6 +1107,7 @@ export class AgregarSalaComponent implements OnInit {
       numeroInterior: v.numeroInterior ?? '',
       codigoPostal: v.codigoPostal ?? '',
       referencias: v.referencias ?? '',
+<<<<<<< HEAD
       latitud: lat,
       longitud: lng,
       metrosCuadrados: toNumber(v.metrosCuadrados),
@@ -1110,10 +1116,27 @@ export class AgregarSalaComponent implements OnInit {
       planoArquitectonico: v.planoArquitectonico ?? '',
       planoDistribucion: v.planoDistribucion ?? '',
       licenciaOperacion: v.licenciaOperacion ?? '',
+=======
+      latitud: (() => {
+        const n = toNumOrNull(v.latitud);
+        return n === null ? null : this.toCoord8(n);
+      })(),
+      longitud: (() => {
+        const n = toNumOrNull(v.longitud);
+        return n === null ? null : this.toCoord8(n);
+      })(),
+      metrosCuadrados: toNumOrNull(v.metrosCuadrados),
+      numeroNiveles: toIntOrNull(v.numeroNiveles),
+      capacidadPersonas: toIntOrNull(v.capacidadPersonas),
+      planoArquitectonico: typeof v.planoArquitectonico === 'string' ? v.planoArquitectonico : '',
+      planoDistribucion: typeof v.planoDistribucion === 'string' ? v.planoDistribucion : '',
+      licenciaOperacion: typeof v.licenciaOperacion === 'string' ? v.licenciaOperacion : '',
+>>>>>>> 7561ab3 ([Fix]Salas y cajas)
       fechaVencimientoLicencia: v.fechaVencimientoLicencia ?? null,
-      idMonedaPrincipal: Number(v.idMonedaPrincipal) || 0,
+      idMonedaPrincipal: toIntOrNull(v.idMonedaPrincipal),
       fechaInicioContrato: v.fechaInicioContrato ?? null,
       fechaFinContrato: v.fechaFinContrato ?? null,
+<<<<<<< HEAD
       idEstatusLicencia: Number(v.idEstatusLicencia) || 0,
       motivoSuspension: v.motivoSuspension ?? null,
       idCliente: (() => {
@@ -1124,6 +1147,11 @@ export class AgregarSalaComponent implements OnInit {
         const n = Number(raw);
         return Number.isFinite(n) ? Math.trunc(n) : 0;
       })(),
+=======
+      idEstatusLicencia: toIntOrNull(v.idEstatusLicencia),
+      idCliente: toIntOrNull(v.idCliente),
+      motivoSuspension: v.motivoSuspension ?? null,
+>>>>>>> 7561ab3 ([Fix]Salas y cajas)
     };
   }
 

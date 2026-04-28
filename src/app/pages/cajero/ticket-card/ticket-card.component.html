@@ -1,0 +1,20 @@
+<button
+  type="button"
+  class="ticket-card"
+  [class.ticket-card--selected]="selected"
+  (click)="onClick()"
+>
+  <span class="ticket-card__cxp">{{ ticket.cxp }}</span>
+  <span class="ticket-card__row">
+    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+    {{ ticket.ubicacion }}
+  </span>
+  <span class="ticket-card__row">
+    <i class="fas fa-table" aria-hidden="true"></i>
+    Mesa {{ ticket.mesa }}
+  </span>
+  <span class="ticket-card__row">
+    <i class="fas fa-user-tie" aria-hidden="true"></i>
+    {{ ticket.mesero }}
+  </span>
+</button>

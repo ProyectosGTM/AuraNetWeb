@@ -192,6 +192,60 @@
                 </div>
               </div>
 
+              <!-- Sección: Mantenimiento y Red -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-tools"></i>
+                  </div>
+                  <h5 class="section-title">Mantenimiento y Red</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha Último Mantenimiento</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-wrench"></i>
+                        <input formControlName="fechaUltimoMantenimiento" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Próximo Mantenimiento</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar-check"></i>
+                        <input formControlName="proximoMantenimiento" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Dirección IP</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-network-wired"></i>
+                        <input formControlName="direccionIP" class="sleek-control" type="text" placeholder="0.0.0.0" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-8 mt-2">
+                    <label class="field">
+                      <span class="field-label text-white">Observaciones</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-sticky-note"></i>
+                        <textarea formControlName="observaciones" rows="1" class="sleek-control"
+                          placeholder="Observaciones"></textarea>
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               <!-- Sección: Imágenes -->
               <div class="form-section">
                 <div class="section-header">

@@ -107,8 +107,8 @@ export class LoginComponent implements OnInit {
       Swal.fire({
         background: '#0d121d',
         icon: 'success',
-        title: '¡Bienvenido!',
-        text: 'Inicio de sesión exitoso',
+        title: '¡Apuesta Ganadora!',
+        text: 'Has entrado al sistema correctamente.',
         confirmButtonText: 'Continuar',
         allowOutsideClick: false,
         allowEscapeKey: false

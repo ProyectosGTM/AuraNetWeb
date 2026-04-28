@@ -29,8 +29,8 @@ export const MENU: MenuItem[] = [
         icon: 'uil-layer-group',
         subItems: [
             { id: 5, label: 'Salas', link: '/salas' },
-            { id: 4, label: 'Zonas', link: '/zonas' },
             { id: 6, label: 'Maquinas', link: '/maquinas' },
+            { id: 4, label: 'Zonas', link: '/zonas' },
             { id: 37, label: 'Cajas', link: '/cajas' },
             { id: 40, label: 'Afiliados', link: '/afiliados' }, 
         ]
@@ -39,6 +39,7 @@ export const MENU: MenuItem[] = [
     // --- NO AGRUPADOS (se quedan solos)
     { id: 36, label: 'Boveda', icon: 'uil-wallet', link: '/tesoreria' },
     { id: 38, label: 'Ap. Turnos', icon: 'uil-clock', link: '/turnos' },
+    { id: 58, label: 'Cajero', icon: 'uil-money-stack', link: '/cajero' },
     { id: 11, label: 'Monederos', icon: 'uil-moneybag-alt', link: '/monederos' },
     { id: 41, label: 'Transacciones', icon: 'uil-exchange-alt', link: '/transacciones' },
     { id: 50, label: 'Promociones', icon: 'uil-gift', link: '/promociones' },

@@ -1,0 +1,122 @@
+<div class="container-fluid cajero-page" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm cajero-banner">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-cash-register"></i>
+            </div>
+            <div>
+              <h4 class="title-title">Cajero</h4>
+              <p class="title-subtitle">Cobro y selección de cuentas</p>
+            </div>
+          </div>
+          <div class="title-actions cajero-toolbar-actions">
+            <div class="title-buttons cajero-toolbar-buttons">
+              <button
+                type="button"
+                class="btn-title btn-title--ghost cajero-btn-contraer"
+                (click)="toggleExpandGroups()"
+              >
+                <i class="fas fa-compress-alt"></i>
+                <span>Contraer Grupos</span>
+              </button>
+              <span class="cajero-total-reg badge rounded-pill cajero-total-registros">
+                Total Registros: {{ tickets.length }}
+              </span>
+              <button type="button" class="btn-title btn-title--danger cajero-btn-limpiar" (click)="recargarTickets()">
+                <i class="fas fa-sync-alt"></i>
+                <span class="cajero-limpiar-label">Limpiar</span>
+                <span class="cajero-actualizar-label">Actualizar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cajero-main-layout">
+        <div class="cajero-grid-host">
+          <dx-data-grid
+            #dataGrid
+            [dataSource]="tickets"
+            keyExpr="id"
+            [showBorders]="true"
+            [rowAlternationEnabled]="true"
+            [columnAutoWidth]="true"
+            [width]="'100%'"
+            (onSelectionChanged)="onSelectionChanged($event)"
+          >
+            <dxo-group-panel [visible]="true" [emptyPanelText]="mensajeAgrupar"></dxo-group-panel>
+            <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+            <dxo-selection mode="single"></dxo-selection>
+            <dxi-column dataField="cxp" caption="CXP"></dxi-column>
+            <dxi-column dataField="ubicacion" caption="Ubicación" [groupIndex]="0"></dxi-column>
+            <dxi-column dataField="mesa" caption="Mesa"></dxi-column>
+            <dxi-column dataField="mesero" caption="Mesero"></dxi-column>
+          </dx-data-grid>
+        </div>
+
+        <div class="cajero-mobile-tickets" role="list" aria-label="Lista de tickets">
+          <div class="cajero-mobile-scroll">
+            <app-ticket-card
+              *ngFor="let t of tickets; trackBy: trackById"
+              [ticket]="t"
+              [selected]="selectedTicket?.id === t.id"
+              (selectTicket)="onCardSelected($event)"
+            />
+          </div>
+        </div>
+
+        <div class="cajero-pago-panel">
+          <p class="cajero-hint">Selecciona un registro para ver subcuentas</p>
+
+          <div class="cajero-pay-buttons">
+            <button type="button" class="cajero-pay-btn" (click)="seleccionarMetodoPago('EFECTIVO')">
+              <i class="fas fa-money-bill-wave"></i>
+              Efectivo
+            </button>
+            <button type="button" class="cajero-pay-btn" (click)="seleccionarMetodoPago('TARJETA')">
+              <i class="fas fa-credit-card"></i>
+              Tarjeta
+            </button>
+            <button type="button" class="cajero-pay-btn" (click)="seleccionarMetodoPago('TRANSFERENCIA')">
+              <i class="fas fa-exchange-alt"></i>
+              Transferencia
+            </button>
+            <button type="button" class="cajero-pay-btn" (click)="seleccionarMetodoPago('MIXTO')">
+              <i class="fas fa-random"></i>
+              Mixto
+            </button>
+          </div>
+
+          <div class="cajero-dto" *ngIf="dtoVista">
+            <div class="cajero-dto__title">DTO</div>
+            <pre class="cajero-dto__pre">{{ dtoVista | json }}</pre>
+          </div>
+
+          <div class="cajero-totals">
+            <div class="cajero-total-line cajero-total-saldado">
+              <span>Saldado</span>
+              <strong>{{ saldado | currency : 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+            </div>
+            <div class="cajero-total-line cajero-total-faltante">
+              <span>Faltante</span>
+              <strong>{{ faltante | currency : 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="cajero-cancel"
+            (click)="cancelarOperacion()"
+            aria-label="Cancelar"
+            title="Cancelar"
+          >
+            <i class="fas fa-times" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

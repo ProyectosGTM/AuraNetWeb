@@ -40,6 +40,7 @@ const routes: Routes = [
   { path: 'cajas', loadChildren: () => import('./cajas/cajas.module').then(m => m.CajasModule)},
   { path: 'monederos', loadChildren: () => import('./monederos/monederos.module').then(m => m.MonederosModule)},
   { path: 'turnos', loadChildren: () => import('./turnos/turnos.module').then(m => m.TurnosModule)},
+  { path: 'cajero', loadChildren: () => import('./cajero/cajero.module').then(m => m.CajeroModule)},
   { path: 'afiliados', loadChildren: () => import('./afiliados/afiliados.module').then(m => m.AfiliadosModule)},
   { path: 'transacciones', loadChildren: () => import('./transacciones/transacciones.module').then(m => m.TransaccionesModule)},
   { path: 'promociones', loadChildren: () => import('./promociones/promociones.module').then(m => m.PromocionesModule) },
