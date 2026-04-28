@@ -50,7 +50,7 @@ export class ClientesService {
         body.apellidoMaterno = 'null';
       }
     }
-    return this.http.patch(`${environment.API_SECURITY}/clientes/` + idCliente, body);
+    return this.http.put(`${environment.API_SECURITY}/clientes/` + idCliente, body);
   }
 
   private apiUrl = `${environment.API_SECURITY}/clientes`;

@@ -86,8 +86,8 @@ export class AgregarClienteComponent implements OnInit {
         estatus: d.estatus ?? 1,
         logotipo: d.logotipo ?? null,
         nombre: d.nombre ?? '',
-        apellidoPaterno: d.apellidoPaterno ?? null,
-        apellidoMaterno: d.apellidoMaterno ?? null,
+        apellidoPaterno: d.apellidoPaterno ?? '',
+        apellidoMaterno: d.apellidoMaterno ?? '',
         telefono: d.telefono ?? '',
         correo: d.correo ?? '',
         estado: d.estado ?? '',
@@ -232,6 +232,45 @@ export class AgregarClienteComponent implements OnInit {
     return String(v ?? '')
       .replace(/[^A-Za-z0-9]/g, '')
       .toUpperCase();
+  }
+
+  private buildSwaggerEditarClientePayload(input: Record<string, any>): Record<string, unknown> {
+    // Solo las llaves que el Swagger muestra para PUT /clientes/{id}
+    const keys = [
+      'idPadre',
+      'rfc',
+      'tipoPersona',
+      'nombre',
+      'apellidoPaterno',
+      'apellidoMaterno',
+      'telefono',
+      'correo',
+      'sitioWeb',
+      'estado',
+      'municipio',
+      'colonia',
+      'calle',
+      'entreCalles',
+      'numeroExterior',
+      'numeroInterior',
+      'cp',
+      'nombreEncargado',
+      'telefonoEncargado',
+      'correoEncargado',
+      'constanciaSituacionFiscal',
+      'comprobanteDomicilio',
+      'actaConstitutiva',
+      'logotipo',
+    ] as const;
+
+    const out: Record<string, unknown> = {};
+    for (const k of keys) out[k] = input[k];
+
+    // Normalizaciones mínimas para alinearse al ejemplo de Swagger / API
+    out['idPadre'] = input.idPadre != null && input.idPadre !== '' ? Number(input.idPadre) : null;
+    out['tipoPersona'] = input.tipoPersona != null && input.tipoPersona !== '' ? Number(input.tipoPersona) : null;
+
+    return out;
   }
 
   sanitizeInput(event: any): void {
@@ -511,21 +550,23 @@ export class AgregarClienteComponent implements OnInit {
           const logoUpload = logoUploadRaw && logoUploadRaw !== this.DEFAULT_LOGO_URL ? logoUploadRaw : '';
           const logoPadre = this.getLogotipoPadre();
 
-          const payload: Record<string, unknown> = {
+          const payloadBase: Record<string, any> = {
             ...v,
-            tipoPersona: v.tipoPersona != null ? Number(v.tipoPersona) : null,
             logotipo: logoUpload || logoPadre || null,
             constanciaSituacionFiscal: u.constanciaSituacionFiscal,
             comprobanteDomicilio: u.comprobanteDomicilio,
             actaConstitutiva: u.actaConstitutiva,
           };
 
+          // Swagger: enviar solo las llaves mostradas (sin estatus y sin “extras” del form)
+          const payload: Record<string, any> = this.buildSwaggerEditarClientePayload(payloadBase);
+
+          // RFC: si no cambió vs lo cargado en edición, no lo envíes
           const rfcIgualAlCargado =
-            this.normalizeRfc(v.rfc) === this.normalizeRfc(this.rfcAlCargarEdicion);
+            this.normalizeRfc(payload['rfc']) === this.normalizeRfc(this.rfcAlCargarEdicion);
           if (rfcIgualAlCargado) {
             delete payload['rfc'];
           }
-          delete payload['estatus'];
 
           this.clieService.actualizarCliente(this.idCliente, payload).subscribe(
             () => {

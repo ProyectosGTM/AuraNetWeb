@@ -277,48 +277,39 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   padding-bottom: 12px;
-  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .section-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, rgba(255, 26, 91, .20), rgba(0, 209, 255, .15));
-  border: 1px solid rgba(255, 255, 255, .12);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
-  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(228, 0, 65, 0.2) 0%, rgba(228, 0, 65, 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   i {
-    color: #fff;
+    color: #ff1a5b;
     font-size: 18px;
-    opacity: .95;
   }
 }
 
 .section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
   margin: 0;
-  font-weight: 700;
-  font-size: 16px;
-  color: #fff;
-  letter-spacing: .3px;
-  flex-shrink: 0;
 }
 
 .section-line {
   flex: 1;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, .15) 0%,
-    rgba(255, 255, 255, .08) 50%,
-    transparent 100%
-  );
-  margin-left: 8px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 26, 91, 0.3) 0%, transparent 100%);
+  border-radius: 1px;
 }
 
 .plano-card {
@@ -1280,6 +1271,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow: hidden;
 }
 
 .pf-uploader:hover {
@@ -1316,6 +1308,13 @@
   font-size: 16px;
 }
 
+.pf-title span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .pf-badge {
   font-family: 'Poppins', sans-serif;
   font-size: 11px;
@@ -1332,6 +1331,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .pf-hero {
@@ -1348,11 +1349,27 @@
   object-fit: cover;
 }
 
+.file-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  text-align: center;
+  word-break: break-word;
+  overflow: hidden;
+  max-height: 56px;
+}
+
 .pf-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .pf-btn {
@@ -1398,9 +1415,13 @@
   background: rgba(255, 255, 255, 0.03);
   padding: 12px;
   display: grid;
-  grid-template-columns: 46px 1fr auto;
+  grid-template-columns: 46px 1fr;
+  grid-template-areas:
+    "orb copy"
+    "cta cta";
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .pf-orb {
@@ -1411,6 +1432,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(255, 26, 91, 0.12);
+  grid-area: orb;
 }
 
 .pf-orb i {
@@ -1420,6 +1442,7 @@
 
 .pf-copy {
   min-width: 0;
+  grid-area: copy;
 }
 
 .pf-main {
@@ -1436,9 +1459,12 @@
   color: rgba(255, 255, 255, 0.60);
   line-height: 1.2;
   margin-top: 2px;
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .pf-cta {
@@ -1454,6 +1480,9 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.10);
   flex-shrink: 0;
+  grid-area: cta;
+  width: 100%;
+  justify-content: center;
 }
 
 .pf-cta i {

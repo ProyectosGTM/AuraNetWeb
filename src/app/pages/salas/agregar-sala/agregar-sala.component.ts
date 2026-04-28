@@ -155,7 +155,7 @@ export class AgregarSalaComponent implements OnInit {
           descripcion: data.descripcionSala ?? '',
           logotipo: data.logotipoSala ?? '',
           direccion: data.direccionSala ?? '',
-          pais: data.paisSala ?? 'México',
+          pais: data.paisSala ?? 'MEX',
           estado: data.estadoSala ?? '',
           municipio: data.municipioSala ?? '',
           colonia: data.coloniaSala ?? '',
@@ -177,6 +177,7 @@ export class AgregarSalaComponent implements OnInit {
           fechaInicioContrato: formatDate(data.fechaInicioContrato),
           fechaFinContrato: formatDate(data.fechaFinContrato),
           idEstatusLicencia: Number(data.idEstatusLicencia ?? 0),
+          motivoSuspension: data.motivoSuspension ?? '',
           idCliente: Number(data.idCliente ?? 0),
         });
 
@@ -222,33 +223,35 @@ export class AgregarSalaComponent implements OnInit {
 
   initForm(): void {
     this.salaForm = this.fb.group({
-      nombre: [''],
-      nombreComercial: [''],
-      descripcion: [''],
-      logotipo: [''],
-      direccion: [''],
-      pais: ['México'],
-      estado: [''],
-      municipio: [''],
-      colonia: [''],
-      calle: [''],
-      numeroExterior: [''],
-      numeroInterior: [''],
-      codigoPostal: [''],
-      referencias: [''],
-      latitud: [0],
-      longitud: [0],
-      metrosCuadrados: [null],
-      numeroNiveles: [null],
-      capacidadPersonas: [null],
-      planoArquitectonico: [''],
-      planoDistribucion: [''],
-      licenciaOperacion: [''],
-      fechaVencimientoLicencia: [null],
-      idMonedaPrincipal: [null],
-      fechaInicioContrato: [null],
-      fechaFinContrato: [null],
-      idEstatusLicencia: [null],
+      nombre: ['', Validators.required],
+      nombreComercial: ['', Validators.required],
+      descripcion: ['', Validators.required],
+      logotipo: ['', Validators.required],
+      direccion: ['', Validators.required],
+      pais: ['MEX', Validators.required],
+      estado: ['', Validators.required],
+      municipio: ['', Validators.required],
+      colonia: ['', Validators.required],
+      calle: ['', Validators.required],
+      numeroExterior: ['', Validators.required],
+      numeroInterior: ['', Validators.required],
+      codigoPostal: ['', Validators.required],
+      referencias: ['', Validators.required],
+      // Ubicación: se selecciona en el modal del mapa (no bloquea el submit por "required")
+      latitud: [null, [Validators.min(-90), Validators.max(90)]],
+      longitud: [null, [Validators.min(-180), Validators.max(180)]],
+      metrosCuadrados: [null, Validators.required],
+      numeroNiveles: [null, Validators.required],
+      capacidadPersonas: [null, Validators.required],
+      planoArquitectonico: ['', Validators.required],
+      planoDistribucion: ['', Validators.required],
+      licenciaOperacion: ['', Validators.required],
+      fechaVencimientoLicencia: [null, Validators.required],
+      idMonedaPrincipal: [null, Validators.required],
+      fechaInicioContrato: [null, Validators.required],
+      fechaFinContrato: [null, Validators.required],
+      idEstatusLicencia: [null, Validators.required],
+      motivoSuspension: [''],
       idCliente: [null, Validators.required],
     });
   }
@@ -669,7 +672,13 @@ export class AgregarSalaComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.salaForm.invalid) {
+    // Validar todo excepto ubicación (lat/long). La ubicación se elige en el mapa.
+    const invalidNonLocation = Object.keys(this.salaForm.controls).filter((key) => {
+      if (key === 'latitud' || key === 'longitud') return false;
+      return this.salaForm.get(key)?.invalid;
+    });
+
+    if (invalidNonLocation.length > 0) {
 
       const etiquetas: any = {
         nombre: 'Nombre',
@@ -682,14 +691,27 @@ export class AgregarSalaComponent implements OnInit {
         colonia: 'Colonia',
         calle: 'Calle',
         numeroExterior: 'Número Exterior',
+        numeroInterior: 'Número Interior',
         codigoPostal: 'Código Postal',
+        referencias: 'Referencias',
+        metrosCuadrados: 'Metros Cuadrados',
+        numeroNiveles: 'Número Niveles',
+        capacidadPersonas: 'Capacidad Personas',
+        planoArquitectonico: 'Plano Arquitectónico',
+        planoDistribucion: 'Plano Distribución',
+        licenciaOperacion: 'Licencia de Operación',
         idMonedaPrincipal: 'Moneda Principal',
+        fechaVencimientoLicencia: 'Fecha Vencimiento Licencia',
+        fechaInicioContrato: 'Fecha Inicio Contrato',
+        fechaFinContrato: 'Fecha Fin Contrato',
         idEstatusLicencia: 'Estatus Licencia',
+        motivoSuspension: 'Motivo Suspensión',
         idCliente: 'Cliente',
       };
 
       const camposFaltantes: string[] = [];
       Object.keys(this.salaForm.controls).forEach((key) => {
+        if (key === 'latitud' || key === 'longitud') return;
         const control = this.salaForm.get(key);
         if (control?.invalid && control.errors?.['required']) {
           camposFaltantes.push(etiquetas[key] || key);
@@ -723,6 +745,19 @@ export class AgregarSalaComponent implements OnInit {
         customClass: { popup: 'swal2-padding swal2-border' },
       });
 
+      return;
+    }
+
+    // Si falta ubicación, abrir mapa (como antes en alta de sala)
+    const lat = this.salaForm.get('latitud')?.value;
+    const lng = this.salaForm.get('longitud')?.value;
+    const hasLatLng =
+      lat !== null && lat !== undefined && lat !== '' &&
+      lng !== null && lng !== undefined && lng !== '';
+    if (!hasLatLng) {
+      this.submitButton = this.idSala ? 'Actualizando...' : 'Guardando...';
+      this.loading = true;
+      this.abrirModalUbicacion();
       return;
     }
 
@@ -1041,6 +1076,17 @@ export class AgregarSalaComponent implements OnInit {
 
   private buildPayloadSala(): any {
     const v = this.salaForm.getRawValue();
+    const toNumber = (val: unknown): number | null => {
+      if (val === null || val === undefined || val === '') return null;
+      if (typeof val === 'number') return Number.isFinite(val) ? val : null;
+      const s = String(val).trim().replace(',', '.');
+      if (!s) return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    const lat = toNumber(v.latitud);
+    const lng = toNumber(v.longitud);
     return {
       nombre: v.nombre ?? '',
       nombreComercial: v.nombreComercial ?? '',
@@ -1056,11 +1102,11 @@ export class AgregarSalaComponent implements OnInit {
       numeroInterior: v.numeroInterior ?? '',
       codigoPostal: v.codigoPostal ?? '',
       referencias: v.referencias ?? '',
-      latitud: Number(v.latitud) || 0,
-      longitud: Number(v.longitud) || 0,
-      metrosCuadrados: Number(v.metrosCuadrados) || 0,
-      numeroNiveles: Number(v.numeroNiveles) || 0,
-      capacidadPersonas: Number(v.capacidadPersonas) || 0,
+      latitud: lat,
+      longitud: lng,
+      metrosCuadrados: toNumber(v.metrosCuadrados),
+      numeroNiveles: toNumber(v.numeroNiveles),
+      capacidadPersonas: toNumber(v.capacidadPersonas),
       planoArquitectonico: v.planoArquitectonico ?? '',
       planoDistribucion: v.planoDistribucion ?? '',
       licenciaOperacion: v.licenciaOperacion ?? '',
@@ -1069,6 +1115,7 @@ export class AgregarSalaComponent implements OnInit {
       fechaInicioContrato: v.fechaInicioContrato ?? null,
       fechaFinContrato: v.fechaFinContrato ?? null,
       idEstatusLicencia: Number(v.idEstatusLicencia) || 0,
+      motivoSuspension: v.motivoSuspension ?? null,
       idCliente: (() => {
         const raw = v.idCliente;
         if (raw === null || raw === undefined || raw === '') {

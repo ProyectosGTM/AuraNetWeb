@@ -6,15 +6,8 @@ export const MENU: MenuItem[] = [
         label: 'MENUITEMS.MENU.TEXT',
         isTitle: true
     },
-    {
-        id: 7,
-        label: 'Principal',
-        icon: 'uil-home-alt',
-        subItems: [
-            { id: 8, label: 'Tablero', link: '/dashboard' },
-            { id: 10, label: 'Perfil', link: '/contacts/profile' }
-        ]
-    },
+    
+    { id: 8, label: 'Tablero', link: '/dashboard', icon: 'uil-shopping-bag', },
     {
         id: 27,
         label: 'Administración',
@@ -87,5 +80,5 @@ export const MENU: MenuItem[] = [
             { id: 35, label: 'Bobeda', link: '/bobeda' }
         ]
     },
-    { id: 18, label: 'Tu cuenta', icon: 'uil-user', link: '/cuenta' },
+    { id: 10, label: 'Perfil', link: '/contacts/profile', icon: 'uil-user', },
 ];
