@@ -180,7 +180,6 @@ export class AgregarSalaComponent implements OnInit {
           idEstatusLicencia: Number(data.idEstatusLicencia ?? 0),
           motivoSuspension: data.motivoSuspension ?? '',
           idCliente: Number(data.idCliente ?? 0),
-          motivoSuspension: data.motivoSuspension ?? null,
         });
 
         // Cargar imágenes si existen
@@ -225,37 +224,6 @@ export class AgregarSalaComponent implements OnInit {
 
   initForm(): void {
     this.salaForm = this.fb.group({
-<<<<<<< HEAD
-      nombre: ['', Validators.required],
-      nombreComercial: ['', Validators.required],
-      descripcion: ['', Validators.required],
-      logotipo: ['', Validators.required],
-      direccion: ['', Validators.required],
-      pais: ['MEX', Validators.required],
-      estado: ['', Validators.required],
-      municipio: ['', Validators.required],
-      colonia: ['', Validators.required],
-      calle: ['', Validators.required],
-      numeroExterior: ['', Validators.required],
-      numeroInterior: ['', Validators.required],
-      codigoPostal: ['', Validators.required],
-      referencias: ['', Validators.required],
-      // Ubicación: se selecciona en el modal del mapa (no bloquea el submit por "required")
-      latitud: [null, [Validators.min(-90), Validators.max(90)]],
-      longitud: [null, [Validators.min(-180), Validators.max(180)]],
-      metrosCuadrados: [null, Validators.required],
-      numeroNiveles: [null, Validators.required],
-      capacidadPersonas: [null, Validators.required],
-      planoArquitectonico: ['', Validators.required],
-      planoDistribucion: ['', Validators.required],
-      licenciaOperacion: ['', Validators.required],
-      fechaVencimientoLicencia: [null, Validators.required],
-      idMonedaPrincipal: [null, Validators.required],
-      fechaInicioContrato: [null, Validators.required],
-      fechaFinContrato: [null, Validators.required],
-      idEstatusLicencia: [null, Validators.required],
-      motivoSuspension: [''],
-=======
       nombre: [''],
       nombreComercial: [''],
       descripcion: [''],
@@ -283,7 +251,6 @@ export class AgregarSalaComponent implements OnInit {
       fechaInicioContrato: [null],
       fechaFinContrato: [null],
       idEstatusLicencia: [null],
->>>>>>> 7561ab3 ([Fix]Salas y cajas)
       idCliente: [null, Validators.required],
       motivoSuspension: [null],
     });
@@ -1069,19 +1036,6 @@ export class AgregarSalaComponent implements OnInit {
 
   private buildPayloadSala(): any {
     const v = this.salaForm.getRawValue();
-<<<<<<< HEAD
-    const toNumber = (val: unknown): number | null => {
-      if (val === null || val === undefined || val === '') return null;
-      if (typeof val === 'number') return Number.isFinite(val) ? val : null;
-      const s = String(val).trim().replace(',', '.');
-      if (!s) return null;
-      const n = Number(s);
-      return Number.isFinite(n) ? n : null;
-    };
-
-    const lat = toNumber(v.latitud);
-    const lng = toNumber(v.longitud);
-=======
     const toNumOrNull = (value: any): number | null => {
       if (value === null || value === undefined || value === '') return null;
       const n = Number(value);
@@ -1091,7 +1045,6 @@ export class AgregarSalaComponent implements OnInit {
       const n = toNumOrNull(value);
       return n === null ? null : Math.trunc(n);
     };
->>>>>>> 7561ab3 ([Fix]Salas y cajas)
     return {
       nombre: v.nombre ?? '',
       nombreComercial: v.nombreComercial ?? '',
@@ -1107,16 +1060,6 @@ export class AgregarSalaComponent implements OnInit {
       numeroInterior: v.numeroInterior ?? '',
       codigoPostal: v.codigoPostal ?? '',
       referencias: v.referencias ?? '',
-<<<<<<< HEAD
-      latitud: lat,
-      longitud: lng,
-      metrosCuadrados: toNumber(v.metrosCuadrados),
-      numeroNiveles: toNumber(v.numeroNiveles),
-      capacidadPersonas: toNumber(v.capacidadPersonas),
-      planoArquitectonico: v.planoArquitectonico ?? '',
-      planoDistribucion: v.planoDistribucion ?? '',
-      licenciaOperacion: v.licenciaOperacion ?? '',
-=======
       latitud: (() => {
         const n = toNumOrNull(v.latitud);
         return n === null ? null : this.toCoord8(n);
@@ -1131,27 +1074,13 @@ export class AgregarSalaComponent implements OnInit {
       planoArquitectonico: typeof v.planoArquitectonico === 'string' ? v.planoArquitectonico : '',
       planoDistribucion: typeof v.planoDistribucion === 'string' ? v.planoDistribucion : '',
       licenciaOperacion: typeof v.licenciaOperacion === 'string' ? v.licenciaOperacion : '',
->>>>>>> 7561ab3 ([Fix]Salas y cajas)
       fechaVencimientoLicencia: v.fechaVencimientoLicencia ?? null,
       idMonedaPrincipal: toIntOrNull(v.idMonedaPrincipal),
       fechaInicioContrato: v.fechaInicioContrato ?? null,
       fechaFinContrato: v.fechaFinContrato ?? null,
-<<<<<<< HEAD
-      idEstatusLicencia: Number(v.idEstatusLicencia) || 0,
-      motivoSuspension: v.motivoSuspension ?? null,
-      idCliente: (() => {
-        const raw = v.idCliente;
-        if (raw === null || raw === undefined || raw === '') {
-          return 0;
-        }
-        const n = Number(raw);
-        return Number.isFinite(n) ? Math.trunc(n) : 0;
-      })(),
-=======
       idEstatusLicencia: toIntOrNull(v.idEstatusLicencia),
       idCliente: toIntOrNull(v.idCliente),
       motivoSuspension: v.motivoSuspension ?? null,
->>>>>>> 7561ab3 ([Fix]Salas y cajas)
     };
   }
 

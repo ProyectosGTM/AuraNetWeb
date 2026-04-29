@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { ClientesService } from 'src/app/shared/services/clientes.service';
@@ -11,6 +11,11 @@ import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
+
+const LISTA_SI_NO: SelectItem[] = [
+  { id: 1, text: 'Sí' },
+  { id: 0, text: 'No' },
+];
 
 @Component({
   selector: 'app-agregar-maquina',
@@ -29,6 +34,7 @@ export class AgregarMaquinaComponent implements OnInit {
   public listaTipoMaquina: any;
   public listaFabricantes: any;
   public listaEstatusMaquina: any;
+  public listaSiNo: SelectItem[] = LISTA_SI_NO;
   maquinaForm: FormGroup;
 
   constructor(
@@ -217,9 +223,11 @@ export class AgregarMaquinaComponent implements OnInit {
           direccionIP: data.direccionIP ?? '',
           mac: data.mac ?? '',
           observaciones: data.observaciones ?? '',
-          anchoMetros: Number(data.anchoMetros ?? 0),
-          altoMetros: Number(data.altoMetros ?? 0),
-          profundidadMetros: Number(data.profundidadMetros ?? 0),
+          mostrarNombre: Number(data.mostrarNombre ?? 0),
+          mostrarNumero: Number(data.mostrarNumero ?? 0),
+          denominacionMinima: Number(data.denominacionMinima ?? 0),
+          denominacionMaxima: Number(data.denominacionMaxima ?? 0),
+          porcentajePago: Number(data.porcentajePago ?? 0),
           imagenMaquina: data.imagenMaquina || '',
           iconoMaquina: data.iconoMaquina || '',
         });
@@ -248,26 +256,29 @@ export class AgregarMaquinaComponent implements OnInit {
 
   private   initForm(): void {
     this.maquinaForm = this.fb.group({
-      numeroSerie: [''],
+      numeroSerie: ['', Validators.required],
       nombre: [''],
       marca: [''],
       modelo: [''],
       idZona: [null],
-      idSala: [null],
-      idCliente: [null],
-      idTipoMaquina: [null],
-      idFabricante: [null],
-      idEstatusMaquina: [null],
+      idSala: [null, Validators.required],
+      idCliente: [null, Validators.required],
+      idTipoMaquina: [null, Validators.required],
+      idFabricante: [null, Validators.required],
+      idEstatusMaquina: [null, Validators.required],
       anioFabricacion: [null],
       fechaAdquisicion: [null],
       costoAdquisicion: [null],
       fechaUltimoMantenimiento: [null],
       proximoMantenimiento: [null],
       direccionIP: [''],
+      mac: [''],
       observaciones: [''],
-      anchoMetros: [null],
-      altoMetros: [null],
-      profundidadMetros: [null],
+      mostrarNombre: [0],
+      mostrarNumero: [0],
+      denominacionMinima: [null],
+      denominacionMaxima: [null],
+      porcentajePago: [null],
       imagenMaquina: [''],
       iconoMaquina: [''],
     });
@@ -415,10 +426,13 @@ export class AgregarMaquinaComponent implements OnInit {
       fechaUltimoMantenimiento: v.fechaUltimoMantenimiento ?? null,
       proximoMantenimiento: v.proximoMantenimiento ?? null,
       direccionIP: v.direccionIP ?? '',
+      mac: v.mac ?? '',
       observaciones: v.observaciones ?? '',
-      anchoMetros: Number(v.anchoMetros) || 0,
-      altoMetros: Number(v.altoMetros) || 0,
-      profundidadMetros: Number(v.profundidadMetros) || 0,
+      mostrarNombre: Number(v.mostrarNombre) || 0,
+      mostrarNumero: Number(v.mostrarNumero) || 0,
+      denominacionMinima: Number(v.denominacionMinima) || 0,
+      denominacionMaxima: Number(v.denominacionMaxima) || 0,
+      porcentajePago: Number(v.porcentajePago) || 0,
       imagenMaquina: v.imagenMaquina ?? '',
       iconoMaquina: v.iconoMaquina ?? '',
     };
@@ -426,9 +440,10 @@ export class AgregarMaquinaComponent implements OnInit {
 
   submit(): void {
     if (this.maquinaForm.invalid) {
+      this.maquinaForm.markAllAsTouched();
       Swal.fire({
         title: '¡Campos incompletos!',
-        text: 'Por favor completa todos los campos obligatorios.',
+        text: 'Completa número de serie, cliente, sala, tipo de máquina, fabricante y estatus (campos obligatorios).',
         icon: 'warning',
         background: '#0d121d',
         confirmButtonColor: '#3085d6',

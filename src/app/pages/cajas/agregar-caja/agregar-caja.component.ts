@@ -204,8 +204,8 @@ export class AgregarCajaComponent implements OnInit {
       descripcion: [''],
       idTipoCaja: [null, Validators.required],
       idEstatusCaja: [null, Validators.required],
-      limiteEfectivo: ['', Validators.required],
-      requiereArqueo: [0, Validators.required],
+      limiteEfectivo: [''],
+      requiereArqueo: [0],
     });
   }
 
@@ -299,9 +299,10 @@ export class AgregarCajaComponent implements OnInit {
 
   submit(): void {
     if (this.cajaForm.invalid) {
+      this.cajaForm.markAllAsTouched();
       Swal.fire({
         title: '¡Atención!',
-        text: 'Por favor, completa todos los campos requeridos.',
+        text: 'Completa sala, zona, código, nombre, tipo de caja y estatus (campos obligatorios según el API).',
         icon: 'warning',
         background: '#0d121d',
         confirmButtonColor: '#3085d6',

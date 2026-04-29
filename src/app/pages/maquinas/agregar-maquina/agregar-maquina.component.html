@@ -34,7 +34,8 @@
                 <div class="row mt-0">
                   <div class="col-12 col-lg-3">
                     <label class="field">
-                      <span class="field-label text-white">Número de Serie</span>
+                      <span class="field-label text-white">Número de Serie <span class="text-danger"
+                          aria-hidden="true">*</span></span>
                       <div class="input-sleek">
                         <i class="fas fa-barcode"></i>
                         <input formControlName="numeroSerie" class="sleek-control" type="text"
@@ -76,7 +77,8 @@
                   </div>
                   <div class="col-12 col-lg-3 mt-2">
                     <label class="field">
-                      <span class="field-label text-white">Tipo de Máquina</span>
+                      <span class="field-label text-white">Tipo de Máquina <span class="text-danger"
+                          aria-hidden="true">*</span></span>
                       <dx-select-box [dataSource]="listaTipoMaquina" displayExpr="text" valueExpr="id"
                         formControlName="idTipoMaquina" placeholder="Selecciona un tipo..." searchEnabled="true"
                         searchMode="contains" [showClearButton]="true"
@@ -86,7 +88,8 @@
                   </div>
                   <div class="col-12 col-lg-3 mt-2">
                     <label class="field">
-                      <span class="field-label text-white">Fabricante</span>
+                      <span class="field-label text-white">Fabricante <span class="text-danger"
+                          aria-hidden="true">*</span></span>
                       <dx-select-box [dataSource]="listaFabricantes" displayExpr="text" valueExpr="id"
                         formControlName="idFabricante" placeholder="Selecciona un fabricante..." searchEnabled="true"
                         searchMode="contains" [showClearButton]="true"
@@ -96,7 +99,8 @@
                   </div>
                   <div class="col-12 col-lg-3 mt-2">
                     <label class="field">
-                      <span class="field-label text-white">Estatus</span>
+                      <span class="field-label text-white">Estatus <span class="text-danger"
+                          aria-hidden="true">*</span></span>
                       <dx-select-box [dataSource]="listaEstatusMaquina" displayExpr="text" valueExpr="id"
                         formControlName="idEstatusMaquina" placeholder="Selecciona un estatus..." searchEnabled="true"
                         searchMode="contains" [showClearButton]="true"
@@ -119,7 +123,8 @@
                 <div class="row mt-0">
                   <div class="col-12 col-lg-4">
                     <label class="field">
-                      <span class="field-label text-white">Cliente</span>
+                      <span class="field-label text-white">Cliente <span class="text-danger"
+                          aria-hidden="true">*</span></span>
                       <dx-select-box [dataSource]="listaClientes" displayExpr="text" valueExpr="id"
                         formControlName="idCliente" placeholder="Selecciona un cliente..." searchEnabled="true"
                         searchMode="contains" [showClearButton]="true"
@@ -129,7 +134,8 @@
                   </div>
                   <div class="col-12 col-lg-4">
                     <label class="field">
-                      <span class="field-label text-white">Sala</span>
+                      <span class="field-label text-white">Sala <span class="text-danger"
+                          aria-hidden="true">*</span></span>
                       <dx-select-box [dataSource]="listaSalas" displayExpr="text" valueExpr="id"
                         formControlName="idSala" placeholder="Selecciona una sala..." searchEnabled="true"
                         searchMode="contains" [showClearButton]="true" class="dx-select-box-custom dx-select-box-sala">
@@ -192,6 +198,70 @@
                 </div>
               </div>
 
+              <!-- Sección: Visualización y denominación -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-sliders-h"></i>
+                  </div>
+                  <h5 class="section-title">Visualización y denominación</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Mostrar nombre</span>
+                      <dx-select-box [dataSource]="listaSiNo" displayExpr="text" valueExpr="id"
+                        formControlName="mostrarNombre" placeholder="Selecciona..." searchEnabled="false"
+                        [showClearButton]="true" class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Mostrar número</span>
+                      <dx-select-box [dataSource]="listaSiNo" displayExpr="text" valueExpr="id"
+                        formControlName="mostrarNumero" placeholder="Selecciona..." searchEnabled="false"
+                        [showClearButton]="true" class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4">
+                    <label class="field">
+                      <span class="field-label text-white">Porcentaje de pago</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-percent"></i>
+                        <input formControlName="porcentajePago" class="sleek-control" type="text" placeholder="0"
+                          (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-6 mt-2">
+                    <label class="field">
+                      <span class="field-label text-white">Denominación mínima</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-coins"></i>
+                        <input formControlName="denominacionMinima" class="sleek-control" type="text" placeholder="0"
+                          (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-6 mt-2">
+                    <label class="field">
+                      <span class="field-label text-white">Denominación máxima</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-coins"></i>
+                        <input formControlName="denominacionMaxima" class="sleek-control" type="text" placeholder="0"
+                          (keypress)="allowOnlyNumbers($event)" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               <!-- Sección: Mantenimiento y Red -->
               <div class="form-section">
                 <div class="section-header">
@@ -228,6 +298,17 @@
                       <div class="input-sleek">
                         <i class="fas fa-network-wired"></i>
                         <input formControlName="direccionIP" class="sleek-control" type="text" placeholder="0.0.0.0" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-lg-4 mt-2">
+                    <label class="field">
+                      <span class="field-label text-white">Dirección MAC</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-ethernet"></i>
+                        <input formControlName="mac" class="sleek-control" type="text"
+                          placeholder="00:00:00:00:00:00" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
