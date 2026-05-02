@@ -5,6 +5,7 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { ClientesService } from 'src/app/shared/services/clientes.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -37,11 +38,12 @@ export class AgregarSalaComponent implements OnInit {
     private usuaService: UsuariosService,
     private salasService: SalaService,
     private clienService: ClientesService,
+    private rolAcceso: RolAccesoService,
   ) { }
 
   ngOnInit(): void {
     this.initForm();
-    
+
     this.activatedRoute.params.subscribe((params) => {
       this.idSala = params['idSala'];
       if (this.idSala) {
@@ -974,6 +976,11 @@ export class AgregarSalaComponent implements OnInit {
   }
 
   private confirmarUbicacion(): void {
+    if (!this.rolAcceso.esPerfilClienteLogueado()) {
+      Swal.close();
+      void this.rolAcceso.mostrarAccesoSoloPerfilCliente('sucursales');
+      return;
+    }
     if (this.selectedLat && this.selectedLng) {
       this.salaForm.patchValue({
         latitud: this.toCoord8(this.selectedLat),
@@ -1086,6 +1093,12 @@ export class AgregarSalaComponent implements OnInit {
 
 
   agregarSala(): void {
+    if (!this.rolAcceso.esPerfilClienteLogueado()) {
+      this.loading = false;
+      this.submitButton = 'Guardar';
+      void this.rolAcceso.mostrarAccesoSoloPerfilCliente('sucursales');
+      return;
+    }
     const payload = this.buildPayloadSala();
 
     this.salasService.agregarSala(payload).subscribe({
@@ -1121,6 +1134,12 @@ export class AgregarSalaComponent implements OnInit {
   }
 
   actualizarSala(): void {
+    if (!this.rolAcceso.esPerfilClienteLogueado()) {
+      this.loading = false;
+      this.submitButton = 'Actualizar';
+      void this.rolAcceso.mostrarAccesoSoloPerfilCliente('sucursales');
+      return;
+    }
     const payload = this.buildPayloadSala();
 
     this.salasService.actualizarSala(this.idSala, payload).subscribe({

@@ -5,12 +5,15 @@ import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
+import { AfiliadosEstatusService } from 'src/app/shared/services/afiliados-estatus.service';
 import { AfiliadosService } from 'src/app/shared/services/afiliados.service';
 import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import Swal from 'sweetalert2';
 
 type ModoLista = 'paginado' | 'inactivos' | 'cumpleaneros' | 'buscar';
+
+type CumpleanerosTipo = 'hoy' | 'mes';
 
 @Component({
   selector: 'app-lista-afiliados',
@@ -38,17 +41,21 @@ export class ListaAfiliadosComponent implements OnInit {
   @ViewChild('modalBloquearAfiliado', { static: false }) modalBloquearAfiliado!: TemplateRef<any>;
   @ViewChild('modalAutoexclusionAfiliado', { static: false }) modalAutoexclusionAfiliado!: TemplateRef<any>;
   @ViewChild('modalNivelVipAfiliado', { static: false }) modalNivelVipAfiliado!: TemplateRef<any>;
+  @ViewChild('modalCumpleanerosTipo', { static: false }) modalCumpleanerosTipo!: TemplateRef<any>;
 
   private modalFiltrosRef?: NgbModalRef;
   private modalBloquearRef?: NgbModalRef;
   private modalAutoexclusionRef?: NgbModalRef;
   private modalNivelVipRef?: NgbModalRef;
+  private modalCumpleanerosRef?: NgbModalRef;
 
   /** Contexto del modal POST /afiliados/{id}/bloquear */
   afiliadoBloqueoId: number | null = null;
   afiliadoBloqueoEtiqueta = '';
   bloqueoMotivo = '';
   bloqueoFechaFin = '';
+  /** Límite inferior del datepicker (hoy local, YYYY-MM-DD), alineado al contrato de fecha fin. */
+  bloqueoFechaMin = '';
   bloqueoEnProceso = false;
 
   /** Contexto del modal POST /afiliados/{id}/autoexclusion */
@@ -75,7 +82,12 @@ export class ListaAfiliadosComponent implements OnInit {
   /** Vista del listado: API paginada, inactivos, cumpleañeros o búsqueda con filtros. */
   modoLista: ModoLista = 'paginado';
 
-  /** Filtros para GET /afiliados/buscar (ajusta nombres según Swagger). */
+  /** Selección en modal GET /afiliados/cumpleaneros (null = ninguna). */
+  cumpleanerosTipoSeleccion: CumpleanerosTipo | null = null;
+  /** Último `tipo` confirmado para la carga del grid (hoy | mes). */
+  cumpleanerosTipoActivo: CumpleanerosTipo | null = null;
+
+  /** Filtros para GET /afiliados/buscar (nombres de query alineados al backend). */
   filtroTexto = '';
   filtroNombre = '';
   filtroApellidoPaterno = '';
@@ -90,6 +102,7 @@ export class ListaAfiliadosComponent implements OnInit {
 
   constructor(
     private afiliadosService: AfiliadosService,
+    private afiliadosEstatusService: AfiliadosEstatusService,
     private salaService: SalaService,
     private router: Router,
     private modalService: NgbModal,
@@ -141,18 +154,108 @@ export class ListaAfiliadosComponent implements OnInit {
     return false;
   }
 
+  /** Fecha local en YYYY-MM-DD (cuerpo Swagger `fechaFinBloqueo`). */
+  private static fechaLocalYYYYMMDD(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  /**
+   * Valida y normaliza `fechaFinBloqueo` para POST /afiliados/{id}/bloquear (solo fecha, YYYY-MM-DD).
+   * Discriminante `error` | `fecha` para que el compilador estreche bien en el llamador.
+   */
+  private parseFechaFinBloqueoSwagger(raw: string): { fecha: string } | { error: string } {
+    let s = (raw || '').trim();
+    if (!s) {
+      return { error: 'Selecciona la fecha fin del bloqueo (AAAA-MM-DD).' };
+    }
+    if (s.includes('T')) {
+      s = s.slice(0, 10);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+      return { error: 'La fecha fin debe ir en formato AAAA-MM-DD.' };
+    }
+    const [ys, ms, ds] = s.split('-').map((x) => Number(x));
+    const dt = new Date(ys, ms - 1, ds);
+    if (dt.getFullYear() !== ys || dt.getMonth() !== ms - 1 || dt.getDate() !== ds) {
+      return { error: 'La fecha fin de bloqueo no es una fecha válida.' };
+    }
+    const hoy = ListaAfiliadosComponent.fechaLocalYYYYMMDD(new Date());
+    if (s < hoy) {
+      return { error: 'La fecha fin de bloqueo no puede ser anterior a hoy.' };
+    }
+    return { fecha: s };
+  }
+
   /** true cuando el grid usa paginación remota contra el servidor. */
   get remotePaging(): boolean {
     return this.modoLista === 'paginado';
   }
 
   setModoLista(modo: ModoLista) {
+    if (modo !== 'cumpleaneros') {
+      this.cumpleanerosTipoActivo = null;
+    }
     this.modoLista = modo;
     this.setupDataSource();
     setTimeout(() => this.refrescarGrid(), 0);
   }
 
+  abrirModalCumpleanerosTipo() {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('verCumpleanerosAfiliados', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('verCumpleanerosAfiliados');
+      return;
+    }
+    this.cumpleanerosTipoSeleccion =
+      this.modoLista === 'cumpleaneros' && this.cumpleanerosTipoActivo
+        ? this.cumpleanerosTipoActivo
+        : null;
+    this.modalCumpleanerosRef = this.modalService.open(this.modalCumpleanerosTipo, {
+      size: 'md',
+      windowClass: 'modal-holder modal-afiliados-cumpleaneros-tipo',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+    });
+  }
+
+  cerrarModalCumpleanerosTipo() {
+    if (this.modalCumpleanerosRef) {
+      this.modalCumpleanerosRef.close();
+      this.modalCumpleanerosRef = undefined;
+    }
+  }
+
+  seleccionarTipoCumpleaneros(tipo: CumpleanerosTipo) {
+    this.cumpleanerosTipoSeleccion = tipo;
+  }
+
+  confirmarCumpleanerosTipo() {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('verCumpleanerosAfiliados', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('verCumpleanerosAfiliados');
+      return;
+    }
+    if (this.cumpleanerosTipoSeleccion == null) {
+      Swal.fire({
+        title: 'Selecciona un período',
+        text: 'Elige si deseas ver cumpleañeros del día de hoy o de todo el mes.',
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
+    this.cumpleanerosTipoActivo = this.cumpleanerosTipoSeleccion;
+    this.cerrarModalCumpleanerosTipo();
+    this.setModoLista('cumpleaneros');
+  }
+
   aplicarBusquedaFiltros() {
+    this.cumpleanerosTipoActivo = null;
     this.modoLista = 'buscar';
     this.setupDataSource();
     setTimeout(() => this.refrescarGrid(), 0);
@@ -181,6 +284,11 @@ export class ListaAfiliadosComponent implements OnInit {
   }
 
   abrirModalBloquearAfiliado(row: any) {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('bloquearAfiliado', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('bloquearAfiliado');
+      return;
+    }
     const id = row?.id;
     if (id == null || id === '') {
       return;
@@ -192,6 +300,7 @@ export class ListaAfiliadosComponent implements OnInit {
       `Afiliado #${id}`;
     this.bloqueoMotivo = '';
     this.bloqueoFechaFin = '';
+    this.bloqueoFechaMin = ListaAfiliadosComponent.fechaLocalYYYYMMDD(new Date());
     this.bloqueoEnProceso = false;
     this.modalBloquearRef = this.modalService.open(this.modalBloquearAfiliado, {
       size: 'lg',
@@ -213,6 +322,11 @@ export class ListaAfiliadosComponent implements OnInit {
   }
 
   abrirModalAutoexclusionAfiliado(row: any) {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('registrarAutoexclusionAfiliado', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('registrarAutoexclusionAfiliado');
+      return;
+    }
     const id = row?.id;
     if (id == null || id === '') {
       return;
@@ -383,6 +497,11 @@ export class ListaAfiliadosComponent implements OnInit {
   }
 
   confirmarAutoexclusionAfiliado() {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('registrarAutoexclusionAfiliado', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('registrarAutoexclusionAfiliado');
+      return;
+    }
     const motivo = (this.autoexclusionMotivo || '').trim();
     if (!motivo) {
       Swal.fire({
@@ -409,13 +528,24 @@ export class ListaAfiliadosComponent implements OnInit {
       return;
     }
     const observaciones = (this.autoexclusionObservaciones || '').trim();
+    if (!observaciones) {
+      Swal.fire({
+        title: 'Observaciones requeridas',
+        text: 'Indica observaciones (por ejemplo, constancia o formato firmado).',
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
     this.autoexclusionEnProceso = true;
+    const body: { motivo: string; duracionDias: number; observaciones: string } = {
+      motivo,
+      duracionDias: dias,
+      observaciones,
+    };
     this.afiliadosService
-      .registrarAutoexclusion(this.afiliadoAutoexclusionId, {
-        motivo,
-        duracionDias: dias,
-        observaciones,
-      })
+      .registrarAutoexclusion(this.afiliadoAutoexclusionId, body)
       .subscribe({
         next: () => {
           this.autoexclusionEnProceso = false;
@@ -450,6 +580,11 @@ export class ListaAfiliadosComponent implements OnInit {
   }
 
   confirmarBloqueoAfiliado() {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('bloquearAfiliado', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('bloquearAfiliado');
+      return;
+    }
     const motivo = (this.bloqueoMotivo || '').trim();
     if (!motivo) {
       Swal.fire({
@@ -461,23 +596,25 @@ export class ListaAfiliadosComponent implements OnInit {
       });
       return;
     }
-    const fechaFinBloqueo = (this.bloqueoFechaFin || '').trim();
-    if (!fechaFinBloqueo) {
+    const parsedFecha = this.parseFechaFinBloqueoSwagger(this.bloqueoFechaFin || '');
+    if ('error' in parsedFecha) {
       Swal.fire({
-        title: 'Fecha requerida',
-        text: 'Selecciona la fecha fin del bloqueo.',
+        title: 'Fecha inválida',
+        text: parsedFecha.error,
         icon: 'info',
         background: '#0d121d',
         confirmButtonColor: '#3085d6',
       });
       return;
     }
+    const fechaFinBloqueo = parsedFecha.fecha;
     if (this.afiliadoBloqueoId == null || !Number.isFinite(this.afiliadoBloqueoId)) {
       return;
     }
     this.bloqueoEnProceso = true;
+    const body: { motivo: string; fechaFinBloqueo: string } = { motivo, fechaFinBloqueo };
     this.afiliadosService
-      .bloquearAfiliado(this.afiliadoBloqueoId, { motivo, fechaFinBloqueo })
+      .bloquearAfiliado(this.afiliadoBloqueoId, body)
       .subscribe({
         next: () => {
           this.bloqueoEnProceso = false;
@@ -583,7 +720,13 @@ export class ListaAfiliadosComponent implements OnInit {
           }
 
           if (this.modoLista === 'cumpleaneros') {
-            const response: any = await lastValueFrom(this.afiliadosService.obtenerCumpleaneros());
+            if (!this.cumpleanerosTipoActivo) {
+              this.loading = false;
+              return { data: [], totalCount: 0 };
+            }
+            const response: any = await lastValueFrom(
+              this.afiliadosService.obtenerCumpleaneros(this.cumpleanerosTipoActivo)
+            );
             this.loading = false;
             const raw = this.normalizarListaResponse(response);
             const all = raw.map((item: any) => this.transformarFila(item));
@@ -912,12 +1055,17 @@ export class ListaAfiliadosComponent implements OnInit {
   }
 
   cancelarAutoexclusionAfiliado(rowData: any) {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('cancelarAutoexclusionAfiliado', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('cancelarAutoexclusionAfiliado');
+      return;
+    }
     const nombre = rowData.nombreCompleto || rowData.numeroIdentificacion || `ID ${rowData.id}`;
     Swal.fire({
       title: 'Cancelar autoexclusión',
       html:
         `¿Cancelar la autoexclusión de <strong>${nombre}</strong>?<br><br>` +
-        '<small style="color:#94a3b8">Solo aplica si ya cumplió la fecha de fin del periodo. La API devolverá error si aún está vigente. Requiere rol de Gerente según documentación.</small>',
+        '<small style="color:#94a3b8">Solo aplica cuando ya finalizó el periodo de autoexclusión. Si aún está vigente, el sistema no permitirá completar la operación.</small>',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#c12a42',
@@ -967,6 +1115,48 @@ export class ListaAfiliadosComponent implements OnInit {
           });
         },
       });
+    });
+  }
+
+  /** PATCH /afiliados/estatus/{id} con estatus 1 (AfiliadosEstatusService). */
+  activarAfiliado(rowData: any) {
+    Swal.fire({
+      title: '¡Activar!',
+      html: `¿Está seguro que requiere activar el afiliado: <strong>${rowData.nombreCompleto || rowData.numeroIdentificacion}</strong>?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Confirmar',
+      cancelButtonText: 'Cancelar',
+      background: '#0d121d',
+    }).then((result) => {
+      if (result.value) {
+        this.afiliadosEstatusService.updateEstatus(rowData.id, 1).subscribe({
+          next: () => {
+            Swal.fire({
+              title: '¡Confirmación realizada!',
+              html: `El afiliado ha sido activado.`,
+              icon: 'success',
+              background: '#0d121d',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'Confirmar',
+            });
+            this.setupDataSource();
+            setTimeout(() => this.refrescarGrid(), 0);
+          },
+          error: (error) => {
+            Swal.fire({
+              title: '¡Error!',
+              text: error.error || 'No se pudo activar el afiliado.',
+              icon: 'error',
+              background: '#0d121d',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'Confirmar',
+            });
+          },
+        });
+      }
     });
   }
 
@@ -1024,7 +1214,7 @@ export class ListaAfiliadosComponent implements OnInit {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.afiliadosService.updateEstatus(rowData.id, 0).subscribe({
+        this.afiliadosEstatusService.updateEstatus(rowData.id, 0).subscribe({
           next: (response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',

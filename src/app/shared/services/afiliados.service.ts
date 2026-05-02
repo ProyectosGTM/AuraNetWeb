@@ -90,9 +90,13 @@ export class AfiliadosService {
     return this.http.get(`${this.baseUrl}/${idAfiliado}/monederos`);
   }
 
-  /** GET /afiliados/cumpleaneros */
-  obtenerCumpleaneros(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/cumpleaneros`);
+  /**
+   * GET /afiliados/cumpleaneros?tipo=hoy|mes
+   * Query `tipo` requerido por API: cumpleaños del día o del mes en curso.
+   */
+  obtenerCumpleaneros(tipo: 'hoy' | 'mes'): Observable<any> {
+    const params = new HttpParams().set('tipo', tipo);
+    return this.http.get(`${this.baseUrl}/cumpleaneros`, { params });
   }
 
   /** GET /afiliados/inactivos */
@@ -108,6 +112,11 @@ export class AfiliadosService {
   /** GET /catnivelesvip/list (catálogo niveles VIP) */
   obtenerNivelesVip(): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/catnivelesvip/list`);
+  }
+
+  /** GET /catestatusafiliado/list (catálogo estatus de afiliado) */
+  obtenerCatalogoEstatusAfiliado(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/catestatusafiliado/list`);
   }
 
   // ——— Escritura (no GET) ———
@@ -135,18 +144,6 @@ export class AfiliadosService {
       return throwError(() => ({ error: 'ID de afiliado inválido' }));
     }
     return this.http.patch(`${this.baseUrl}/${idAfiliado}`, data);
-  }
-
-  updateEstatus(id: number, estatus: number): Observable<string> {
-    const idAfiliado = this.idAfiliadoValido(id);
-    if (idAfiliado === null) {
-      return throwError(() => ({ error: 'ID de afiliado inválido' }));
-    }
-    const url = `${this.baseUrl}/estatus/${idAfiliado}`;
-    const body = { estatus };
-    return this.http.patch(url, body, { responseType: 'text' }).pipe(
-      catchError(error => throwError(() => error))
-    );
   }
 
   /**

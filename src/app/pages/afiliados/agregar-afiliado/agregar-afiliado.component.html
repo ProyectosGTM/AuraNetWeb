@@ -22,16 +22,107 @@
         <div class="row mt-3 gy-4">
           <form [formGroup]="afiliadoForm">
             <div class="col-12">
-              <div class="row mt-0">
+
+              <!-- Datos personales -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-user"></i></div>
+                  <h5 class="section-title">Datos personales</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
-                      <span class="field-label text-white">Sala *</span>
+                      <span class="field-label text-white">Nombre <span class="field-req" aria-hidden="true">*</span></span>
+                      <div class="input-sleek">
+                        <i class="fas fa-user"></i>
+                        <input formControlName="nombre" class="sleek-control" type="text" placeholder="Juan" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Apellido paterno <span class="field-req" aria-hidden="true">*</span></span>
+                      <div class="input-sleek">
+                        <i class="fas fa-user"></i>
+                        <input formControlName="apellidoPaterno" class="sleek-control" type="text" placeholder="Pérez" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Apellido materno</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-user"></i>
+                        <input formControlName="apellidoMaterno" class="sleek-control" type="text" placeholder="García" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Fecha de nacimiento <span class="field-req" aria-hidden="true">*</span></span>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input formControlName="fechaNacimiento" class="sleek-control" type="date" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Sexo <span class="field-req" aria-hidden="true">*</span></span>
+                      <dx-select-box
+                        [dataSource]="listaSexo"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="sexo"
+                        placeholder="Selecciona…"
+                        [searchEnabled]="false"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-sexo">
+                      </dx-select-box>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Estatus afiliado <span class="field-req" aria-hidden="true">*</span></span>
+                      <dx-select-box
+                        [dataSource]="listaEstatusAfiliado"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idEstatusAfiliado"
+                        placeholder="Selecciona un estatus…"
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-estatus">
+                      </dx-select-box>
+                      <div *ngIf="listaEstatusAfiliado.length === 0" class="text-muted small mt-1">No hay estatus disponibles</div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sala e identificación -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-id-card"></i></div>
+                  <h5 class="section-title">Sala e identificación</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Sala <span class="field-req" aria-hidden="true">*</span></span>
                       <dx-select-box
                         [dataSource]="listaSalas"
                         displayExpr="text"
                         valueExpr="id"
                         formControlName="idSala"
-                        placeholder="Selecciona una sala..."
+                        placeholder="Selecciona una sala…"
                         searchEnabled="true"
                         searchMode="contains"
                         [showClearButton]="true"
@@ -42,13 +133,13 @@
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
-                      <span class="field-label text-white">Tipo Identificación *</span>
+                      <span class="field-label text-white">Tipo de identificación <span class="field-req" aria-hidden="true">*</span></span>
                       <dx-select-box
                         [dataSource]="listaTipoIdentificacion"
                         displayExpr="text"
                         valueExpr="id"
                         formControlName="idTipoIdentificacion"
-                        placeholder="Selecciona un tipo..."
+                        placeholder="Selecciona un tipo…"
                         searchEnabled="true"
                         searchMode="contains"
                         [showClearButton]="true"
@@ -59,119 +150,420 @@
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
-                      <span class="field-label text-white">Número Identificación *</span>
+                      <span class="field-label text-white">Número de identificación <span class="field-req" aria-hidden="true">*</span></span>
                       <div class="input-sleek">
                         <i class="fas fa-hashtag"></i>
-                        <input formControlName="numeroIdentificacion" class="sleek-control" type="text"
-                          placeholder="ABC123456" />
+                        <input formControlName="numeroIdentificacion" class="sleek-control" type="text" placeholder="ABC123456" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
-                      <span class="field-label text-white">Nombre *</span>
+                      <span class="field-label text-white">Vigencia de identificación</span>
                       <div class="input-sleek">
-                        <i class="fas fa-user"></i>
-                        <input formControlName="nombre" class="sleek-control" type="text"
-                          placeholder="Juan" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Apellido Paterno *</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-user"></i>
-                        <input formControlName="apellidoPaterno" class="sleek-control" type="text"
-                          placeholder="Pérez" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Apellido Materno</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-user"></i>
-                        <input formControlName="apellidoMaterno" class="sleek-control" type="text"
-                          placeholder="García" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Fecha Nacimiento *</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-alt"></i>
-                        <input formControlName="fechaNacimiento" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Sexo *</span>
-                      <dx-select-box
-                        [dataSource]="listaSexo"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="sexo"
-                        placeholder="Selecciona..."
-                        searchEnabled="false"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-sexo">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Estatus Afiliado *</span>
-                      <dx-select-box
-                        [dataSource]="listaEstatusAfiliado"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idEstatusAfiliado"
-                        placeholder="Selecciona un estatus..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-estatus">
-                      </dx-select-box>
-                      <div *ngIf="listaEstatusAfiliado.length === 0" class="text-muted small mt-1">No hay estatus disponibles</div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Email *</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-envelope"></i>
-                        <input formControlName="email" class="sleek-control" type="email"
-                          placeholder="juan.perez@example.com" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4 mt-1">
-                    <label class="field">
-                      <span class="field-label text-white">Teléfono Celular *</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-phone"></i>
-                        <input formControlName="telefonoCelular" class="sleek-control" maxlength="10"
-                        (keypress)="allowOnlyNumbers($event)"
-                          placeholder="5551234567" />
+                        <i class="fas fa-calendar-check"></i>
+                        <input formControlName="vigenciaIdentificacion" class="sleek-control" type="date" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
                   </div>
                 </div>
+              </div>
 
-              <!-- Botones de acción -->
+              <!-- Contacto -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-address-book"></i></div>
+                  <h5 class="section-title">Contacto</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Correo electrónico</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-envelope"></i>
+                        <input formControlName="email" class="sleek-control" type="email" placeholder="juan.perez@example.com" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Teléfono</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-phone-alt"></i>
+                        <input formControlName="telefono" class="sleek-control" maxlength="10"
+                          (keypress)="allowOnlyNumbers($event)" placeholder="5551002000" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Teléfono celular</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-mobile-alt"></i>
+                        <input formControlName="telefonoCelular" class="sleek-control" maxlength="10"
+                          (keypress)="allowOnlyNumbers($event)" placeholder="5551234567" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CURP / RFC -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-file-signature"></i></div>
+                  <h5 class="section-title">CURP y RFC</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">CURP</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-id-card"></i>
+                        <input formControlName="curp" class="sleek-control" type="text" maxlength="18" placeholder="PEGJ900115HDFRRN01" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">RFC</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-file-invoice"></i>
+                        <input formControlName="rfc" class="sleek-control" type="text" maxlength="13" placeholder="PEGJ900115" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Domicilio -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-home"></i></div>
+                  <h5 class="section-title">Domicilio</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Estado</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-map"></i>
+                        <input formControlName="estado" class="sleek-control" type="text" placeholder="Ciudad de México" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Municipio</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input formControlName="municipio" class="sleek-control" type="text" placeholder="Benito Juárez" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Colonia</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-city"></i>
+                        <input formControlName="colonia" class="sleek-control" type="text" placeholder="Del Valle" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Calle</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-road"></i>
+                        <input formControlName="calle" class="sleek-control" type="text" placeholder="Av. Insurgentes Sur" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Núm. exterior</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-hashtag"></i>
+                        <input formControlName="numeroExterior" class="sleek-control" type="text" placeholder="300" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Núm. interior</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-hashtag"></i>
+                        <input formControlName="numeroInterior" class="sleek-control" type="text" placeholder="B" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Código postal</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-mail-bulk"></i>
+                        <input formControlName="codigoPostal" class="sleek-control" type="text" maxlength="5"
+                          (keypress)="allowOnlyNumbers($event)" placeholder="03100" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Emergencia -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-user-friends"></i></div>
+                  <h5 class="section-title">Contacto de emergencia</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Nombre</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-user"></i>
+                        <input formControlName="nombreEmergencia" class="sleek-control" type="text" placeholder="Nombre completo" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Teléfono</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-phone-square"></i>
+                        <input formControlName="telefonoEmergencia" class="sleek-control" maxlength="10"
+                          (keypress)="allowOnlyNumbers($event)" placeholder="5550001111" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Parentesco</span>
+                      <dx-select-box
+                        [dataSource]="listaParentescoEmergencia"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="parentescoEmergencia"
+                        placeholder="Selecciona…"
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-parentesco">
+                      </dx-select-box>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Preferencias y límites -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-sliders-h"></i></div>
+                  <h5 class="section-title">Preferencias y límites</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Nivel VIP</span>
+                      <dx-select-box
+                        [dataSource]="listaNivelesVip"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="idNivelVIP"
+                        placeholder="Sin asignar…"
+                        searchEnabled="true"
+                        searchMode="contains"
+                        [showClearButton]="true"
+                        class="dx-select-box-custom dx-select-box-vip">
+                      </dx-select-box>
+                      <div *ngIf="listaNivelesVip.length === 0" class="text-muted small mt-1">No hay niveles en catálogo</div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Límite apuesta diaria</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-coins"></i>
+                        <input formControlName="limiteApuestaDiaria" class="sleek-control" type="number" min="0" step="0.01" placeholder="Opcional" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Límite retiro diario</span>
+                      <div class="input-sleek">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <input formControlName="limiteRetiroDiario" class="sleek-control" type="number" min="0" step="1" placeholder="Opcional" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Acepta promociones</span>
+                      <dx-select-box
+                        [dataSource]="listaSiNo"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="aceptaPromociones"
+                        [searchEnabled]="false"
+                        class="dx-select-box-custom">
+                      </dx-select-box>
+                    </label>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Acepta correo</span>
+                      <dx-select-box
+                        [dataSource]="listaSiNo"
+                        displayExpr="text"
+                        valueExpr="id"
+                        formControlName="aceptaEmail"
+                        [searchEnabled]="false"
+                        class="dx-select-box-custom">
+                      </dx-select-box>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Observaciones -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-align-left"></i></div>
+                  <h5 class="section-title">Observaciones</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 mt-1">
+                    <label class="field">
+                      <span class="field-label text-white">Descripción u observaciones</span>
+                      <div class="input-sleek input-sleek--textarea">
+                        <i class="fas fa-comment-alt"></i>
+                        <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Notas adicionales del registro" />
+                        <span class="sleek-line"></span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Archivos (estilo pf-uploader como máquinas / salas) -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <h5 class="section-title">Archivos</h5>
+                  <div class="section-line"></div>
+                </div>
+                <div class="row mt-0">
+                  <div class="col-12 col-lg-6 mt-1">
+                    <div class="field">
+                      <span class="field-label text-white d-block mb-2">Identificación (frente)</span>
+                      <div class="pf-uploader" (click)="!uploadingIdentificacionFrente && !loading && openIdentificacionFrentePicker()">
+                        <div class="pf-top">
+                          <div class="pf-title">
+                            <i class="fas fa-id-card"></i>
+                            <span>Identificación · frente</span>
+                          </div>
+                          <div class="pf-badge" *ngIf="identificacionFrenteNombre">{{ identificacionFrenteNombre }}</div>
+                        </div>
+                        <div class="pf-mid">
+                          <div class="pf-hero" *ngIf="identificacionPreviewUrl">
+                            <img [src]="identificacionPreviewUrl" alt="Identificación" />
+                          </div>
+                          <div class="pf-hero pf-hero--pdf" *ngIf="identificacionArchivoEsPdf()">
+                            <i class="fas fa-file-pdf"></i>
+                          </div>
+                          <div class="pf-empty" *ngIf="!identificacionPreviewUrl && !identificacionArchivoEsPdf()">
+                            <div class="pf-orb"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="pf-copy">
+                              <div class="pf-main">Subir archivo</div>
+                              <div class="pf-sub">Clic aquí · JPG, PNG, WEBP o PDF · máx. 5 MB</div>
+                            </div>
+                            <div class="pf-cta"><span>Seleccionar</span><i class="fas fa-arrow-right"></i></div>
+                          </div>
+                        </div>
+                        <div class="pf-actions" *ngIf="tieneArchivoIdentificacionFrente()" (click)="$event.stopPropagation()">
+                          <button type="button" class="pf-btn pf-btn--primary" (click)="openIdentificacionFrentePicker()"
+                            [disabled]="uploadingIdentificacionFrente || loading">
+                            <i class="fas fa-sync"></i><span>Reemplazar</span>
+                          </button>
+                          <button type="button" class="pf-btn pf-btn--ghost" (click)="limpiarIdentificacionFrente($event)">
+                            <i class="fas fa-trash"></i><span>Eliminar</span>
+                          </button>
+                        </div>
+                      </div>
+                      <input type="file" #identificacionFrenteInput hidden
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        (change)="onIdentificacionFrenteSelected($event)" />
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 mt-1">
+                    <div class="field">
+                      <span class="field-label text-white d-block mb-2">Foto de perfil</span>
+                      <div class="pf-uploader" (click)="!uploadingFotoPerfil && !loading && openFotoPerfilPicker()">
+                        <div class="pf-top">
+                          <div class="pf-title">
+                            <i class="fas fa-camera"></i>
+                            <span>Foto de perfil</span>
+                          </div>
+                          <div class="pf-badge" *ngIf="fotoPerfilNombre">{{ fotoPerfilNombre }}</div>
+                        </div>
+                        <div class="pf-mid">
+                          <div class="pf-hero" *ngIf="fotoPerfilPreviewUrl">
+                            <img [src]="fotoPerfilPreviewUrl" alt="Foto de perfil" />
+                          </div>
+                          <div class="pf-empty" *ngIf="!fotoPerfilPreviewUrl">
+                            <div class="pf-orb"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="pf-copy">
+                              <div class="pf-main">Subir imagen</div>
+                              <div class="pf-sub">Clic aquí · JPG, PNG o WEBP · máx. 5 MB</div>
+                            </div>
+                            <div class="pf-cta"><span>Seleccionar</span><i class="fas fa-arrow-right"></i></div>
+                          </div>
+                        </div>
+                        <div class="pf-actions" *ngIf="fotoPerfilPreviewUrl" (click)="$event.stopPropagation()">
+                          <button type="button" class="pf-btn pf-btn--primary" (click)="openFotoPerfilPicker()"
+                            [disabled]="uploadingFotoPerfil || loading">
+                            <i class="fas fa-sync"></i><span>Reemplazar</span>
+                          </button>
+                          <button type="button" class="pf-btn pf-btn--ghost" (click)="limpiarFotoPerfil($event)">
+                            <i class="fas fa-trash"></i><span>Eliminar</span>
+                          </button>
+                        </div>
+                      </div>
+                      <input type="file" #fotoPerfilInput hidden accept="image/jpeg,image/png,image/webp"
+                        (change)="onFotoPerfilSelected($event)" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="row mt-4">
                 <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
-                  <button (click)="guardar()" type="button" class="btn-alt btn-alt--success" [disabled]="loading">
+                  <button (click)="guardar()" type="button" class="btn-alt btn-alt--success" [disabled]="loading || uploadingIdentificacionFrente || uploadingFotoPerfil">
                     <i class="fas fa-check"></i>
                     <span>{{ submitButton }}</span>
                   </button>

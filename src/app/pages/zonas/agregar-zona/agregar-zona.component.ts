@@ -93,7 +93,7 @@ export class AgregarZonaComponent implements OnInit {
   private rotateDir = 1;
   private rotateDoorTarget: DoorType | null = null;
   private rotateMachineTarget = false;
-  public listaTipoZona: any;
+  public listaTipoZona: any[] = [];
   public listaSalas: any;
 
   isTipoZonaOpen = false;
@@ -196,26 +196,26 @@ export class AgregarZonaComponent implements OnInit {
 
   initForm(): void {
     this.zonaForm = this.formBuilder.group({
-      nombre: [''],
+      nombre: ['', Validators.required],
       descripcion: [''],
-      idTipoZona: [null],
+      idTipoZona: [null, Validators.required],
       nivel: [''],
-      nivelNumerico: [null],
-      anchoMetros: [null],
-      altoMetros: [null],
+      anchoMetros: [null, Validators.required],
+      altoMetros: [null, Validators.required],
       areaMetrosCuadrados: [null],
       areaPoligonoJSON: [{}],
       capacidadMaximaPersonas: [null],
       capacidadMaximaMaquinas: [null],
-      idSala: [null]
+      idSala: [null, Validators.required]
     });
   }
 
   obtenerTipoZona() {
-    this.zonaService.obtenerTipoZona().subscribe((response) => {
+    this.zonaService.listarCatTiposZona().subscribe((response) => {
       this.listaTipoZona = (response.data || []).map((c: any) => ({
         ...c,
-        id: Number(c.id),
+        id: Number(c.id ?? c.idTipoZona),
+        nombre: (c.nombre ?? c.nombreTipoZona ?? '').toString(),
       }));
       // Actualizar label si ya hay un valor en el formulario
       const currentId = Number(this.zonaForm.get('idTipoZona')?.value ?? 0);
@@ -249,7 +249,6 @@ export class AgregarZonaComponent implements OnInit {
           descripcion: data.descripcionZona ?? data.descripcion ?? '',
           idTipoZona: data.idTipoZona ?? 0,
           nivel: data.nivelZona ?? data.nivel ?? '',
-          nivelNumerico: data.nivelNumericoZona ?? data.nivelNumerico ?? 0,
           anchoMetros: data.anchoMetrosZona ?? data.anchoMetros ?? 0,
           altoMetros: data.altoMetrosZona ?? data.altoMetros ?? 0,
           areaMetrosCuadrados: data.areaMetrosCuadradosZona ?? data.areaMetrosCuadrados ?? 0,
@@ -305,9 +304,12 @@ export class AgregarZonaComponent implements OnInit {
       this.submitButton = 'Guardar';
       this.loading = false;
 
-      const etiquetas: any = {
+      const etiquetas: Record<string, string> = {
         nombre: 'Nombre',
-        descripcion: 'Descripción',
+        idTipoZona: 'Tipo de zona',
+        anchoMetros: 'Ancho (metros)',
+        altoMetros: 'Alto (metros)',
+        idSala: 'Sala',
       };
 
       const camposFaltantes: string[] = [];
@@ -383,9 +385,12 @@ export class AgregarZonaComponent implements OnInit {
       this.submitButton = 'Guardar';
       this.loading = false;
 
-      const etiquetas: any = {
+      const etiquetas: Record<string, string> = {
         nombre: 'Nombre',
-        descripcion: 'Descripción',
+        idTipoZona: 'Tipo de zona',
+        anchoMetros: 'Ancho (metros)',
+        altoMetros: 'Alto (metros)',
+        idSala: 'Sala',
       };
 
       const camposFaltantes: string[] = [];
@@ -460,7 +465,6 @@ export class AgregarZonaComponent implements OnInit {
       descripcion: v.descripcion ?? '',
       idTipoZona: Number(v.idTipoZona) || 0,
       nivel: v.nivel ?? '',
-      nivelNumerico: Number(v.nivelNumerico) || 0,
       anchoMetros: Number(v.anchoMetros) || 0,
       altoMetros: Number(v.altoMetros) || 0,
       areaMetrosCuadrados: Number(v.areaMetrosCuadrados) || 0,

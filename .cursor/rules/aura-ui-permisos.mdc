@@ -1,0 +1,24 @@
+---
+description: Textos de UI y permisos sin referencias a Swagger ni roles crudos en pantalla
+alwaysApply: true
+---
+
+# AuraNet — UI y control de permisos
+
+## No exponer contrato de API ni matriz de roles en la interfaz
+
+- No mostrar en **HTML**, **tooltips**, **SweetAlert** ni copy de usuario frases del tipo: "según API", "según Swagger", "requiere rol X", "documentación", "identificador de rol", "La API devolverá…" como sustituto de permisos.
+- La documentación OpenAPI/Swagger sirve para **implementación y comentarios técnicos en código** (servicios, contratos), no como mensaje visible al operador.
+
+## Dónde sí definir roles y mensajes de acceso
+
+- Centralizar reglas de rol y mensajes de **acceso denegado** en **`RolAccesoService`** (`AccionConControlRol`, `puedeRealizarAccion`, `mostrarAccesoDenegado`), igual que en **agregar-caja** con `RolAccesoService` / flujos de perfil.
+- Antes de abrir un modal sensible o ejecutar la acción, validar con `obtenerRolUsuarioLogueado()` + `puedeRealizarAccion` y, si aplica, `mostrarAccesoDenegado`.
+- Los textos de `mostrarAccesoDenegado` deben ser **orientados al usuario** (qué no puede hacer y qué roles sí pueden), sin citar endpoints ni IDs de Swagger.
+
+## Resumen
+
+| Evitar en UI | Usar en su lugar |
+|--------------|------------------|
+| "Requiere rol Gerente según API" | Validación + modal `RolAccesoService` |
+| Tooltips con "según documentación" | Tooltip funcional breve o sin mención de rol |

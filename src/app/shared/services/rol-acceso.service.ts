@@ -6,15 +6,21 @@ import Swal from 'sweetalert2';
  * Claves de acciones sujetas a validación de rol en UI (extensible).
  * Cada clave tiene ids permitidos alineados con GET /roles/list y `user.rol` / JWT `rol`.
  */
-export type AccionConControlRol = 'registrarAfiliado' | 'actualizarNivelVipAfiliado';
+export type AccionConControlRol =
+  | 'registrarAfiliado'
+  | 'actualizarNivelVipAfiliado'
+  | 'verCumpleanerosAfiliados'
+  | 'bloquearAfiliado'
+  | 'registrarAutoexclusionAfiliado'
+  | 'cancelarAutoexclusionAfiliado';
 
-/** Nombres legibles por id de catálogo de roles (sync con contrato /roles/list). */
+/** Nombres por id de `user.rol` / login (API auran3t; id 5 = Gerente en sesión). */
 const ROLES_CATALOGO: Record<string, string> = {
   '1': 'Super Administrador (SA)',
   '2': 'Administrador',
   '3': 'Gerente',
   '4': 'Jefe de Sala',
-  '5': 'Cajero',
+  '5': 'Gerente',
   '6': 'Jugador',
 };
 
@@ -25,6 +31,13 @@ function tituloPorPalabras(texto: string): string {
     .filter(Boolean)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ');
+}
+
+/** Primera letra del subtítulo en mayúscula; el resto del texto en minúsculas (una sola oración). */
+function subtituloOracion(texto: string): string {
+  const t = (texto || '').trim();
+  if (!t) return '';
+  return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
 }
 
 interface ConfigAccionRol {
@@ -49,11 +62,36 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   actualizarNivelVipAfiliado: {
-    /** POST /afiliados/{id}/nivel-vip — Swagger: rol Gerente (id 2). */
-    rolesPermitidosIds: ['2'],
+    /** Gerente: API auran3t usa `rol` `"5"`; se mantiene `"3"` por compatibilidad con catálogo local. */
+    rolesPermitidosIds: ['3', '5'],
     titulo: 'No puedes actualizar el nivel VIP',
-    subtitulo:
-      'Tu rol no tiene permiso para cambiar el nivel VIP. La API documenta el rol autorizado como Gerente (identificador 2).',
+    subtitulo: 'Tu rol no tiene permiso para cambiar el nivel VIP de un afiliado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  verCumpleanerosAfiliados: {
+    rolesPermitidosIds: ['1', '2', '3', '4'],
+    titulo: 'No puedes ver cumpleañeros',
+    subtitulo: 'Tu rol no tiene permiso para consultar el listado de cumpleañeros.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  bloquearAfiliado: {
+    /** POST /afiliados/{id}/bloquear — solo Gerente (`user.rol` `"5"` en login auran3t). */
+    rolesPermitidosIds: ['5'],
+    titulo: 'No puedes bloquear afiliados',
+    subtitulo: 'Tu rol no tiene permiso para bloquear afiliados y sus monederos.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  registrarAutoexclusionAfiliado: {
+    /** POST /afiliados/{id}/autoexclusion — solo Gerente (`user.rol` `"5"` en login auran3t). */
+    rolesPermitidosIds: ['5'],
+    titulo: 'No puedes registrar autoexclusión',
+    subtitulo: 'Tu rol no tiene permiso para registrar autoexclusión de afiliados.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  cancelarAutoexclusionAfiliado: {
+    rolesPermitidosIds: ['1', '2', '3', '4'],
+    titulo: 'No puedes cancelar autoexclusión',
+    subtitulo: 'Tu rol no tiene permiso para cancelar la autoexclusión de un afiliado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
 };
@@ -62,6 +100,9 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
   providedIn: 'root',
 })
 export class RolAccesoService {
+  /** Valor de `user.rol` en sesión para perfil cliente (login). Solo uso interno; no mostrar en mensajes al usuario. */
+  private readonly rolPerfilClienteSesion = '3';
+
   constructor(private auth: AuthenticationService) {}
 
   /**
@@ -77,6 +118,36 @@ export class RolAccesoService {
     } catch {
       return null;
     }
+  }
+
+  /** Indica si el usuario en sesión tiene perfil cliente (`rol` del login). */
+  esPerfilClienteLogueado(): boolean {
+    return this.obtenerRolUsuarioLogueado() === this.rolPerfilClienteSesion;
+  }
+
+  /**
+   * Aviso cuando solo el perfil cliente puede usar cajas o sucursales (salas).
+   * Título: mayúscula inicial en cada palabra. Subtítulo: mayúscula solo al inicio.
+   */
+  mostrarAccesoSoloPerfilCliente(contexto: 'cajas' | 'sucursales'): Promise<unknown> {
+    const cuerpo =
+      contexto === 'cajas'
+        ? 'solo pueden registrar o modificar cajas los usuarios con perfil de cliente.'
+        : 'solo pueden registrar o modificar sucursales los usuarios con perfil de cliente.';
+    const tituloFormateado = `¡${tituloPorPalabras('Acceso restringido')}!`;
+    return Swal.fire({
+      icon: 'warning',
+      title: tituloFormateado,
+      text: subtituloOracion(cuerpo),
+      background: '#0d121d',
+      color: '#e2e8f0',
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido',
+      didOpen: (popup) => {
+        const titleEl = popup.querySelector('.swal2-title') as HTMLElement | null;
+        if (titleEl) titleEl.style.textAlign = 'center';
+      },
+    });
   }
 
   puedeRealizarAccion(accion: AccionConControlRol, rolUsuario: string | null | undefined): boolean {

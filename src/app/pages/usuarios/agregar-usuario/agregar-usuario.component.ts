@@ -71,7 +71,7 @@ export class AgregarUsuarioComponent implements OnInit {
         confirmPassword: ['', [Validators.required]],
         telefono: ['', [Validators.required]],
         nombre: ['', [Validators.required]],
-        apellidoPaterno: ['', [Validators.required]],
+        apellidoPaterno: [''],
         apellidoMaterno: [''],
         fotoPerfil: [null],
         idRol: [null],

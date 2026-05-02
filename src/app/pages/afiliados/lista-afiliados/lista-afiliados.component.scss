@@ -1,5 +1,11 @@
 // Misma base que Monederos / Bóveda: action-buttons-card + btn-action-large
 
+.field-req {
+  color: #e40041;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
 .action-buttons-card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -313,6 +319,13 @@
   &:hover { background-color: #0c2215 !important; border-color: #34d399 !important; }
 }
 
+.btnAcciones--activar {
+  background-color: #0f2a1a !important;
+  border-color: #14532d !important;
+  i { color: #4ade80 !important; }
+  &:hover { background-color: #0c2215 !important; border-color: #4ade80 !important; }
+}
+
 .btnAcciones--desactivar {
   background-color: #2a0d0d !important;
   border-color: #7f1d1d !important;
@@ -365,5 +378,127 @@
 
   &:hover {
     border-color: #ff1a5b;
+  }
+}
+
+/* Modal cumpleañeros — opciones hoy / mes en fila */
+.cumpleaneros-tipo-row {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.cumpleaneros-tipo-card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 14px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e5e7eb;
+  cursor: pointer;
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+
+  /* Hover solo si no está seleccionado: evita choque con --selected */
+  &:hover:not(.cumpleaneros-tipo-card--selected) {
+    border-color: rgba(241, 180, 76, 0.45);
+    background: rgba(241, 180, 76, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+
+    .cumpleaneros-tipo-card__icon {
+      transform: scale(1.05);
+    }
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    background: rgba(241, 180, 76, 0.2);
+    color: #fcd34d;
+    transition: transform 0.22s ease, background 0.22s ease, color 0.22s ease;
+  }
+
+  &__label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  &__hint {
+    font-size: 11px;
+    color: #9ca3af;
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  &--selected {
+    border-color: #f1b44c;
+    background: linear-gradient(160deg, rgba(241, 180, 76, 0.22), rgba(228, 0, 65, 0.12));
+    box-shadow:
+      0 0 0 1px rgba(241, 180, 76, 0.35),
+      0 12px 32px rgba(241, 180, 76, 0.18);
+    transform: translateY(-1px) scale(1.02);
+
+    .cumpleaneros-tipo-card__icon {
+      background: rgba(241, 180, 76, 0.45);
+      color: #fffbeb;
+      transform: scale(1.06);
+    }
+
+    .cumpleaneros-tipo-card__hint {
+      color: #d1d5db;
+    }
+
+    /* Mismo transform base + refuerzo suave de borde/sombra (sin segundo “salto”) */
+    &:hover {
+      border-color: #f5c563;
+      box-shadow:
+        0 0 0 1px rgba(245, 197, 99, 0.5),
+        0 14px 36px rgba(241, 180, 76, 0.24);
+      transform: translateY(-1px) scale(1.02);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .cumpleaneros-tipo-row {
+    flex-direction: column;
+  }
+}
+
+::ng-deep .modal-holder.modal-afiliados-cumpleaneros-tipo {
+  .modal-accion-header--cumpleaneros-tipo::before {
+    background: linear-gradient(90deg, #f1b44c, #e40041);
+  }
+
+  .modal-accion-header--cumpleaneros-tipo .modal-title i {
+    color: #fcd34d;
+  }
+
+  .btn-alt--cumpleaneros-tipo {
+    background: #c27a12;
+    color: #ffffff;
+    box-shadow: 0 10px 26px rgba(194, 122, 18, 0.35);
+  }
+
+  .btn-alt--cumpleaneros-tipo:hover:not(:disabled) {
+    background: #e49a1e;
+    transform: translateY(-1px);
   }
 }

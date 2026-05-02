@@ -23,9 +23,9 @@
           <form [formGroup]="zonaForm">
             <div class="col-12">
               <div class="row g-3">
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-6 col-lg-3">
                   <label class="field">
-                    <span class="field-label text-white">Nombre</span>
+                    <span class="field-label text-white">Nombre <span class="text-danger">*</span></span>
                     <div class="input-sleek">
                       <i class="fas fa-user"></i>
                       <input formControlName="nombre" class="sleek-control" type="text" placeholder="Nombre completo" />
@@ -33,7 +33,7 @@
                     </div>
                   </label>
                 </div>
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-6 col-lg-3">
                   <label class="field">
                     <span class="field-label text-white">Descripción</span>
                     <div class="input-sleek">
@@ -56,17 +56,23 @@
                 </div>
                 <div class="col-12 col-md-6 col-lg-3">
                   <label class="field">
-                    <span class="field-label text-white">Nivel Numérico</span>
-                    <div class="input-sleek">
-                      <i class="fas fa-sort-numeric-up"></i>
-                      <input formControlName="nivelNumerico" class="sleek-control" type="text" placeholder="0" (keypress)="allowOnlyNumbers($event)" />
-                      <span class="sleek-line"></span>
-                    </div>
+                    <span class="field-label text-white">Tipo de zona <span class="text-danger">*</span></span>
+                    <dx-select-box
+                      [dataSource]="listaTipoZona"
+                      displayExpr="nombre"
+                      valueExpr="id"
+                      formControlName="idTipoZona"
+                      placeholder="Selecciona un tipo..."
+                      searchEnabled="true"
+                      searchMode="contains"
+                      [showClearButton]="false"
+                      class="dx-select-box-custom dx-select-box-sala">
+                    </dx-select-box>
                   </label>
                 </div>
                 <div class="col-12 col-md-6 col-lg-3">
                   <label class="field">
-                    <span class="field-label text-white">Sala</span>
+                    <span class="field-label text-white">Sala <span class="text-danger">*</span></span>
                     <dx-select-box
                       [dataSource]="listaSalas"
                       displayExpr="text"
@@ -75,14 +81,14 @@
                       placeholder="Selecciona una sala..."
                       searchEnabled="true"
                       searchMode="contains"
-                      [showClearButton]="true"
+                      [showClearButton]="false"
                       class="dx-select-box-custom dx-select-box-sala">
                     </dx-select-box>
                   </label>
                 </div>
                 <div class="col-12 col-md-6 col-lg-3">
                   <label class="field">
-                    <span class="field-label text-white">Ancho (metros)</span>
+                    <span class="field-label text-white">Ancho (metros) <span class="text-danger">*</span></span>
                     <div class="input-sleek">
                       <i class="fas fa-ruler-horizontal"></i>
                       <input formControlName="anchoMetros" class="sleek-control" type="text" placeholder="0" (keypress)="allowOnlyNumbers($event)" />
@@ -92,7 +98,7 @@
                 </div>
                 <div class="col-12 col-md-6 col-lg-3">
                   <label class="field">
-                    <span class="field-label text-white">Alto (metros)</span>
+                    <span class="field-label text-white">Alto (metros) <span class="text-danger">*</span></span>
                     <div class="input-sleek">
                       <i class="fas fa-ruler-vertical"></i>
                       <input formControlName="altoMetros" class="sleek-control" type="text" placeholder="0" (keypress)="allowOnlyNumbers($event)" />
@@ -131,7 +137,7 @@
                   </label>
                 </div>
               </div>
-              <div class="col-12 mt-4">
+              <!-- <div class="col-12 mt-4">
                 <div class="plano-card">
                   <div class="plano-head">
                     <div class="plano-title">
@@ -162,9 +168,6 @@
                       </div>
                       <div class="plano-select select-sleek" [class.is-open]="isTipoZonaOpen"
                         (mousedown)="toggleTipoZona($event)">
-                        <!-- 
-                          <i class="fas fa-layer-group"></i>
-                        -->
                         <div class="plano-select__control select-display">
                           <span class="select-value" [class.placeholder]="!zonaForm.get('idTipoZona')?.value">
                             {{ tipoZonaLabel || 'Tipo Zona' }}
@@ -374,7 +377,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> -->
             </div>
           </form>
         </div>

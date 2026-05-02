@@ -338,7 +338,7 @@
                 </div>
                 <div class="row mt-0">
                   <div class="col-12 col-lg-6">
-                    <label class="field">
+                    <div class="field">
                       <span class="field-label text-white">Imagen de la Máquina</span>
                       <div class="pf-uploader" (click)="openImagenFilePicker()">
                         <div class="pf-top">
@@ -379,10 +379,10 @@
                       </div>
                       <input type="file" #imagenFileInput accept=".jpg,.jpeg,.png,.webp" hidden
                         (change)="onImagenSelected($event)" />
-                    </label>
+                    </div>
                   </div>
                   <div class="col-12 col-lg-6">
-                    <label class="field">
+                    <div class="field">
                       <span class="field-label text-white">Icono de la Máquina</span>
                       <div class="pf-uploader" (click)="openIconoFilePicker()">
                         <div class="pf-top">
@@ -423,7 +423,7 @@
                       </div>
                       <input type="file" #iconoFileInput accept=".jpg,.jpeg,.png,.webp" hidden
                         (change)="onIconoSelected($event)" />
-                    </label>
+                    </div>
                   </div>
                 </div>
               </div>

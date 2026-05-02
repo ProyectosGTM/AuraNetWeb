@@ -1,16 +1,36 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { AfiliadosService } from 'src/app/shared/services/afiliados.service';
 import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { FormularioValidacionSwalService } from 'src/app/shared/services/formulario-validacion-swal.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
-import { CajasService } from 'src/app/shared/services/cajas.service';
+import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
+
+const LISTA_SI_NO: SelectItem[] = [
+  { id: 1, text: 'Sí' },
+  { id: 0, text: 'No' },
+];
+
+/** Email vacío válido; si hay texto, debe ser correo válido. */
+function optionalEmailValidator(control: AbstractControl): ValidationErrors | null {
+  const v = (control.value ?? '').toString().trim();
+  if (!v) {
+    return null;
+  }
+  return Validators.email(control);
+}
 
 @Component({
   selector: 'app-agregar-afiliado',
@@ -26,26 +46,52 @@ export class AgregarAfiliadoComponent implements OnInit {
   public listaSalas: any[] = [];
   public listaTipoIdentificacion: SelectItem[] = [];
   public listaEstatusAfiliado: SelectItem[] = [];
+  public listaNivelesVip: SelectItem[] = [];
+  public listaSiNo: SelectItem[] = LISTA_SI_NO;
   public listaSexo: { id: string; text: string }[] = [
     { id: 'M', text: 'Masculino' },
     { id: 'F', text: 'Femenino' },
   ];
+  /** Valores de parentesco de contacto de emergencia (catálogo fijo en UI). */
+  public listaParentescoEmergencia: { id: string; text: string }[] = [
+    { id: 'Cónyuge', text: 'Cónyuge' },
+    { id: 'Padre', text: 'Padre' },
+    { id: 'Madre', text: 'Madre' },
+    { id: 'Hijo(a)', text: 'Hijo(a)' },
+    { id: 'Hermano(a)', text: 'Hermano(a)' },
+    { id: 'Tío(a)', text: 'Tío(a)' },
+    { id: 'Abuelo(a)', text: 'Abuelo(a)' },
+    { id: 'Amigo(a)', text: 'Amigo(a)' },
+    { id: 'Otro', text: 'Otro' },
+  ];
 
   afiliadoForm: FormGroup;
 
-  /** Etiquetas para el Swal de validación (mismo patrón que otros módulos). */
+  @ViewChild('identificacionFrenteInput', { static: false })
+  identificacionFrenteInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('fotoPerfilInput', { static: false })
+  fotoPerfilInput!: ElementRef<HTMLInputElement>;
+
+  identificacionFrenteNombre: string | null = null;
+  identificacionPreviewUrl: string | null = null;
+  fotoPerfilNombre: string | null = null;
+  fotoPerfilPreviewUrl: string | ArrayBuffer | null = null;
+  uploadingIdentificacionFrente = false;
+  uploadingFotoPerfil = false;
+
+  private readonly MAX_FILE_MB = 5;
+
+  /** Etiquetas solo para campos obligatorios (validación Swal). */
   private readonly etiquetasCamposAfiliado: Record<string, string> = {
     idSala: 'Sala',
     idTipoIdentificacion: 'Tipo de identificación',
     numeroIdentificacion: 'Número de identificación',
     nombre: 'Nombre',
     apellidoPaterno: 'Apellido paterno',
-    apellidoMaterno: 'Apellido materno',
     fechaNacimiento: 'Fecha de nacimiento',
     sexo: 'Sexo',
     idEstatusAfiliado: 'Estatus del afiliado',
     email: 'Correo electrónico',
-    telefonoCelular: 'Teléfono celular',
   };
 
   constructor(
@@ -54,7 +100,7 @@ export class AgregarAfiliadoComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private afiliadosService: AfiliadosService,
     private salasService: SalaService,
-    private cajasService: CajasService,
+    private usuariosService: UsuariosService,
     private rolAcceso: RolAccesoService,
     private formularioValidacionSwal: FormularioValidacionSwalService,
   ) { }
@@ -70,7 +116,8 @@ export class AgregarAfiliadoComponent implements OnInit {
         forkJoin({
           salas: this.salasService.obtenerSalas(),
           tipoIdentificacion: this.afiliadosService.obtenerTipoIdentificacion(),
-          estatusAfiliado: this.cajasService.obtenerEstatusAfiliado()
+          estatusAfiliado: this.afiliadosService.obtenerCatalogoEstatusAfiliado(),
+          nivelesVip: this.afiliadosService.obtenerNivelesVip(),
         }).subscribe({
           next: (responses) => {
             this.procesarListas(responses);
@@ -97,6 +144,28 @@ export class AgregarAfiliadoComponent implements OnInit {
     }
   }
 
+  esUrlPdf(url: string): boolean {
+    return /\.pdf(\?|#|$)/i.test((url || '').trim());
+  }
+
+  identificacionArchivoEsPdf(): boolean {
+    const u = this.trimStr(this.afiliadoForm?.get('archivoIdentificacionFrente')?.value);
+    return u !== '' && this.esUrlPdf(u);
+  }
+
+  tieneArchivoIdentificacionFrente(): boolean {
+    return this.trimStr(this.afiliadoForm?.get('archivoIdentificacionFrente')?.value) !== '';
+  }
+
+  private actualizarVistaIdentificacionFrente(url: string): void {
+    const u = (url || '').trim();
+    if (!u || this.esUrlPdf(u)) {
+      this.identificacionPreviewUrl = null;
+    } else {
+      this.identificacionPreviewUrl = u;
+    }
+  }
+
   private procesarListas(responses: any) {
     this.listaSalas = (responses.salas.data || []).map((s: any) => ({
       ...s,
@@ -111,14 +180,36 @@ export class AgregarAfiliadoComponent implements OnInit {
 
     this.listaEstatusAfiliado = (responses.estatusAfiliado.data || []).map((e: any) => ({
       id: Number(e.id),
-      text: e.nombre || ''
+      text:
+        String(e.nombre ?? e.nombreEstatusAfiliado ?? e.descripcion ?? '').trim() ||
+        `Estatus ${e.id}`,
     } as SelectItem));
+    if (responses.nivelesVip != null) {
+      this.aplicarListaNivelesVip(responses.nivelesVip);
+    }
+  }
+
+  private aplicarListaNivelesVip(res: any): void {
+    const raw = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+    this.listaNivelesVip = raw
+      .filter((x: any) => x?.id != null)
+      .map((x: any) => ({
+        id: Number(x.id),
+        text:
+          String(x.nombre ?? x.nombreNivelVip ?? x.descripcion ?? '').trim() || `Nivel ${x.id}`,
+      }));
   }
 
   private cargarListasIndividualmente() {
     this.obtenerSalas();
     this.obtenerTipoIdentificacion();
     this.obtenerEstatusAfiliado();
+    this.afiliadosService.obtenerNivelesVip().subscribe({
+      next: (r) => this.aplicarListaNivelesVip(r),
+      error: () => {
+        this.listaNivelesVip = [];
+      },
+    });
   }
 
   obtenerSalas(): void {
@@ -151,11 +242,13 @@ export class AgregarAfiliadoComponent implements OnInit {
   }
 
   obtenerEstatusAfiliado(): void {
-    this.cajasService.obtenerEstatusAfiliado().subscribe({
+    this.afiliadosService.obtenerCatalogoEstatusAfiliado().subscribe({
       next: (response: any) => {
         this.listaEstatusAfiliado = (response.data || []).map((e: any) => ({
           id: Number(e.id),
-          text: e.nombre || ''
+          text:
+            String(e.nombre ?? e.nombreEstatusAfiliado ?? e.descripcion ?? '').trim() ||
+            `Estatus ${e.id}`,
         } as SelectItem));
       },
       error: (error) => {
@@ -180,8 +273,37 @@ export class AgregarAfiliadoComponent implements OnInit {
           sexo: data.sexo || '',
           idEstatusAfiliado: data.idEstatusAfiliado ? Number(data.idEstatusAfiliado) : null,
           email: data.email || '',
-          telefonoCelular: data.telefonoCelular || ''
+          telefonoCelular: data.telefonoCelular || '',
+          vigenciaIdentificacion: this.formatDate(data.vigenciaIdentificacion),
+          archivoIdentificacionFrente: data.archivoIdentificacionFrente || '',
+          curp: data.curp || '',
+          rfc: data.rfc || '',
+          telefono: data.telefono || '',
+          estado: data.estado || '',
+          municipio: data.municipio || '',
+          colonia: data.colonia || '',
+          calle: data.calle || '',
+          numeroExterior: data.numeroExterior || '',
+          numeroInterior: data.numeroInterior || '',
+          codigoPostal: data.codigoPostal || '',
+          nombreEmergencia: data.nombreEmergencia || '',
+          telefonoEmergencia: data.telefonoEmergencia || '',
+          parentescoEmergencia: data.parentescoEmergencia || '',
+          fotoPerfil: data.fotoPerfil || '',
+          idNivelVIP: data.idNivelVIP != null ? Number(data.idNivelVIP) : null,
+          limiteApuestaDiaria: data.limiteApuestaDiaria ?? null,
+          limiteRetiroDiario: data.limiteRetiroDiario ?? null,
+          aceptaPromociones:
+            data.aceptaPromociones === 0 || data.aceptaPromociones === 1 ? Number(data.aceptaPromociones) : 1,
+          aceptaEmail: data.aceptaEmail === 0 || data.aceptaEmail === 1 ? Number(data.aceptaEmail) : 1,
+          observaciones: data.observaciones || '',
         });
+        const urlId = (data.archivoIdentificacionFrente || '').toString().trim();
+        this.identificacionFrenteNombre = urlId ? urlId.split('/').pop() || urlId : null;
+        this.actualizarVistaIdentificacionFrente(urlId);
+        const urlFoto = (data.fotoPerfil || '').toString().trim();
+        this.fotoPerfilNombre = urlFoto ? urlFoto.split('/').pop() || urlFoto : null;
+        this.fotoPerfilPreviewUrl = /^https?:\/\//i.test(urlFoto) || urlFoto.startsWith('data:') ? urlFoto : urlFoto || null;
       },
       error: (error) => {
         Swal.fire({
@@ -221,12 +343,44 @@ export class AgregarAfiliadoComponent implements OnInit {
       fechaNacimiento: ['', Validators.required],
       sexo: ['', Validators.required],
       idEstatusAfiliado: [null, Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      telefonoCelular: ['', Validators.required]
+      email: ['', optionalEmailValidator],
+      telefonoCelular: [''],
+      vigenciaIdentificacion: [''],
+      archivoIdentificacionFrente: [''],
+      curp: [''],
+      rfc: [''],
+      telefono: [''],
+      estado: [''],
+      municipio: [''],
+      colonia: [''],
+      calle: [''],
+      numeroExterior: [''],
+      numeroInterior: [''],
+      codigoPostal: [''],
+      nombreEmergencia: [''],
+      telefonoEmergencia: [''],
+      parentescoEmergencia: [''],
+      fotoPerfil: [''],
+      idNivelVIP: [null],
+      limiteApuestaDiaria: [null as number | null],
+      limiteRetiroDiario: [null as number | null],
+      aceptaPromociones: [1],
+      aceptaEmail: [1],
+      observaciones: [''],
     });
   }
 
   guardar() {
+    if (this.uploadingIdentificacionFrente || this.uploadingFotoPerfil) {
+      Swal.fire({
+        title: 'Espera un momento',
+        text: 'Aún se está subiendo un archivo. Intenta de nuevo en unos segundos.',
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
     if (
       this.formularioValidacionSwal.resaltarYAlertarSiInvalido(
         this.afiliadoForm,
@@ -301,20 +455,207 @@ export class AgregarAfiliadoComponent implements OnInit {
     }
   }
 
+  private trimStr(v: unknown): string {
+    if (v == null) {
+      return '';
+    }
+    return String(v).trim();
+  }
+
   buildPayloadAfiliado(): any {
-    return {
-      idSala: this.afiliadoForm.value.idSala,
-      idTipoIdentificacion: this.afiliadoForm.value.idTipoIdentificacion,
-      numeroIdentificacion: this.afiliadoForm.value.numeroIdentificacion,
-      nombre: this.afiliadoForm.value.nombre,
-      apellidoPaterno: this.afiliadoForm.value.apellidoPaterno,
-      apellidoMaterno: this.afiliadoForm.value.apellidoMaterno || null,
-      fechaNacimiento: this.afiliadoForm.value.fechaNacimiento,
-      sexo: this.afiliadoForm.value.sexo,
-      idEstatusAfiliado: this.afiliadoForm.value.idEstatusAfiliado,
-      email: this.afiliadoForm.value.email,
-      telefonoCelular: this.afiliadoForm.value.telefonoCelular
+    const v = this.afiliadoForm.getRawValue();
+    const t = (x: unknown) => this.trimStr(x);
+    const payload: Record<string, unknown> = {
+      idSala: v.idSala,
+      idTipoIdentificacion: v.idTipoIdentificacion,
+      numeroIdentificacion: t(v.numeroIdentificacion),
+      nombre: t(v.nombre),
+      apellidoPaterno: t(v.apellidoPaterno),
+      apellidoMaterno: t(v.apellidoMaterno) || null,
+      fechaNacimiento: v.fechaNacimiento || null,
+      sexo: v.sexo,
+      idEstatusAfiliado: v.idEstatusAfiliado,
+      pais: 'MEX',
+      email: t(v.email) || null,
+      telefonoCelular: t(v.telefonoCelular) || null,
+      vigenciaIdentificacion: v.vigenciaIdentificacion || null,
+      archivoIdentificacionFrente: t(v.archivoIdentificacionFrente) || null,
+      curp: t(v.curp) || null,
+      rfc: t(v.rfc) || null,
+      telefono: t(v.telefono) || null,
+      estado: t(v.estado) || null,
+      municipio: t(v.municipio) || null,
+      colonia: t(v.colonia) || null,
+      calle: t(v.calle) || null,
+      numeroExterior: t(v.numeroExterior) || null,
+      numeroInterior: t(v.numeroInterior) || null,
+      codigoPostal: t(v.codigoPostal) || null,
+      nombreEmergencia: t(v.nombreEmergencia) || null,
+      telefonoEmergencia: t(v.telefonoEmergencia) || null,
+      parentescoEmergencia: t(v.parentescoEmergencia) || null,
+      fotoPerfil: t(v.fotoPerfil) || null,
+      observaciones: t(v.observaciones) || null,
+      aceptaPromociones: v.aceptaPromociones === 0 || v.aceptaPromociones === 1 ? Number(v.aceptaPromociones) : 1,
+      aceptaEmail: v.aceptaEmail === 0 || v.aceptaEmail === 1 ? Number(v.aceptaEmail) : 1,
     };
+    const idNv = v.idNivelVIP;
+    if (idNv != null && !(typeof idNv === 'string' && idNv.trim() === '')) {
+      const nv = Math.trunc(Number(idNv));
+      if (Number.isFinite(nv)) {
+        payload.idNivelVIP = nv;
+      }
+    }
+    const parseLim = (x: unknown): number | undefined => {
+      if (x === null || x === undefined || x === '') {
+        return undefined;
+      }
+      const n = typeof x === 'number' ? x : parseFloat(String(x).replace(',', '.'));
+      return Number.isFinite(n) ? n : undefined;
+    };
+    const la = parseLim(v.limiteApuestaDiaria);
+    if (la !== undefined) {
+      payload.limiteApuestaDiaria = la;
+    }
+    const lr = parseLim(v.limiteRetiroDiario);
+    if (lr !== undefined) {
+      payload.limiteRetiroDiario = lr;
+    }
+    return payload;
+  }
+
+  private isImagenPerfil(file: File): boolean {
+    return /^image\/(png|jpe?g|webp)$/i.test(file.type);
+  }
+
+  private isDocIdentificacion(file: File): boolean {
+    return /^image\/(png|jpe?g|webp)$/i.test(file.type) || file.type === 'application/pdf';
+  }
+
+  private subirArchivoS3(file: File, onOk: (url: string) => void, onFinally: () => void): void {
+    const fd = new FormData();
+    fd.append('file', file, file.name);
+    fd.append('folder', 'afiliados');
+    fd.append('idModule', '40');
+    this.usuariosService.uploadFile(fd).subscribe({
+      next: (res: any) => {
+        const url = res?.url ?? res?.Location ?? res?.data?.url ?? '';
+        if (url) {
+          onOk(String(url));
+        } else {
+          Swal.fire({
+            title: 'Subida incompleta',
+            text: 'No se recibió la URL del archivo. Intenta de nuevo.',
+            icon: 'warning',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+          });
+        }
+        onFinally();
+      },
+      error: () => {
+        Swal.fire({
+          title: 'Error al subir',
+          text: 'No se pudo subir el archivo. Revisa tu conexión o vuelve a intentarlo.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+        });
+        onFinally();
+      },
+    });
+  }
+
+  openIdentificacionFrentePicker(): void {
+    this.identificacionFrenteInput?.nativeElement?.click();
+  }
+
+  openFotoPerfilPicker(): void {
+    this.fotoPerfilInput?.nativeElement?.click();
+  }
+
+  onIdentificacionFrenteSelected(e: Event): void {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    input.value = '';
+    if (!file) {
+      return;
+    }
+    if (!this.isDocIdentificacion(file) || file.size > this.MAX_FILE_MB * 1024 * 1024) {
+      Swal.fire({
+        title: 'Archivo no válido',
+        text: `Usa imagen (JPG, PNG, WEBP) o PDF de hasta ${this.MAX_FILE_MB} MB.`,
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
+    this.uploadingIdentificacionFrente = true;
+    this.identificacionFrenteNombre = file.name;
+    this.subirArchivoS3(
+      file,
+      (url) => {
+        this.afiliadoForm.patchValue({ archivoIdentificacionFrente: url });
+        this.actualizarVistaIdentificacionFrente(url);
+      },
+      () => {
+        this.uploadingIdentificacionFrente = false;
+      }
+    );
+  }
+
+  onFotoPerfilSelected(e: Event): void {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    input.value = '';
+    if (!file) {
+      return;
+    }
+    if (!this.isImagenPerfil(file) || file.size > this.MAX_FILE_MB * 1024 * 1024) {
+      Swal.fire({
+        title: 'Archivo no válido',
+        text: `Usa imagen JPG, PNG o WEBP de hasta ${this.MAX_FILE_MB} MB.`,
+        icon: 'info',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
+    }
+    this.uploadingFotoPerfil = true;
+    this.fotoPerfilNombre = file.name;
+    const reader = new FileReader();
+    reader.onload = () => (this.fotoPerfilPreviewUrl = reader.result);
+    reader.readAsDataURL(file);
+    this.subirArchivoS3(
+      file,
+      (url) => {
+        this.afiliadoForm.patchValue({ fotoPerfil: url });
+        this.fotoPerfilPreviewUrl = url;
+      },
+      () => {
+        this.uploadingFotoPerfil = false;
+      }
+    );
+  }
+
+  limpiarIdentificacionFrente(ev: Event): void {
+    ev.stopPropagation();
+    this.identificacionFrenteNombre = null;
+    this.identificacionPreviewUrl = null;
+    this.afiliadoForm.patchValue({ archivoIdentificacionFrente: '' });
+    if (this.identificacionFrenteInput?.nativeElement) {
+      this.identificacionFrenteInput.nativeElement.value = '';
+    }
+  }
+
+  limpiarFotoPerfil(ev: Event): void {
+    ev.stopPropagation();
+    this.fotoPerfilNombre = null;
+    this.fotoPerfilPreviewUrl = null;
+    this.afiliadoForm.patchValue({ fotoPerfil: '' });
+    if (this.fotoPerfilInput?.nativeElement) {
+      this.fotoPerfilInput.nativeElement.value = '';
+    }
   }
 
   cancelar() {

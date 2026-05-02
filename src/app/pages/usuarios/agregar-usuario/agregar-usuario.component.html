@@ -259,10 +259,15 @@
                                                     </div>
                                                 </div>
                                                 <div class="perm-module__right">
-                                                    <label class="sw">
-                                                        <input type="checkbox" [checked]="isModuloCompleto(modulo)"
+                                                    <label class="perm-mod-toggle"
+                                                        [class.perm-mod-toggle--on]="isModuloCompleto(modulo)"
+                                                        title="Activar o desactivar todos los permisos de este módulo">
+                                                        <input type="checkbox" class="perm-mod-toggle__input"
+                                                            [checked]="isModuloCompleto(modulo)"
                                                             (change)="onToggleModulo(modulo, $any($event.target).checked)" />
-                                                        <span class="sl"></span>
+                                                        <span class="perm-mod-toggle__visual" aria-hidden="true">
+                                                            <span class="perm-mod-toggle__knob"></span>
+                                                        </span>
                                                     </label>
                                                 </div>
                                             </div>

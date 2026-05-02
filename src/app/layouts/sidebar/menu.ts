@@ -29,8 +29,8 @@ export const MENU: MenuItem[] = [
         icon: 'uil-layer-group',
         subItems: [
             { id: 5, label: 'Salas', link: '/salas' },
-            { id: 6, label: 'Maquinas', link: '/maquinas' },
             { id: 4, label: 'Zonas', link: '/zonas' },
+            { id: 6, label: 'Maquinas', link: '/maquinas' },
             { id: 37, label: 'Cajas', link: '/cajas' },
             { id: 40, label: 'Afiliados', link: '/afiliados' }, 
         ]

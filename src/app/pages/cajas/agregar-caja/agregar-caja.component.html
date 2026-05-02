@@ -23,136 +23,92 @@
           <form [formGroup]="cajaForm">
             <div class="col-12">
               <div class="row mt-0">
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="field">
-                      <span class="field-label text-white">Sala <span class="text-danger"
-                          aria-hidden="true">*</span></span>
-                      <dx-select-box
-                        [dataSource]="listaSalas"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idSala"
-                        placeholder="Selecciona una sala..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-sala">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="field">
-                      <span class="field-label text-white">Zona <span class="text-danger"
-                          aria-hidden="true">*</span></span>
-                      <dx-select-box
-                        [dataSource]="listaZonas"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idZona"
-                        placeholder="Selecciona una zona..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-zona">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="field">
-                      <span class="field-label text-white">Código <span class="text-danger"
-                          aria-hidden="true">*</span></span>
-                      <div class="input-sleek">
-                        <i class="fas fa-barcode"></i>
-                        <input formControlName="codigo" class="sleek-control" type="text"
-                          placeholder="CAJA-001" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="field">
-                      <span class="field-label text-white">Nombre <span class="text-danger"
-                          aria-hidden="true">*</span></span>
-                      <div class="input-sleek">
-                        <i class="fas fa-tag"></i>
-                        <input formControlName="nombre" class="sleek-control" type="text"
-                          placeholder="Nombre de la caja" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="field">
-                      <span class="field-label text-white">Tipo Caja <span class="text-danger"
-                          aria-hidden="true">*</span></span>
-                      <dx-select-box
-                        [dataSource]="listaTiposCaja"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idTipoCaja"
-                        placeholder="Selecciona un tipo..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-tipo-caja">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="field">
-                      <span class="field-label text-white">Estatus Caja <span class="text-danger"
-                          aria-hidden="true">*</span></span>
-                      <dx-select-box
-                        [dataSource]="listaEstatusCaja"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idEstatusCaja"
-                        placeholder="Selecciona un estatus..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-estatus">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="field">
-                      <span class="field-label text-white">Límite Efectivo</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-dollar-sign"></i>
-                        <input formControlName="limiteEfectivo" class="sleek-control" type="text"
-                          placeholder="0.00" (keypress)="allowOnlyNumbers($event)" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="field">
-                      <span class="field-label text-white">Requiere Arqueo</span>
-                      <dx-select-box
-                        [dataSource]="listaRequiereArqueo"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="requiereArqueo"
-                        placeholder="Selecciona..."
-                        searchEnabled="false"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-estatus">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-12 col-lg-12">
-                    <label class="field">
-                      <span class="field-label text-white">Descripción</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-comment-alt"></i>
-                        <input formControlName="descripcion" class="sleek-control" type="text"
-                          placeholder="Ingresa la descripción..." />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Nombre <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <div class="input-sleek">
+                      <i class="fas fa-tag"></i>
+                      <input formControlName="nombre" class="sleek-control" type="text"
+                        placeholder="Nombre de la caja" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
                 </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Sala <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <dx-select-box [dataSource]="listaSalas" displayExpr="text" valueExpr="id" formControlName="idSala"
+                      placeholder="Selecciona una sala..." searchEnabled="true" searchMode="contains"
+                      [showClearButton]="false" class="dx-select-box-custom dx-select-box-sala">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Zona <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <dx-select-box [dataSource]="listaZonas" displayExpr="text" valueExpr="id" formControlName="idZona"
+                      placeholder="Selecciona una zona..." searchEnabled="true" searchMode="contains"
+                      [showClearButton]="false" class="dx-select-box-custom dx-select-box-zona">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Código <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <div class="input-sleek">
+                      <i class="fas fa-barcode"></i>
+                      <input formControlName="codigo" class="sleek-control" type="text" placeholder="CAJA-001" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Tipo Caja <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <dx-select-box [dataSource]="listaTiposCaja" displayExpr="text" valueExpr="id"
+                      formControlName="idTipoCaja" placeholder="Selecciona un tipo..." searchEnabled="true"
+                      searchMode="contains" [showClearButton]="false"
+                      class="dx-select-box-custom dx-select-box-tipo-caja">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Límite Efectivo</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-dollar-sign"></i>
+                      <input formControlName="limiteEfectivo" class="sleek-control" type="text" placeholder="0.00"
+                        (keypress)="allowOnlyNumbers($event)" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Requiere Arqueo</span>
+                    <dx-select-box [dataSource]="listaRequiereArqueo" displayExpr="text" valueExpr="id"
+                      formControlName="requiereArqueo" placeholder="Selecciona..." searchEnabled="false"
+                      [showClearButton]="true" class="dx-select-box-custom dx-select-box-estatus">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Descripción</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-comment-alt"></i>
+                      <input formControlName="descripcion" class="sleek-control" type="text"
+                        placeholder="Ingresa la descripción..." />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+              </div>
 
               <!-- Botones de acción -->
               <div class="row mt-4">

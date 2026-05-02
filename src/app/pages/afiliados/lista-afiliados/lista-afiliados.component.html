@@ -59,7 +59,7 @@
                                 </button>
                                 <button type="button" class="btn-action-large btn-afiliados-cumpleaneros"
                                     [class.btn-afiliados-vista--activa]="modoLista === 'cumpleaneros'"
-                                    (click)="setModoLista('cumpleaneros')">
+                                    (click)="abrirModalCumpleanerosTipo()">
                                     <div class="btn-action-icon">
                                         <i class="fas fa-birthday-cake"></i>
                                     </div>
@@ -68,7 +68,7 @@
                                         <span class="btn-action-desc">Próximos cumpleaños según el servicio</span>
                                     </div>
                                 </button>
-                                <button type="button" class="btn-action-large btn-afiliados-filtros-modal"
+                                <!-- <button type="button" class="btn-action-large btn-afiliados-filtros-modal"
                                     [class.btn-afiliados-vista--activa]="modoLista === 'buscar'"
                                     (click)="abrirModalFiltrosGrid()">
                                     <div class="btn-action-icon">
@@ -78,7 +78,7 @@
                                         <span class="btn-action-label">Filtros del grid</span>
                                         <span class="btn-action-desc">Búsqueda avanzada por nombre, sala y más</span>
                                     </div>
-                                </button>
+                                </button> -->
                             </div>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
                         <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20, 50]"
                             [showInfo]="true"></dxo-pager>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="492"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="540"></dxi-column>
                         <dxi-column dataField="nombreCompleto" caption="Nombre Completo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="numeroIdentificacion" caption="Número Identificación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="email" caption="Email" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -123,67 +123,80 @@
                         <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala" dataType="string" [visible]="false"></dxi-column>
 
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex flex-wrap gap-2 justify-content-center align-items-center">  
-                            <div>
+                            <ng-container>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones btnAcciones--editar"
                                     (click)="actualizarAfiliado(row.data.id)"
                                     ngbTooltip="Editar afiliado" placement="top" container="body">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                            </div>
-                            <div>
+                            </ng-container>
+                            <ng-container>
                                 <button type="button" id="resumenAfiliadoButton" class="btnAcciones btnAcciones--resumen"
                                     (click)="verResumenAfiliado(row.data)"
                                     ngbTooltip="Ver resumen del afiliado" placement="top" container="body">
                                     <i class="fa fa-id-card"></i>
                                 </button>
-                            </div>
-                            <div>
+                            </ng-container>
+                            <ng-container>
                                 <button type="button" id="monederosAfiliadoButton" class="btnAcciones btnAcciones--monederos"
                                     (click)="verMonederosAfiliado(row.data)"
                                     ngbTooltip="Ver monederos del afiliado" placement="top" container="body">
                                     <i class="fa fa-wallet"></i>
                                 </button>
-                            </div>
-                            <div>
+                            </ng-container>
+                            <ng-container>
                                 <button type="button" id="nivelVipAfiliadoButton" class="btnAcciones btnAcciones--nivel-vip"
                                     (click)="abrirModalNivelVipAfiliado(row.data)"
-                                    ngbTooltip="Actualizar nivel VIP (rol autorizado según API)" placement="top" container="body">
+                                    ngbTooltip="Actualizar nivel VIP" placement="top" container="body">
                                     <i class="fas fa-crown"></i>
                                 </button>
-                            </div>
-                            <div>
+                            </ng-container>
+                            <ng-container>
                                 <button type="button" id="bloquearAfiliadoButton" class="btnAcciones btnAcciones--bloquear"
                                     (click)="abrirModalBloquearAfiliado(row.data)"
                                     ngbTooltip="Bloquear afiliado y monederos" placement="top" container="body">
                                     <i class="fa fa-ban"></i>
                                 </button>
-                            </div>
-                            <div *ngIf="puedeRegistrarAutoexclusion(row.data)">
+                            </ng-container>
+                            <ng-container *ngIf="puedeRegistrarAutoexclusion(row.data)">
                                 <button type="button" id="autoexclusionAfiliadoButton" class="btnAcciones btnAcciones--autoexclusion"
                                     (click)="abrirModalAutoexclusionAfiliado(row.data)"
                                     ngbTooltip="Registrar autoexclusión (juego responsable)" placement="top" container="body">
                                     <i class="fa fa-hand-paper"></i>
                                 </button>
-                            </div>
-                            <div>
+                            </ng-container>
+                            <ng-container>
                                 <button type="button" id="cancelarAutoexclusionButton" class="btnAcciones btnAcciones--cancelar-autoexclusion"
                                     (click)="cancelarAutoexclusionAfiliado(row.data)"
-                                    ngbTooltip="Cancelar autoexclusión (tras fecha fin; rol Gerente según API)" placement="top" container="body">
+                                    ngbTooltip="Cancelar autoexclusión (tras fecha de fin del periodo)" placement="top" container="body">
                                     <i class="fas fa-calendar-times"></i>
                                 </button>
-                            </div>
-                            <div>
-                                <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones btnAcciones--desbloquear"
+                            </ng-container>
+                            <!-- PATCH /afiliados/estatus/{id} — AfiliadosEstatusService (mismo patrón que zonas, máquinas, etc.) -->
+                            <ng-container>
+                                <button *ngIf="row.data.estatus === 0" type="button" id="pinButton"
+                                    class="btnAcciones btnAcciones--desbloquear"
                                     (click)="desbloquearAfiliado(row.data)"
-                                    ngbTooltip="Desbloquear afiliado" placement="top" container="body">
+                                    ngbTooltip="Desbloquear afiliado y monederos" placement="top" container="body">
                                     <i class="fa fa-unlock"></i>
                                 </button>
-                                <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones btnAcciones--desactivar"
+                            </ng-container>
+                            <ng-container>
+                                <button *ngIf="row.data.estatus === 0" type="button" id="activarAfiliadoButton"
+                                    class="btnAcciones btnAcciones--activar"
+                                    (click)="activarAfiliado(row.data)"
+                                    ngbTooltip="Activar afiliado (estatus en listado)" placement="top" container="body">
+                                    <i class="fa fa-arrow-up"></i>
+                                </button>
+                                <button *ngIf="row.data.estatus === 1" type="button" id="deleteButton"
+                                    class="btnAcciones btnAcciones--desactivar"
                                     (click)="desactivar(row.data)"
-                                    ngbTooltip="Desactivar afiliado" placement="top" container="body">
+                                    ngbTooltip="Desactivar afiliado (estatus en listado)" placement="top" container="body">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
-                            </div>
+                            </ng-container>
+                            <!-- POST /afiliados/{id}/desbloquear — AfiliadosService (bloqueo de monederos; no es el PATCH de estatus) -->
+                            
                         </div>
 
                         <div *dxTemplate="let f of 'est'">
@@ -215,7 +228,7 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--info">
             <i class="fas fa-info-circle"></i>
-            <span>Completa los criterios que necesites y aplica para actualizar el listado con la búsqueda del servicio.</span>
+            <span>Completa los criterios que necesites y aplica para actualizar el listado.</span>
         </div>
         <div class="row g-3">
             <div class="col-12 col-md-6">
@@ -301,6 +314,50 @@
     </div>
 </ng-template>
 
+<!-- Modal cumpleañeros — GET /afiliados/cumpleaneros?tipo=hoy|mes -->
+<ng-template #modalCumpleanerosTipo let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--cumpleaneros-tipo">
+        <h5 class="modal-title">
+            <i class="fas fa-birthday-cake"></i>
+            <span>Cumpleañeros</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalCumpleanerosTipo()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="form-indication form-indication--info">
+            <i class="fas fa-info-circle"></i>
+            <span>Selecciona si quieres ver afiliados que cumplen años hoy o durante el mes actual.</span>
+        </div>
+        <p class="text-white-50 small mt-2 mb-3">Período</p>
+        <div class="cumpleaneros-tipo-row">
+            <button type="button" class="cumpleaneros-tipo-card"
+                [class.cumpleaneros-tipo-card--selected]="cumpleanerosTipoSeleccion === 'hoy'"
+                (click)="seleccionarTipoCumpleaneros('hoy')">
+                <span class="cumpleaneros-tipo-card__icon"><i class="fas fa-sun"></i></span>
+                <span class="cumpleaneros-tipo-card__label">Hoy</span>
+                <span class="cumpleaneros-tipo-card__hint">Cumpleañeros del día</span>
+            </button>
+            <button type="button" class="cumpleaneros-tipo-card"
+                [class.cumpleaneros-tipo-card--selected]="cumpleanerosTipoSeleccion === 'mes'"
+                (click)="seleccionarTipoCumpleaneros('mes')">
+                <span class="cumpleaneros-tipo-card__icon"><i class="fas fa-calendar-alt"></i></span>
+                <span class="cumpleaneros-tipo-card__label">Mes</span>
+                <span class="cumpleaneros-tipo-card__hint">Cumpleañeros del mes</span>
+            </button>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalCumpleanerosTipo()">
+            <i class="fas fa-times"></i><span>Cancelar</span>
+        </button>
+        <button type="button" class="btn-alt btn-alt--cumpleaneros-tipo" (click)="confirmarCumpleanerosTipo()">
+            <i class="fas fa-birthday-cake"></i><span>Ver listado</span>
+        </button>
+    </div>
+</ng-template>
+
 <!-- Modal bloquear afiliado — POST /afiliados/{id}/bloquear -->
 <ng-template #modalBloquearAfiliado let-modal>
     <div class="modal-header modal-accion-header modal-accion-header--bloquear-afiliado">
@@ -318,26 +375,28 @@
         </p>
         <div class="form-indication form-indication--warning">
             <i class="fas fa-shield-alt"></i>
-            <span>Operación sensible: bloquea al afiliado y todos sus monederos. Requiere permisos de Jefe de Sala o Gerente según API.</span>
+            <span>Bloquea al afiliado y todos sus monederos. Debes indicar motivo y fecha fin (formato AAAA-MM-DD).</span>
         </div>
         <div class="row g-3 mt-1">
-            <div class="col-6">
+            <div class="col-12 col-md-6">
                 <label class="field">
-                    <span class="field-label text-white">Motivo</span>
+                    <span class="field-label text-white">Motivo <span class="field-req" aria-hidden="true">*</span></span>
                     <div class="input-sleek">
                         <i class="fas fa-comment-alt"></i>
-                        <input type="text" class="sleek-control" placeholder="Describe el motivo del bloqueo"
-                            [(ngModel)]="bloqueoMotivo" [ngModelOptions]="{standalone: true}">
+                        <input type="text" class="sleek-control" name="bloqueoMotivo" maxlength="500"
+                            placeholder="Ej. Comportamiento inapropiado en sala"
+                            [(ngModel)]="bloqueoMotivo" [ngModelOptions]="{standalone: true}" autocomplete="off">
                         <span class="sleek-line"></span>
                     </div>
                 </label>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-md-6">
                 <label class="field">
-                    <span class="field-label text-white">Fecha fin de bloqueo</span>
+                    <span class="field-label text-white">Fecha fin de bloqueo <span class="field-req" aria-hidden="true">*</span></span>
                     <div class="input-sleek">
                         <i class="fas fa-calendar-alt"></i>
-                        <input type="date" class="sleek-control" [(ngModel)]="bloqueoFechaFin"
+                        <input type="date" class="sleek-control" name="bloqueoFechaFin"
+                            [(ngModel)]="bloqueoFechaFin" [min]="bloqueoFechaMin"
                             [ngModelOptions]="{standalone: true}">
                         <span class="sleek-line"></span>
                     </div>
@@ -374,26 +433,28 @@
         </div>
         <div class="form-indication form-indication--warning">
             <i class="fas fa-shield-alt"></i>
-            <span>Programa de juego responsable. Mínimo 30 días de duración. Requiere rol de Jefe de Sala o Gerente.</span>
+            <span>Programa de juego responsable. Debes enviar motivo, duración en días (mínimo 30) y observaciones.</span>
         </div>
         <div class="row g-3 mt-1">
             <div class="col-12">
                 <label class="field">
-                    <span class="field-label text-white">Motivo</span>
+                    <span class="field-label text-white">Motivo <span class="field-req" aria-hidden="true">*</span></span>
                     <div class="input-sleek">
                         <i class="fas fa-comment-alt"></i>
-                        <input type="text" class="sleek-control" placeholder="Ej. Solicitud voluntaria del cliente por juego responsable"
-                            [(ngModel)]="autoexclusionMotivo" [ngModelOptions]="{standalone: true}">
+                        <input type="text" class="sleek-control" name="autoexclusionMotivo" maxlength="500"
+                            placeholder="Solicitud voluntaria del cliente por juego responsable"
+                            [(ngModel)]="autoexclusionMotivo" [ngModelOptions]="{standalone: true}" autocomplete="off">
                         <span class="sleek-line"></span>
                     </div>
                 </label>
             </div>
             <div class="col-12 col-md-6">
                 <label class="field">
-                    <span class="field-label text-white">Duración (días)</span>
+                    <span class="field-label text-white">Duración (días) <span class="field-req" aria-hidden="true">*</span></span>
                     <div class="input-sleek">
                         <i class="fas fa-calendar-day"></i>
-                        <input type="number" class="sleek-control" min="30" step="1" placeholder="Mínimo 30"
+                        <input type="number" class="sleek-control" name="autoexclusionDuracionDias" min="30" step="1"
+                            placeholder="Ej. 180"
                             [(ngModel)]="autoexclusionDuracionDias" [ngModelOptions]="{standalone: true}">
                         <span class="sleek-line"></span>
                     </div>
@@ -401,11 +462,12 @@
             </div>
             <div class="col-12 col-md-6">
                 <label class="field">
-                    <span class="field-label text-white">Observaciones</span>
+                    <span class="field-label text-white">Observaciones <span class="field-req" aria-hidden="true">*</span></span>
                     <div class="input-sleek">
                         <i class="fas fa-sticky-note"></i>
-                        <input type="text" class="sleek-control" placeholder="Notas adicionales (opcional)"
-                            [(ngModel)]="autoexclusionObservaciones" [ngModelOptions]="{standalone: true}">
+                        <input type="text" class="sleek-control" name="autoexclusionObservaciones" maxlength="500"
+                            placeholder="Cliente firmó formato de autoexclusión"
+                            [(ngModel)]="autoexclusionObservaciones" [ngModelOptions]="{standalone: true}" autocomplete="off">
                         <span class="sleek-line"></span>
                     </div>
                 </label>
@@ -441,7 +503,7 @@
         </p>
         <div class="form-indication form-indication--info">
             <i class="fas fa-info-circle"></i>
-            <span>Actualización manual del nivel VIP. La API documenta rol autorizado con identificador 2.</span>
+            <span>Actualización manual del nivel VIP. Indica el nivel y el motivo del cambio.</span>
         </div>
         <div class="row g-3 mt-1">
             <div class="col-12 col-md-6">

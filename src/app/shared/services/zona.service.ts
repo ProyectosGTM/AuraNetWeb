@@ -43,7 +43,14 @@ export class ZonaService {
     );
   }
 
-  obtenerTipoZona(): Observable<any> {
+  /**
+   * GET /cattiposzona/list — catálogo de tipos de zona.
+   */
+  listarCatTiposZona(): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/cattiposzona/list`);
+  }
+
+  obtenerTipoZona(): Observable<any> {
+    return this.listarCatTiposZona();
   }
 }
