@@ -90,6 +90,12 @@ Si se detecta un problema o una mejora posible:
 
 ---
 
+## 8.1 Catálogo de roles (referencia API)
+
+Para revisar “qué rol puede qué cosa” o alinear ids con servicios: usar el contrato de **`GET /roles/list`** documentado en `docs/CONTRATO-DEL-PROYECTO.md` (sección **6.1**) y en `docs/CONTRATO_DESARROLLO.md` (apartado **Autenticación, JWT y roles de usuario**). Ahí están los **id** y **nombre** oficiales (1…8: SA, Dev, Cliente, Administrador, Gerente, Sub-Gerente, Cajero, Recepcionista).
+
+---
+
 ## 9. Prohibiciones resumidas
 
 - Inventar estilos o patrones visuales sin contrastar con lo existente.

@@ -150,7 +150,7 @@
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
                         [pager]="{ 
                             showPageSizeSelector: true, 
-                            allowedPageSizes: [50], 
+                            allowedPageSizes: [20], 
                             showInfo: true,
                             infoText: 'Página {0} de {1}', 
                             visible: true 
@@ -184,54 +184,55 @@
                         </dxo-export>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
-                                <button type="button" id="saldoButton" class="btnAcciones" (click)="verSaldo(row.data.id)"
-                                    ngbTooltip="Obtener saldo de tesorería" placement="top" container="body">
-                                    <i class="fa fa-wallet"></i>
+                                <button type="button" id="bovedaAbiertaSalaButton" class="btnAcciones" (click)="verBovedaAbiertaSala(row.data)"
+                                    ngbTooltip="Ver bóveda abierta de la sala" placement="top">
+                                    <i class="fa fa-door-open"></i>
                                 </button>
                             </div>
                             <div>
                                 <button type="button" id="resumenButton" class="btnAcciones" (click)="verResumen(row.data.id)"
-                                    ngbTooltip="Ver resumen de tesorería" placement="top" container="body">
+                                    ngbTooltip="Ver resumen de tesorería" placement="top">
                                     <i class="fa fa-chart-line"></i>
                                 </button>
                             </div>
                             <div>
                                 <button type="button" id="historialButton" class="btnAcciones" (click)="verHistorial(row.data.id)"
-                                    ngbTooltip="Ver historial de movimientos" placement="top" container="body">
+                                    ngbTooltip="Ver historial de movimientos" placement="top">
                                     <i class="fa fa-history"></i>
                                 </button>
                             </div>
-                            <div>
-                                <button type="button" id="bovedaAbiertaSalaButton" class="btnAcciones" (click)="verBovedaAbiertaSala(row.data)"
-                                    ngbTooltip="Ver bóveda abierta de la sala" placement="top" container="body">
-                                    <i class="fa fa-door-open"></i>
+                            <!-- <div>
+                                <button type="button" id="saldoButton" class="btnAcciones" (click)="verSaldo(row.data.id)"
+                                    ngbTooltip="Obtener saldo de tesorería" placement="top">
+                                    <i class="fa fa-wallet"></i>
                                 </button>
-                            </div>
+                            </div> -->
                             <div>
-                                <button type="button" id="eliminarTesoreriaButton" class="btnAcciones" (click)="eliminarTesoreria(row.data)"
-                                    ngbTooltip="Eliminar tesorería" placement="top" container="body">
+                                <button type="button" id="eliminarTesoreriaButton" class="btnAcciones"
+                                    (click)="eliminarTesoreria(row.data.id ?? row.data.Id)"
+                                    ngbTooltip="Eliminar tesorería" placement="top">
                                     <i class="fa fa-trash-alt"></i>
                                 </button>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarTesoreria(row.data.id)"
-                                    ngbTooltip="Editar tesorería" placement="top" container="body">
+                                    ngbTooltip="Editar tesorería" placement="top">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
                             <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
                                     (click)="activar(row.data)"
-                                    ngbTooltip="Activar tesorería" placement="top" container="body">
+                                    ngbTooltip="Activar tesorería" placement="top">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
                                     (click)="desactivar(row.data)"
-                                    ngbTooltip="Desactivar tesorería" placement="top" container="body">
+                                    ngbTooltip="Desactivar tesorería" placement="top">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                         <div *dxTemplate="let row of 'EstatusTesoreria'">
                             <span class="estatus" [style.background-color]="row.data.estatusTesoreriaColor" [style.color]="'#fff'" [style.border-color]="row.data.estatusTesoreriaColor">
@@ -396,7 +397,7 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--warning">
             <i class="fas fa-door-closed"></i>
-            <span>Cierra la bóveda del día. Registra el fondo contado y las observaciones del cierre.</span>
+            <span>Cierra la bóveda del día. No se puede completar el cierre si aún hay turnos de caja abiertos. Indica el fondo contado y, si quieres, observaciones.</span>
         </div>
         <form [formGroup]="cerrarTesoreriaForm">
             <div class="row g-3">
@@ -422,7 +423,15 @@
                         <span class="field-label text-white">Fondo Contado *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="fondoContado" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <input
+                                #inpFondoContadoCerrar
+                                class="sleek-control"
+                                type="text"
+                                inputmode="decimal"
+                                autocomplete="off"
+                                placeholder="0.00"
+                                (input)="onMontoCerrarInput($event)"
+                                (blur)="onMontoCerrarBlur($event)" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -490,7 +499,15 @@
                         <span class="field-label text-white">Monto *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <input
+                                #inpMontoReponer
+                                class="sleek-control"
+                                type="text"
+                                inputmode="decimal"
+                                autocomplete="off"
+                                placeholder="0.00"
+                                (input)="onMontoReponerInput($event)"
+                                (blur)="onMontoReponerBlur($event)" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -568,7 +585,15 @@
                         <span class="field-label text-white">Monto *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <input
+                                #inpMontoRetirar
+                                class="sleek-control"
+                                type="text"
+                                inputmode="decimal"
+                                autocomplete="off"
+                                placeholder="0.00"
+                                (input)="onMontoRetirarInput($event)"
+                                (blur)="onMontoRetirarBlur($event)" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>

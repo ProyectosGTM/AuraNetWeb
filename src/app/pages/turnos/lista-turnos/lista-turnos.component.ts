@@ -10,6 +10,7 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { TransaccionesService } from 'src/app/shared/services/transacciones.service';
+import { AccionConControlRol, RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { TurnosService } from 'src/app/shared/services/turnos.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
@@ -17,8 +18,8 @@ import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
 
-/** Pesta?as del panel de acciones POS (misma UX que Promociones). */
-export type TabTurnosPanel = 'apertura' | 'efectivo' | 'control' | 'corte';
+/** Pestañas del panel de acciones POS (misma UX que Promociones). */
+export type TabTurnosPanel =  'apertura' | 'efectivo' | 'control' | 'corte' | 'consulta-turnos';
 
 const turnoTabPanelAnimation = trigger('turnoTabPanel', [
   transition('* => *', [
@@ -51,8 +52,8 @@ export class ListaTurnosComponent {
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
 
-  /** Pesta?a visible (por defecto apertura / cierre). */
-  tabTurnos: TabTurnosPanel = 'apertura';
+  /** Pestaña visible del panel POS (por defecto: consulta mi turno y activos). */
+  tabTurnos: TabTurnosPanel = 'consulta-turnos';
 
   @ViewChild('modalAbrirTurno', { static: false }) modalAbrirTurno!: TemplateRef<any>;
   @ViewChild('modalCerrarTurno', { static: false }) modalCerrarTurno!: TemplateRef<any>;
@@ -65,15 +66,27 @@ export class ListaTurnosComponent {
   @ViewChild('modalReactivarTurno', { static: false }) modalReactivarTurno!: TemplateRef<any>;
   @ViewChild('modalCorteParcial', { static: false }) modalCorteParcial!: TemplateRef<any>;
   @ViewChild('modalTurnosActivos', { static: false }) modalTurnosActivos!: TemplateRef<any>;
+  @ViewChild('modalDetalleTurno', { static: false }) modalDetalleTurno!: TemplateRef<any>;
+  @ViewChild('modalMiTurnoActivo', { static: false }) modalMiTurnoActivo!: TemplateRef<any>;
   private modalRef?: NgbModalRef;
 
   // Turnos activos (GET /pos/turnos/activos)
   turnosActivos: any[] = [];
   loadingTurnosActivos = false;
 
+  /** Turno activo del usuario en sesión (GET mi-turno/activo). */
+  miTurnoActivo: any = null;
+  loadingMiTurnoActivo = false;
+
+  /** Detalle de un turno por id (GET turno/{id}). */
+  detalleTurnoData: any = null;
+  loadingDetalleTurno = false;
+
   // Resumen turno (GET /pos/turnos/resumen/saldos/{id})
   resumenTurnoData: any = null;
   loadingResumenTurno = false;
+  /** Sin datos para el turno (el backend puede responder 404 con HTML o JSON). No es fallo de red ni del listado. */
+  resumenTurnoSinDatos = false;
 
   // Movimientos turno (GET /pos/turnos/movimientos/{id})
   movimientosTurnoData: any[] = [];
@@ -139,6 +152,7 @@ export class ListaTurnosComponent {
     private transaccionesService: TransaccionesService,
     private usuariosService: UsuariosService,
     private salasService: SalaService,
+    private rolAcceso: RolAccesoService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -203,6 +217,7 @@ export class ListaTurnosComponent {
   ngOnInit() {
     this.setupDataSource();
     this.cargarTurnosActivos();
+    this.cargarMiTurnoActivo();
     this.cargarListasParaFiltros();
   }
 
@@ -261,6 +276,178 @@ export class ListaTurnosComponent {
     });
   }
 
+  cargarMiTurnoActivo(): void {
+    this.loadingMiTurnoActivo = true;
+    this.turnosService.obtenerMiTurnoActivo().subscribe({
+      next: (resp) => {
+        this.loadingMiTurnoActivo = false;
+        this.miTurnoActivo = this.normalizarRespuestaMiTurnoActivo(resp);
+      },
+      error: (err) => {
+        this.loadingMiTurnoActivo = false;
+        const status = err?.status;
+        if (status === 404 || status === 204) {
+          this.miTurnoActivo = null;
+          return;
+        }
+        this.miTurnoActivo = null;
+      },
+    });
+  }
+
+  private normalizarRespuestaMiTurnoActivo(resp: any): any | null {
+    if (resp == null) {
+      return null;
+    }
+    if (resp.success === false) {
+      return null;
+    }
+    let raw = resp.data !== undefined ? resp.data : resp;
+    if (raw == null || raw === '') {
+      return null;
+    }
+    const t = Array.isArray(raw) ? raw[0] : raw;
+    if (t == null || typeof t !== 'object') {
+      return null;
+    }
+    const id = t.id ?? t.idTurno ?? t.idTurnoCaja;
+    if (id == null && t.idCaja == null) {
+      return null;
+    }
+    return t;
+  }
+
+  getIdTurnoMiActivo(): number | null {
+    const t = this.miTurnoActivo;
+    if (!t) {
+      return null;
+    }
+    const id = t.id ?? t.idTurno ?? t.idTurnoCaja;
+    if (id == null || id === '') {
+      return null;
+    }
+    const n = Number(id);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  verDetalleTurno(idTurno: number): void {
+    if (idTurno == null || Number.isNaN(Number(idTurno))) {
+      return;
+    }
+    this.detalleTurnoData = null;
+    this.loadingDetalleTurno = true;
+    this.modalRef = this.modalService.open(this.modalDetalleTurno, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-detalle-turno',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+    });
+    this.turnosService.obtenerTurnoPorId(Number(idTurno)).subscribe({
+      next: (resp) => {
+        this.loadingDetalleTurno = false;
+        this.detalleTurnoData = resp?.data ?? resp ?? null;
+      },
+      error: (err) => {
+        this.loadingDetalleTurno = false;
+        this.detalleTurnoData = null;
+        Swal.fire({
+          title: 'Error',
+          text: err?.error?.message || err?.error || 'No se pudo cargar el detalle del turno.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Cerrar',
+        });
+        if (this.modalRef) {
+          this.modalRef.close();
+        }
+      },
+    });
+  }
+
+  cerrarModalDetalleTurno(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+    this.detalleTurnoData = null;
+    this.loadingDetalleTurno = false;
+  }
+
+  abrirModalMiTurno(): void {
+    this.modalRef = this.modalService.open(this.modalMiTurnoActivo, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-mi-turno-activo',
+      centered: true,
+      backdrop: true,
+      keyboard: true,
+    });
+    this.cargarMiTurnoActivo();
+  }
+
+  cerrarModalMiTurno(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+  }
+
+  /** Limpia textos nulos o la cadena literal "null" que a veces envía el API. */
+  limpiarTextoTurno(v: unknown): string {
+    if (v == null) {
+      return '';
+    }
+    const s = String(v).trim();
+    if (!s || s.toLowerCase() === 'null') {
+      return '';
+    }
+    return s;
+  }
+
+  textoNombreClienteTurno(t: any): string {
+    if (!t) {
+      return '—';
+    }
+    const parts = [t.nombreCliente, t.apellidoPaternoCliente, t.apellidoMaternoCliente].map((p) => this.limpiarTextoTurno(p)).filter(Boolean);
+    return parts.length ? parts.join(' ') : '—';
+  }
+
+  textoNombreUsuarioTurno(t: any): string {
+    if (!t) {
+      return '—';
+    }
+    const parts = [t.nombreUsuario, t.apellidoPaternoUsuario, t.apellidoMaternoUsuario].map((p) => this.limpiarTextoTurno(p)).filter(Boolean);
+    return parts.length ? parts.join(' ') : '—';
+  }
+
+  fechaTurnoIsoMostrar(iso: string | null | undefined, vacio: string): string {
+    if (!iso) {
+      return vacio;
+    }
+    const txt = this.formatearFechaHora(iso);
+    return txt || vacio;
+  }
+
+  fechaTurnoSoloFecha(iso: string | null | undefined, vacio: string): string {
+    if (!iso) {
+      return vacio;
+    }
+    const txt = this.formatearFecha(iso);
+    return txt || vacio;
+  }
+
+  /** Id numérico del turno (para acciones; no se muestra en la ficha). */
+  idTurnoEnObjeto(t: any): number | null {
+    if (!t) {
+      return null;
+    }
+    const id = t.id ?? t.idTurno;
+    if (id == null || id === '') {
+      return null;
+    }
+    const n = Number(id);
+    return Number.isFinite(n) ? n : null;
+  }
+
   abrirModalTurnosActivos(): void {
     this.cargarTurnosActivos();
     this.modalRef = this.modalService.open(this.modalTurnosActivos, {
@@ -282,6 +469,7 @@ export class ListaTurnosComponent {
   limpiarCampos() {
     this.filterParams = {};
     this.filtrosForm?.reset({ idCaja: null, idEstatusTurno: null });
+    this.cargarMiTurnoActivo();
     if (this.dataGrid && this.dataGrid.instance) {
       this.dataGrid.instance.clearFilter();
       this.dataGrid.instance.clearGrouping();
@@ -328,6 +516,7 @@ export class ListaTurnosComponent {
   verResumenTurno(idTurno: number) {
     if (idTurno == null || idTurno === undefined) return;
     this.resumenTurnoData = null;
+    this.resumenTurnoSinDatos = false;
     this.loadingResumenTurno = true;
     this.modalRef = this.modalService.open(this.modalResumenTurno, {
       size: 'lg',
@@ -339,14 +528,27 @@ export class ListaTurnosComponent {
     this.turnosService.obtenerResumenTurno(Number(idTurno)).subscribe({
       next: (resp) => {
         this.loadingResumenTurno = false;
+        this.resumenTurnoSinDatos = false;
         this.resumenTurnoData = resp?.data ?? resp ?? null;
       },
       error: (err) => {
         this.loadingResumenTurno = false;
         this.resumenTurnoData = null;
+        // Algunos backends usan 404 cuando no hay resumen para el turno; no es un fallo del servicio en sí.
+        if (err?.status === 404) {
+          this.resumenTurnoSinDatos = true;
+          return;
+        }
+        this.resumenTurnoSinDatos = false;
+        const texto =
+          typeof err?.error?.message === 'string'
+            ? err.error.message
+            : typeof err?.message === 'string'
+              ? err.message
+              : 'No se pudo cargar el resumen del turno.';
         Swal.fire({
           title: 'Error',
-          text: err?.error?.message || err?.error || 'No se pudo cargar el resumen del turno.',
+          text: texto,
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -391,6 +593,7 @@ export class ListaTurnosComponent {
   cerrarModalResumen() {
     if (this.modalRef) this.modalRef.close();
     this.resumenTurnoData = null;
+    this.resumenTurnoSinDatos = false;
   }
 
   cerrarModalMovimientos() {
@@ -410,7 +613,7 @@ export class ListaTurnosComponent {
     this.listaTurnos = new CustomStore({
       key: 'id',
       load: async (loadOptions: any) => {
-        const take = Number(loadOptions?.take) || this.pageSize || 10;
+        const take = Number(loadOptions?.take) || this.pageSize || 20;
         const skip = Number(loadOptions?.skip) || 0;
         const page = Math.floor(skip / take) + 1;
 
@@ -704,6 +907,7 @@ export class ListaTurnosComponent {
         });
         this.cerrarModal();
         this.abrirTurnoForm.reset();
+        this.cargarMiTurnoActivo();
         this.setupDataSource();
         if (this.dataGrid) {
           this.dataGrid.instance.refresh();
@@ -775,7 +979,19 @@ export class ListaTurnosComponent {
     return codigo === 'SUSPENDIDO';
   }
 
+  private asegurarRolOperacionTurno(accion: AccionConControlRol): boolean {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion(accion, rol)) {
+      this.rolAcceso.mostrarAccesoDenegado(accion);
+      return false;
+    }
+    return true;
+  }
+
   abrirModalReponerDesdeFila(row: any) {
+    if (!this.asegurarRolOperacionTurno('reponerEfectivoTurno')) {
+      return;
+    }
     if (!row?.idCaja) {
       Swal.fire({
         title: '¡Atención!',
@@ -818,6 +1034,9 @@ export class ListaTurnosComponent {
   }
 
   abrirModalRetirarDesdeFila(row: any) {
+    if (!this.asegurarRolOperacionTurno('retirarEfectivoTurno')) {
+      return;
+    }
     if (!row?.idCaja) {
       Swal.fire({
         title: '¡Atención!',
@@ -900,6 +1119,9 @@ export class ListaTurnosComponent {
   }
 
   reponerTurno() {
+    if (!this.asegurarRolOperacionTurno('reponerEfectivoTurno')) {
+      return;
+    }
     this.reponerTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
     this.listaCajasReponer = [];
     this.modalRef = this.modalService.open(this.modalReponerTurno, {
@@ -945,6 +1167,9 @@ export class ListaTurnosComponent {
   }
 
   suspenderTurno() {
+    if (!this.asegurarRolOperacionTurno('suspenderTurno')) {
+      return;
+    }
     this.suspenderTurnoForm.reset({ idCaja: null, motivo: '', efectivoContado: '' });
     this.listaCajasSuspender = [];
     this.modalRef = this.modalService.open(this.modalSuspenderTurno, {
@@ -972,6 +1197,9 @@ export class ListaTurnosComponent {
   }
 
   abrirModalSuspenderDesdeFila(row: any) {
+    if (!this.asegurarRolOperacionTurno('suspenderTurno')) {
+      return;
+    }
     if (!row?.idCaja) {
       Swal.fire({
         title: '¡Atención!',
@@ -1014,6 +1242,9 @@ export class ListaTurnosComponent {
   }
 
   guardarSuspenderTurno() {
+    if (!this.asegurarRolOperacionTurno('suspenderTurno')) {
+      return;
+    }
     if (this.suspenderTurnoForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
@@ -1043,6 +1274,7 @@ export class ListaTurnosComponent {
         this.cerrarModal();
         this.suspenderTurnoForm.reset();
         this.cargarTurnosActivos();
+        this.cargarMiTurnoActivo();
         this.setupDataSource();
         if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
       },
@@ -1060,6 +1292,9 @@ export class ListaTurnosComponent {
   }
 
   reactivarTurno() {
+    if (!this.asegurarRolOperacionTurno('reactivarTurno')) {
+      return;
+    }
     this.reactivarTurnoForm.reset({ idCaja: null, observaciones: '' });
     this.listaCajasReactivar = [];
     this.modalRef = this.modalService.open(this.modalReactivarTurno, {
@@ -1088,6 +1323,9 @@ export class ListaTurnosComponent {
   }
 
   abrirModalReactivarDesdeFila(row: any) {
+    if (!this.asegurarRolOperacionTurno('reactivarTurno')) {
+      return;
+    }
     if (!row?.idCaja) {
       Swal.fire({
         title: '¡Atención!',
@@ -1130,6 +1368,9 @@ export class ListaTurnosComponent {
   }
 
   guardarReactivarTurno() {
+    if (!this.asegurarRolOperacionTurno('reactivarTurno')) {
+      return;
+    }
     if (this.reactivarTurnoForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
@@ -1158,6 +1399,7 @@ export class ListaTurnosComponent {
         this.cerrarModal();
         this.reactivarTurnoForm.reset();
         this.cargarTurnosActivos();
+        this.cargarMiTurnoActivo();
         this.setupDataSource();
         if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
       },
@@ -1175,6 +1417,9 @@ export class ListaTurnosComponent {
   }
 
   corteParcial() {
+    if (!this.asegurarRolOperacionTurno('corteParcialTurno')) {
+      return;
+    }
     this.corteParcialForm.reset({ idCaja: null, efectivoContado: '', observaciones: '' });
     this.listaCajasCorteParcial = [];
     this.modalRef = this.modalService.open(this.modalCorteParcial, {
@@ -1203,6 +1448,9 @@ export class ListaTurnosComponent {
   }
 
   abrirModalCorteParcialDesdeFila(row: any) {
+    if (!this.asegurarRolOperacionTurno('corteParcialTurno')) {
+      return;
+    }
     if (!row?.idCaja) {
       Swal.fire({
         title: '¡Atención!',
@@ -1245,6 +1493,9 @@ export class ListaTurnosComponent {
   }
 
   guardarCorteParcial() {
+    if (!this.asegurarRolOperacionTurno('corteParcialTurno')) {
+      return;
+    }
     if (this.corteParcialForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
@@ -1274,6 +1525,7 @@ export class ListaTurnosComponent {
         this.cerrarModal();
         this.corteParcialForm.reset();
         this.cargarTurnosActivos();
+        this.cargarMiTurnoActivo();
         this.setupDataSource();
         if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
       },
@@ -1291,6 +1543,9 @@ export class ListaTurnosComponent {
   }
 
   retirarTurno() {
+    if (!this.asegurarRolOperacionTurno('retirarEfectivoTurno')) {
+      return;
+    }
     this.retirarTurnoForm.reset({ idCaja: null, monto: '', motivo: '' });
     this.listaCajasRetirar = [];
     this.modalRef = this.modalService.open(this.modalRetirarTurno, {
@@ -1319,6 +1574,9 @@ export class ListaTurnosComponent {
   }
 
   guardarRetirarTurno() {
+    if (!this.asegurarRolOperacionTurno('retirarEfectivoTurno')) {
+      return;
+    }
     if (this.retirarTurnoForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
@@ -1349,6 +1607,7 @@ export class ListaTurnosComponent {
         });
         this.cerrarModal();
         this.retirarTurnoForm.reset();
+        this.cargarMiTurnoActivo();
         this.setupDataSource();
         if (this.dataGrid) {
           this.dataGrid.instance.refresh();
@@ -1368,6 +1627,9 @@ export class ListaTurnosComponent {
   }
 
   guardarReponerTurno() {
+    if (!this.asegurarRolOperacionTurno('reponerEfectivoTurno')) {
+      return;
+    }
     if (this.reponerTurnoForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
@@ -1399,6 +1661,7 @@ export class ListaTurnosComponent {
         });
         this.cerrarModal();
         this.reponerTurnoForm.reset();
+        this.cargarMiTurnoActivo();
         this.setupDataSource();
         if (this.dataGrid) {
           this.dataGrid.instance.refresh();
@@ -1461,6 +1724,7 @@ export class ListaTurnosComponent {
         });
         this.cerrarModal();
         this.cerrarTurnoForm.reset();
+        this.cargarMiTurnoActivo();
         this.setupDataSource();
         if (this.dataGrid) {
           this.dataGrid.instance.refresh();
@@ -1555,6 +1819,8 @@ export class ListaTurnosComponent {
       this.corteParcialForm.reset();
       this.consultarSaldoCajaForm.reset();
       this.saldoCajaData = null;
+      this.detalleTurnoData = null;
+      this.loadingDetalleTurno = false;
     }
   }
 }

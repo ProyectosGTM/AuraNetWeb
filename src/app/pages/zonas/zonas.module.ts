@@ -23,6 +23,14 @@ import { AgregarZonaComponent } from './agregar-zona/agregar-zona.component';
     DxPopupModule,
     SharedModule,
     DxSelectBoxModule
+  ],
+  exports: [
+    AgregarZonaComponent,
+    FormsModule,
+    ReactiveFormsModule,
+    DxSelectBoxModule,
+    NgbTooltipModule,
+    SharedModule,
   ]
 })
 export class ZonasModule { }

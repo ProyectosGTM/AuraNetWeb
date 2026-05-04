@@ -1,13 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import Swal from 'sweetalert2';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
+import {
+  aplicarMontoBlurEnCampo,
+  aplicarMontoInputEnCampo,
+  textoMontoDesdeValorControl,
+} from 'src/app/shared/utils/monto-input-formato.util';
 
 @Component({
   selector: 'app-abrir-boveda',
@@ -15,7 +21,7 @@ import { UsuariosService } from 'src/app/shared/services/usuario.service';
   styleUrl: './abrir-boveda.component.scss',
   animations: [fadeInRightAnimation],
 })
-export class AbrirBovedaComponent implements OnInit {
+export class AbrirBovedaComponent implements OnInit, AfterViewInit {
   /** Popup al body: evita listas cortadas por overflow en la tarjeta de turnos. */
   readonly selectDropDownOptions = { container: 'body', hideOnParentScroll: false };
 
@@ -27,6 +33,8 @@ export class AbrirBovedaComponent implements OnInit {
   public listaUsuarios: any[] = [];
   public mapaUsuarios: Map<string, any> = new Map();
 
+  @ViewChild('inpFondoInicialBoveda', { static: false }) inpFondoInicialBoveda?: ElementRef<HTMLInputElement>;
+
   constructor(
     private router: Router,
     private tesoreriaService: TesoreriaService,
@@ -34,10 +42,11 @@ export class AbrirBovedaComponent implements OnInit {
     private salasService: SalaService,
     private cajasService: CajasService,
     private usuService: UsuariosService,
+    private rolAcceso: RolAccesoService,
   ) {
     this.abrirTesoreriaForm = this.fb.group({
       idSala: [null, Validators.required],
-      fondoInicial: ['', [Validators.required, Validators.min(0.01)]],
+      fondoInicial: [null as number | null, [Validators.required, Validators.min(0.01)]],
       observaciones: [''],
       turnosAbrir: this.fb.array([], this.minLengthArray(1))
     });
@@ -61,6 +70,15 @@ export class AbrirBovedaComponent implements OnInit {
     // Agregar un turno inicial automáticamente
     this.agregarTurnoAbrir();
     this.obtenerUsuarios();
+  }
+
+  ngAfterViewInit(): void {
+    queueMicrotask(() => {
+      this.refrescarVistaFondoInicialBoveda();
+      for (let i = 0; i < this.turnosAbrirArray.length; i++) {
+        this.refrescarVistaMontoTurno(i);
+      }
+    });
   }
 
   /**
@@ -159,10 +177,13 @@ export class AbrirBovedaComponent implements OnInit {
   agregarTurnoAbrir() {
     const turnoForm = this.fb.group({
       idCaja: [null, Validators.required],
-      fondoInicial: ['', [Validators.required, Validators.min(0.01)]],
-      idUsuario: [null, Validators.required]
+      fondoInicial: [null as number | null, [Validators.required, Validators.min(0.01)]],
+      /** Opcional: si no se elige, el backend asigna al usuario que abre la bóveda (Swagger). */
+      idUsuario: [null],
     });
     this.turnosAbrirArray.push(turnoForm);
+    const idx = this.turnosAbrirArray.length - 1;
+    setTimeout(() => this.refrescarVistaMontoTurno(idx), 0);
   }
 
   eliminarTurnoAbrir(index: number) {
@@ -181,43 +202,129 @@ export class AbrirBovedaComponent implements OnInit {
   }
 
   guardarAbrirTesoreria() {
-    if (this.abrirTesoreriaForm.invalid) {
-      const turnosArray = this.abrirTesoreriaForm.get('turnosAbrir') as FormArray;
-      if (turnosArray.length === 0) {
-        Swal.fire({
-          title: '¡Atención!',
-          text: 'Debe agregar al menos un turno de caja para abrir la boveda.',
-          icon: 'warning',
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-        return;
-      }
+    const raw = this.abrirTesoreriaForm.getRawValue();
+    const idSala = Number(raw.idSala);
+    if (!Number.isFinite(idSala) || idSala <= 0) {
       Swal.fire({
-        title: '¡Atención!',
-        text: 'Por favor complete todos los campos requeridos.',
-        icon: 'warning',
+        title: 'Elige la sala',
+        text: 'Indica en qué sala vas a abrir la bóveda. Es el primer dato que debes elegir.',
+        icon: 'info',
         background: '#0d121d',
+        color: '#e2e8f0',
         confirmButtonColor: '#3085d6',
-        confirmButtonText: 'Confirmar',
+        confirmButtonText: 'Entendido',
       });
       return;
     }
 
-    const turnosArray = this.abrirTesoreriaForm.get('turnosAbrir') as FormArray;
-    const turnosAbrir = turnosArray.controls.map(control => ({
-      idCaja: Number(control.get('idCaja')?.value),
-      fondoInicial: Number(control.get('fondoInicial')?.value ?? 0),
-      idUsuario: Number(control.get('idUsuario')?.value)
-    }));
+    const fondoBoveda = Number(raw.fondoInicial);
+    if (!Number.isFinite(fondoBoveda) || fondoBoveda <= 0) {
+      Swal.fire({
+        title: 'Dinero de la bóveda',
+        text: 'Escribe cuánto dinero hay en la bóveda al abrirla. Debe ser un número mayor que cero.',
+        icon: 'info',
+        background: '#0d121d',
+        color: '#e2e8f0',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido',
+      });
+      return;
+    }
 
-    const payload = {
-      idSala: Number(this.abrirTesoreriaForm.value.idSala),
-      fondoInicial: Number(this.abrirTesoreriaForm.value.fondoInicial),
-      observaciones: this.abrirTesoreriaForm.value.observaciones || '',
-      turnosAbrir
+    const turnosArray = this.turnosAbrirArray;
+    if (turnosArray.length === 0) {
+      Swal.fire({
+        title: 'Faltan turnos de caja',
+        text: 'Agrega al menos un turno: cada uno es una caja con su dinero inicial.',
+        icon: 'info',
+        background: '#0d121d',
+        color: '#e2e8f0',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido',
+      });
+      return;
+    }
+
+    for (let i = 0; i < turnosArray.length; i++) {
+      const g = turnosArray.at(i) as FormGroup;
+      const idCaja = Number(g.get('idCaja')?.value);
+      if (!Number.isFinite(idCaja) || idCaja <= 0) {
+        Swal.fire({
+          title: 'Revisa la caja',
+          text: `En el turno ${i + 1}, elige la caja que corresponde.`,
+          icon: 'info',
+          background: '#0d121d',
+          color: '#e2e8f0',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Entendido',
+        });
+        return;
+      }
+      const fondoTurno = Number(g.get('fondoInicial')?.value);
+      if (!Number.isFinite(fondoTurno) || fondoTurno <= 0) {
+        Swal.fire({
+          title: 'Revisa el dinero del turno',
+          text: `En el turno ${i + 1}, escribe el dinero con el que abre la caja. Debe ser mayor que cero.`,
+          icon: 'info',
+          background: '#0d121d',
+          color: '#e2e8f0',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Entendido',
+        });
+        return;
+      }
+      const idUsuarioRaw = g.get('idUsuario')?.value;
+      if (idUsuarioRaw != null && idUsuarioRaw !== '') {
+        const idUsuario = Number(idUsuarioRaw);
+        if (!Number.isFinite(idUsuario) || idUsuario <= 0) {
+          Swal.fire({
+            title: 'Usuario del turno',
+            text: `En el turno ${i + 1}, si eliges usuario debe ser uno válido. Si no, deja el campo vacío y el sistema lo asigna solo.`,
+            icon: 'info',
+            background: '#0d121d',
+            color: '#e2e8f0',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Entendido',
+          });
+          return;
+        }
+      }
+    }
+
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('abrirTesoreriaDelDia', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('abrirTesoreriaDelDia');
+      return;
+    }
+
+    const observacionesTrim = (raw.observaciones ?? '').toString().trim();
+    const turnosAbrir = turnosArray.controls.map((control) => {
+      const idUsuarioRaw = control.get('idUsuario')?.value;
+      const idUsuarioNum =
+        idUsuarioRaw != null && idUsuarioRaw !== '' ? Number(idUsuarioRaw) : NaN;
+      const item: { idCaja: number; fondoInicial: number; idUsuario?: number } = {
+        idCaja: Number(control.get('idCaja')?.value),
+        fondoInicial: Number(control.get('fondoInicial')?.value ?? 0),
+      };
+      if (Number.isFinite(idUsuarioNum) && idUsuarioNum > 0) {
+        item.idUsuario = Math.trunc(idUsuarioNum);
+      }
+      return item;
+    });
+
+    const payload: {
+      idSala: number;
+      fondoInicial: number;
+      turnosAbrir: { idCaja: number; fondoInicial: number; idUsuario?: number }[];
+      observaciones?: string;
+    } = {
+      idSala: Math.trunc(idSala),
+      fondoInicial: fondoBoveda,
+      turnosAbrir,
     };
+    if (observacionesTrim) {
+      payload.observaciones = observacionesTrim;
+    }
 
     this.tesoreriaService.abrirTesoreria(payload).subscribe({
       next: (response) => {
@@ -246,5 +353,41 @@ export class AbrirBovedaComponent implements OnInit {
 
   cancelar() {
     this.router.navigate(['/tesoreria']);
+  }
+
+  /** Control numérico del monto (misma fuente que el body); `null` = bóveda principal. */
+  private controlMonto(indexTurno: number | null) {
+    if (indexTurno === null) {
+      return this.abrirTesoreriaForm.get('fondoInicial');
+    }
+    const g = this.turnosAbrirArray.at(indexTurno) as FormGroup | null;
+    return g?.get('fondoInicial') ?? null;
+  }
+
+  onMontoCampoInput(ev: Event, indexTurno: number | null): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.controlMonto(indexTurno));
+  }
+
+  onMontoCampoBlur(ev: Event, indexTurno: number | null): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.controlMonto(indexTurno));
+  }
+
+  private refrescarVistaFondoInicialBoveda(): void {
+    const el = this.inpFondoInicialBoveda?.nativeElement;
+    if (!el) {
+      return;
+    }
+    el.value = textoMontoDesdeValorControl(this.abrirTesoreriaForm.get('fondoInicial')?.value);
+  }
+
+  /** Sincroniza el texto del input de monto de un turno tras agregar filas al array. */
+  private refrescarVistaMontoTurno(indexTurno: number): void {
+    const host = document.querySelector(
+      `[data-turno-monto-index="${indexTurno}"]`,
+    ) as HTMLInputElement | null;
+    if (!host) {
+      return;
+    }
+    host.value = textoMontoDesdeValorControl(this.controlMonto(indexTurno)?.value);
   }
 }

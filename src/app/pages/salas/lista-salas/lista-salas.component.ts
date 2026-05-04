@@ -64,6 +64,17 @@ export class ListaSalasComponent {
     this.router.navigateByUrl('/salas/editar-sala/' + id);
   }
 
+  private idSalaDesdeFila(row: any): number | null {
+    const id = Number(row?.id ?? row?.idSala);
+    return Number.isFinite(id) && id > 0 ? id : null;
+  }
+
+  abrirDistribucion(row: any): void {
+    const id = this.idSalaDesdeFila(row);
+    if (id == null) return;
+    this.router.navigate(['/salas', 'distribucion', id]);
+  }
+
   activar(rowData: any) {
     Swal.fire({
       title: '¡Activar!',
@@ -162,7 +173,7 @@ export class ListaSalasComponent {
     this.listaSalas = new CustomStore({
       key: 'id',
       load: async (loadOptions: any) => {
-        const take = Number(loadOptions?.take) || this.pageSize || 10;
+        const take = Number(loadOptions?.take) || this.pageSize || 20;
         const skip = Number(loadOptions?.skip) || 0;
         const page = Math.floor(skip / take) + 1;
 

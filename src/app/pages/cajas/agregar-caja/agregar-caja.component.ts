@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -8,6 +8,11 @@ import { ZonaService } from 'src/app/shared/services/zona.service';
 import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
+import {
+  aplicarMontoBlurEnCampo,
+  aplicarMontoInputEnCampo,
+  textoMontoDesdeValorControl,
+} from 'src/app/shared/utils/monto-input-formato.util';
 
 type SelectItem = { id: number; text: string };
 
@@ -17,7 +22,7 @@ type SelectItem = { id: number; text: string };
   styleUrl: './agregar-caja.component.scss',
   animations: [fadeInRightAnimation],
 })
-export class AgregarCajaComponent implements OnInit {
+export class AgregarCajaComponent implements OnInit, AfterViewInit {
   /** Estatus enviado siempre al API (campo oculto, sin selector en pantalla). */
   private readonly idEstatusCajaDefault = 2;
 
@@ -34,6 +39,8 @@ export class AgregarCajaComponent implements OnInit {
   ];
 
   cajaForm: FormGroup;
+
+  @ViewChild('inpLimiteEfectivo', { static: false }) inpLimiteEfectivo?: ElementRef<HTMLInputElement>;
 
   constructor(
     private fb: FormBuilder,
@@ -76,6 +83,10 @@ export class AgregarCajaComponent implements OnInit {
         this.cargarListasIndividualmente();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    queueMicrotask(() => this.refrescarVistaLimiteEfectivo());
   }
 
   private procesarListas(responses: any) {
@@ -159,9 +170,10 @@ export class AgregarCajaComponent implements OnInit {
           nombre: data.nombre || '',
           descripcion: data.descripcion || '',
           idTipoCaja: data.idTipoCaja ? Number(data.idTipoCaja) : null,
-          limiteEfectivo: data.limiteEfectivo?.toString() || '',
+          limiteEfectivo: Number(data.limiteEfectivo ?? 0),
           requiereArqueo: data.requiereArqueo === 1 || data.requiereArqueo === true ? 1 : 0,
         });
+        queueMicrotask(() => this.refrescarVistaLimiteEfectivo());
       },
       error: (error) => {
         console.error('Error al obtener caja:', error);
@@ -185,7 +197,7 @@ export class AgregarCajaComponent implements OnInit {
       nombre: ['', Validators.required],
       descripcion: [''],
       idTipoCaja: [null, Validators.required],
-      limiteEfectivo: [''],
+      limiteEfectivo: [null],
       requiereArqueo: [0],
     });
   }
@@ -203,6 +215,22 @@ export class AgregarCajaComponent implements OnInit {
     }
   }
 
+  onLimiteEfectivoInput(ev: Event): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.cajaForm.get('limiteEfectivo'));
+  }
+
+  onLimiteEfectivoBlur(ev: Event): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.cajaForm.get('limiteEfectivo'));
+  }
+
+  private refrescarVistaLimiteEfectivo(): void {
+    const el = this.inpLimiteEfectivo?.nativeElement;
+    if (!el) {
+      return;
+    }
+    el.value = textoMontoDesdeValorControl(this.cajaForm.get('limiteEfectivo')?.value);
+  }
+
   buildPayloadCaja(): any {
     const formValue = this.cajaForm.value;
     return {
@@ -213,14 +241,14 @@ export class AgregarCajaComponent implements OnInit {
       descripcion: formValue.descripcion || null,
       idTipoCaja: Number(formValue.idTipoCaja ?? 0),
       idEstatusCaja: Number(this.idEstatusCajaDefault),
-      limiteEfectivo: Number(formValue.limiteEfectivo?.replace(/,/g, '.') ?? 0),
+      limiteEfectivo: Number(formValue.limiteEfectivo ?? 0),
       requiereArqueo: Number(formValue.requiereArqueo ?? 0),
     };
   }
 
   agregarCaja(): void {
     if (!this.rolAcceso.esPerfilClienteLogueado()) {
-      void this.rolAcceso.mostrarAccesoSoloPerfilCliente('cajas');
+      this.rolAcceso.mostrarAccesoDenegado('gestionarCajasCliente');
       return;
     }
     const payload = this.buildPayloadCaja();
@@ -254,7 +282,7 @@ export class AgregarCajaComponent implements OnInit {
 
   actualizarCaja(): void {
     if (!this.rolAcceso.esPerfilClienteLogueado()) {
-      void this.rolAcceso.mostrarAccesoSoloPerfilCliente('cajas');
+      this.rolAcceso.mostrarAccesoDenegado('gestionarCajasCliente');
       return;
     }
     const payload = this.buildPayloadCaja();
@@ -334,7 +362,7 @@ export class AgregarCajaComponent implements OnInit {
     }
 
     if (!this.rolAcceso.esPerfilClienteLogueado()) {
-      void this.rolAcceso.mostrarAccesoSoloPerfilCliente('cajas');
+      this.rolAcceso.mostrarAccesoDenegado('gestionarCajasCliente');
       return;
     }
 

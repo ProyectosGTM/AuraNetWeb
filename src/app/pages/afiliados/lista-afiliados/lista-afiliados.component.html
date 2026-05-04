@@ -89,7 +89,7 @@
                         [dataSource]="listaAfiliados" [keyExpr]="'id'" [width]="'100%'"
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" [pager]="{ 
                                 showPageSizeSelector: true, 
-                                allowedPageSizes: [20, 50], 
+                                allowedPageSizes: [20], 
                                 showInfo: true,
                                 infoText: 'Página {0} de {1}', 
                                 visible: true 
@@ -100,7 +100,7 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20, 50]"
+                        <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]"
                             [showInfo]="true"></dxo-pager>
                         <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="540"></dxi-column>
                         <dxi-column dataField="nombreCompleto" caption="Nombre Completo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -126,49 +126,49 @@
                             <ng-container>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones btnAcciones--editar"
                                     (click)="actualizarAfiliado(row.data.id)"
-                                    ngbTooltip="Editar afiliado" placement="top" container="body">
+                                    ngbTooltip="Editar afiliado" placement="top">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </ng-container>
                             <ng-container>
                                 <button type="button" id="resumenAfiliadoButton" class="btnAcciones btnAcciones--resumen"
                                     (click)="verResumenAfiliado(row.data)"
-                                    ngbTooltip="Ver resumen del afiliado" placement="top" container="body">
+                                    ngbTooltip="Ver resumen del afiliado" placement="top">
                                     <i class="fa fa-id-card"></i>
                                 </button>
                             </ng-container>
                             <ng-container>
                                 <button type="button" id="monederosAfiliadoButton" class="btnAcciones btnAcciones--monederos"
                                     (click)="verMonederosAfiliado(row.data)"
-                                    ngbTooltip="Ver monederos del afiliado" placement="top" container="body">
+                                    ngbTooltip="Ver monederos del afiliado" placement="top">
                                     <i class="fa fa-wallet"></i>
                                 </button>
                             </ng-container>
                             <ng-container>
                                 <button type="button" id="nivelVipAfiliadoButton" class="btnAcciones btnAcciones--nivel-vip"
                                     (click)="abrirModalNivelVipAfiliado(row.data)"
-                                    ngbTooltip="Actualizar nivel VIP" placement="top" container="body">
+                                    ngbTooltip="Actualizar nivel VIP" placement="top">
                                     <i class="fas fa-crown"></i>
                                 </button>
                             </ng-container>
                             <ng-container>
                                 <button type="button" id="bloquearAfiliadoButton" class="btnAcciones btnAcciones--bloquear"
                                     (click)="abrirModalBloquearAfiliado(row.data)"
-                                    ngbTooltip="Bloquear afiliado y monederos" placement="top" container="body">
+                                    ngbTooltip="Bloquear afiliado y monederos" placement="top">
                                     <i class="fa fa-ban"></i>
                                 </button>
                             </ng-container>
                             <ng-container *ngIf="puedeRegistrarAutoexclusion(row.data)">
                                 <button type="button" id="autoexclusionAfiliadoButton" class="btnAcciones btnAcciones--autoexclusion"
                                     (click)="abrirModalAutoexclusionAfiliado(row.data)"
-                                    ngbTooltip="Registrar autoexclusión (juego responsable)" placement="top" container="body">
+                                    ngbTooltip="Registrar autoexclusión (juego responsable)" placement="top">
                                     <i class="fa fa-hand-paper"></i>
                                 </button>
                             </ng-container>
                             <ng-container>
                                 <button type="button" id="cancelarAutoexclusionButton" class="btnAcciones btnAcciones--cancelar-autoexclusion"
                                     (click)="cancelarAutoexclusionAfiliado(row.data)"
-                                    ngbTooltip="Cancelar autoexclusión (tras fecha de fin del periodo)" placement="top" container="body">
+                                    ngbTooltip="Cancelar autoexclusión (tras fecha de fin del periodo)" placement="top">
                                     <i class="fas fa-calendar-times"></i>
                                 </button>
                             </ng-container>
@@ -177,7 +177,7 @@
                                 <button *ngIf="row.data.estatus === 0" type="button" id="pinButton"
                                     class="btnAcciones btnAcciones--desbloquear"
                                     (click)="desbloquearAfiliado(row.data)"
-                                    ngbTooltip="Desbloquear afiliado y monederos" placement="top" container="body">
+                                    ngbTooltip="Desbloquear afiliado y monederos" placement="top">
                                     <i class="fa fa-unlock"></i>
                                 </button>
                             </ng-container>
@@ -185,13 +185,13 @@
                                 <button *ngIf="row.data.estatus === 0" type="button" id="activarAfiliadoButton"
                                     class="btnAcciones btnAcciones--activar"
                                     (click)="activarAfiliado(row.data)"
-                                    ngbTooltip="Activar afiliado (estatus en listado)" placement="top" container="body">
+                                    ngbTooltip="Activar afiliado (estatus en listado)" placement="top">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" type="button" id="deleteButton"
                                     class="btnAcciones btnAcciones--desactivar"
                                     (click)="desactivar(row.data)"
-                                    ngbTooltip="Desactivar afiliado (estatus en listado)" placement="top" container="body">
+                                    ngbTooltip="Desactivar afiliado (estatus en listado)" placement="top">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </ng-container>

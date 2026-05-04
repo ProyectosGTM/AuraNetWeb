@@ -763,18 +763,22 @@ Al decodificar el payload del `token` (sin verificar firma en front; solo lectur
 
 Los nombres y descripciones legibles provienen del listado de roles (respuesta típica con `data` y `paginated`). **El `id` de cada ítem del catálogo debe coincidir con el valor de `rol` del login y del JWT** (mismo significado, mismo formato string en la API de roles).
 
-**Roles vigentes en sistema (referencia de negocio):**
+**Roles vigentes en sistema (contrato con `GET /roles/list`; `id` en string en login/JWT):**
 
-| id (catálogo) | nombre         | descripción (resumen)        |
-|---------------|----------------|------------------------------|
-| 1             | SA             | Super Administrador          |
-| 2             | Administrador  | Administrador                |
-| 3             | Gerente        | Gerente de operación de sala |
-| 4             | JefeSala       | Encargado de sala            |
-| 5             | Cajero         | Cajero de la sala            |
-| 6             | Jugador        | Usuario jugador              |
+| id (catálogo) | nombre          | descripción |
+|----------------|-----------------|-------------|
+| 1              | SA              | Super Administrador |
+| 2              | Dev             | Desarrollador |
+| 3              | Cliente         | Usuario Cliente |
+| 4              | Administrador   | Administrador De Sucursales Del Cliente |
+| 5              | Gerente         | Gerente De Operacion De Una Sala |
+| 6              | Sub-Gerente     | Sub-Gerente De Operacion De Una Sala |
+| 7              | Cajero          | Cajero de la sala |
+| 8              | Recepcionista   | Recepcionista De La Salas |
 
-Si Swagger u otra documentación citan roles por número (ej. “Gerente (2)”), **alinear siempre con el `id` del catálogo `/roles/list`**: en la tabla anterior, “2” = Administrador, “3” = Gerente, etc. No asumir otro orden sin validar contra el servicio.
+**Regla:** Cualquier validación en UI por rol (`RolAccesoService`, `puedeRealizarAccion`, menús condicionados, etc.) debe usar estos **ids** como referencia. Si Swagger u otra documentación nombran un rol con número, **cruzar siempre con esta tabla** (ej. id `5` = Gerente, id `3` = Cliente). No asumir otro mapeo sin validar contra `/roles/list` en el entorno.
+
+**Referencia de implementación (solo contrato, no sustituye este catálogo):** `src/app/shared/services/rol-acceso.service.ts` (`ROLES_CATALOGO`, `ACCIONES`, `puedeRealizarAccion`, `mostrarAccesoDenegado`).
 
 #### Obligatorio para desarrollo
 

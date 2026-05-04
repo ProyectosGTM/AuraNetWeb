@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -6,6 +6,11 @@ import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
+import {
+  aplicarMontoBlurEnCampo,
+  aplicarMontoInputEnCampo,
+  textoMontoDesdeValorControl,
+} from 'src/app/shared/utils/monto-input-formato.util';
 
 type SelectItem = { id: number; text: string };
 
@@ -15,7 +20,7 @@ type SelectItem = { id: number; text: string };
   styleUrl: './agregar-tesoreria.component.scss',
   animations: [fadeInRightAnimation],
 })
-export class AgregarTesoreriaComponent implements OnInit {
+export class AgregarTesoreriaComponent implements OnInit, AfterViewInit {
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
   public idTesoreria: number;
@@ -24,6 +29,8 @@ export class AgregarTesoreriaComponent implements OnInit {
   public listaEstatusTesoreria: SelectItem[] = [];
 
   tesoreriaForm: FormGroup;
+
+  @ViewChild('inpFondoInicial', { static: false }) inpFondoInicial?: ElementRef<HTMLInputElement>;
 
   constructor(
     private fb: FormBuilder,
@@ -81,6 +88,10 @@ export class AgregarTesoreriaComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    queueMicrotask(() => this.refrescarVistaFondoInicial());
+  }
+
   obtenerSalas(): void {
     this.salasService.obtenerSalas().subscribe({
       next: (response: any) => {
@@ -134,9 +145,10 @@ export class AgregarTesoreriaComponent implements OnInit {
         this.tesoreriaForm.patchValue({
           idSala: Number(data.idSala ?? 0),
           fecha: formatDate(data.fecha),
-          fondoInicial: data.fondoInicial?.toString() || '',
+          fondoInicial: Number(data.fondoInicial ?? 0),
           idEstatusTesoreria: data.idEstatusTesoreria ? Number(data.idEstatusTesoreria) : null,
         });
+        queueMicrotask(() => this.refrescarVistaFondoInicial());
       },
       error: (error) => {
         console.error('Error al obtener tesorería:', error);
@@ -156,22 +168,25 @@ export class AgregarTesoreriaComponent implements OnInit {
     this.tesoreriaForm = this.fb.group({
       idSala: [null, Validators.required],
       fecha: [null, Validators.required],
-      fondoInicial: ['', Validators.required],
+      fondoInicial: [null as number | null, Validators.required],
       idEstatusTesoreria: [null, Validators.required],
     });
   }
 
-  allowOnlyNumbers(event: KeyboardEvent): void {
-    const charCode = event.keyCode ? event.keyCode : event.which;
-    const key = event.key;
-    const allowedKeys = [8, 9, 13, 37, 38, 39, 40, 46]; // backspace, tab, enter, flechas, delete
-    const isNumber = (charCode >= 48 && charCode <= 57) || (charCode >= 96 && charCode <= 105);
-    const isDecimal = key === '.' || key === ',' || charCode === 190 || charCode === 188 || charCode === 110;
-    const isAllowedKey = allowedKeys.includes(charCode);
-    
-    if (!isNumber && !isAllowedKey && !isDecimal) {
-      event.preventDefault();
+  onFondoInicialInput(ev: Event): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.tesoreriaForm.get('fondoInicial'));
+  }
+
+  onFondoInicialBlur(ev: Event): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.tesoreriaForm.get('fondoInicial'));
+  }
+
+  private refrescarVistaFondoInicial(): void {
+    const el = this.inpFondoInicial?.nativeElement;
+    if (!el) {
+      return;
     }
+    el.value = textoMontoDesdeValorControl(this.tesoreriaForm.get('fondoInicial')?.value);
   }
 
   buildPayloadTesoreria(): any {
@@ -179,7 +194,7 @@ export class AgregarTesoreriaComponent implements OnInit {
     return {
       idSala: Number(formValue.idSala ?? 0),
       fecha: formValue.fecha || null,
-      fondoInicial: Number(formValue.fondoInicial?.replace(/,/g, '.') ?? 0),
+      fondoInicial: Number(formValue.fondoInicial ?? 0),
       idEstatusTesoreria: formValue.idEstatusTesoreria ? Number(formValue.idEstatusTesoreria) : null,
     };
   }

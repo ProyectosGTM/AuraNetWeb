@@ -36,7 +36,7 @@ export class MonederosServices {
 
   private apiUrl = `${environment.API_SECURITY}/monederos`;
   updateEstatus(id: number, estatus: number): Observable<string> {
-    const url = `${this.apiUrl}/estatus/${id}`;
+    const url = `${this.apiUrl}/${id}/estatus`;
     const body = { estatus };
     return this.http.patch(url, body, { responseType: 'text' }).pipe(
       catchError(error => throwError(() => error))

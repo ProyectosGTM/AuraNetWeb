@@ -405,7 +405,9 @@
                       <span class="field-label text-white">Límite apuesta diaria</span>
                       <div class="input-sleek">
                         <i class="fas fa-coins"></i>
-                        <input formControlName="limiteApuestaDiaria" class="sleek-control" type="number" min="0" step="0.01" placeholder="Opcional" />
+                        <input #inpLimiteApuestaDiaria class="sleek-control" type="text" placeholder="Opcional"
+                          (input)="onMontoAfiliadoInput($event, 'limiteApuestaDiaria')"
+                          (blur)="onMontoAfiliadoBlur($event, 'limiteApuestaDiaria')" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
@@ -415,7 +417,9 @@
                       <span class="field-label text-white">Límite retiro diario</span>
                       <div class="input-sleek">
                         <i class="fas fa-hand-holding-usd"></i>
-                        <input formControlName="limiteRetiroDiario" class="sleek-control" type="number" min="0" step="1" placeholder="Opcional" />
+                        <input #inpLimiteRetiroDiario class="sleek-control" type="text" placeholder="Opcional"
+                          (input)="onMontoAfiliadoInput($event, 'limiteRetiroDiario')"
+                          (blur)="onMontoAfiliadoBlur($event, 'limiteRetiroDiario')" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>

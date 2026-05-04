@@ -124,6 +124,23 @@ Los siguientes ítems aparecen en el menú (`src/app/layouts/sidebar/menu.ts`) p
 - Patrón de métodos: `obtener*()` / `obtener*Data(page, take)` para listados; `obtener*(id)` para edición; `crear*` / `actualizar*` para persistencia; `updateEstatus(id, estatus)` para activar/desactivar donde aplique.
 - Algunos servicios son compartidos entre módulos (por ejemplo `CajasService` en recarga, turnos, afiliados y operaciones de monederos en UI; `TurnosService` en turnos).
 
+### 6.1 Catálogo de roles del sistema (`GET /roles/list`)
+
+Contrato de **ids y nombres** de rol tal como los devuelve el API (mismo valor que `user.rol` / JWT en string). Varios endpoints y reglas de UI dependen de este catálogo.
+
+| id | nombre | descripción |
+|----|--------|-------------|
+| 1 | SA | Super Administrador |
+| 2 | Dev | Desarrollador |
+| 3 | Cliente | Usuario Cliente |
+| 4 | Administrador | Administrador De Sucursales Del Cliente |
+| 5 | Gerente | Gerente De Operacion De Una Sala |
+| 6 | Sub-Gerente | Sub-Gerente De Operacion De Una Sala |
+| 7 | Cajero | Cajero de la sala |
+| 8 | Recepcionista | Recepcionista De La Salas |
+
+Validaciones por rol en pantalla: `RolAccesoService` (`src/app/shared/services/rol-acceso.service.ts`). La autorización efectiva sigue siendo del backend.
+
 ---
 
 ## 7. Estilos globales
@@ -153,5 +170,6 @@ Para que una nueva funcionalidad se considere alineada con este contrato:
 - **Alcance:** Principal (Tablero, POS, Perfil), Administración (Módulos, Permisos, Roles, Usuarios, Bitácora), Estructura (Clientes, Salas, Zonas, Máquinas, Cajas, Afiliados), Operación (Boveda, Turnos, Monederos, Transacciones, Monitoreo).
 - **Fuera de alcance actual:** Indicadores, catálogos listados en el menú, submenú Finanzas (Caja/Bobeda) y enlace “Tu cuenta” (`/cuenta`).
 - **Documentación técnica detallada:** `docs/PROJECT-CONTEXT.md`.
+- **Roles (ids/nombres):** sección **6.1** de este documento (contrato con `GET /roles/list`).
 
 **Última actualización:** según revisión de módulos y menú del proyecto (documento generado a partir del estado actual del código).

@@ -41,7 +41,7 @@
                         [dataSource]="listaModulos" [keyExpr]="'id'" [width]="'100%'"
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" [pager]="{ 
                                 showPageSizeSelector: true, 
-                                allowedPageSizes: [50], 
+                                allowedPageSizes: [20], 
                                 showInfo: true,
                                 infoText: 'Página {0} de {1}', 
                                 visible: true 
@@ -77,19 +77,19 @@
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarModulo(row.data.id)"
-                                    ngbTooltip="Editar módulo" placement="top" container="body">
+                                    ngbTooltip="Editar módulo" placement="top">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
                             <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
                                     (click)="activar(row.data)"
-                                    ngbTooltip="Activar módulo" placement="top" container="body">
+                                    ngbTooltip="Activar módulo" placement="top">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
                                     (click)="desactivar(row.data)"
-                                    ngbTooltip="Desactivar módulo" placement="top" container="body">
+                                    ngbTooltip="Desactivar módulo" placement="top">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </div>

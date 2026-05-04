@@ -17,9 +17,13 @@
           <div class="title-actions">
             <div class="title-tagline">
               <span class="line"></span>
-              <span class="text">Gestión de promociones</span>
+              <span class="text">Control y configuración centralizada</span>
             </div>
             <div class="title-buttons">
+              <button type="button" (click)="agregar()" class="btn-title btn-title--primary">
+                <i class="fas fa-plus"></i>
+                <span>Nuevo</span>
+              </button>
               <button (click)="toggleExpandGroups()" type="button" class="btn-title btn-title--ghost">
                 <i class="fas fa-expand"></i>
                 <span>Contraer Grid</span>

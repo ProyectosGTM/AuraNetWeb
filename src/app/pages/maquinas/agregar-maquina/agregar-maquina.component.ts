@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -9,8 +9,15 @@ import { MaquinasService } from 'src/app/shared/services/maquinas.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
+import {
+  aplicarMontoBlurEnCampo,
+  aplicarMontoInputEnCampo,
+  textoMontoDesdeValorControl,
+} from 'src/app/shared/utils/monto-input-formato.util';
 
 type SelectItem = { id: number; text: string };
+
+type CampoMontoMaquina = 'costoAdquisicion' | 'denominacionMinima' | 'denominacionMaxima';
 
 const LISTA_SI_NO: SelectItem[] = [
   { id: 1, text: 'Sí' },
@@ -23,7 +30,7 @@ const LISTA_SI_NO: SelectItem[] = [
   styleUrl: './agregar-maquina.component.scss',
   animations: [fadeInRightAnimation],
 })
-export class AgregarMaquinaComponent implements OnInit {
+export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
   public idMaquina: number;
@@ -81,6 +88,10 @@ export class AgregarMaquinaComponent implements OnInit {
         this.cargarListasIndividualmente();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    queueMicrotask(() => this.refrescarVistasMontosMaquina());
   }
 
   private procesarListas(responses: any) {
@@ -239,6 +250,7 @@ export class AgregarMaquinaComponent implements OnInit {
         if (data.iconoMaquina) {
           this.iconoPreviewUrl = data.iconoMaquina;
         }
+        queueMicrotask(() => this.refrescarVistasMontosMaquina());
       },
       error: (error) => {
         console.error('Error al obtener máquina:', error);
@@ -287,6 +299,10 @@ export class AgregarMaquinaComponent implements OnInit {
   // File upload properties
   @ViewChild('imagenFileInput') imagenFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('iconoFileInput') iconoFileInput!: ElementRef<HTMLInputElement>;
+
+  @ViewChild('inpCostoAdquisicion', { static: false }) inpCostoAdquisicion?: ElementRef<HTMLInputElement>;
+  @ViewChild('inpDenominacionMinima', { static: false }) inpDenominacionMinima?: ElementRef<HTMLInputElement>;
+  @ViewChild('inpDenominacionMaxima', { static: false }) inpDenominacionMaxima?: ElementRef<HTMLInputElement>;
 
   imagenPreviewUrl: string | ArrayBuffer | null = null;
   imagenFileName: string | null = null;
@@ -404,6 +420,29 @@ export class AgregarMaquinaComponent implements OnInit {
     
     if (!isNumber && !isAllowedKey && !isDecimal) {
       event.preventDefault();
+    }
+  }
+
+  onMontoMaquinaInput(ev: Event, campo: CampoMontoMaquina): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.maquinaForm.get(campo));
+  }
+
+  onMontoMaquinaBlur(ev: Event, campo: CampoMontoMaquina): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.maquinaForm.get(campo));
+  }
+
+  private refrescarVistasMontosMaquina(): void {
+    const pares: [CampoMontoMaquina, ElementRef<HTMLInputElement> | undefined][] = [
+      ['costoAdquisicion', this.inpCostoAdquisicion],
+      ['denominacionMinima', this.inpDenominacionMinima],
+      ['denominacionMaxima', this.inpDenominacionMaxima],
+    ];
+    for (const [campo, ref] of pares) {
+      const el = ref?.nativeElement;
+      if (!el) {
+        continue;
+      }
+      el.value = textoMontoDesdeValorControl(this.maquinaForm.get(campo)?.value);
     }
   }
 

@@ -1,5 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -7,8 +7,14 @@ import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import Swal from 'sweetalert2';
+import {
+  aplicarMontoBlurEnCampo,
+  aplicarMontoInputEnCampo,
+  textoMontoDesdeValorControl,
+} from 'src/app/shared/utils/monto-input-formato.util';
 
 /** Pestañas del panel Centro de Operaciones (mismo patrón que Promociones). */
 export type TabAccionesBoveda = 'apertura' | 'efectivo';
@@ -52,6 +58,10 @@ export class ListaTesoreriaComponent {
   @ViewChild('modalCerrarTesoreria', { static: false }) modalCerrarTesoreria!: TemplateRef<any>;
   @ViewChild('modalReponerTesoreria', { static: false }) modalReponerTesoreria!: TemplateRef<any>;
   @ViewChild('modalRetirarTesoreria', { static: false }) modalRetirarTesoreria!: TemplateRef<any>;
+
+  @ViewChild('inpFondoContadoCerrar', { static: false }) inpFondoContadoCerrar?: ElementRef<HTMLInputElement>;
+  @ViewChild('inpMontoReponer', { static: false }) inpMontoReponer?: ElementRef<HTMLInputElement>;
+  @ViewChild('inpMontoRetirar', { static: false }) inpMontoRetirar?: ElementRef<HTMLInputElement>;
   
   public resumenData: any = null;
   public historialData: any[] = [];
@@ -76,26 +86,68 @@ export class ListaTesoreriaComponent {
     private tesoreriaService: TesoreriaService,
     private modalService: NgbModal,
     private fb: FormBuilder,
+    private rolAcceso: RolAccesoService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
     this.cerrarTesoreriaForm = this.fb.group({
       idTesoreria: [null, Validators.required],
-      fondoContado: ['', [Validators.required, Validators.min(0.01)]],
+      fondoContado: [null as number | null, [Validators.required, Validators.min(0.01)]],
       observaciones: ['']
     });
     this.reponerTesoreriaForm = this.fb.group({
       idTesoreria: [null, Validators.required],
-      monto: ['', [Validators.required, Validators.min(0.01)]],
+      monto: [null as number | null, [Validators.required, Validators.min(0.01)]],
       referencia: [''],
       observaciones: ['']
     });
     this.retirarTesoreriaForm = this.fb.group({
       idTesoreria: [null, Validators.required],
-      monto: ['', [Validators.required, Validators.min(0.01)]],
+      monto: [null as number | null, [Validators.required, Validators.min(0.01)]],
       referencia: [''],
       observaciones: ['']
     });
+  }
+
+  onMontoCerrarInput(ev: Event): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.cerrarTesoreriaForm.get('fondoContado'));
+  }
+
+  onMontoCerrarBlur(ev: Event): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.cerrarTesoreriaForm.get('fondoContado'));
+  }
+
+  onMontoReponerInput(ev: Event): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.reponerTesoreriaForm.get('monto'));
+  }
+
+  onMontoReponerBlur(ev: Event): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.reponerTesoreriaForm.get('monto'));
+  }
+
+  onMontoRetirarInput(ev: Event): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.retirarTesoreriaForm.get('monto'));
+  }
+
+  onMontoRetirarBlur(ev: Event): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.retirarTesoreriaForm.get('monto'));
+  }
+
+  private refrescarVistasMontosModalesBoveda(): void {
+    const sync = (ref: ElementRef<HTMLInputElement> | undefined, form: FormGroup, key: string) => {
+      const el = ref?.nativeElement;
+      if (!el) {
+        return;
+      }
+      el.value = textoMontoDesdeValorControl(form.get(key)?.value);
+    };
+    sync(this.inpFondoContadoCerrar, this.cerrarTesoreriaForm, 'fondoContado');
+    sync(this.inpMontoReponer, this.reponerTesoreriaForm, 'monto');
+    sync(this.inpMontoRetirar, this.retirarTesoreriaForm, 'monto');
+  }
+
+  private despuesDeAbrirModalBoveda(): void {
+    setTimeout(() => this.refrescarVistasMontosModalesBoveda(), 50);
   }
 
   ngOnInit() {
@@ -151,6 +203,16 @@ export class ListaTesoreriaComponent {
   formatearMoneda(valor: number | null | undefined): string {
     if (valor === null || valor === undefined) return 'Sin registro';
     return `$${Number(valor).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  /** Texto seguro para usar dentro de `html` en SweetAlert2. */
+  private escapeHtml(texto: string): string {
+    return String(texto ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   verResumen(id: number) {
@@ -364,31 +426,64 @@ export class ListaTesoreriaComponent {
     }
     this.tesoreriaService.obtenerTesoreriaAbiertaPorSala(Number(idSala)).subscribe({
       next: (response: any) => {
-        const data = response?.data ?? response;
-        if (!data || (Array.isArray(data) && data.length === 0)) {
+        const rawData =
+          response != null && Object.prototype.hasOwnProperty.call(response, 'data')
+            ? response.data
+            : response;
+        const tieneListaVacia = Array.isArray(rawData) && rawData.length === 0;
+        const sinRegistro =
+          rawData === null ||
+          rawData === undefined ||
+          tieneListaVacia;
+
+        if (sinRegistro) {
+          const mensajeApi =
+            typeof response?.message === 'string' && response.message.trim()
+              ? response.message.trim()
+              : 'No hay tesorería abierta para esta sala.';
+          const nombreSala =
+            rowData?.nombreSala ??
+            rowData?.nombreComercialSala ??
+            rowData?.nombreComercial ??
+            '';
+          const bloqueSala = nombreSala
+            ? `<p class="mb-2" style="color:#94a3b8;font-size:13px"><strong>Sala:</strong> ${this.escapeHtml(
+                String(nombreSala)
+              )}</p>`
+            : '';
           Swal.fire({
-            title: 'Bóveda abierta',
-            html: `<p class="mb-0">No hay bóveda abierta para esta sala.</p>`,
+            title: 'Sin bóveda abierta',
+            html:
+              `${bloqueSala}` +
+              `<p class="mb-0" style="color:#e2e8f0;line-height:1.45">${this.escapeHtml(mensajeApi)}</p>`,
             icon: 'info',
             background: '#0d121d',
+            color: '#e2e8f0',
             confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Cerrar',
+            confirmButtonText: 'Entendido',
           });
           return;
         }
-        const t = Array.isArray(data) ? data[0] : data;
-        const sala = t?.nombreSala ?? t?.nombreComercialSala ?? rowData.nombreSala ?? 'Sala';
-        const fondo = t?.fondoInicial != null ? this.formatearMoneda(t.fondoInicial) : 'N/A';
-        const estatus = t?.nombreEstatusTesoreria ?? t?.codigoEstatusTesoreria ?? 'N/A';
+
+        const t = Array.isArray(rawData) ? rawData[0] : rawData;
+        const sala =
+          t?.nombreSala ?? t?.nombreComercialSala ?? rowData?.nombreSala ?? rowData?.nombreComercialSala ?? 'Sala';
+        const fondo =
+          t?.fondoInicial != null && t?.fondoInicial !== ''
+            ? this.formatearMoneda(t.fondoInicial)
+            : 'Sin registro';
+        const estatus =
+          t?.nombreEstatusTesoreria ?? t?.codigoEstatusTesoreria ?? 'Sin registro';
         Swal.fire({
           title: 'Bóveda abierta',
           html: `
-            <p class="mb-1"><strong>Sala:</strong> ${sala}</p>
-            <p class="mb-1"><strong>Fondo inicial:</strong> ${fondo}</p>
-            <p class="mb-0"><strong>Estatus:</strong> ${estatus}</p>
+            <p class="mb-1" style="color:#e2e8f0"><strong>Sala:</strong> ${this.escapeHtml(String(sala))}</p>
+            <p class="mb-1" style="color:#e2e8f0"><strong>Fondo inicial:</strong> ${this.escapeHtml(String(fondo))}</p>
+            <p class="mb-0" style="color:#e2e8f0"><strong>Estatus:</strong> ${this.escapeHtml(String(estatus))}</p>
           `,
-          icon: 'info',
+          icon: 'success',
           background: '#0d121d',
+          color: '#e2e8f0',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Cerrar',
         });
@@ -406,8 +501,20 @@ export class ListaTesoreriaComponent {
     });
   }
 
-  /** DELETE tesorerias/{id} - Eliminar tesorería */
-  eliminarTesoreria(rowData: any) {
+  /** DELETE /tesorerias/{id} — identificador de la tesorería (Swagger). */
+  eliminarTesoreria(idTesoreriaRaw: number | string | null | undefined) {
+    const idTesoreria = Math.trunc(Number(idTesoreriaRaw));
+    if (!Number.isFinite(idTesoreria) || idTesoreria <= 0) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'No se pudo obtener el identificador de la tesorería para eliminar.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido',
+      });
+      return;
+    }
     Swal.fire({
       title: '¿Eliminar tesorería?',
       html: `¿Está seguro que desea eliminar este registro de tesorería? Esta acción no se puede deshacer.`,
@@ -420,7 +527,7 @@ export class ListaTesoreriaComponent {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.tesoreriaService.eliminarTesoreria(Number(rowData.id)).subscribe({
+        this.tesoreriaService.eliminarTesoreria(idTesoreria).subscribe({
           next: () => {
             Swal.fire({
               title: '¡Eliminado!',
@@ -462,7 +569,7 @@ export class ListaTesoreriaComponent {
     this.listaTesoreria = new CustomStore({
       key: 'id',
       load: async (loadOptions: any) => {
-        const take = Number(loadOptions?.take) || this.pageSize || 10;
+        const take = Number(loadOptions?.take) || this.pageSize || 20;
         const skip = Number(loadOptions?.skip) || 0;
         const page = Math.floor(skip / take) + 1;
 
@@ -558,8 +665,18 @@ export class ListaTesoreriaComponent {
               }
             };
 
+            const idFila =
+              item?.id != null
+                ? Number(item.id)
+                : item?.Id != null
+                  ? Number(item.Id)
+                  : NaN;
+            const idNormalizado =
+              Number.isFinite(idFila) && idFila > 0 ? Math.trunc(idFila) : undefined;
+
             return {
               ...item,
+              ...(idNormalizado !== undefined ? { id: idNormalizado } : {}),
               estatusTexto,
               estatusBadge,
               estatusTesoreriaTexto,
@@ -683,6 +800,11 @@ export class ListaTesoreriaComponent {
   }
 
   abrirTesoreria() {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('abrirTesoreriaDelDia', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('abrirTesoreriaDelDia');
+      return;
+    }
     this.router.navigate(['/tesoreria/abrir-boveda']);
   }
 
@@ -702,6 +824,11 @@ export class ListaTesoreriaComponent {
   }
 
   cerrarTesoreria() {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('cerrarTesoreriaDelDia', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('cerrarTesoreriaDelDia');
+      return;
+    }
     this.loadingAcciones = true;
     this.tesoreriaService.obtenerTesoreriaData(1, 100).subscribe({
       next: (response) => {
@@ -721,7 +848,7 @@ export class ListaTesoreriaComponent {
           return;
         }
 
-        this.cerrarTesoreriaForm.reset({ idTesoreria: null, fondoContado: '', observaciones: '' });
+        this.cerrarTesoreriaForm.reset({ idTesoreria: null, fondoContado: null, observaciones: '' });
 
         this.modalRef = this.modalService.open(this.modalCerrarTesoreria, {
           size: 'md',
@@ -730,6 +857,7 @@ export class ListaTesoreriaComponent {
           backdrop: 'static',
           keyboard: true
         });
+        this.despuesDeAbrirModalBoveda();
       },
       error: (error) => {
         this.loadingAcciones = false;
@@ -758,9 +886,15 @@ export class ListaTesoreriaComponent {
       return;
     }
 
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('cerrarTesoreriaDelDia', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('cerrarTesoreriaDelDia');
+      return;
+    }
+
     const payload = {
       idTesoreria: Number(this.cerrarTesoreriaForm.value.idTesoreria),
-      fondoContado: Number(this.cerrarTesoreriaForm.value.fondoContado),
+      fondoContado: Number(this.cerrarTesoreriaForm.value.fondoContado ?? 0),
       observaciones: (this.cerrarTesoreriaForm.value.observaciones || '').trim() || null
     };
 
@@ -778,9 +912,14 @@ export class ListaTesoreriaComponent {
         this.setupDataSource();
       },
       error: (error) => {
+        const errBody = error?.error;
+        const texto =
+          typeof errBody === 'string'
+            ? errBody
+            : (errBody?.message ?? errBody?.Message ?? error?.message ?? 'No se pudo cerrar la tesorería.');
         Swal.fire({
           title: '¡Error!',
-          text: error.error || 'No se pudo cerrar la tesorería.',
+          text: texto,
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -791,6 +930,11 @@ export class ListaTesoreriaComponent {
   }
 
   reponerTesoreria() {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('cerrarTesoreriaDelDia', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('cerrarTesoreriaDelDia');
+      return;
+    }
     this.loadingAcciones = true;
     this.tesoreriaService.obtenerTesoreriaData(1, 100).subscribe({
       next: (response) => {
@@ -810,7 +954,7 @@ export class ListaTesoreriaComponent {
           return;
         }
 
-        this.reponerTesoreriaForm.reset({ idTesoreria: null, monto: '', referencia: '', observaciones: '' });
+        this.reponerTesoreriaForm.reset({ idTesoreria: null, monto: null, referencia: '', observaciones: '' });
 
         this.modalRef = this.modalService.open(this.modalReponerTesoreria, {
           size: 'md',
@@ -819,6 +963,7 @@ export class ListaTesoreriaComponent {
           backdrop: 'static',
           keyboard: true
         });
+        this.despuesDeAbrirModalBoveda();
       },
       error: (error) => {
         this.loadingAcciones = false;
@@ -847,9 +992,15 @@ export class ListaTesoreriaComponent {
       return;
     }
 
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('cerrarTesoreriaDelDia', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('cerrarTesoreriaDelDia');
+      return;
+    }
+
     const payload = {
       idTesoreria: Number(this.reponerTesoreriaForm.value.idTesoreria),
-      monto: Number(this.reponerTesoreriaForm.value.monto),
+      monto: Number(this.reponerTesoreriaForm.value.monto ?? 0),
       referencia: (this.reponerTesoreriaForm.value.referencia || '').trim() || null,
       observaciones: (this.reponerTesoreriaForm.value.observaciones || '').trim() || null
     };
@@ -868,9 +1019,14 @@ export class ListaTesoreriaComponent {
         this.setupDataSource();
       },
       error: (error) => {
+        const errBody = error?.error;
+        const texto =
+          typeof errBody === 'string'
+            ? errBody
+            : (errBody?.message ?? errBody?.Message ?? error?.message ?? 'No se pudo reponer el efectivo a la tesorería.');
         Swal.fire({
           title: '¡Error!',
-          text: error.error || 'No se pudo reponer el efectivo a la tesorería.',
+          text: texto,
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -881,6 +1037,11 @@ export class ListaTesoreriaComponent {
   }
 
   retirarTesoreria() {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('cerrarTesoreriaDelDia', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('cerrarTesoreriaDelDia');
+      return;
+    }
     this.loadingAcciones = true;
     this.tesoreriaService.obtenerTesoreriaData(1, 100).subscribe({
       next: (response) => {
@@ -900,7 +1061,7 @@ export class ListaTesoreriaComponent {
           return;
         }
 
-        this.retirarTesoreriaForm.reset({ idTesoreria: null, monto: '', referencia: '', observaciones: '' });
+        this.retirarTesoreriaForm.reset({ idTesoreria: null, monto: null, referencia: '', observaciones: '' });
 
         this.modalRef = this.modalService.open(this.modalRetirarTesoreria, {
           size: 'md',
@@ -909,6 +1070,7 @@ export class ListaTesoreriaComponent {
           backdrop: 'static',
           keyboard: true
         });
+        this.despuesDeAbrirModalBoveda();
       },
       error: (error) => {
         this.loadingAcciones = false;
@@ -937,9 +1099,15 @@ export class ListaTesoreriaComponent {
       return;
     }
 
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('cerrarTesoreriaDelDia', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('cerrarTesoreriaDelDia');
+      return;
+    }
+
     const payload = {
       idTesoreria: Number(this.retirarTesoreriaForm.value.idTesoreria),
-      monto: Number(this.retirarTesoreriaForm.value.monto),
+      monto: Number(this.retirarTesoreriaForm.value.monto ?? 0),
       referencia: (this.retirarTesoreriaForm.value.referencia || '').trim() || null,
       observaciones: (this.retirarTesoreriaForm.value.observaciones || '').trim() || null
     };
@@ -958,9 +1126,14 @@ export class ListaTesoreriaComponent {
         this.setupDataSource();
       },
       error: (error) => {
+        const errBody = error?.error;
+        const texto =
+          typeof errBody === 'string'
+            ? errBody
+            : (errBody?.message ?? errBody?.Message ?? error?.message ?? 'No se pudo retirar el efectivo de la tesorería.');
         Swal.fire({
           title: '¡Error!',
-          text: error.error || 'No se pudo retirar el efectivo de la tesorería.',
+          text: texto,
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',

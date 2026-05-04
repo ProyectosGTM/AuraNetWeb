@@ -20,7 +20,7 @@
                     </div>
                 </div>
                 <div class="row mt-5 gy-0">
-                    <div class="col-12 mb-3">
+                    <div class="col-12 mb-0">
                         <div class="form-indication">
                             <i class="fas fa-door-open"></i>
                             <span>Abre la bóveda del día para una sala. Define el fondo inicial y los turnos de caja a abrir.</span>
@@ -51,7 +51,15 @@
                                         <span class="field-label text-white">Fondo Inicial *</span>
                                         <div class="input-sleek">
                                             <i class="fas fa-dollar-sign"></i>
-                                            <input formControlName="fondoInicial" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                                            <input
+                                                #inpFondoInicialBoveda
+                                                class="sleek-control"
+                                                type="text"
+                                                inputmode="decimal"
+                                                autocomplete="off"
+                                                placeholder="0"
+                                                (input)="onMontoCampoInput($event, null)"
+                                                (blur)="onMontoCampoBlur($event, null)" />
                                             <span class="sleek-line"></span>
                                         </div>
                                     </label>
@@ -109,14 +117,22 @@
                                                                 <span class="field-label text-white">Monto *</span>
                                                                 <div class="input-sleek input-sleek--compact">
                                                                     <i class="fas fa-dollar-sign"></i>
-                                                                    <input formControlName="fondoInicial" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0" />
+                                                                    <input
+                                                                        class="sleek-control"
+                                                                        type="text"
+                                                                        inputmode="decimal"
+                                                                        autocomplete="off"
+                                                                        placeholder="0"
+                                                                        [attr.data-turno-monto-index]="i"
+                                                                        (input)="onMontoCampoInput($event, i)"
+                                                                        (blur)="onMontoCampoBlur($event, i)" />
                                                                     <span class="sleek-line"></span>
                                                                 </div>
                                                             </label>
                                                         </div>
                                                         <div class="col-4">
                                                             <label class="field field--inline">
-                                                                <span class="field-label text-white">Usuario *</span>
+                                                                <span class="field-label text-white">Usuario (opcional)</span>
                                                                 <dx-select-box
                                                                     [dataSource]="listaUsuarios"
                                                                     displayExpr="text"

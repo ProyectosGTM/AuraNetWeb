@@ -4,13 +4,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { PromocionesRoutingModule } from './promociones-routing.module';
+import { AgregarPromocionComponent } from './agregar-promocion/agregar-promocion.component';
 import { ListaPromocionesComponent } from './lista-promociones/lista-promociones.component';
 
-import { DxDataGridModule } from 'devextreme-angular';
+import { DxDataGridModule, DxSelectBoxModule } from 'devextreme-angular';
 import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
-  declarations: [ListaPromocionesComponent],
+  declarations: [ListaPromocionesComponent, AgregarPromocionComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -18,6 +19,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
     RouterModule,
     PromocionesRoutingModule,
     DxDataGridModule,
+    DxSelectBoxModule,
     SharedModule,
   ],
 })

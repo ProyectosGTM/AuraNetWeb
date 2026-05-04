@@ -26,13 +26,13 @@ export class InboxComponent implements OnInit {
   // page number
   page = 1;
   // default page size
-  pageSize = 15;
+  pageSize = 20;
   // total number of records
   totalRecords = 0;
 
   // start and end index
   startIndex = 1;
-  endIndex = 15;
+  endIndex = 20;
 
   constructor(private modalService: NgbModal) {
   }

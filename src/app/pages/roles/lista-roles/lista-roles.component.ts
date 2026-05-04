@@ -169,7 +169,7 @@ export class ListaRolesComponent implements OnInit {
     this.listaRoles = new CustomStore({
       key: 'id',
       load: async (loadOptions: any) => {
-        const take = Number(loadOptions?.take) || this.pageSize || 10;
+        const take = Number(loadOptions?.take) || this.pageSize || 20;
         const skip = Number(loadOptions?.skip) || 0;
         const page = Math.floor(skip / take) + 1;
 

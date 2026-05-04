@@ -26,8 +26,9 @@ export class TesoreriaService {
     return this.http.post(environment.API_SECURITY + '/tesorerias', data);
   }
 
-  eliminarTesoreria(idTesoreria: Number) {
-    return this.http.delete(environment.API_SECURITY + '/tesorerias/' + idTesoreria);
+  /** DELETE /tesorerias/{id} (OpenAPI). */
+  eliminarTesoreria(id: number): Observable<any> {
+    return this.http.delete(`${environment.API_SECURITY}/tesorerias/${id}`);
   }
 
   obtenerTesoreriaPorId(idTesoreria: number): Observable<any> {

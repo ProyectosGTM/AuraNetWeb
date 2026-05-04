@@ -115,12 +115,17 @@ export class AppModule {
   constructor(tooltipConfig: NgbTooltipConfig) {
   // Tooltips (ng-bootstrap): evitar que se queden “pegados” por focus/click
   tooltipConfig.triggers = 'mouseenter:mouseleave';
-  tooltipConfig.container = 'body';
+  // No forzar container body: en grids DevExtreme desalinea el tooltip (Popper + transform).
+  tooltipConfig.container = undefined as unknown as string;
   tooltipConfig.placement = 'top';
   tooltipConfig.tooltipClass = 'aura-tooltip';
   tooltipConfig.openDelay = 0;
   tooltipConfig.closeDelay = 0;
   tooltipConfig.animation = false;
+  tooltipConfig.popperOptions = (options) => ({
+    ...options,
+    strategy: 'fixed',
+  });
 
   // Carga los mensajes en español
   loadMessages({

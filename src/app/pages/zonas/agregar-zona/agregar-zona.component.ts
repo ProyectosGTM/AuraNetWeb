@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import { ZonaService } from 'src/app/shared/services/zona.service';
+import { DistribucionService } from 'src/app/shared/services/distribucion.service';
 import Swal from 'sweetalert2';
 type MachineType = 'Tragamonedas' | 'Ruleta' | 'Blackjack' | 'Poker';
 type ZoneType = 'VIP' | 'Caja' | 'Baños' | 'Sala';
@@ -52,6 +53,14 @@ export class AgregarZonaComponent implements OnInit {
   public zonaForm: FormGroup;
   public idZona: number;
   public title = 'Agregar Zona';
+  /** Vista /salas/distribucion/:idSala — reutiliza este componente y el plano comentado */
+  modoDistribucionSala = false;
+  idSalaDistribucion: number | null = null;
+  nombreSalaDistribucion = '';
+  canvasLogicalW = 3048;
+  canvasLogicalH = 3684;
+  defaultMachineW = 80;
+  defaultMachineH = 120;
   public listaClientes: any[] = [];
   selectedFileName: string = '';
   previewUrl: string | ArrayBuffer | null = null;
@@ -168,12 +177,49 @@ export class AgregarZonaComponent implements OnInit {
     private route: Router,
     private formBuilder: FormBuilder,
     private zonaService: ZonaService,
-    private salaService: SalaService
+    private salaService: SalaService,
+    private distribucionService: DistribucionService,
   ) { }
 
   ngOnInit(): void {
     this.initForm();
+    this.modoDistribucionSala = this.activatedRouted.snapshot.data['modoDistribucionSala'] === true;
+    this.activatedRouted.data.subscribe((d) => {
+      this.modoDistribucionSala = d['modoDistribucionSala'] === true;
+    });
+
     this.activatedRouted.params.subscribe((params) => {
+      if (this.modoDistribucionSala) {
+        const id = Number(params['idSala']);
+        if (!Number.isFinite(id) || id <= 0) {
+          Swal.fire({
+            title: 'Error',
+            text: 'Identificador de sala no válido.',
+            icon: 'error',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Aceptar',
+          }).then(() => this.route.navigateByUrl('/salas'));
+          return;
+        }
+        this.idSalaDistribucion = id;
+        this.title = 'Distribución';
+        this.submitButton = 'Guardar distribución';
+        this.obtenerTipoZona();
+        this.salaService.obtenerSala(id).subscribe({
+          next: (res: any) => {
+            const data = res?.data ?? res ?? {};
+            this.nombreSalaDistribucion =
+              String(data.nombreSala ?? data.nombre ?? '').trim() || `Sala ${id}`;
+          },
+          error: () => {
+            this.nombreSalaDistribucion = `Sala ${id}`;
+          },
+        });
+        this.cargarDistribucionLayout();
+        return;
+      }
+
       this.idZona = params['idZona'];
       if (this.idZona) {
         this.title = 'Actualizar Zona';
@@ -182,10 +228,8 @@ export class AgregarZonaComponent implements OnInit {
         this.title = 'Agregar Zona';
         this.submitButton = 'Guardar';
       }
-      // Cargar listas siempre
       this.obtenerTipoZona();
       this.obtenerSalas();
-      // Si hay idZona, cargar la zona después de un breve delay para que las listas se carguen primero
       if (this.idZona) {
         setTimeout(() => {
           this.obtenerZona();
@@ -284,6 +328,11 @@ export class AgregarZonaComponent implements OnInit {
   }
 
   submit() {
+    if (this.modoDistribucionSala) {
+      this.guardarDistribucionSala();
+      return;
+    }
+
     this.submitButton = 'Cargando...';
     this.loading = true;
 
@@ -485,7 +534,199 @@ export class AgregarZonaComponent implements OnInit {
   }
 
   regresar() {
+    if (this.modoDistribucionSala) {
+      this.route.navigateByUrl('/salas');
+      return;
+    }
     this.route.navigateByUrl('/zonas');
+  }
+
+  cargarDistribucionLayout(): void {
+    const id = this.idSalaDistribucion;
+    if (id == null || id <= 0) {
+      return;
+    }
+    this.distribucionService.obtenerMapaSala(id).subscribe({
+      next: (resp) => this.hydrateFromDistribucionApi(resp),
+      error: () => this.hydrateFromDistribucionApi(null),
+    });
+  }
+
+  private hydrateFromDistribucionApi(resp: any): void {
+    const raw = resp?.data ?? resp;
+    const inner = raw?.areaPoligonoJson ?? raw;
+
+    if (inner && typeof inner === 'object' && (inner.dimensiones || inner.maquinaTamano ||
+      Array.isArray(inner.zonas) || Array.isArray(inner.maquinasSinZona))) {
+      const dim = inner.dimensiones ?? {};
+      this.canvasLogicalW = Number(dim.ancho) || this.canvasLogicalW;
+      this.canvasLogicalH = Number(dim.alto) || this.canvasLogicalH;
+      this.zoom = Number(dim.zoom) || this.zoom;
+
+      const mt = inner.maquinaTamano ?? {};
+      this.defaultMachineW = Number(mt.ancho) || this.defaultMachineW;
+      this.defaultMachineH = Number(mt.alto) || this.defaultMachineH;
+
+      const zonasApi = Array.isArray(inner.zonas) ? inner.zonas : [];
+      const zones: ZoneItem[] = [];
+      const machines: MachineItem[] = [];
+
+      zonasApi.forEach((z: any, zi: number) => {
+        const zid = Number(z.id ?? zi + 1);
+        zones.push({
+          id: zid,
+          type: (z.type as ZoneType) ?? 'Sala',
+          x: Number(z.x ?? 0),
+          y: Number(z.y ?? 0),
+          w: Number(z.w ?? 260),
+          h: Number(z.h ?? 160),
+        });
+        const mas = Array.isArray(z.maquinas) ? z.maquinas : [];
+        mas.forEach((p: any, mi: number) => {
+          machines.push(this.mapApiMachineFromDistribucion(p, zid * 10000 + mi + 1));
+        });
+      });
+
+      const sin = Array.isArray(inner.maquinasSinZona) ? inner.maquinasSinZona : [];
+      sin.forEach((p: any, mi: number) => {
+        machines.push(this.mapApiMachineFromDistribucion(p, mi + 1));
+      });
+
+      this.zones = zones.map((zz) => this.snapZone(zz));
+      this.machines = machines.map((mm) => this.snapMachine(mm));
+      this.entrada = inner.entrada ? this.safeParsePoint(inner.entrada) : null;
+      this.salida = inner.salida ? this.safeParsePoint(inner.salida) : null;
+      this.persistPlanoToForm();
+      return;
+    }
+
+    if (inner && typeof inner === 'object' && (inner.machines || inner.zones)) {
+      this.loadPlanoFromAreaPoligono(inner);
+      return;
+    }
+
+    this.limpiarPlano();
+    this.canvasLogicalW = 3048;
+    this.canvasLogicalH = 3684;
+    this.defaultMachineW = 80;
+    this.defaultMachineH = 120;
+  }
+
+  private mapApiMachineFromDistribucion(p: any, fallbackId: number): MachineItem {
+    const type = (p?.type as MachineType) ?? 'Tragamonedas';
+    const id = Number(p?.id ?? fallbackId);
+    const dw = Number(p?.w ?? this.defaultMachineW);
+    const dh = Number(p?.h ?? this.defaultMachineH);
+    return {
+      id,
+      label: Number(p?.label ?? id),
+      type,
+      name: String(p?.name ?? `${type} ${id}`),
+      status: (p?.status as MachineStatus) ?? 'Activa',
+      serial: String(p?.serial ?? this.makeSerial(type, id)),
+      img: String(p?.img ?? this.machineImg(type)),
+      x: Number(p?.x ?? 60),
+      y: Number(p?.y ?? 80),
+      w: Math.max(dw, 40),
+      h: Math.max(dh, 40),
+      r: this.normalizeRotation(Number(p?.r ?? 0)),
+    };
+  }
+
+  private maquinaCentroEnZona(m: MachineItem, z: ZoneItem): boolean {
+    const cx = m.x + m.w / 2;
+    const cy = m.y + m.h / 2;
+    return cx >= z.x && cx <= z.x + z.w && cy >= z.y && cy <= z.y + z.h;
+  }
+
+  private serializeMachineDistribucion(m: MachineItem): Record<string, unknown> {
+    return {
+      id: m.id,
+      label: m.label,
+      type: m.type,
+      name: m.name,
+      status: m.status,
+      serial: m.serial,
+      img: m.img,
+      x: m.x,
+      y: m.y,
+      w: m.w,
+      h: m.h,
+      r: m.r,
+    };
+  }
+
+  private buildAreaPoligonoJsonForPut(): Record<string, unknown> {
+    const zonas = this.zones.map((z) => ({
+      id: z.id,
+      x: z.x,
+      y: z.y,
+      w: z.w,
+      h: z.h,
+      maquinas: this.machines
+        .filter((m) => this.maquinaCentroEnZona(m, z))
+        .map((m) => this.serializeMachineDistribucion(m)),
+    }));
+    const maquinasSinZona = this.machines
+      .filter((m) => !this.zones.some((z) => this.maquinaCentroEnZona(m, z)))
+      .map((m) => this.serializeMachineDistribucion(m));
+
+    const payload: Record<string, unknown> = {
+      dimensiones: {
+        ancho: this.canvasLogicalW,
+        alto: this.canvasLogicalH,
+        zoom: this.zoom,
+      },
+      maquinaTamano: {
+        ancho: this.defaultMachineW,
+        alto: this.defaultMachineH,
+      },
+      zonas,
+      maquinasSinZona,
+    };
+    if (this.entrada) {
+      payload['entrada'] = { ...this.entrada };
+    }
+    if (this.salida) {
+      payload['salida'] = { ...this.salida };
+    }
+    return payload;
+  }
+
+  guardarDistribucionSala(): void {
+    const id = this.idSalaDistribucion;
+    if (id == null || id <= 0) {
+      return;
+    }
+    this.loading = true;
+    this.submitButton = 'Guardando...';
+    const areaPoligonoJson = this.buildAreaPoligonoJsonForPut();
+    this.distribucionService.guardarMapaSala(id, { areaPoligonoJson }).subscribe({
+      next: () => {
+        this.loading = false;
+        this.submitButton = 'Guardar distribución';
+        Swal.fire({
+          title: 'Guardado',
+          text: 'La distribución se guardó correctamente.',
+          icon: 'success',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Aceptar',
+        }).then(() => this.regresar());
+      },
+      error: (error) => {
+        this.loading = false;
+        this.submitButton = 'Guardar distribución';
+        Swal.fire({
+          title: 'Error',
+          text: error?.error?.message ?? 'No se pudo guardar la distribución.',
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Aceptar',
+        });
+      },
+    });
   }
 
   addMachine(type: any) {
@@ -504,8 +745,8 @@ export class AgregarZonaComponent implements OnInit {
       img,
       x: 60 + (id % 10) * 58,
       y: 80 + (id % 6) * 48,
-      w: 180,
-      h: 130,
+      w: Math.max(this.defaultMachineW, 40),
+      h: Math.max(this.defaultMachineH, 40),
       r: 0
     };
     const placed = this.placeWithoutOverlap(base);
@@ -555,9 +796,8 @@ export class AgregarZonaComponent implements OnInit {
     this.selectedMachineId = null;
     this.selectedZoneId = null;
     this.editNameId = null;
-    const rect = this.stageRect();
-    const w = rect ? rect.width / this.zoom : this.stageW;
-    const h = rect ? rect.height / this.zoom : this.stageH;
+    const w = this.logicalStageW();
+    const h = this.logicalStageH();
     const doorW = 130;
     const doorH = 54;
     const cx = this.clamp(Math.round(((w - doorW) / 2) / this.grid) * this.grid, 10, w - doorW - 10);
@@ -841,8 +1081,8 @@ export class AgregarZonaComponent implements OnInit {
       for (const t of tries) {
         const test = this.snapMachine({
           ...candidate,
-          x: this.clamp(t.x, 10, this.stageW - candidate.w - 10),
-          y: this.clamp(t.y, 10, this.stageH - candidate.h - 10)
+          x: this.clamp(t.x, 10, this.logicalStageW() - candidate.w - 10),
+          y: this.clamp(t.y, 10, this.logicalStageH() - candidate.h - 10)
         });
         if (!others.some(o => this.overlaps(test, o))) return test;
       }
@@ -973,8 +1213,8 @@ export class AgregarZonaComponent implements OnInit {
       const r = this.normalizeRotation(Number(parsed.r ?? 0));
       if (Number.isNaN(x) || Number.isNaN(y)) return null;
       return {
-        x: this.clamp(Math.round(x / this.grid) * this.grid, 10, this.stageW - 46),
-        y: this.clamp(Math.round(y / this.grid) * this.grid, 10, this.stageH - 46),
+        x: this.clamp(Math.round(x / this.grid) * this.grid, 10, this.logicalStageW() - 46),
+        y: this.clamp(Math.round(y / this.grid) * this.grid, 10, this.logicalStageH() - 46),
         r
       };
     } catch {
@@ -986,17 +1226,25 @@ export class AgregarZonaComponent implements OnInit {
     const el = this.stageRef?.nativeElement;
     if (!el) return null;
     const rect = el.getBoundingClientRect();
-    this.stageW = rect.width;
-    this.stageH = rect.height;
+    if (!this.modoDistribucionSala) {
+      this.stageW = rect.width;
+      this.stageH = rect.height;
+    }
     return rect;
   }
 
   private logicalStageW() {
+    if (this.modoDistribucionSala) {
+      return this.canvasLogicalW;
+    }
     const rect = this.stageRect();
     return rect ? rect.width / this.zoom : this.stageW;
   }
 
   private logicalStageH() {
+    if (this.modoDistribucionSala) {
+      return this.canvasLogicalH;
+    }
     const rect = this.stageRect();
     return rect ? rect.height / this.zoom : this.stageH;
   }

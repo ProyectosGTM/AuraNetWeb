@@ -1,0 +1,345 @@
+<div class="container-fluid" [@fadeInRight]>
+  <div class="row">
+    <div class="col-12">
+      <div class="title-banner-card shadow-sm">
+        <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="title-icon">
+              <i class="fas fa-plus"></i>
+            </div>
+            <div>
+              <h4 class="title-title">{{ title }}</h4>
+              <p class="title-subtitle">Captura la información requerida para el registro.</p>
+            </div>
+          </div>
+          <div class="title-actions">
+            <div class="title-tagline">
+              <span class="line"></span>
+              <span class="text">Control y configuración centralizada</span>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3 gy-4">
+          <form [formGroup]="promocionForm">
+            <div class="col-12">
+              <div class="row mt-0">
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Código <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <div class="input-sleek">
+                      <i class="fas fa-barcode"></i>
+                      <input formControlName="codigo" class="sleek-control" type="text" placeholder="Ej. PROMO-2026-01" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Nombre <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <div class="input-sleek">
+                      <i class="fas fa-tag"></i>
+                      <input formControlName="nombre" class="sleek-control" type="text" placeholder="Nombre visible" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Tipo de promoción <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <dx-select-box [dataSource]="listaTiposPromocion" displayExpr="text" valueExpr="id"
+                      formControlName="idTipoPromocion" placeholder="Selecciona un tipo..." searchEnabled="true"
+                      searchMode="contains" [showClearButton]="false"
+                      class="dx-select-box-custom dx-select-box-promocion-tipo">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Sala</span>
+                    <dx-select-box [dataSource]="listaSalas" displayExpr="text" valueExpr="id" formControlName="idSala"
+                      placeholder="Selecciona una sala..." searchEnabled="true" searchMode="contains"
+                      [showClearButton]="true" class="dx-select-box-custom dx-select-box-sala">
+                    </dx-select-box>
+                  </label>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Descripción</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-comment-alt"></i>
+                      <input formControlName="descripcion" class="sleek-control" type="text"
+                        placeholder="Ingresa la descripción..." />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Bono por porcentaje <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <dx-select-box [dataSource]="listaSiNo" displayExpr="text" valueExpr="id"
+                      formControlName="esPorcentaje" placeholder="Selecciona..." searchEnabled="false"
+                      [showClearButton]="false" class="dx-select-box-custom dx-select-box-estatus">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Porcentaje bono (%)</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-percent"></i>
+                      <input formControlName="porcentajeBono" class="sleek-control" type="number" min="0" step="0.01"
+                        placeholder="Opcional" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Monto fijo</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-dollar-sign"></i>
+                      <input #inpMontoFijo class="sleek-control" type="text" placeholder="0.00"
+                        (input)="onMontoInput('montoFijo', $event)" (blur)="onMontoBlur('montoFijo', $event)" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Monto mín. depósito</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-dollar-sign"></i>
+                      <input #inpMontoMinDeposito class="sleek-control" type="text" placeholder="0.00"
+                        (input)="onMontoInput('montoMinDeposito', $event)"
+                        (blur)="onMontoBlur('montoMinDeposito', $event)" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Monto máx. bono</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-dollar-sign"></i>
+                      <input #inpMontoMaxBono class="sleek-control" type="text" placeholder="0.00"
+                        (input)="onMontoInput('montoMaxBono', $event)" (blur)="onMontoBlur('montoMaxBono', $event)" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Multiplicador rollover <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <div class="input-sleek">
+                      <i class="fas fa-times"></i>
+                      <input formControlName="multiplicadorRollover" class="sleek-control" type="number" min="0.0001"
+                        step="0.01" placeholder="Ej. 35" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Días para completar <span class="text-danger"
+                        aria-hidden="true">*</span></span>
+                    <div class="input-sleek">
+                      <i class="fas fa-calendar-day"></i>
+                      <input formControlName="diasParaCompletar" class="sleek-control" type="number" min="1" step="1"
+                        placeholder="Ej. 30" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Fecha inicio</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-calendar"></i>
+                      <input formControlName="fechaInicio" class="sleek-control" type="date" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Fecha fin</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-calendar"></i>
+                      <input formControlName="fechaFin" class="sleek-control" type="date" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Hora inicio</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-clock"></i>
+                      <input formControlName="horaInicio" class="sleek-control" type="time" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Hora fin</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-clock"></i>
+                      <input formControlName="horaFin" class="sleek-control" type="time" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Días aplica</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-calendar-week"></i>
+                      <input formControlName="diasAplica" class="sleek-control" type="text"
+                        placeholder="Ej. 1,2,3 o formato definido" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Solo nuevos afiliados</span>
+                    <dx-select-box [dataSource]="listaSiNo" displayExpr="text" valueExpr="id"
+                      formControlName="soloNuevosAfiliados" placeholder="Selecciona..." searchEnabled="false"
+                      [showClearButton]="false" class="dx-select-box-custom dx-select-box-estatus">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Límite usos por afiliado</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-user"></i>
+                      <input formControlName="limiteUsosPorAfiliado" class="sleek-control" type="number" min="0"
+                        step="1" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Límite usos total</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-users"></i>
+                      <input formControlName="limiteUsosTotal" class="sleek-control" type="number" min="0" step="1" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Límite usos por día</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-sun"></i>
+                      <input formControlName="limiteUsosPorDia" class="sleek-control" type="number" min="0" step="1" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Nivel VIP mínimo</span>
+                    <dx-select-box [dataSource]="listaNivelesVip" displayExpr="text" valueExpr="id"
+                      formControlName="idNivelVIPMinimo" placeholder="Opcional..." searchEnabled="true"
+                      searchMode="contains" [showClearButton]="true"
+                      class="dx-select-box-custom dx-select-box-afiliado">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Días máx. antigüedad</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-history"></i>
+                      <input formControlName="diasMaxAntiguedad" class="sleek-control" type="number" min="0" step="1" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Visible</span>
+                    <dx-select-box [dataSource]="listaSiNo" displayExpr="text" valueExpr="id" formControlName="visible"
+                      placeholder="Selecciona..." searchEnabled="false" [showClearButton]="false"
+                      class="dx-select-box-custom dx-select-box-estatus">
+                    </dx-select-box>
+                  </label>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Activa</span>
+                    <dx-select-box [dataSource]="listaSiNo" displayExpr="text" valueExpr="id" formControlName="activa"
+                      placeholder="Selecciona..." searchEnabled="false" [showClearButton]="false"
+                      class="dx-select-box-custom dx-select-box-estatus">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Requiere código promo</span>
+                    <dx-select-box [dataSource]="listaSiNo" displayExpr="text" valueExpr="id"
+                      formControlName="requiereCodigoPromo" placeholder="Selecciona..." searchEnabled="false"
+                      [showClearButton]="false" class="dx-select-box-custom dx-select-box-estatus">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="field">
+                    <span class="field-label text-white">Código promo</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-key"></i>
+                      <input formControlName="codigoPromo" class="sleek-control" type="text" placeholder="Si aplica" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="col-12">
+                  <label class="field">
+                    <span class="field-label text-white">Términos y condiciones</span>
+                    <div class="input-sleek input-sleek--textarea">
+                      <i class="fas fa-file-contract"></i>
+                      <textarea formControlName="terminosCondiciones" class="sleek-control sleek-control--textarea" rows="4"
+                        placeholder="Texto legal o condiciones"></textarea>
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Botones de acción -->
+              <div class="row mt-4">
+                <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
+                  <button (click)="submit()" type="button" class="btn-alt btn-alt--success" [disabled]="loading">
+                    <i class="fas fa-check"></i>
+                    <span>{{ submitButton }}</span>
+                  </button>
+                  <button (click)="cancelar()" type="button" class="btn-alt btn-alt--cancel" [disabled]="loading">
+                    <i class="fas fa-times"></i>
+                    <span>Cancelar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

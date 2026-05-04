@@ -82,8 +82,8 @@
                     <span class="field-label text-white">Límite Efectivo</span>
                     <div class="input-sleek">
                       <i class="fas fa-dollar-sign"></i>
-                      <input formControlName="limiteEfectivo" class="sleek-control" type="text" placeholder="0.00"
-                        (keypress)="allowOnlyNumbers($event)" />
+                      <input #inpLimiteEfectivo class="sleek-control" type="text" placeholder="0.00"
+                        (input)="onLimiteEfectivoInput($event)" (blur)="onLimiteEfectivoBlur($event)" />
                       <span class="sleek-line"></span>
                     </div>
                   </label>

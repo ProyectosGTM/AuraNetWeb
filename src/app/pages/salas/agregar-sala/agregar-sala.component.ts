@@ -1102,9 +1102,12 @@ export class AgregarSalaComponent implements OnInit {
     const payload = this.buildPayloadSala();
 
     this.salasService.agregarSala(payload).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.submitButton = 'Guardar';
         this.loading = false;
+
+        const nuevaId =
+          Number(res?.data?.idSala ?? res?.data?.id ?? res?.idSala ?? res?.id ?? 0) || null;
 
         Swal.fire({
           title: '¡Operación Exitosa!',
@@ -1113,9 +1116,29 @@ export class AgregarSalaComponent implements OnInit {
           icon: 'success',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
+        }).then(() => {
+          if (!nuevaId) {
+            this.regresar();
+            return;
+          }
+          Swal.fire({
+            title: '¿Configurar distribución?',
+            html: 'Puede diseñar ahora el plano de la sala o hacerlo más tarde desde el listado de salas.',
+            icon: 'question',
+            background: '#0d121d',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ir a distribución',
+            cancelButtonText: 'Volver al listado',
+          }).then((r) => {
+            if (r.isConfirmed) {
+              this.route.navigate(['/salas', 'distribucion', nuevaId]);
+            } else {
+              this.regresar();
+            }
+          });
         });
-
-        this.regresar();
       },
       error: (error) => {
         this.submitButton = 'Guardar';

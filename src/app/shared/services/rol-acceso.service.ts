@@ -7,21 +7,32 @@ import Swal from 'sweetalert2';
  * Cada clave tiene ids permitidos alineados con GET /roles/list y `user.rol` / JWT `rol`.
  */
 export type AccionConControlRol =
+  | 'gestionarCajasCliente'
   | 'registrarAfiliado'
   | 'actualizarNivelVipAfiliado'
   | 'verCumpleanerosAfiliados'
   | 'bloquearAfiliado'
   | 'registrarAutoexclusionAfiliado'
-  | 'cancelarAutoexclusionAfiliado';
+  | 'cancelarAutoexclusionAfiliado'
+  | 'abrirTesoreriaDelDia'
+  | 'cerrarTesoreriaDelDia'
+  | 'reponerEfectivoTurno'
+  | 'retirarEfectivoTurno'
+  | 'suspenderTurno'
+  | 'reactivarTurno'
+  | 'corteParcialTurno'
+  | 'registrarPromocion';
 
-/** Nombres por id de `user.rol` / login (API auran3t; id 5 = Gerente en sesión). */
+/** Nombres por id de `user.rol` / login; alineado con `GET /roles/list` (contrato en docs). */
 const ROLES_CATALOGO: Record<string, string> = {
-  '1': 'Super Administrador (SA)',
-  '2': 'Administrador',
-  '3': 'Gerente',
-  '4': 'Jefe de Sala',
+  '1': 'SA',
+  '2': 'Dev',
+  '3': 'Cliente',
+  '4': 'Administrador',
   '5': 'Gerente',
-  '6': 'Jugador',
+  '6': 'Sub-Gerente',
+  '7': 'Cajero',
+  '8': 'Recepcionista',
 };
 
 /** Primera letra mayúscula y el resto minúsculas en cada palabra (títulos). */
@@ -49,21 +60,38 @@ interface ConfigAccionRol {
   tituloRolesPermitidos: string;
 }
 
+/** Etiquetas de rol para mostrar al usuario, sin repetir (p. ej. ids 3 y 5 → ambos "Gerente"). */
+function etiquetasRolesPermitidosUnicas(ids: string[]): string[] {
+  const vistos = new Set<string>();
+  const resultado: string[] = [];
+  for (const id of ids) {
+    const etiqueta = ROLES_CATALOGO[id] ?? id;
+    if (vistos.has(etiqueta)) continue;
+    vistos.add(etiqueta);
+    resultado.push(etiqueta);
+  }
+  return resultado;
+}
+
 const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
+  /** Alta y edición de cajas en consola: solo perfil Cliente (misma regla que la validación actual). */
+  gestionarCajasCliente: {
+    rolesPermitidosIds: ['3'],
+    titulo: 'No puedes registrar ni modificar cajas',
+    subtitulo:
+      'Con tu usuario no está permitido dar de alta ni modificar cajas. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
   registrarAfiliado: {
-    /**
-     * POST /afiliados — personal operativo (excluye Jugador en consola de gestión).
-     * Ajustar ids si negocio autoriza más roles.
-     */
-    rolesPermitidosIds: ['1', '2', '3', '4', '5'],
-    titulo: 'No puedes registrar afiliados',
-    subtitulo: 'Tu rol actual no tiene permiso para crear registros de afiliados.',
-    /** Texto del encabezado de la lista de roles (se formatea como título en el modal). */
+    /** Alta y edición de afiliados en consola: solo perfil Cliente (misma regla que la validación actual). */
+    rolesPermitidosIds: ['3'],
+    titulo: 'No puedes agregar ni actualizar afiliados',
+    subtitulo:
+      'Con tu usuario no está permitido dar de alta ni modificar afiliados. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   actualizarNivelVipAfiliado: {
-    /** Gerente: API auran3t usa `rol` `"5"`; se mantiene `"3"` por compatibilidad con catálogo local. */
-    rolesPermitidosIds: ['3', '5'],
+    rolesPermitidosIds: ['5'],
     titulo: 'No puedes actualizar el nivel VIP',
     subtitulo: 'Tu rol no tiene permiso para cambiar el nivel VIP de un afiliado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
@@ -92,6 +120,65 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
     rolesPermitidosIds: ['1', '2', '3', '4'],
     titulo: 'No puedes cancelar autoexclusión',
     subtitulo: 'Tu rol no tiene permiso para cancelar la autoexclusión de un afiliado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  /** POST /tesorerias/abrir — Cliente, Administrador, Gerente, Sub-Gerente. */
+  abrirTesoreriaDelDia: {
+    rolesPermitidosIds: ['3', '4', '5', '6'],
+    titulo: 'No puedes abrir la bóveda del día',
+    subtitulo: 'Con tu usuario no está permitido abrir la bóveda. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  /** POST /tesorerias/cerrar — mismo alcance de perfiles que abrir bóveda del día. */
+  cerrarTesoreriaDelDia: {
+    rolesPermitidosIds: ['3', '4', '5', '6'],
+    titulo: 'No puedes cerrar la bóveda del día',
+    subtitulo:
+      'Con tu usuario no está permitido cerrar la bóveda ni registrar el arqueo final. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  /** POS turnos: Gerente, Sub-Gerente y Cajero (`user.rol` 5, 6, 7). */
+  reponerEfectivoTurno: {
+    rolesPermitidosIds: ['5', '6', '7'],
+    titulo: 'No puedes reponer efectivo',
+    subtitulo:
+      'Con tu usuario no está permitido transferir efectivo de tesorería a caja durante el turno. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  retirarEfectivoTurno: {
+    rolesPermitidosIds: ['5', '6', '7'],
+    titulo: 'No puedes retirar efectivo',
+    subtitulo:
+      'Con tu usuario no está permitido retirar efectivo de caja hacia tesorería durante el turno. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  suspenderTurno: {
+    rolesPermitidosIds: ['5', '6', '7'],
+    titulo: 'No puedes suspender el turno',
+    subtitulo:
+      'Con tu usuario no está permitido pausar temporalmente un turno de caja. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  reactivarTurno: {
+    rolesPermitidosIds: ['5', '6', '7'],
+    titulo: 'No puedes reactivar el turno',
+    subtitulo:
+      'Con tu usuario no está permitido reanudar un turno suspendido. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  corteParcialTurno: {
+    rolesPermitidosIds: ['5', '6', '7'],
+    titulo: 'No puedes realizar el corte parcial',
+    subtitulo:
+      'Con tu usuario no está permitido generar un corte parcial (Corte X) sin cerrar el turno. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  /** Alta de promoción en consola — Cliente y Administrador. */
+  registrarPromocion: {
+    rolesPermitidosIds: ['3', '4'],
+    titulo: 'No puedes registrar promociones',
+    subtitulo:
+      'Con tu usuario no está permitido dar de alta promociones. Pide apoyo a un usuario con perfil Cliente o Administrador.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
 };
@@ -126,14 +213,16 @@ export class RolAccesoService {
   }
 
   /**
-   * Aviso cuando solo el perfil cliente puede usar cajas o sucursales (salas).
+   * Aviso cuando solo el perfil cliente puede usar cajas, sucursales (salas) o afiliados (alta/edición).
    * Título: mayúscula inicial en cada palabra. Subtítulo: mayúscula solo al inicio.
    */
-  mostrarAccesoSoloPerfilCliente(contexto: 'cajas' | 'sucursales'): Promise<unknown> {
+  mostrarAccesoSoloPerfilCliente(contexto: 'cajas' | 'sucursales' | 'afiliados'): Promise<unknown> {
     const cuerpo =
       contexto === 'cajas'
         ? 'solo pueden registrar o modificar cajas los usuarios con perfil de cliente.'
-        : 'solo pueden registrar o modificar sucursales los usuarios con perfil de cliente.';
+        : contexto === 'sucursales'
+          ? 'solo pueden registrar o modificar sucursales los usuarios con perfil de cliente.'
+          : 'solo pueden registrar o modificar afiliados los usuarios con perfil de cliente.';
     const tituloFormateado = `¡${tituloPorPalabras('Acceso restringido')}!`;
     return Swal.fire({
       icon: 'warning',
@@ -164,9 +253,7 @@ export class RolAccesoService {
    */
   obtenerTextoRolesAutorizados(accion: AccionConControlRol): string {
     const cfg = ACCIONES[accion];
-    return cfg.rolesPermitidosIds
-      .map((id) => ROLES_CATALOGO[id] ?? `Rol ${id}`)
-      .join(', ');
+    return etiquetasRolesPermitidosUnicas(cfg.rolesPermitidosIds).join(', ');
   }
 
   /**
@@ -174,8 +261,8 @@ export class RolAccesoService {
    */
   mostrarAccesoDenegado(accion: AccionConControlRol): void {
     const cfg = ACCIONES[accion];
-    const items = cfg.rolesPermitidosIds
-      .map((id) => `<li>${ROLES_CATALOGO[id] ?? id}</li>`)
+    const items = etiquetasRolesPermitidosUnicas(cfg.rolesPermitidosIds)
+      .map((etiqueta) => `<li>${etiqueta}</li>`)
       .join('');
     const tituloFormateado = `¡${tituloPorPalabras(cfg.titulo)}!`;
     const encabezadoRoles = tituloPorPalabras(cfg.tituloRolesPermitidos);

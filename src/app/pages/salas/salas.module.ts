@@ -8,6 +8,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { ZonasModule } from '../zonas/zonas.module';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { SharedModule } from 'src/app/shared/shared.module';
     DxLoadPanelModule,
     DxPopupModule,
     SharedModule,
-    DxSelectBoxModule
+    DxSelectBoxModule,
+    ZonasModule,
   ]
 })
 export class SalasModule { }

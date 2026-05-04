@@ -1,6 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { lastValueFrom } from 'rxjs';
@@ -79,7 +80,8 @@ export class ListaPromocionesComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private promocionesService: PromocionesService
+    private promocionesService: PromocionesService,
+    private router: Router,
   ) {
     this.formParam = this.fb.group({
       id: [''],
@@ -132,6 +134,10 @@ export class ListaPromocionesComponent implements OnInit {
 
   esTabAcciones(tab: TabAccionesPromo): boolean {
     return this.tabAcciones === tab;
+  }
+
+  agregar(): void {
+    void this.router.navigateByUrl('/promociones/agregar-promocion');
   }
 
   /** Mantiene la pestaña alineada con la vista activa (p. ej. al elegir una tarjeta). */

@@ -8,7 +8,6 @@ import CustomStore from 'devextreme/data/custom_store';
 import { forkJoin, lastValueFrom } from 'rxjs';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { MonederosServices } from 'src/app/shared/services/monederos.service';
-import { TransaccionesService } from 'src/app/shared/services/transacciones.service';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import Swal from 'sweetalert2';
 
@@ -112,7 +111,6 @@ export class ListaMonederosComponent {
   constructor(
     private router: Router,
     private monederosService: MonederosServices,
-    private transaccionesService: TransaccionesService,
     private modalService: NgbModal,
     private fb: FormBuilder,
     private cajasService: CajasService,
@@ -349,9 +347,10 @@ export class ListaMonederosComponent {
 
   verHistorialMonedero(id: number, rowData?: any) {
     this.monederoSeleccionadoHistorial = rowData ? { id: rowData.id, numeroMonedero: rowData.numeroMonedero, alias: rowData.alias } : null;
-    this.transaccionesService.obtenerHistorialMonedero(id).subscribe({
+    this.monederosService.obtenerHistorialMovimientosMonedero(id).subscribe({
       next: (response: any) => {
-        this.historialData = response.data || response || [];
+        const raw = response?.data !== undefined ? response.data : response;
+        this.historialData = Array.isArray(raw) ? raw : Array.isArray(raw?.movimientos) ? raw.movimientos : [];
         this.modalRef = this.modalService.open(this.modalHistorialMonedero, {
           size: 'lg',
           windowClass: 'modal-holder modal-historial-movimientos',
@@ -382,12 +381,21 @@ export class ListaMonederosComponent {
   /** Usa icono/color del API si existe, sino fallback por nombre */
   getIconoMovimientoItem(m: any): { icon: string; class: string; color?: string } {
     const tm = m?.tipoMovimiento;
+    if (typeof tm === 'string') {
+      return { ...this.getIconoMovimiento(tm), color: undefined };
+    }
     if (tm?.icono) {
       const icon = tm.icono.startsWith('fa-') ? tm.icono : `fa-${tm.icono}`;
       return { icon, class: 'icon-dinamico', color: tm.color };
     }
     const nombre = tm?.nombre || m?.tipo || '';
     return { ...this.getIconoMovimiento(nombre), color: undefined };
+  }
+
+  etiquetaTipoMovimientoHistorial(m: any): string {
+    const tm = m?.tipoMovimiento;
+    if (typeof tm === 'string') return tm;
+    return tm?.nombre || m?.tipo || 'Sin registro';
   }
 
   getIconoMovimiento(tipo: string): { class: string; icon: string } {
@@ -571,7 +579,7 @@ export class ListaMonederosComponent {
     this.listaMonederos = new CustomStore({
       key: 'id',
       load: async (loadOptions: any) => {
-        const take = Number(loadOptions?.take) || this.pageSize || 10;
+        const take = Number(loadOptions?.take) || this.pageSize || 20;
         const skip = Number(loadOptions?.skip) || 0;
         const page = Math.floor(skip / take) + 1;
 

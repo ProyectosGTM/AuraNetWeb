@@ -814,6 +814,20 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   z-index: 1;
   pointer-events: none;
 }
+.dx-select-box-custom.dx-select-box-promocion-tipo .dx-textbox-container::before {
+  content: '\f06b';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #e40041;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
 .dx-select-box-custom.dx-select-box-turno .dx-textbox-container::before {
   content: '\f017';
   font-family: 'Font Awesome 5 Free';
@@ -1116,6 +1130,14 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   &:hover { background-color: #1f1509; border-color: #f59e0b; }
 }
 
+/* Distribución / layout de sala (icono cuadrícula): neutro claro, mismo patrón que el resto */
+#distribucionButton {
+  background-color: #243036;
+  border-color: #3f4f5c;
+  i { color: #cbd5e1; }
+  &:hover { background-color: #1a2329; border-color: #94a3b8; }
+}
+
 #resumenButton {
   background-color: #1e1b29;
   border-color: #3d3652;
@@ -1125,9 +1147,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 /* Paleta de colores única por acción (NINGÚN botón comparte color):
    actualizar=azul claro, pin=verde esmeralda, delete=rojo, map=ámbar,
+   distribucion=gris pizarra (cuadrícula),
    resumen=violeta, historial=sky, detalles=cyan, saldo=teal, saldoCaja=naranja,
-   cambiarEstatus=rosa, reponer=verde lima, retirar=amarillo, resumenTurno=magenta,
-   movimientosTurno=rojo coral, suspenderTurno=gris azulado, reemplazarMonedero=morado,
+   cambiarEstatus=rosa, reponer=verde lima, retirar=amarillo,
+   turno-detalle=violeta claro, turno-resumen=magenta, turno-movimientos=coral, turno-reactivar=verde,
+   suspenderTurno=gris azulado, reemplazarMonedero=morado,
    historialMonedero=azul turquesa,
    afiliados: filtros=magenta/fucsia, resumenAfiliado=mismo violeta que resumen bóveda,
    monederosAfiliado=mismo teal que saldo bóveda */
@@ -1180,18 +1204,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   &:hover { background-color: #1f1f09; border-color: #eab308; }
 }
 
-#resumenTurnoButton {
+.btnAcciones--turno-resumen {
   background-color: #2a0d2a;
   border-color: #5c195c;
   i { color: #d946ef; }
   &:hover { background-color: #1f091f; border-color: #d946ef; }
 }
 
-#movimientosTurnoButton {
+.btnAcciones--turno-movimientos {
   background-color: #2a0d0d;
   border-color: #5c1919;
   i { color: #f87171; }
   &:hover { background-color: #1f0909; border-color: #f87171; }
+}
+
+.btnAcciones--turno-detalle {
+  background-color: #221a32;
+  border-color: #432d6b;
+  i { color: #a78bfa; }
+  &:hover { background-color: #1a1426; border-color: #a78bfa; }
 }
 
 #suspenderTurnoButton {
@@ -1201,7 +1232,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   &:hover { background-color: #141920; border-color: #94a3b8; }
 }
 
-#reactivarTurnoButton {
+.btnAcciones--turno-reactivar {
   background-color: #1a2e1a;
   border-color: #2d4d2d;
   i { color: #4ade80; }

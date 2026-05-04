@@ -189,8 +189,9 @@
                       <span class="field-label text-white">Costo de Adquisición</span>
                       <div class="input-sleek">
                         <i class="fas fa-dollar-sign"></i>
-                        <input formControlName="costoAdquisicion" class="sleek-control" type="text" placeholder="0.00"
-                          (keypress)="allowOnlyNumbers($event)" />
+                        <input #inpCostoAdquisicion class="sleek-control" type="text" placeholder="0.00"
+                          (input)="onMontoMaquinaInput($event, 'costoAdquisicion')"
+                          (blur)="onMontoMaquinaBlur($event, 'costoAdquisicion')" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
@@ -242,8 +243,9 @@
                       <span class="field-label text-white">Denominación mínima</span>
                       <div class="input-sleek">
                         <i class="fas fa-coins"></i>
-                        <input formControlName="denominacionMinima" class="sleek-control" type="text" placeholder="0"
-                          (keypress)="allowOnlyNumbers($event)" />
+                        <input #inpDenominacionMinima class="sleek-control" type="text" placeholder="0"
+                          (input)="onMontoMaquinaInput($event, 'denominacionMinima')"
+                          (blur)="onMontoMaquinaBlur($event, 'denominacionMinima')" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
@@ -253,8 +255,9 @@
                       <span class="field-label text-white">Denominación máxima</span>
                       <div class="input-sleek">
                         <i class="fas fa-coins"></i>
-                        <input formControlName="denominacionMaxima" class="sleek-control" type="text" placeholder="0"
-                          (keypress)="allowOnlyNumbers($event)" />
+                        <input #inpDenominacionMaxima class="sleek-control" type="text" placeholder="0"
+                          (input)="onMontoMaquinaInput($event, 'denominacionMaxima')"
+                          (blur)="onMontoMaquinaBlur($event, 'denominacionMaxima')" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>

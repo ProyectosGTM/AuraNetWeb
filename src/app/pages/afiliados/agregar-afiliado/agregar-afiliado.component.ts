@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -15,8 +15,15 @@ import { SalaService } from 'src/app/shared/services/salas.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
+import {
+  aplicarMontoBlurEnCampo,
+  aplicarMontoInputEnCampo,
+  textoMontoDesdeValorControl,
+} from 'src/app/shared/utils/monto-input-formato.util';
 
 type SelectItem = { id: number; text: string };
+
+type CampoMontoAfiliado = 'limiteApuestaDiaria' | 'limiteRetiroDiario';
 
 const LISTA_SI_NO: SelectItem[] = [
   { id: 1, text: 'Sí' },
@@ -38,7 +45,7 @@ function optionalEmailValidator(control: AbstractControl): ValidationErrors | nu
   styleUrl: './agregar-afiliado.component.scss',
   animations: [fadeInRightAnimation],
 })
-export class AgregarAfiliadoComponent implements OnInit {
+export class AgregarAfiliadoComponent implements OnInit, AfterViewInit {
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
   public idAfiliado: number;
@@ -71,6 +78,11 @@ export class AgregarAfiliadoComponent implements OnInit {
   identificacionFrenteInput!: ElementRef<HTMLInputElement>;
   @ViewChild('fotoPerfilInput', { static: false })
   fotoPerfilInput!: ElementRef<HTMLInputElement>;
+
+  @ViewChild('inpLimiteApuestaDiaria', { static: false })
+  inpLimiteApuestaDiaria?: ElementRef<HTMLInputElement>;
+  @ViewChild('inpLimiteRetiroDiario', { static: false })
+  inpLimiteRetiroDiario?: ElementRef<HTMLInputElement>;
 
   identificacionFrenteNombre: string | null = null;
   identificacionPreviewUrl: string | null = null;
@@ -137,10 +149,48 @@ export class AgregarAfiliadoComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    queueMicrotask(() => this.refrescarVistasMontosAfiliado());
+  }
+
   allowOnlyNumbers(event: KeyboardEvent): void {
     const charCode = event.keyCode ? event.keyCode : event.which;
     if (charCode < 48 || charCode > 57) {
       event.preventDefault();
+    }
+  }
+
+  /** Misma idea que `parseLim` al leer del API: número finito o null. */
+  private limiteNumeroDesdeApi(raw: unknown): number | null {
+    if (raw === null || raw === undefined || raw === '') {
+      return null;
+    }
+    if (typeof raw === 'number') {
+      return Number.isFinite(raw) ? raw : null;
+    }
+    const n = parseFloat(String(raw).replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  onMontoAfiliadoInput(ev: Event, campo: CampoMontoAfiliado): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.afiliadoForm.get(campo));
+  }
+
+  onMontoAfiliadoBlur(ev: Event, campo: CampoMontoAfiliado): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.afiliadoForm.get(campo));
+  }
+
+  private refrescarVistasMontosAfiliado(): void {
+    const pares: [CampoMontoAfiliado, ElementRef<HTMLInputElement> | undefined][] = [
+      ['limiteApuestaDiaria', this.inpLimiteApuestaDiaria],
+      ['limiteRetiroDiario', this.inpLimiteRetiroDiario],
+    ];
+    for (const [campo, ref] of pares) {
+      const el = ref?.nativeElement;
+      if (!el) {
+        continue;
+      }
+      el.value = textoMontoDesdeValorControl(this.afiliadoForm.get(campo)?.value);
     }
   }
 
@@ -291,8 +341,8 @@ export class AgregarAfiliadoComponent implements OnInit {
           parentescoEmergencia: data.parentescoEmergencia || '',
           fotoPerfil: data.fotoPerfil || '',
           idNivelVIP: data.idNivelVIP != null ? Number(data.idNivelVIP) : null,
-          limiteApuestaDiaria: data.limiteApuestaDiaria ?? null,
-          limiteRetiroDiario: data.limiteRetiroDiario ?? null,
+          limiteApuestaDiaria: this.limiteNumeroDesdeApi(data.limiteApuestaDiaria),
+          limiteRetiroDiario: this.limiteNumeroDesdeApi(data.limiteRetiroDiario),
           aceptaPromociones:
             data.aceptaPromociones === 0 || data.aceptaPromociones === 1 ? Number(data.aceptaPromociones) : 1,
           aceptaEmail: data.aceptaEmail === 0 || data.aceptaEmail === 1 ? Number(data.aceptaEmail) : 1,
@@ -304,6 +354,7 @@ export class AgregarAfiliadoComponent implements OnInit {
         const urlFoto = (data.fotoPerfil || '').toString().trim();
         this.fotoPerfilNombre = urlFoto ? urlFoto.split('/').pop() || urlFoto : null;
         this.fotoPerfilPreviewUrl = /^https?:\/\//i.test(urlFoto) || urlFoto.startsWith('data:') ? urlFoto : urlFoto || null;
+        queueMicrotask(() => this.refrescarVistasMontosAfiliado());
       },
       error: (error) => {
         Swal.fire({
@@ -390,6 +441,11 @@ export class AgregarAfiliadoComponent implements OnInit {
       return;
     }
 
+    if (!this.rolAcceso.esPerfilClienteLogueado()) {
+      this.rolAcceso.mostrarAccesoDenegado('registrarAfiliado');
+      return;
+    }
+
     this.loading = true;
     const payload = this.buildPayloadAfiliado();
 
@@ -420,13 +476,6 @@ export class AgregarAfiliadoComponent implements OnInit {
         }
       });
     } else {
-      const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
-      if (!this.rolAcceso.puedeRealizarAccion('registrarAfiliado', rolUsuario)) {
-        this.loading = false;
-        this.rolAcceso.mostrarAccesoDenegado('registrarAfiliado');
-        return;
-      }
-
       this.afiliadosService.agregarAfiliado(payload).subscribe({
         next: (response) => {
           this.loading = false;

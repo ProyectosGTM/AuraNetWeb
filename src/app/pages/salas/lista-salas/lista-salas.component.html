@@ -41,7 +41,7 @@
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
                         [pager]="{ 
                             showPageSizeSelector: true, 
-                            allowedPageSizes: [50], 
+                            allowedPageSizes: [20], 
                             showInfo: true,
                             infoText: 'Página {0} de {1}', 
                             visible: true 
@@ -53,7 +53,7 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="220"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="260"></dxi-column>
                         <dxi-column dataField="nombreSala" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="descripcionSala" caption="Descripción" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -76,27 +76,34 @@
                         <dxo-export [enabled]="false" [allowExportSelectedData]="true"
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
-                        <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                        <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center flex-wrap">
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarSala(row.data.id)"
-                                    ngbTooltip="Editar sala" placement="top" container="body">
+                                    ngbTooltip="Editar sala" placement="top">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
                             <div>
+                                <button type="button" id="distribucionButton" class="btnAcciones"
+                                    (click)="abrirDistribucion(row.data)"
+                                    ngbTooltip="Distribución" placement="top">
+                                    <i class="fa fa-th-large"></i>
+                                </button>
+                            </div>
+                            <div>
                                 <button id="mapButton" class="btnAcciones" (click)="mostrarUbicacion(row.data)"
-                                    ngbTooltip="Ver ubicación en mapa" placement="top" container="body">
+                                    ngbTooltip="Ver ubicación en mapa" placement="top">
                                     <i class="fa fa-map-marker-alt"></i>
                                 </button>
                             </div>
                             <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones" (click)="activar(row.data)"
-                                    ngbTooltip="Activar sala" placement="top" container="body">
+                                    ngbTooltip="Activar sala" placement="top">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones" (click)="desactivar(row.data)"
-                                    ngbTooltip="Desactivar sala" placement="top" container="body">
+                                    ngbTooltip="Desactivar sala" placement="top">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </div>

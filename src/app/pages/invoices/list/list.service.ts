@@ -56,7 +56,7 @@ export class InvoiceService {
 
   private _state: State = {
     page: 1,
-    pageSize: 10,
+    pageSize: 20,
     searchTerm: '',
     sortColumn: '',
     sortDirection: '',

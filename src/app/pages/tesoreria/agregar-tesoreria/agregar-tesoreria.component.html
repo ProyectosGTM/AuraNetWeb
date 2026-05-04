@@ -54,8 +54,15 @@
                       <span class="field-label text-white">Fondo Inicial *</span>
                       <div class="input-sleek">
                         <i class="fas fa-dollar-sign"></i>
-                        <input formControlName="fondoInicial" class="sleek-control" type="text"
-                          placeholder="500000.00" (keypress)="allowOnlyNumbers($event)" />
+                        <input
+                          #inpFondoInicial
+                          class="sleek-control"
+                          type="text"
+                          inputmode="decimal"
+                          autocomplete="off"
+                          placeholder="0.00"
+                          (input)="onFondoInicialInput($event)"
+                          (blur)="onFondoInicialBlur($event)" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>

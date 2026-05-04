@@ -65,6 +65,199 @@
   }
 }
 
+/** CTA: abre modal Mi turno (misma familia que Turnos activos, tono ámbar). */
+.btn-turnos-mi-turno-cta {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 2px solid rgba(251, 191, 36, 0.85);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0.32) 100%);
+  box-shadow:
+    0 0 0 1px rgba(251, 191, 36, 0.25),
+    0 4px 18px rgba(245, 158, 11, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  color: #fff;
+
+  i {
+    color: #fff7ed !important;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(253, 230, 138, 0.95);
+    box-shadow:
+      0 0 0 2px rgba(251, 191, 36, 0.45),
+      0 8px 26px rgba(245, 158, 11, 0.45);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.5);
+  }
+}
+
+.modal-accion-header--mi-turno .modal-title,
+.modal-accion-header--detalle-turno .modal-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.turno-ficha-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.92) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.turno-ficha-hero-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.turno-ficha-hero-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.turno-ficha-estatus-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.turno-ficha-dl--hero {
+  row-gap: 8px;
+  padding-top: 0;
+
+  dt {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(148, 163, 184, 0.92);
+    font-weight: 700;
+  }
+
+  dd {
+    color: #f1f5f9;
+  }
+}
+
+.turno-ficha-hero-value--code {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #f8fafc !important;
+}
+
+.turno-ficha-hero-value--name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.92) !important;
+}
+
+.turno-ficha-hero-value--desc {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgba(226, 232, 240, 0.78) !important;
+}
+
+.turno-ficha-estatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fff;
+  border: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.turno-ficha-root {
+  > .turno-ficha-hero {
+    margin-bottom: 26px;
+  }
+
+  > .saldo-section:first-of-type {
+    margin-top: 2px;
+  }
+}
+
+.turno-ficha-dl {
+  display: grid;
+  grid-template-columns: minmax(140px, 34%) 1fr;
+  column-gap: 14px;
+  row-gap: 10px;
+  margin: 0;
+  padding: 2px 0 0;
+  font-size: 0.9rem;
+
+  dt {
+    margin: 0;
+    color: rgba(203, 213, 225, 0.88);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    color: #f1f5f9;
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  &--muted dt {
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  &--muted dd {
+    color: rgba(226, 232, 240, 0.92);
+  }
+}
+
+.turno-ficha-section--registro {
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.turno-ficha-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 28px 16px;
+  color: rgba(226, 232, 240, 0.75);
+  font-size: 0.95rem;
+
+  i {
+    font-size: 2rem;
+    color: rgba(125, 211, 252, 0.65);
+  }
+}
+
+.resumen-turno-sin-datos-hint {
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(226, 232, 240, 0.62);
+  font-weight: 400;
+}
+
 .turnos-grid-wrapper {
   width: 100%;
   min-width: 0;
@@ -114,8 +307,6 @@
 // Estilos para columna de acciones responsive
 .acciones-turnos-wrapper {
   width: 100%;
-  min-width: 280px;
-  padding: 4px 0;
 }
 
 .acciones-turnos-grid {
@@ -132,10 +323,6 @@
 }
 
 @media (max-width: 768px) {
-  .acciones-turnos-wrapper {
-    min-width: 240px;
-  }
-  
   .acciones-turnos-grid {
     gap: 4px;
     
@@ -1153,6 +1340,44 @@
     .btn-action-icon { background: #673ab7; }
     &:hover { background: rgba(103, 58, 183, 0.22); border-color: #673ab7; }
   }
+
+  &.btn-turnos-mi-turno-tab {
+    border-color: rgba(23, 162, 184, 0.55);
+    background: rgba(23, 162, 184, 0.12);
+    .btn-action-icon {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+    &:hover {
+      background: rgba(23, 162, 184, 0.22);
+      border-color: #17a2b8;
+    }
+  }
+
+  &.btn-turnos-activos-tab {
+    border-color: rgba(80, 165, 241, 0.55);
+    background: rgba(80, 165, 241, 0.12);
+    .btn-action-icon {
+      background: linear-gradient(135deg, #50a5f1 0%, #2563eb 100%);
+    }
+    &:hover {
+      background: rgba(80, 165, 241, 0.22);
+      border-color: #50a5f1;
+    }
+
+    .btn-action-chip {
+      display: inline-flex;
+      align-self: flex-start;
+      margin-top: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: #e0f2fe;
+      background: rgba(37, 99, 235, 0.35);
+      border: 1px solid rgba(125, 211, 252, 0.35);
+    }
+  }
 }
 
 /* Botones confirmar en modales Turnos (colores sólidos) */
@@ -1232,9 +1457,11 @@
     }
   }
 
-  // Modales de columna (Resumen y Movimientos) - igual que Bóveda
+  // Modales de columna (Resumen, Movimientos, Mi turno, Detalle) - igual que Bóveda
   .modal-resumen-turno,
-  .modal-movimientos-turno {
+  .modal-movimientos-turno,
+  .modal-mi-turno-activo,
+  .modal-detalle-turno {
     .modal-content {
       background: #0d121d;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1283,6 +1510,14 @@
 
     .btn-close:hover {
       opacity: 1;
+    }
+  }
+
+  .modal-mi-turno-activo,
+  .modal-detalle-turno {
+    .modal-body.modal-accion-body.modal-body-resumen {
+      max-height: min(72vh, 560px);
+      overflow-y: auto;
     }
   }
 
@@ -1352,6 +1587,22 @@
 
     &.modal-accion-header--turnos-activos .modal-title i {
       color: #7dd3fc;
+    }
+
+    &.modal-accion-header--mi-turno::before {
+      background: linear-gradient(180deg, #17a2b8, #138496);
+    }
+
+    &.modal-accion-header--mi-turno .modal-title i {
+      color: #17a2b8;
+    }
+
+    &.modal-accion-header--detalle-turno::before {
+      background: linear-gradient(180deg, #7c3aed, #5b21b6);
+    }
+
+    &.modal-accion-header--detalle-turno .modal-title i {
+      color: #a78bfa;
     }
   }
 
@@ -1709,6 +1960,18 @@
       }
     }
   }
+
+  // Celdas con cards de monto: no dejar que el contenido empuje fuera del ancho de columna
+  .turnos-grid-wrapper .dx-datagrid-rowsview .dx-data-row > td:has(.monto-cell) {
+    overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+    vertical-align: middle;
+  }
+
+  .turnos-grid-wrapper .dx-datagrid-rowsview .dx-data-row > td .monto-cell {
+    max-width: 100%;
+  }
 }
 
 // Estilos para el contenido de las celdas
@@ -1724,17 +1987,22 @@
   padding: 4px 0;
 }
 
-// Estilos para la celda de monto destacada
+// Estilos para la celda de monto destacada (contenido siempre dentro de la card / celda)
 .monto-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 8px 16px;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 8px 10px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+  overflow: hidden;
 
   &:hover {
     transform: translateY(-2px);
@@ -1742,13 +2010,13 @@
   }
 
   .monto-icon {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 13px;
     flex-shrink: 0;
   }
 
@@ -1756,20 +2024,36 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 2px;
+    flex: 1 1 0%;
+    min-width: 0;
+    max-width: 100%;
+    text-align: center;
 
     .monto-value {
-      font-size: 16px;
+      width: 100%;
+      max-width: 100%;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.02em;
+      line-height: 1.25;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      hyphens: auto;
     }
 
     .monto-label {
-      font-size: 10px;
-      font-weight: 500;
+      width: 100%;
+      max-width: 100%;
+      font-size: 9px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      opacity: 0.8;
+      letter-spacing: 0.06em;
+      opacity: 0.85;
+      line-height: 1.2;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
   }
 

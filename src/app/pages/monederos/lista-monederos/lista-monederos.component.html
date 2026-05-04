@@ -176,7 +176,7 @@
                         [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
                         [pager]="{ 
                             showPageSizeSelector: true, 
-                            allowedPageSizes: [50], 
+                            allowedPageSizes: [20], 
                             showInfo: true,
                             infoText: 'Página {0} de {1}', 
                             visible: true 
@@ -189,13 +189,6 @@
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
                         <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="300"></dxi-column>
                         <dxi-column dataField="numeroMonedero" caption="Número Monedero" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="codigoRFID" caption="Código RFID" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="alias" caption="Alias" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreCompletoAfiliado" caption="Afiliado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="esPrincipalTexto" caption="Es Principal" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Estatus Monedero" cellTemplate="EstatusMonedero" alignment="center" dataType="string" [width]="150"></dxi-column>
-                        <dxi-column dataField="idEstatusMonedero" caption="ID Estatus Monedero" alignment="center" dataType="number" [visible]="false" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreEstatusMonedero" caption="Nombre Estatus Monedero" alignment="center" dataType="string" [visible]="false" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string">
                             <div *dxTemplate="let f of 'est'">
                                 <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
@@ -206,6 +199,13 @@
                                 </span>
                             </div>
                         </dxi-column>
+                        <dxi-column dataField="codigoRFID" caption="Código RFID" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="alias" caption="Alias" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreCompletoAfiliado" caption="Afiliado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="esPrincipalTexto" caption="Es Principal" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="Estatus Monedero" cellTemplate="EstatusMonedero" alignment="center" dataType="string" [width]="150"></dxi-column>
+                        <dxi-column dataField="idEstatusMonedero" caption="ID Estatus Monedero" alignment="center" dataType="number" [visible]="false" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreEstatusMonedero" caption="Nombre Estatus Monedero" alignment="center" dataType="string" [visible]="false" [allowSearch]="true"></dxi-column>
                         <div *dxTemplate="let row of 'EstatusMonedero'">
                             <span class="estatus" [style.background-color]="row.data.estatusMonederoColor" [style.color]="'#fff'" [style.border-color]="row.data.estatusMonederoColor">
                                 {{ row.data.estatusMonederoTexto }}
@@ -218,43 +218,43 @@
                             <div>
                                 <button type="button" id="cambiarEstatusButton" class="btnAcciones"
                                     (click)="abrirCambiarEstatus(row.data)"
-                                    ngbTooltip="Cambiar estatus del monedero (Activo/Inactivo)" placement="top" container="body">
+                                    ngbTooltip="Cambiar estatus del monedero (Activo/Inactivo)" placement="top">
                                     <i class="fa fa-exchange-alt"></i>
                                 </button>
                             </div>
                             <div>
                                 <button type="button" id="reemplazarMonederoButton" class="btnAcciones"
                                     (click)="abrirReemplazarMonedero(row.data)"
-                                    ngbTooltip="Reemplazar monedero (ej: extraviado)" placement="top" container="body">
+                                    ngbTooltip="Reemplazar monedero (ej: extraviado)" placement="top">
                                     <i class="fa fa-sync-alt"></i>
                                 </button>
                             </div>
                             <div>
                                 <button type="button" id="historialMonederoButton" class="btnAcciones"
                                     (click)="verHistorialMonedero(row.data.id, row.data)"
-                                    ngbTooltip="Ver historial de movimientos" placement="top" container="body">
+                                    ngbTooltip="Ver historial de movimientos" placement="top">
                                     <i class="fa fa-history"></i>
                                 </button>
                             </div>
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarMonedero(row.data.id)"
-                                    ngbTooltip="Editar monedero" placement="top" container="body">
+                                    ngbTooltip="Editar monedero" placement="top">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
                                     (click)="activar(row.data)"
-                                    ngbTooltip="Activar monedero" placement="top" container="body">
+                                    ngbTooltip="Activar monedero" placement="top">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
                                     (click)="desactivar(row.data)"
-                                    ngbTooltip="Desactivar monedero" placement="top" container="body">
+                                    ngbTooltip="Desactivar monedero" placement="top">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                     </dx-data-grid>
                 </div>
@@ -512,7 +512,7 @@
                     <i class="fas" [ngClass]="getIconoMovimientoItem(m).icon"></i>
                 </div>
                 <div class="movimiento-content">
-                    <div class="movimiento-tipo">{{ m.tipoMovimiento?.nombre || m.tipo || 'Sin registro' }}</div>
+                    <div class="movimiento-tipo">{{ etiquetaTipoMovimientoHistorial(m) }}</div>
                     <div class="movimiento-concepto" *ngIf="m.concepto">{{ m.concepto }}</div>
                     <div class="movimiento-meta">
                         <span class="movimiento-fecha" *ngIf="m.fechaMovimiento">

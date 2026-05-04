@@ -11,6 +11,11 @@ export class PromocionesService {
 
   constructor(private http: HttpClient) {}
 
+  /** POST /promociones — Crear promoción */
+  crear(payload: Record<string, unknown>): Observable<any> {
+    return this.http.post(this.base, payload);
+  }
+
   /** GET /promociones - Listar promociones */
   listar(params?: { [key: string]: string | number }): Observable<any> {
     let httpParams = new HttpParams();
