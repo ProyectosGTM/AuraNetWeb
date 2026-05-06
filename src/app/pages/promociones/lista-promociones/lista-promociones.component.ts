@@ -19,7 +19,7 @@ const promoTabPanelAnimation = trigger('promoTabPanel', [
   ]),
 ]);
 
-/** Vistas de solo lectura (GET) agrupadas en un solo módulo. */
+/** Vistas de solo lectura (GET) agrupadas en un solo móduloff. */
 export type VistaPromociones =
   | 'todas'
   | 'vigentes'
