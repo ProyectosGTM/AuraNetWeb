@@ -56,7 +56,7 @@
                                             <span class="promo-tab-inner">
                                                 <i class="fas fa-user-clock" aria-hidden="true"></i>
                                                 <span class="promo-tab-caption">Mi turno y activos</span>
-                                                <span class="promo-tab-count" *ngIf="!loadingTurnosActivos" aria-label="Cantidad de turnos activos">{{ turnosActivos.length }}</span>
+                                                <!-- <span class="promo-tab-count" *ngIf="!loadingTurnosActivos" aria-label="Cantidad de turnos activos">{{ turnosActivos.length }}</span> -->
                                             </span>
                                         </button>
                                     </div>
@@ -688,7 +688,7 @@
                         <span class="field-label text-white">Fondo Inicial *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="fondoInicial" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                            <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0" (input)="onMontoTurnosInput($event, 'abrir', 'fondoInicial')" (blur)="onMontoTurnosBlur($event, 'abrir', 'fondoInicial')" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -746,7 +746,7 @@
                         <span class="field-label text-white">Monto *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0" (input)="onMontoTurnosInput($event, 'reponer', 'monto')" (blur)="onMontoTurnosBlur($event, 'reponer', 'monto')" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -814,7 +814,7 @@
                         <span class="field-label text-white">Monto *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                            <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0" (input)="onMontoTurnosInput($event, 'retirar', 'monto')" (blur)="onMontoTurnosBlur($event, 'retirar', 'monto')" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -892,7 +892,7 @@
                         <span class="field-label text-white">Efectivo contado *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="efectivoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0" />
+                            <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0" (input)="onMontoTurnosInput($event, 'suspender', 'efectivoContado')" (blur)="onMontoTurnosBlur($event, 'suspender', 'efectivoContado')" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -980,11 +980,11 @@
         </button>
     </div>
     <div class="modal-body modal-accion-body">
-        <div class="form-indication">
+        <div class="form-indication" *ngIf="!corteParcialData">
             <i class="fas fa-cut"></i>
-            <span>Genera un reporte del estado actual del turno sin cerrarlo. Compara efectivo contado vs saldo calculado. El turno debe estar <strong>abierto</strong>, se identifica por <strong>ID de caja</strong>. Requiere rol Operador, Jefe de Sala o Gerente.</span>
+            <span>Genera un reporte del estado actual del turno sin cerrarlo. Compara efectivo contado vs saldo calculado. El turno debe estar <strong>abierto</strong>, se identifica por <strong>ID de caja</strong>.</span>
         </div>
-        <form [formGroup]="corteParcialForm">
+        <form [formGroup]="corteParcialForm" *ngIf="!corteParcialData">
             <div class="row g-3 align-items-end">
                 <div class="col-12">
                     <label class="field">
@@ -1000,7 +1000,7 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-caja">
                         </dx-select-box>
-                        <div *ngIf="listaCajasCorteParcial.length === 0" class="text-muted small mt-1">Sin cajas en catálogo (/cajas/list). Requiere turno abierto en la caja (API).</div>
+                        <div *ngIf="listaCajasCorteParcial.length === 0" class="text-muted small mt-1">No hay cajas disponibles por el momento para generar el corte parcial.</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -1008,7 +1008,7 @@
                         <span class="field-label text-white">Efectivo contado *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="efectivoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                            <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0" (input)="onMontoTurnosInput($event, 'corte', 'efectivoContado')" (blur)="onMontoTurnosBlur($event, 'corte', 'efectivoContado')" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -1025,13 +1025,102 @@
                 </div>
             </div>
         </form>
+        <div *ngIf="corteParcialData" class="saldo-result-content">
+            <div class="saldo-section">
+                <h5 class="saldo-section-title">
+                    <i class="fas fa-cut"></i>
+                    <span>Resultado del corte parcial</span>
+                </h5>
+                <div class="saldo-cards-grid">
+                    <div class="saldo-card saldo-card-total" *ngIf="corteParcialData.turno?.id != null">
+                        <div class="saldo-card-icon"><i class="fas fa-hashtag"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">ID turno</div>
+                            <div class="saldo-card-value">{{ corteParcialData.turno?.id }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-promocional" *ngIf="corteParcialData.turno?.horasTranscurridas != null">
+                        <div class="saldo-card-icon"><i class="fas fa-clock"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Horas transcurridas</div>
+                            <div class="saldo-card-value">{{ corteParcialData.turno?.horasTranscurridas | number:'1.2-2' }} h</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-redimible" *ngIf="corteParcialData.corte?.fechaCorte">
+                        <div class="saldo-card-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Fecha de corte</div>
+                            <div class="saldo-card-value">{{ formatearFechaHora(corteParcialData.corte?.fechaCorte) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-promocional" *ngIf="corteParcialData.corte?.saldoCalculado != null">
+                        <div class="saldo-card-icon"><i class="fas fa-wallet"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Saldo calculado</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(corteParcialData.corte?.saldoCalculado) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-efectivo" *ngIf="corteParcialData.corte?.efectivoContado != null">
+                        <div class="saldo-card-icon"><i class="fas fa-coins"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Efectivo contado</div>
+                            <div class="saldo-card-value">{{ formatearMoneda(corteParcialData.corte?.efectivoContado) }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-puntos" *ngIf="corteParcialData.corte?.diferencia != null">
+                        <div class="saldo-card-icon"><i class="fas" [ngClass]="(corteParcialData.corte?.diferencia || 0) >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Diferencia</div>
+                            <div class="saldo-card-value" [class.text-success]="(corteParcialData.corte?.diferencia || 0) >= 0" [class.text-danger]="(corteParcialData.corte?.diferencia || 0) < 0">
+                                {{ formatearMoneda(corteParcialData.corte?.diferencia) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-total" *ngIf="corteParcialData.corte?.resultado">
+                        <div class="saldo-card-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Estado</div>
+                            <div class="saldo-card-value">{{ corteParcialData.corte?.resultado }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-total" *ngIf="corteParcialData.acumulado?.operaciones != null">
+                        <div class="saldo-card-icon"><i class="fas fa-calculator"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Operaciones</div>
+                            <div class="saldo-card-value">{{ corteParcialData.acumulado?.operaciones }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-efectivo" *ngIf="corteParcialData.acumulado?.cargas != null">
+                        <div class="saldo-card-icon"><i class="fas fa-arrow-up"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Cargas</div>
+                            <div class="saldo-card-value">{{ corteParcialData.acumulado?.cargas }}</div>
+                        </div>
+                    </div>
+                    <div class="saldo-card saldo-card-redimible" *ngIf="corteParcialData.acumulado?.descargas != null">
+                        <div class="saldo-card-icon"><i class="fas fa-arrow-down"></i></div>
+                        <div class="saldo-card-content">
+                            <div class="saldo-card-label">Descargas</div>
+                            <div class="saldo-card-value">{{ corteParcialData.acumulado?.descargas }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-indication form-indication--info mt-3" *ngIf="corteParcialData.mensaje">
+                <i class="fas fa-info-circle"></i>
+                <span>{{ corteParcialData.mensaje }}</span>
+            </div>
+        </div>
     </div>
     <div class="modal-footer modal-accion-footer">
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
-            <i class="fas fa-times"></i><span>Cancelar</span>
+            <i class="fas fa-times"></i><span>{{ corteParcialData ? 'Cerrar' : 'Cancelar' }}</span>
         </button>
-        <button type="button" class="btn btn-confirm-turnos-corte" (click)="guardarCorteParcial()" [disabled]="corteParcialForm.invalid">
+        <button *ngIf="!corteParcialData" type="button" class="btn btn-confirm-turnos-corte" (click)="guardarCorteParcial()" [disabled]="corteParcialForm.invalid || procesandoCorteParcial">
             <i class="fas fa-cut"></i> Generar corte parcial
+        </button>
+        <button *ngIf="corteParcialData" type="button" class="btn btn-confirm-turnos-corte" (click)="corteParcial()">
+            <i class="fas fa-sync-alt"></i> Nuevo corte parcial
         </button>
     </div>
 </ng-template>
@@ -1076,7 +1165,7 @@
                         <span class="field-label text-white">Fondo Contado *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input formControlName="fondoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                            <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0" (input)="onMontoTurnosInput($event, 'cerrar', 'fondoContado')" (blur)="onMontoTurnosBlur($event, 'cerrar', 'fondoContado')" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -1344,13 +1433,13 @@
         </div>
     </div>
     <div class="modal-footer modal-accion-footer">
-        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cargarMiTurnoActivo()" [disabled]="loadingMiTurnoActivo">
-            <i class="fas fa-sync-alt" [class.fa-spin]="loadingMiTurnoActivo"></i>
-            <span>Actualizar</span>
-        </button>
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalMiTurno()">
             <i class="fas fa-times"></i>
             <span>Cerrar</span>
+        </button>
+        <button type="button" class="btn btn-confirm-turnos-consultar-caja" (click)="cargarMiTurnoActivo()" [disabled]="loadingMiTurnoActivo">
+            <i class="fas fa-sync-alt" [class.fa-spin]="loadingTurnosActivos"></i>
+            <span>Actualizar</span>
         </button>
     </div>
 </ng-template>

@@ -3,12 +3,40 @@ import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+/** JSON guardado en sala para el diagrama de distribución (layout/mapa). */
+export interface AreaPoligonoJsonPayload {
+  dimensiones: { ancho: number; alto: number; zoom: number };
+  maquinaTamano: { ancho: number; alto: number };
+  zonas: Array<{ id: number; x: number; y: number; w: number; h: number; maquinas: unknown[] }>;
+  maquinasSinZona: unknown[];
+  entrada?: { x: number; y: number; r: number } | null;
+  salida?: { x: number; y: number; r: number } | null;
+}
+
+/** Respuesta típica del GET /layout/mapa/{idSala}. */
+export interface LayoutMapaSalaResponse {
+  areaPoligonoJson?: AreaPoligonoJsonPayload;
+  maquinasSinZona?: unknown[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class SalaService {
 
   constructor(private http: HttpClient) { }
+
+  /** GET /layout/mapa/{idSala} — diagrama de distribución de la sala. */
+  obtenerLayoutMapaSala(idSala: number): Observable<LayoutMapaSalaResponse | { data?: LayoutMapaSalaResponse }> {
+    return this.http.get<LayoutMapaSalaResponse | { data?: LayoutMapaSalaResponse }>(
+      `${environment.API_SECURITY}/layout/mapa/${idSala}`
+    );
+  }
+
+  /** PATCH /layout/mapa/{idSala} */
+  guardarLayoutMapaSala(idSala: number, body: { areaPoligonoJson: Record<string, unknown> }): Observable<unknown> {
+    return this.http.patch<unknown>(`${environment.API_SECURITY}/layout/mapa/${idSala}`, body);
+  }
 
   obtenerSalasData(page: number, pageSize: number): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/salas/${page}/${pageSize}`);

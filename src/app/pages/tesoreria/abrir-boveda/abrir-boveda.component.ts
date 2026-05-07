@@ -9,6 +9,7 @@ import { SalaService } from 'src/app/shared/services/salas.service';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import Swal from 'sweetalert2';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
+import { AuthenticationService } from 'src/app/core/services/auth.service';
 import {
   aplicarMontoBlurEnCampo,
   aplicarMontoInputEnCampo,
@@ -42,6 +43,7 @@ export class AbrirBovedaComponent implements OnInit, AfterViewInit {
     private salasService: SalaService,
     private cajasService: CajasService,
     private usuService: UsuariosService,
+    private authService: AuthenticationService,
     private rolAcceso: RolAccesoService,
   ) {
     this.abrirTesoreriaForm = this.fb.group({
@@ -110,7 +112,15 @@ export class AbrirBovedaComponent implements OnInit, AfterViewInit {
   }
 
   obtenerUsuarios() {
-    this.usuService.obtenerUsuarios().subscribe((response) => {
+    const user = this.authService.getUser();
+    const idCliente = Number(user?.idCliente);
+    if (!Number.isFinite(idCliente) || idCliente <= 0) {
+      this.listaUsuarios = [];
+      this.mapaUsuarios = new Map();
+      return;
+    }
+
+    this.usuService.obtenerUsuariosRolOperador(idCliente).subscribe((response) => {
       const data = response.data || [];
       this.listaUsuarios = data.map((u: any) => {
         const idRaw = u.id ?? u.Id;
@@ -119,7 +129,7 @@ export class AbrirBovedaComponent implements OnInit, AfterViewInit {
         const apellidoPaterno = u.ApellidoPaterno || u.apellidoPaterno || '';
         const apellidoMaterno = u.ApellidoMaterno || u.apellidoMaterno || '';
         const nombreCompleto = `${nombre} ${apellidoPaterno} ${apellidoMaterno}`.trim();
-        
+
         return {
           id,
           text: nombreCompleto || u.usuario || u.correo || String(id)

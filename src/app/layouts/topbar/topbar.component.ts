@@ -6,6 +6,7 @@ import { AuthfakeauthenticationService } from '../../core/services/authfake.serv
 import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslateService } from '@ngx-translate/core';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 
 @Component({
   selector: 'app-topbar',
@@ -23,6 +24,7 @@ export class TopbarComponent implements OnInit {
   valueset;
   public showNombre: any;
   public showImage: any;
+  public showRol: string;
 
   constructor(@Inject(DOCUMENT) private document: any,
     private router: Router,
@@ -31,10 +33,12 @@ export class TopbarComponent implements OnInit {
     public languageService: LanguageService,
     public translate: TranslateService,
     private users: AuthenticationService,
+    private rolAccesoService: RolAccesoService,
     public _cookiesService: CookieService) {
     const user = this.users.getUser();
     this.showImage = user.fotoPerfil || 'assets/images/user_default.png';
     this.showNombre = user.nombre + ' ' + user.apellidoPaterno;
+    this.showRol = this.rolAccesoService.obtenerEtiquetaRol(user?.rol);
   }
 
   defaultAvatar = 'assets/images/user_default.png';
@@ -53,7 +57,6 @@ export class TopbarComponent implements OnInit {
       img.src = this.defaultAvatar;
     }
   }
-
 
   listLang = [
     { text: 'English', flag: 'assets/images/flags/us.jpg', lang: 'en' },

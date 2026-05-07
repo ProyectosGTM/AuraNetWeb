@@ -309,7 +309,7 @@
   }
 
   // Estilos Modal Resumen
-  .modal-header-resumen {
+  .modal-header-info-boveda {
     background: linear-gradient(135deg, #5b73e8 0%, #4a5fc7 100%);
     padding: 20px 24px;
     border-radius: 12px 12px 0 0;
@@ -319,6 +319,12 @@
     box-shadow: 0 4px 20px rgba(91, 115, 232, 0.25);
     margin: 0;
     border: none;
+
+    .modal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
     .modal-title {
       margin: 0;
@@ -333,13 +339,28 @@
         font-size: 22px;
       }
     }
+
+    .btn-close {
+      filter: none;
+      opacity: 1;
+      margin: 0;
+      padding: 0.45rem 0.55rem;
+      border: 1px solid rgba(111, 145, 176, 0.8);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.16);
+
+      i {
+        color: #fff;
+      }
+    }
   }
 
   // Resumen compacto (más grande)
   .resumen-compact {
     font-size: 14px;
-    max-width: 560px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
   }
 
   .resumen-header {
@@ -433,11 +454,15 @@
 
   .resumen-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 16px;
 
-    @media (max-width: 400px) {
+    @media (max-width: 900px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 480px) {
       grid-template-columns: repeat(2, 1fr);
     }
   }

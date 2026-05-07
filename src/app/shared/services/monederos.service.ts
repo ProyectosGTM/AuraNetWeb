@@ -47,6 +47,10 @@ export class MonederosServices {
     return this.http.get(`${environment.API_SECURITY}/afiliados/list`);
   }
 
+  obtenerAfiliadosSinMonedero(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/afiliados/list/sin-monedero`);
+  }
+
   obtenerEstatusMonedero(): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/catestatusmonedero/list`);
   }

@@ -226,11 +226,14 @@
       </div> -->
 
       <div class="dropdown d-inline-block" ngbDropdown>
-        <button type="button" class="btn header-item waves-effect" ngbDropdownToggle id="page-header-user-dropdown">
+        <button style="display: flex; align-items: center; justify-content: center;" type="button" class="btn header-item waves-effect" ngbDropdownToggle id="page-header-user-dropdown">
           <img class="rounded-circle header-profile-user" [src]="'https://transmovi.s3.us-east-2.amazonaws.com/imagenes/user_default.png'" (error)="onAvatarError($event)"
             alt="Header Avatar">
 
-          <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15">{{showNombre}}</span>
+          <span class="d-none d-xl-inline-flex ms-1 topbar-user-meta">
+            <span class="topbar-user-name">{{ showNombre }}</span>
+            <span class="topbar-user-role">{{ showRol }}</span>
+          </span>
           <i class="uil-angle-down d-none d-xl-inline-block font-size-15" style="color: #09fa3a;"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>

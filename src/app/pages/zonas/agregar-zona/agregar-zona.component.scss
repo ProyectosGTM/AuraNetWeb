@@ -147,22 +147,77 @@
   text-align: center;
 }
 
-.plano-select {
+/* Selects del toolbar: mismo acento que .plano-btn--ghost (cyan) */
+.plano-select.select-sleek {
   position: relative;
+  z-index: 40;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 0 12px;
+  padding: 0 34px 0 12px;
+  min-width: 168px;
   height: 40px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, .06);
-  border: 1px solid rgba(255, 255, 255, .10);
+  cursor: pointer;
+  user-select: none;
+  background: rgba(0, 209, 255, .10);
+  border: 1px solid rgba(0, 209, 255, .26);
   color: rgba(255, 255, 255, .92);
+  transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
 }
 
-.plano-select i {
+.plano-select.select-sleek:hover:not(.plano-select--empty) {
+  transform: translateY(-1px);
+  background: rgba(0, 209, 255, .15);
+  border-color: rgba(0, 209, 255, .36);
+}
+
+.plano-select.select-sleek.is-open:not(.plano-select--empty) {
+  background: rgba(0, 209, 255, .16);
+  border-color: rgba(0, 209, 255, .42);
+  box-shadow: 0 0 0 1px rgba(0, 209, 255, .12);
+}
+
+.plano-select.select-sleek.plano-select--empty {
+  opacity: .72;
+  cursor: default;
+  background: rgba(255, 255, 255, .05);
+  border-color: rgba(255, 255, 255, .14);
+}
+
+.plano-select.select-sleek.plano-select--empty:hover {
+  transform: none;
+}
+
+.plano-select.select-sleek i {
   opacity: .95;
   font-size: 13px;
+  color: rgba(130, 245, 255, .95);
+}
+
+.plano-select.select-sleek.plano-select--empty i {
+  color: rgba(255, 255, 255, .45);
+}
+
+/* Un solo chevron (evita conflicto con .select-sleek global) */
+.plano-select.select-sleek::after {
+  content: '\f107';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  width: auto;
+  height: auto;
+  font-size: 13px;
+  color: rgba(120, 235, 255, .88);
+  pointer-events: none;
+}
+
+.plano-select.select-sleek.plano-select--empty::after {
+  color: rgba(255, 255, 255, .38);
 }
 
 .plano-select__control {
@@ -175,26 +230,41 @@
   color: rgba(255, 255, 255, .92);
   font-weight: 700;
   font-size: 12.5px;
-  padding-right: 18px;
-  cursor: pointer;
+  padding-right: 0;
+  cursor: inherit;
+  flex: 1;
+  min-width: 0;
 }
 
 .plano-select__control option {
   color: #111;
 }
 
-.plano-select::after {
-  content: '';
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 6px solid rgba(255, 255, 255, .70);
-  pointer-events: none;
+.plano-select.select-sleek .select-panel {
+  border-color: rgba(0, 209, 255, .32);
+  color: white;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, .55),
+    0 0 0 1px rgba(0, 209, 255, .08);
+}
+
+.plano-select.select-sleek .select-empty-hint {
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgb(255, 255, 255);
+  text-align: center;
+}
+
+.plano-select.select-sleek .select-value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff !important;
+}
+
+/* Global `.select-value-muted` fuerza gris con !important */
+.plano-select.select-sleek .select-value.select-value-muted {
+  color: #ffffff !important;
 }
 
 .plano-stage {
@@ -203,6 +273,8 @@
   height: 520px;
   border-radius: 16px;
   overflow: hidden;
+  touch-action: none;
+  cursor: grab;
   border: 1px solid rgba(255, 255, 255, .10);
   background:
     radial-gradient(650px 420px at 15% 25%, rgba(255, 26, 91, .12), transparent 55%),
@@ -213,6 +285,10 @@
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, .04),
     inset 0 -40px 120px rgba(0, 0, 0, .35);
+}
+
+.plano-stage--panning {
+  cursor: grabbing !important;
 }
 
 .snap-line {
@@ -357,24 +433,27 @@
 
 .machine-tooltip {
   position: absolute;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
-  min-width: 210px;
-  padding: 12px;
-  border-radius: 14px;
-  background: rgba(15, 20, 35, .95);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, .15);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, .55);
+  min-width: 168px;
+  max-width: min(240px, 52vw);
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: rgba(15, 20, 35, .96);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, .14);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .5);
   color: #fff;
-  font-size: 12px;
+  font-size: 10.5px;
+  line-height: 1.25;
   z-index: 30;
 }
 
 .tt-title {
   font-weight: 900;
-  margin-bottom: 8px;
+  font-size: 11px;
+  margin-bottom: 5px;
   color: #ffd26a;
 }
 
@@ -382,14 +461,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 2px 0;
+  gap: 6px;
+  padding: 1px 0;
   color: rgba(255, 255, 255, .82);
 }
 
 .tt-row b {
   color: rgba(255, 255, 255, .92);
-  font-weight: 900;
+  font-weight: 800;
+  font-size: 10px;
 }
 
 .machine-handle {
@@ -592,70 +672,20 @@
   border-color: rgba(255, 255, 255, .22);
 }
 
-.plano-select {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 12px;
-  height: 40px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .06);
-  border: 1px solid rgba(255, 255, 255, .10);
-  color: rgba(255, 255, 255, .92);
-}
-
-.plano-select i {
-  opacity: .95;
-  font-size: 13px;
-}
-
-.plano-select__control {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background: transparent;
-  border: 0;
-  outline: none;
-  color: rgba(255, 255, 255, .92);
-  font-weight: 700;
-  font-size: 12.5px;
-  padding-right: 18px;
-  cursor: pointer;
-}
-
-.plano-select__control option {
-  color: #111;
-}
-
-.plano-select::after {
-  content: '';
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 6px solid rgba(255, 255, 255, .70);
-  pointer-events: none;
-}
-
 .tt-name {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  max-width: 150px;
+  gap: 5px;
+  max-width: 118px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .tt-edit {
-  width: 26px;
-  height: 26px;
-  border-radius: 9px;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, .14);
   background: rgba(255, 255, 255, .06);
   color: rgba(255, 255, 255, .92);
@@ -665,6 +695,22 @@
   flex: 0 0 auto;
 }
 
+.tt-edit i {
+  font-size: 9px;
+}
+
+.tt-input {
+  width: 100%;
+  min-width: 0;
+  max-width: 118px;
+  padding: 4px 6px;
+  font-size: 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+}
+
 .tt-edit:hover {
   background: rgba(255, 255, 255, .10);
   border-color: rgba(255, 255, 255, .22);
@@ -672,33 +718,45 @@
 
 .tt-row--rotate {
   align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+.tt-row--rotate > span:first-child {
+  flex: 0 0 auto;
+  margin-right: auto;
 }
 
 .tt-rotate {
   display: inline-flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
 }
 
 .tt-rotate-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 3px;
 
-  min-width: 44px;
-  height: 36px;
-  padding: 0 10px;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 6px;
 
-  border-radius: 10px;
+  border-radius: 7px;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 9.5px;
   line-height: 1;
   white-space: nowrap;
 
-  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, .14);
   background: rgba(255, 255, 255, .06);
   color: rgba(255, 255, 255, .92);
+}
+
+.tt-rotate-btn i {
+  font-size: 10px;
 }
 
 .tt-rotate-btn--danger {
@@ -740,14 +798,14 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -12px;
-  height: 12px;
+  bottom: -8px;
+  height: 8px;
 }
 
 .tt-rotate-btn--center {
   width: auto;
-  padding: 0 10px;
-  gap: 6px;
+  padding: 0 7px;
+  gap: 4px;
   display: inline-flex;
   align-items: center;
 }
@@ -759,7 +817,8 @@
 
 .plano-content {
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: 0;
   transform-origin: 0 0;
 }
 

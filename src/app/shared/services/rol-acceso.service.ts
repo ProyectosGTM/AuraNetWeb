@@ -193,6 +193,46 @@ export class RolAccesoService {
   constructor(private auth: AuthenticationService) {}
 
   /**
+   * Convierte el valor de rol (id/string/objeto) a una etiqueta legible para UI.
+   */
+  obtenerEtiquetaRol(rol: unknown): string {
+    if (rol == null) {
+      return 'Sin rol';
+    }
+
+    if (typeof rol === 'object') {
+      const rolObj = rol as Record<string, unknown>;
+      const nombreDesdeObjeto = (
+        rolObj['rolNombre'] ??
+        rolObj['nombre'] ??
+        rolObj['name'] ??
+        rolObj['descripcion'] ??
+        ''
+      )
+        .toString()
+        .trim();
+
+      if (nombreDesdeObjeto) {
+        return nombreDesdeObjeto;
+      }
+
+      const idDesdeObjeto = (rolObj['id'] ?? rolObj['rolId'] ?? '').toString().trim();
+      if (idDesdeObjeto && ROLES_CATALOGO[idDesdeObjeto]) {
+        return ROLES_CATALOGO[idDesdeObjeto];
+      }
+
+      return 'Sin rol';
+    }
+
+    const rolComoTexto = String(rol).trim();
+    if (!rolComoTexto) {
+      return 'Sin rol';
+    }
+
+    return ROLES_CATALOGO[rolComoTexto] ?? rolComoTexto;
+  }
+
+  /**
    * Rol del usuario en sesión (`user.rol`), como string; null si no hay sesión válida.
    */
   obtenerRolUsuarioLogueado(): string | null {

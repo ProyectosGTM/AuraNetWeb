@@ -4,17 +4,18 @@ import { CommonModule } from '@angular/common';
 import { SalasRoutingModule } from './salas-routing.module';
 import { ListaSalasComponent } from './lista-salas/lista-salas.component';
 import { AgregarSalaComponent } from './agregar-sala/agregar-sala.component';
+import { DistribucionSalaComponent } from './distribucion-sala/distribucion-sala.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DxDataGridModule, DxLoadPanelModule, DxPopupModule, DxSelectBoxModule } from 'devextreme-angular';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/shared/shared.module';
-import { ZonasModule } from '../zonas/zonas.module';
 
 
 @NgModule({
   declarations: [
     ListaSalasComponent,
-    AgregarSalaComponent
+    AgregarSalaComponent,
+    DistribucionSalaComponent,
   ],
   imports: [
     CommonModule,
@@ -27,7 +28,6 @@ import { ZonasModule } from '../zonas/zonas.module';
     DxPopupModule,
     SharedModule,
     DxSelectBoxModule,
-    ZonasModule,
   ]
 })
 export class SalasModule { }

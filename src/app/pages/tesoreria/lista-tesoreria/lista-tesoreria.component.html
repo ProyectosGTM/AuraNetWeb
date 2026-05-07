@@ -20,10 +20,10 @@
                             <span class="text">Control y configuración centralizada</span>
                         </div>
                         <div class="title-buttons">
-                            <button type="button" (click)="agregar()" class="btn-title btn-title--primary">
+                            <!-- <button type="button" (click)="agregar()" class="btn-title btn-title--primary">
                                 <i class="fas fa-plus"></i>
                                 <span>Nuevo</span>
-                            </button>
+                            </button> -->
                             <button (click)="toggleExpandGroups()" type="button" class="btn-title btn-title--ghost">
                                 <i class="fas fa-expand"></i>
                                 <span>Contraer Grid</span>
@@ -48,15 +48,11 @@
                             <nav class="promo-tabs-nav w-100" role="tablist" aria-label="Acciones de bóveda agrupadas">
                                 <div class="row row-cols-1 row-cols-sm-2 g-2 mx-0 w-100 promo-tabs-row">
                                     <div class="col d-flex">
-                                        <button
-                                            type="button"
-                                            role="tab"
-                                            [attr.aria-selected]="esTabAcciones('apertura')"
-                                            class="promo-tab w-100"
+                                        <button type="button" role="tab"
+                                            [attr.aria-selected]="esTabAcciones('apertura')" class="promo-tab w-100"
                                             [class.promo-tab--active]="esTabAcciones('apertura')"
                                             (click)="setTabAcciones('apertura')"
-                                            title="Abrir o cerrar tesorería de sala"
-                                        >
+                                            title="Abrir o cerrar tesorería de sala">
                                             <span class="promo-tab-inner">
                                                 <i class="fas fa-door-open" aria-hidden="true"></i>
                                                 <span class="promo-tab-caption">Apertura y cierre</span>
@@ -64,15 +60,10 @@
                                         </button>
                                     </div>
                                     <div class="col d-flex">
-                                        <button
-                                            type="button"
-                                            role="tab"
-                                            [attr.aria-selected]="esTabAcciones('efectivo')"
-                                            class="promo-tab w-100"
+                                        <button type="button" role="tab"
+                                            [attr.aria-selected]="esTabAcciones('efectivo')" class="promo-tab w-100"
                                             [class.promo-tab--active]="esTabAcciones('efectivo')"
-                                            (click)="setTabAcciones('efectivo')"
-                                            title="Reponer o retirar efectivo"
-                                        >
+                                            (click)="setTabAcciones('efectivo')" title="Reponer o retirar efectivo">
                                             <span class="promo-tab-inner">
                                                 <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
                                                 <span class="promo-tab-caption">Efectivo en bóveda</span>
@@ -87,18 +78,21 @@
                                     <ng-container [ngSwitch]="tabAcciones">
                                         <div *ngSwitchCase="'apertura'" class="row g-3 promo-tab-cards">
                                             <div class="col-12 col-md-6 col-xl-4 d-flex">
-                                                <button (click)="abrirTesoreria()" type="button" class="btn-action-large btn-boveda-abrir w-100 align-self-stretch">
+                                                <button (click)="abrirTesoreria()" type="button"
+                                                    class="btn-action-large btn-boveda-abrir w-100 align-self-stretch">
                                                     <div class="btn-action-icon">
                                                         <i class="fas fa-door-open"></i>
                                                     </div>
                                                     <div class="btn-action-text">
                                                         <span class="btn-action-label">Abrir Bóveda</span>
-                                                        <span class="btn-action-desc">Iniciar nueva tesorería de sala</span>
+                                                        <span class="btn-action-desc">Iniciar nueva tesorería de
+                                                            sala</span>
                                                     </div>
                                                 </button>
                                             </div>
                                             <div class="col-12 col-md-6 col-xl-4 d-flex">
-                                                <button (click)="cerrarTesoreria()" type="button" class="btn-action-large btn-boveda-cerrar w-100 align-self-stretch"
+                                                <button (click)="cerrarTesoreria()" type="button"
+                                                    class="btn-action-large btn-boveda-cerrar w-100 align-self-stretch"
                                                     [disabled]="loadingAcciones">
                                                     <div class="btn-action-icon">
                                                         <i class="fas fa-door-closed"></i>
@@ -113,7 +107,8 @@
 
                                         <div *ngSwitchCase="'efectivo'" class="row g-3 promo-tab-cards">
                                             <div class="col-12 col-md-6 col-xl-4 d-flex">
-                                                <button (click)="reponerTesoreria()" type="button" class="btn-action-large btn-boveda-reponer w-100 align-self-stretch"
+                                                <button (click)="reponerTesoreria()" type="button"
+                                                    class="btn-action-large btn-boveda-reponer w-100 align-self-stretch"
                                                     [disabled]="loadingAcciones">
                                                     <div class="btn-action-icon">
                                                         <i class="fas fa-arrow-up"></i>
@@ -125,7 +120,8 @@
                                                 </button>
                                             </div>
                                             <div class="col-12 col-md-6 col-xl-4 d-flex">
-                                                <button (click)="retirarTesoreria()" type="button" class="btn-action-large btn-boveda-retirar w-100 align-self-stretch"
+                                                <button (click)="retirarTesoreria()" type="button"
+                                                    class="btn-action-large btn-boveda-retirar w-100 align-self-stretch"
                                                     [disabled]="loadingAcciones">
                                                     <div class="btn-action-icon">
                                                         <i class="fas fa-arrow-down"></i>
@@ -145,76 +141,103 @@
                 </div>
                 <div class="row mt-3 gy-4">
                     <div class="boveda-grid-wrapper">
-                    <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
-                        [showColumnLines]="true" [dataSource]="listaTesoreria" [showRowLines]="true" [rowAlternationEnabled]="'true'"[keyExpr]="'id'" [width]="'100%'"
-                        [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" 
-                        [pager]="{ 
+                        <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true"
+                            [showBorders]="'true'" [showColumnLines]="true" [dataSource]="listaTesoreria"
+                            [showRowLines]="true" [rowAlternationEnabled]="'true'" [keyExpr]="'id'" [width]="'100%'"
+                            [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" [pager]="{ 
                             showPageSizeSelector: true, 
                             allowedPageSizes: [20], 
                             showInfo: true,
                             infoText: 'Página {0} de {1}', 
                             visible: true 
-                        }" (onPageIndexChanged)=" onPageIndexChanged($event)" (onOptionChanged)="onGridOptionChanged($event)">
-                        <dxo-search-panel [visible]="true" [width]="200" placeholder="Buscar..."></dxo-search-panel>
-                        <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]" [showInfo]="true"></dxo-pager>
-                        <dxo-group-panel [emptyPanelText]="mensajeAgrupar" [visible]="true"></dxo-group-panel>
-                        <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
-                        <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
-                        <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="340" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
-                        <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="fechaFormateada" caption="Fecha" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="fondoInicialFormateado" caption="Fondo Inicial" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column caption="Estatus Boveda" cellTemplate="EstatusTesoreria" alignment="center" dataType="string"></dxi-column>
-                        <dxi-column dataField="fondoContadoFormateado" caption="Fondo Contado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="fechaAperturaFormateada" caption="Fecha Apertura" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreCompletoUsuarioApertura" caption="Usuario Apertura" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="fechaCierreFormateada" caption="Fecha Cierre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreCompletoUsuarioCierre" caption="Usuario Cierre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string"></dxi-column>
-                        <dxi-column dataField="nombreCompletoCliente" caption="Cliente" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
-                        <dxi-column dataField="rfcCliente" caption="RFC Cliente" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
-                        <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
-                        <dxi-column dataField="observaciones" caption="Observaciones" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
-                        <dxi-column dataField="codigoEstatusTesoreria" caption="Código Estatus Boveda" alignment="center" dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
-                        <dxi-column dataField="fechaCreacion" caption="Fecha Creación" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'" [visible]="false"></dxi-column>
-                        <dxi-column dataField="fechaActualizacion" caption="Fecha Actualización" alignment="center" dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'" [visible]="false"></dxi-column>
-                        <dxo-export [enabled]="false" [allowExportSelectedData]="true"
-                            [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
-                        </dxo-export>
-                        <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
-                            <div>
-                                <button type="button" id="bovedaAbiertaSalaButton" class="btnAcciones" (click)="verBovedaAbiertaSala(row.data)"
-                                    ngbTooltip="Ver bóveda abierta de la sala" placement="top">
-                                    <i class="fa fa-door-open"></i>
-                                </button>
-                            </div>
-                            <div>
-                                <button type="button" id="resumenButton" class="btnAcciones" (click)="verResumen(row.data.id)"
-                                    ngbTooltip="Ver resumen de tesorería" placement="top">
-                                    <i class="fa fa-chart-line"></i>
-                                </button>
-                            </div>
-                            <div>
-                                <button type="button" id="historialButton" class="btnAcciones" (click)="verHistorial(row.data.id)"
-                                    ngbTooltip="Ver historial de movimientos" placement="top">
-                                    <i class="fa fa-history"></i>
-                                </button>
-                            </div>
-                            <!-- <div>
+                        }" (onPageIndexChanged)=" onPageIndexChanged($event)"
+                            (onOptionChanged)="onGridOptionChanged($event)">
+                            <dxo-search-panel [visible]="true" [width]="200" placeholder="Buscar..."></dxo-search-panel>
+                            <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]"
+                                [showInfo]="true"></dxo-pager>
+                            <dxo-group-panel [emptyPanelText]="mensajeAgrupar" [visible]="true"></dxo-group-panel>
+                            <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
+                            <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
+                            <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+                            <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string"
+                                [width]="340" [fixed]="true" [fixedPosition]="'left'"></dxi-column>
+                                <dxi-column caption="Estatus Boveda" cellTemplate="EstatusTesoreria" alignment="center"
+                                    dataType="string"></dxi-column>
+                            <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string"
+                                [allowSearch]="true"></dxi-column>
+                            <dxi-column dataField="fechaFormateada" caption="Fecha" alignment="center" dataType="string"
+                                [allowSearch]="true"></dxi-column>
+                            <dxi-column dataField="fondoInicialFormateado" caption="Fondo Inicial" alignment="center"
+                                dataType="string" [allowSearch]="true"></dxi-column>
+                            <dxi-column dataField="fondoContadoFormateado" caption="Fondo Contado" alignment="center"
+                                dataType="string" [allowSearch]="true"></dxi-column>
+                            <dxi-column dataField="fechaAperturaFormateada" caption="Fecha Apertura" alignment="center"
+                                dataType="string" [allowSearch]="true"></dxi-column>
+                            <dxi-column dataField="nombreCompletoUsuarioApertura" caption="Usuario Apertura"
+                                alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                            <dxi-column dataField="fechaCierreFormateada" caption="Fecha Cierre" alignment="center"
+                                dataType="string" [allowSearch]="true"></dxi-column>
+                            <dxi-column dataField="nombreCompletoUsuarioCierre" caption="Usuario Cierre"
+                                alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                            <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est"
+                                dataType="string"></dxi-column>
+                            <dxi-column dataField="nombreCompletoCliente" caption="Cliente" alignment="center"
+                                dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                            <dxi-column dataField="rfcCliente" caption="RFC Cliente" alignment="center"
+                                dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                            <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala"
+                                alignment="center" dataType="string" [allowSearch]="true"
+                                [visible]="false"></dxi-column>
+                            <dxi-column dataField="observaciones" caption="Observaciones" alignment="center"
+                                dataType="string" [allowSearch]="true" [visible]="false"></dxi-column>
+                            <dxi-column dataField="codigoEstatusTesoreria" caption="Código Estatus Boveda"
+                                alignment="center" dataType="string" [allowSearch]="true"
+                                [visible]="false"></dxi-column>
+                            <dxi-column dataField="fechaCreacion" caption="Fecha Creación" alignment="center"
+                                dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'"
+                                [visible]="false"></dxi-column>
+                            <dxi-column dataField="fechaActualizacion" caption="Fecha Actualización" alignment="center"
+                                dataType="datetime" [allowSearch]="true" [format]="'dd/MM/yyyy HH:mm'"
+                                [visible]="false"></dxi-column>
+                            <dxo-export [enabled]="false" [allowExportSelectedData]="true"
+                                [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
+                            </dxo-export>
+                            <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                                <div>
+                                    <button type="button" id="bovedaAbiertaSalaButton" class="btnAcciones"
+                                        (click)="verBovedaAbiertaSala(row.data)"
+                                        ngbTooltip="Ver bóveda abierta de la sala" placement="top">
+                                        <i class="fa fa-door-open"></i>
+                                    </button>
+                                </div>
+                                <div>
+                                    <button type="button" id="resumenButton" class="btnAcciones"
+                                        (click)="verResumen(row.data.id)" ngbTooltip="Ver resumen de tesorería"
+                                        placement="top">
+                                        <i class="fa fa-chart-line"></i>
+                                    </button>
+                                </div>
+                                <div>
+                                    <button type="button" id="historialButton" class="btnAcciones"
+                                        (click)="verHistorial(row.data.id)" ngbTooltip="Ver historial de movimientos"
+                                        placement="top">
+                                        <i class="fa fa-history"></i>
+                                    </button>
+                                </div>
+                                <!-- <div>
                                 <button type="button" id="saldoButton" class="btnAcciones" (click)="verSaldo(row.data.id)"
                                     ngbTooltip="Obtener saldo de tesorería" placement="top">
                                     <i class="fa fa-wallet"></i>
                                 </button>
                             </div> -->
-                            <div>
-                                <button type="button" id="eliminarTesoreriaButton" class="btnAcciones"
-                                    (click)="eliminarTesoreria(row.data.id ?? row.data.Id)"
-                                    ngbTooltip="Eliminar tesorería" placement="top">
-                                    <i class="fa fa-trash-alt"></i>
-                                </button>
-                            </div>
-                            <!-- <div>
+                                <div>
+                                    <button type="button" id="eliminarTesoreriaButton" class="btnAcciones"
+                                        (click)="eliminarTesoreria(row.data.id ?? row.data.Id)"
+                                        ngbTooltip="Eliminar tesorería" placement="top">
+                                        <i class="fa fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                                <!-- <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarTesoreria(row.data.id)"
                                     ngbTooltip="Editar tesorería" placement="top">
@@ -233,21 +256,22 @@
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </div> -->
-                        </div>
-                        <div *dxTemplate="let row of 'EstatusTesoreria'">
-                            <span class="estatus" [style.background-color]="row.data.estatusTesoreriaColor" [style.color]="'#fff'" [style.border-color]="row.data.estatusTesoreriaColor">
-                                {{ row.data.estatusTesoreriaTexto }}
-                            </span>
-                        </div>
-                        <div *dxTemplate="let f of 'est'">
-                            <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
-                                Activo
-                            </span>
-                            <span *ngIf="f.data.estatus !== 1" class="estatus estatus-inactivo">
-                                Inactivo
-                            </span>
-                        </div>
-                    </dx-data-grid>
+                            </div>
+                            <div *dxTemplate="let row of 'EstatusTesoreria'">
+                                <span class="estatus" [style.background-color]="row.data.estatusTesoreriaColor"
+                                    [style.color]="'#fff'" [style.border-color]="row.data.estatusTesoreriaColor">
+                                    {{ row.data.estatusTesoreriaTexto }}
+                                </span>
+                            </div>
+                            <div *dxTemplate="let f of 'est'">
+                                <span *ngIf="f.data.estatus === 1" class="estatus estatus-activo">
+                                    Activo
+                                </span>
+                                <span *ngIf="f.data.estatus !== 1" class="estatus estatus-inactivo">
+                                    Inactivo
+                                </span>
+                            </div>
+                        </dx-data-grid>
                     </div>
                 </div>
             </div>
@@ -257,11 +281,13 @@
 
 <!-- Modal Resumen -->
 <ng-template #modalResumen let-modal>
-    <div class="modal-header modal-header-resumen">
-        <h5 class="modal-title">
-            <i class="fas fa-chart-line"></i>
-            <span>Resumen de Boveda</span>
-        </h5>
+    <div class="modal-header modal-header-info-boveda">
+        <div class="modal-header-left">
+            <h5 class="modal-title">
+                <i class="fas fa-chart-line"></i>
+                <span>Resumen de Boveda</span>
+            </h5>
+        </div>
         <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarResumen()">
             <i class="fas fa-times"></i>
         </button>
@@ -271,7 +297,8 @@
             <div class="resumen-header">
                 <span class="resumen-sala">{{ resumenData.nombreSala || 'Sin registro' }}</span>
                 <span class="resumen-fecha">{{ formatearFecha(resumenData.fecha) }}</span>
-                <span class="resumen-estatus" [class.estatus-abierta]="(resumenData.estatus || resumenData.nombreEstatusTesoreria || '').toUpperCase() === 'ABIERTA'"
+                <span class="resumen-estatus"
+                    [class.estatus-abierta]="(resumenData.estatus || resumenData.nombreEstatusTesoreria || '').toUpperCase() === 'ABIERTA'"
                     [class.estatus-cerrada]="(resumenData.estatus || resumenData.nombreEstatusTesoreria || '').toUpperCase() === 'CERRADA'">
                     {{ resumenData.estatus || resumenData.nombreEstatusTesoreria || 'Sin registro' }}
                 </span>
@@ -397,25 +424,21 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--warning">
             <i class="fas fa-door-closed"></i>
-            <span>Cierra la bóveda del día. No se puede completar el cierre si aún hay turnos de caja abiertos. Indica el fondo contado y, si quieres, observaciones.</span>
+            <span>Cierra la bóveda del día. No se puede completar el cierre si aún hay turnos de caja abiertos. Indica
+                el fondo contado y, si quieres, observaciones.</span>
         </div>
         <form [formGroup]="cerrarTesoreriaForm">
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
                         <span class="field-label text-white">Boveda *</span>
-                        <dx-select-box
-                            [dataSource]="listaTesoreriaAbierta"
-                            displayExpr="text"
-                            valueExpr="id"
-                            formControlName="idTesoreria"
-                            placeholder="Selecciona boveda abierta..."
-                            searchEnabled="true"
-                            searchMode="contains"
-                            [showClearButton]="true"
+                        <dx-select-box [dataSource]="listaTesoreriaAbierta" displayExpr="text" valueExpr="id"
+                            formControlName="idTesoreria" placeholder="Selecciona boveda abierta..."
+                            searchEnabled="true" searchMode="contains" [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-boveda">
                         </dx-select-box>
-                        <div *ngIf="listaTesoreriaAbierta.length === 0" class="text-muted small mt-1">No hay bovedas abiertas</div>
+                        <div *ngIf="listaTesoreriaAbierta.length === 0" class="text-muted small mt-1">No hay bovedas
+                            abiertas</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -423,14 +446,8 @@
                         <span class="field-label text-white">Fondo Contado *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input
-                                #inpFondoContadoCerrar
-                                class="sleek-control"
-                                type="text"
-                                inputmode="decimal"
-                                autocomplete="off"
-                                placeholder="0.00"
-                                (input)="onMontoCerrarInput($event)"
+                            <input #inpFondoContadoCerrar class="sleek-control" type="text" inputmode="decimal"
+                                autocomplete="off" placeholder="0.00" (input)="onMontoCerrarInput($event)"
                                 (blur)="onMontoCerrarBlur($event)" />
                             <span class="sleek-line"></span>
                         </div>
@@ -441,7 +458,8 @@
                         <span class="field-label text-white">Observaciones</span>
                         <div class="input-sleek">
                             <i class="fas fa-comment-alt"></i>
-                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                            <input formControlName="observaciones" class="sleek-control" type="text"
+                                placeholder="Opcional" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -453,7 +471,8 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-danger" (click)="guardarCerrarTesoreria()" [disabled]="cerrarTesoreriaForm.invalid">
+        <button type="button" class="btn btn-danger" (click)="guardarCerrarTesoreria()"
+            [disabled]="cerrarTesoreriaForm.invalid">
             <i class="fas fa-check"></i> Cerrar Boveda
         </button>
     </div>
@@ -473,25 +492,21 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication">
             <i class="fas fa-arrow-up"></i>
-            <span>Agrega efectivo a la bóveda desde una fuente externa. Aumenta el saldo disponible de la tesorería.</span>
+            <span>Agrega efectivo a la bóveda desde una fuente externa. Aumenta el saldo disponible de la
+                tesorería.</span>
         </div>
         <form [formGroup]="reponerTesoreriaForm">
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
                         <span class="field-label text-white">Boveda *</span>
-                        <dx-select-box
-                            [dataSource]="listaTesoreriaReponer"
-                            displayExpr="text"
-                            valueExpr="id"
-                            formControlName="idTesoreria"
-                            placeholder="Selecciona boveda abierta..."
-                            searchEnabled="true"
-                            searchMode="contains"
-                            [showClearButton]="true"
+                        <dx-select-box [dataSource]="listaTesoreriaReponer" displayExpr="text" valueExpr="id"
+                            formControlName="idTesoreria" placeholder="Selecciona boveda abierta..."
+                            searchEnabled="true" searchMode="contains" [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-boveda">
                         </dx-select-box>
-                        <div *ngIf="listaTesoreriaReponer.length === 0" class="text-muted small mt-1">No hay bovedas abiertas</div>
+                        <div *ngIf="listaTesoreriaReponer.length === 0" class="text-muted small mt-1">No hay bovedas
+                            abiertas</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -499,14 +514,8 @@
                         <span class="field-label text-white">Monto *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input
-                                #inpMontoReponer
-                                class="sleek-control"
-                                type="text"
-                                inputmode="decimal"
-                                autocomplete="off"
-                                placeholder="0.00"
-                                (input)="onMontoReponerInput($event)"
+                            <input #inpMontoReponer class="sleek-control" type="text" inputmode="decimal"
+                                autocomplete="off" placeholder="0.00" (input)="onMontoReponerInput($event)"
                                 (blur)="onMontoReponerBlur($event)" />
                             <span class="sleek-line"></span>
                         </div>
@@ -517,7 +526,8 @@
                         <span class="field-label text-white">Referencia</span>
                         <div class="input-sleek">
                             <i class="fas fa-hashtag"></i>
-                            <input formControlName="referencia" class="sleek-control" type="text" placeholder="Opcional" />
+                            <input formControlName="referencia" class="sleek-control" type="text"
+                                placeholder="Opcional" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -527,7 +537,8 @@
                         <span class="field-label text-white">Observaciones</span>
                         <div class="input-sleek">
                             <i class="fas fa-comment-alt"></i>
-                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                            <input formControlName="observaciones" class="sleek-control" type="text"
+                                placeholder="Opcional" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -539,7 +550,8 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-success" (click)="guardarReponerTesoreria()" [disabled]="reponerTesoreriaForm.invalid">
+        <button type="button" class="btn btn-success" (click)="guardarReponerTesoreria()"
+            [disabled]="reponerTesoreriaForm.invalid">
             <i class="fas fa-check"></i> Reponer
         </button>
     </div>
@@ -566,18 +578,13 @@
                 <div class="col-12">
                     <label class="field">
                         <span class="field-label text-white">Boveda *</span>
-                        <dx-select-box
-                            [dataSource]="listaTesoreriaRetirar"
-                            displayExpr="text"
-                            valueExpr="id"
-                            formControlName="idTesoreria"
-                            placeholder="Selecciona boveda abierta..."
-                            searchEnabled="true"
-                            searchMode="contains"
-                            [showClearButton]="true"
+                        <dx-select-box [dataSource]="listaTesoreriaRetirar" displayExpr="text" valueExpr="id"
+                            formControlName="idTesoreria" placeholder="Selecciona boveda abierta..."
+                            searchEnabled="true" searchMode="contains" [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-boveda">
                         </dx-select-box>
-                        <div *ngIf="listaTesoreriaRetirar.length === 0" class="text-muted small mt-1">No hay bovedas abiertas</div>
+                        <div *ngIf="listaTesoreriaRetirar.length === 0" class="text-muted small mt-1">No hay bovedas
+                            abiertas</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -585,14 +592,8 @@
                         <span class="field-label text-white">Monto *</span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
-                            <input
-                                #inpMontoRetirar
-                                class="sleek-control"
-                                type="text"
-                                inputmode="decimal"
-                                autocomplete="off"
-                                placeholder="0.00"
-                                (input)="onMontoRetirarInput($event)"
+                            <input #inpMontoRetirar class="sleek-control" type="text" inputmode="decimal"
+                                autocomplete="off" placeholder="0.00" (input)="onMontoRetirarInput($event)"
                                 (blur)="onMontoRetirarBlur($event)" />
                             <span class="sleek-line"></span>
                         </div>
@@ -603,7 +604,8 @@
                         <span class="field-label text-white">Referencia</span>
                         <div class="input-sleek">
                             <i class="fas fa-hashtag"></i>
-                            <input formControlName="referencia" class="sleek-control" type="text" placeholder="Opcional" />
+                            <input formControlName="referencia" class="sleek-control" type="text"
+                                placeholder="Opcional" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -613,7 +615,8 @@
                         <span class="field-label text-white">Observaciones</span>
                         <div class="input-sleek">
                             <i class="fas fa-comment-alt"></i>
-                            <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
+                            <input formControlName="observaciones" class="sleek-control" type="text"
+                                placeholder="Opcional" />
                             <span class="sleek-line"></span>
                         </div>
                     </label>
@@ -625,7 +628,8 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-warning" (click)="guardarRetirarTesoreria()" [disabled]="retirarTesoreriaForm.invalid">
+        <button type="button" class="btn btn-warning" (click)="guardarRetirarTesoreria()"
+            [disabled]="retirarTesoreriaForm.invalid">
             <i class="fas fa-check"></i> Retirar
         </button>
     </div>

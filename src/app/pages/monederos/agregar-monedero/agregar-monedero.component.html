@@ -23,89 +23,68 @@
           <form [formGroup]="monederoForm">
             <div class="col-12">
               <div class="row mt-0">
-                  <div class="col-12 col-md-6 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Afiliado</span>
-                      <dx-select-box
-                        [dataSource]="listaAfiliados"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idAfiliado"
-                        placeholder="Selecciona un afiliado..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-afiliado">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Número Monedero</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-hashtag"></i>
-                        <input formControlName="numeroMonedero" class="sleek-control" type="text"
-                          placeholder="MON-2024-001234" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Código RFID</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-qrcode"></i>
-                        <input formControlName="codigoRFID" class="sleek-control" type="text"
-                          placeholder="RFID-ABC123456789" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Es Principal</span>
-                      <dx-select-box
-                        [dataSource]="listaEsPrincipal"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="esPrincipal"
-                        placeholder="Selecciona..."
-                        searchEnabled="false"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-es-principal">
-                      </dx-select-box>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Alias</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-tag"></i>
-                        <input formControlName="alias" class="sleek-control" type="text"
-                          placeholder="Monedero Principal" />
-                        <span class="sleek-line"></span>
-                      </div>
-                    </label>
-                  </div>
-                  <div class="col-12 col-md-6 col-lg-4">
-                    <label class="field">
-                      <span class="field-label text-white">Estatus Monedero</span>
-                      <dx-select-box
-                        [dataSource]="listaEstatusMonedero"
-                        displayExpr="text"
-                        valueExpr="id"
-                        formControlName="idEstatusMonedero"
-                        placeholder="Selecciona un estatus..."
-                        searchEnabled="true"
-                        searchMode="contains"
-                        [showClearButton]="true"
-                        class="dx-select-box-custom dx-select-box-estatus">
-                      </dx-select-box>
-                    </label>
-                  </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Afiliado</span>
+                    <dx-select-box [dataSource]="listaAfiliados" displayExpr="text" valueExpr="id"
+                      formControlName="idAfiliado" placeholder="Selecciona un afiliado..." searchEnabled="true"
+                      searchMode="contains" [showClearButton]="true"
+                      class="dx-select-box-custom dx-select-box-afiliado">
+                    </dx-select-box>
+                  </label>
                 </div>
-
-              <!-- Botones de acción -->
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Número Monedero</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-hashtag"></i>
+                      <input formControlName="numeroMonedero" class="sleek-control" type="text"
+                        placeholder="MON-2024-001234" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Código RFID</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-qrcode"></i>
+                      <input formControlName="codigoRFID" class="sleek-control" type="text"
+                        placeholder="RFID-ABC123456789" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Es Principal</span>
+                    <dx-select-box [dataSource]="listaEsPrincipal" displayExpr="text" valueExpr="id"
+                      formControlName="esPrincipal" placeholder="Selecciona..." searchEnabled="false"
+                      [showClearButton]="true" class="dx-select-box-custom dx-select-box-es-principal">
+                    </dx-select-box>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Alias</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-tag"></i>
+                      <input formControlName="alias" class="sleek-control" type="text"
+                        placeholder="Monedero Principal" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
+                    <span class="field-label text-white">Estatus Monedero</span>
+                    <dx-select-box [dataSource]="listaEstatusMonedero" displayExpr="text" valueExpr="id"
+                      formControlName="idEstatusMonedero" placeholder="Selecciona un estatus..." searchEnabled="true"
+                      searchMode="contains" [showClearButton]="true" class="dx-select-box-custom dx-select-box-estatus">
+                    </dx-select-box>
+                  </label>
+                </div>
+              </div>
               <div class="row mt-4">
                 <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
                   <button (click)="submit()" type="button" class="btn-alt btn-alt--success" [disabled]="loading">

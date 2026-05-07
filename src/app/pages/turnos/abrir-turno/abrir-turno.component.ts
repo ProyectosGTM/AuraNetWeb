@@ -6,6 +6,7 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { TurnosService } from 'src/app/shared/services/turnos.service';
+import { aplicarMontoBlurEnCampo, aplicarMontoInputEnCampo } from 'src/app/shared/utils/monto-input-formato.util';
 import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
@@ -102,6 +103,14 @@ export class AbrirTurnoComponent implements OnInit {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(valor);
+  }
+
+  onMontoFondoInicialInput(ev: Event): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.abrirTurnoForm.get('fondoInicial'));
+  }
+
+  onMontoFondoInicialBlur(ev: Event): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.abrirTurnoForm.get('fondoInicial'));
   }
 
   guardarAbrirTurno() {

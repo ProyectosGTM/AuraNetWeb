@@ -102,7 +102,7 @@
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
                         <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]"
                             [showInfo]="true"></dxo-pager>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="540"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="350"></dxi-column>
                         <dxi-column dataField="nombreCompleto" caption="Nombre Completo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="numeroIdentificacion" caption="Número Identificación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="email" caption="Email" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -314,16 +314,230 @@
     </div>
 </ng-template>
 
+<!-- Modal resumen afiliado — GET /afiliados/{id}/resumen -->
+<ng-template #modalResumenAfiliado let-modal>
+    <div class="modal-header modal-header-info-afiliados">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
+                <i class="fa fa-id-card"></i>
+                <span>Resumen del afiliado</span>
+            </h5>
+            <!-- <span class="historial-chip" *ngIf="resumenAfiliadoEtiqueta">
+                <i class="fas fa-user"></i>
+                <span><b>{{ resumenAfiliadoEtiqueta }}</b></span>
+            </span> -->
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="header-badge">
+                {{ resumenAfiliadoData?.monederos ?? 0 }} monedero{{ (resumenAfiliadoData?.monederos ?? 0) !== 1 ? 's' : '' }}
+            </span>
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalResumenAfiliado()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="modal-body modal-accion-body modal-accion-body--resumen-afiliado">
+        <!-- <div class="modal-afiliado-nombre-autoexclusion" *ngIf="resumenAfiliadoEtiqueta">
+            {{ resumenAfiliadoEtiqueta }}
+        </div> -->
+
+        <div class="resumen-afiliado-loading" *ngIf="resumenAfiliadoCargando">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Cargando resumen del afiliado...</span>
+        </div>
+
+        <ng-container *ngIf="!resumenAfiliadoCargando">
+            <div class="resumen-afiliado-modal" *ngIf="resumenAfiliadoData as payload; else resumenSinDatos">
+                <section class="resumen-afiliado-card resumen-afiliado-card--principal">
+                    <div class="resumen-afiliado-card__header">
+                        <div class="resumen-afiliado-card__title-wrap">
+                            <h3 class="resumen-afiliado-card__title">{{ safeText(payload?.afiliado?.nombreCompleto) }}</h3>
+                            <p class="resumen-afiliado-card__subtitle">
+                                ID {{ safeText(payload?.afiliado?.id, '—') }} ·
+                                No. identificación {{ safeText(payload?.afiliado?.numeroIdentificacion, '—') }}
+                            </p>
+                        </div>
+                        <span class="resumen-afiliado-card__badge"
+                            [ngClass]="(safeText(payload?.afiliado?.estatus, 'Sin estatus') | lowercase) === 'activo' ? 'is-activo' : 'is-inactivo'">
+                            {{ safeText(payload?.afiliado?.estatus, 'Sin estatus') }}
+                        </span>
+                    </div>
+                    <div class="resumen-afiliado-grid resumen-afiliado-grid--mini">
+                        <div class="resumen-item"><span class="label">Edad</span><span class="value">{{ safeText(payload?.afiliado?.edad, '0') }}</span></div>
+                        <div class="resumen-item"><span class="label">Nivel VIP</span><span class="value">{{ safeText(payload?.afiliado?.nivelVIP, 'Sin nivel VIP') }}</span></div>
+                        <div class="resumen-item"><span class="label">Correo</span><span class="value">{{ safeText(payload?.afiliado?.email) }}</span></div>
+                        <div class="resumen-item"><span class="label">Teléfono</span><span class="value">{{ safeText(payload?.afiliado?.telefono) }}</span></div>
+                        <div class="resumen-item"><span class="label">Monederos</span><span class="value">{{ toNumber(payload?.monederos) }}</span></div>
+                    </div>
+                </section>
+
+                <div class="resumen-afiliado-grid resumen-afiliado-grid--cards">
+                    <section class="resumen-afiliado-card">
+                        <h4 class="resumen-afiliado-card__section-title"><i class="fas fa-wallet"></i> Saldos</h4>
+                        <div class="resumen-afiliado-grid resumen-afiliado-grid--mini">
+                            <div class="resumen-item"><span class="label">Efectivo total</span><span class="value">{{ toMoney(payload?.saldos?.efectivoTotal) }}</span></div>
+                            <div class="resumen-item"><span class="label">Promocional total</span><span class="value">{{ toMoney(payload?.saldos?.promocionalTotal) }}</span></div>
+                            <div class="resumen-item"><span class="label">Puntos disponibles</span><span class="value">{{ toNumber(payload?.saldos?.puntosDisponibles) }}</span></div>
+                            <div class="resumen-item"><span class="label">Total jugable</span><span class="value">{{ toMoney(payload?.saldos?.totalJugable) }}</span></div>
+                        </div>
+                    </section>
+
+                    <section class="resumen-afiliado-card">
+                        <h4 class="resumen-afiliado-card__section-title"><i class="fas fa-chart-line"></i> Actividad del mes</h4>
+                        <div class="resumen-afiliado-grid resumen-afiliado-grid--mini">
+                            <div class="resumen-item"><span class="label">Visitas</span><span class="value">{{ toNumber(payload?.actividadMes?.visitas) }}</span></div>
+                            <div class="resumen-item"><span class="label">Horas jugadas</span><span class="value">{{ toNumber(payload?.actividadMes?.horasJugadas) }}</span></div>
+                            <div class="resumen-item"><span class="label">Total apuestas</span><span class="value">{{ toMoney(payload?.actividadMes?.totalApuestas) }}</span></div>
+                            <div class="resumen-item"><span class="label">Total ganancias</span><span class="value">{{ toMoney(payload?.actividadMes?.totalGanancias) }}</span></div>
+                            <div class="resumen-item"><span class="label">Neto bruto</span><span class="value">{{ toMoney(payload?.actividadMes?.netoBruto) }}</span></div>
+                        </div>
+                    </section>
+
+                    <section class="resumen-afiliado-card">
+                        <h4 class="resumen-afiliado-card__section-title"><i class="fas fa-gift"></i> Promociones</h4>
+                        <div class="resumen-afiliado-grid resumen-afiliado-grid--mini">
+                            <div class="resumen-item"><span class="label">Activas</span><span class="value">{{ toNumber(payload?.promociones?.activas) }}</span></div>
+                            <div class="resumen-item"><span class="label">Completadas</span><span class="value">{{ toNumber(payload?.promociones?.completadas) }}</span></div>
+                            <div class="resumen-item"><span class="label">Canceladas</span><span class="value">{{ toNumber(payload?.promociones?.canceladas) }}</span></div>
+                        </div>
+                    </section>
+
+                    <section class="resumen-afiliado-card">
+                        <h4 class="resumen-afiliado-card__section-title"><i class="fas fa-shield-alt"></i> Juego responsable</h4>
+                        <div class="resumen-afiliado-card__autoexclusion is-warning" *ngIf="payload?.autoexclusion; else sinAutoexclusion">
+                            <i class="fas fa-hand-paper"></i>
+                            <div>
+                                <div class="resumen-afiliado-card__autoexclusion-title">Autoexclusión vigente</div>
+                                <div class="resumen-afiliado-card__autoexclusion-text">{{ payload?.autoexclusion | json }}</div>
+                            </div>
+                        </div>
+                        <ng-template #sinAutoexclusion>
+                            <div class="resumen-afiliado-card__autoexclusion is-ok">
+                                <i class="fas fa-check-circle"></i>
+                                <div>
+                                    <div class="resumen-afiliado-card__autoexclusion-title">Sin autoexclusión activa</div>
+                                    <div class="resumen-afiliado-card__autoexclusion-text">
+                                        El afiliado no tiene periodos de autoexclusión vigentes.
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </section>
+                </div>
+            </div>
+        </ng-container>
+
+        <ng-template #resumenSinDatos>
+            <div class="resumen-afiliado-empty">
+                <i class="fas fa-inbox"></i>
+                <span>No hay información disponible para este afiliado.</span>
+            </div>
+        </ng-template>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalResumenAfiliado()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal monederos afiliado — GET /afiliados/{id}/monederos -->
+<ng-template #modalMonederosAfiliado let-modal>
+    <div class="modal-header modal-header-info-afiliados">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
+                <i class="fa fa-wallet"></i>
+                <span>Monederos del afiliado</span>
+            </h5>
+            <!-- <span class="historial-chip" *ngIf="monederosAfiliadoEtiqueta">
+                <i class="fas fa-user"></i>
+                <span><b>{{ monederosAfiliadoEtiqueta }}</b></span>
+            </span> -->
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="header-badge">{{ monederosAfiliadoData.length }} monedero{{ monederosAfiliadoData.length !== 1 ? 's' : '' }}</span>
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalMonederosAfiliado()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="modal-afiliado-nombre-autoexclusion" *ngIf="monederosAfiliadoEtiqueta">
+            {{ monederosAfiliadoEtiqueta }}
+        </div>
+        <div class="resumen-afiliado-loading" *ngIf="monederosAfiliadoCargando">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Cargando monederos...</span>
+        </div>
+
+        <ng-container *ngIf="!monederosAfiliadoCargando">
+            <div class="monederos-resumen-tabla" *ngIf="monederosAfiliadoData.length; else monederosVacio">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Principal</th>
+                            <th>Estatus</th>
+                            <th>Efectivo</th>
+                            <th>Promocional</th>
+                            <th>Puntos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let m of monederosAfiliadoData">
+                            <td>{{ safeText(m?.numeroMonedero ?? m?.id ?? m?.numero, '—') }}</td>
+                            <td>
+                                <span class="estado-pill" [ngClass]="m?.esPrincipal ? 'estado-pill--ok' : 'estado-pill--muted'">
+                                    {{ m?.esPrincipal ? 'Sí' : 'No' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="estado-pill"
+                                    [ngClass]="(safeText(m?.estatus ?? m?.nombreEstatus, '—') | lowercase) === 'activo' ? 'estado-pill--ok' : 'estado-pill--warn'">
+                                    {{ safeText(m?.estatus ?? m?.nombreEstatus, '—') }}
+                                </span>
+                            </td>
+                            <td>{{ toMoney(m?.saldoEfectivo) }}</td>
+                            <td>{{ toMoney(m?.saldoPromocional) }}</td>
+                            <td>{{ toNumber(m?.puntos) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ng-template #monederosVacio>
+                <div class="resumen-afiliado-empty">
+                    <i class="fas fa-wallet"></i>
+                    <span>Este afiliado no tiene monederos registrados.</span>
+                </div>
+            </ng-template>
+        </ng-container>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalMonederosAfiliado()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
+        </button>
+    </div>
+</ng-template>
+
 <!-- Modal cumpleañeros — GET /afiliados/cumpleaneros?tipo=hoy|mes -->
 <ng-template #modalCumpleanerosTipo let-modal>
-    <div class="modal-header modal-accion-header modal-accion-header--cumpleaneros-tipo">
-        <h5 class="modal-title">
-            <i class="fas fa-birthday-cake"></i>
-            <span>Cumpleañeros</span>
-        </h5>
-        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalCumpleanerosTipo()">
-            <i class="fas fa-times"></i>
-        </button>
+    <div class="modal-header modal-header-info-afiliados">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
+                <i class="fas fa-birthday-cake"></i>
+                <span>Cumpleañeros</span>
+            </h5>
+            <span class="historial-chip">
+                <i class="fas fa-calendar-alt"></i>
+                <span><b>Selección de período</b></span>
+            </span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="header-badge">{{ cumpleanerosTipoSeleccion ? '1 seleccionado' : 'Sin selección' }}</span>
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalCumpleanerosTipo()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--info">
@@ -361,18 +575,21 @@
 <!-- Modal bloquear afiliado — POST /afiliados/{id}/bloquear -->
 <ng-template #modalBloquearAfiliado let-modal>
     <div class="modal-header modal-accion-header modal-accion-header--bloquear-afiliado">
-        <h5 class="modal-title">
-            <i class="fas fa-ban"></i>
-            <span>Bloquear afiliado</span>
-        </h5>
+        <div class="modal-title-stack">
+            <h5 class="modal-title">
+                <i class="fas fa-ban"></i>
+                <span>Bloquear Afiliado</span>
+            </h5>
+            <span class="modal-title-subtext" *ngIf="afiliadoBloqueoEtiqueta">
+                {{ afiliadoBloqueoEtiqueta }}
+            </span>
+        </div>
         <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalBloquearAfiliado()">
             <i class="fas fa-times"></i>
         </button>
     </div>
     <div class="modal-body modal-accion-body">
-        <p class="text-white-50 small mb-3" *ngIf="afiliadoBloqueoEtiqueta">
-            <strong class="text-white">{{ afiliadoBloqueoEtiqueta }}</strong>
-        </p>
+        
         <div class="form-indication form-indication--warning">
             <i class="fas fa-shield-alt"></i>
             <span>Bloquea al afiliado y todos sus monederos. Debes indicar motivo y fecha fin (formato AAAA-MM-DD).</span>
@@ -419,18 +636,20 @@
 <!-- Modal autoexclusión — POST /afiliados/{id}/autoexclusion -->
 <ng-template #modalAutoexclusionAfiliado let-modal>
     <div class="modal-header modal-accion-header modal-accion-header--autoexclusion-afiliado">
-        <h5 class="modal-title">
-            <i class="fas fa-hand-paper"></i>
-            <span>Registrar autoexclusión</span>
-        </h5>
+        <div class="modal-title-stack">
+            <h5 class="modal-title">
+                <i class="fas fa-hand-paper"></i>
+                <span>Registrar autoexclusión</span>
+            </h5>
+            <span class="modal-title-subtext" *ngIf="afiliadoAutoexclusionEtiqueta">
+                {{ afiliadoAutoexclusionEtiqueta }}
+            </span>
+        </div>
         <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalAutoexclusionAfiliado()">
             <i class="fas fa-times"></i>
         </button>
     </div>
     <div class="modal-body modal-accion-body">
-        <div class="modal-afiliado-nombre-autoexclusion" *ngIf="afiliadoAutoexclusionEtiqueta">
-            {{ afiliadoAutoexclusionEtiqueta }}
-        </div>
         <div class="form-indication form-indication--warning">
             <i class="fas fa-shield-alt"></i>
             <span>Programa de juego responsable. Debes enviar motivo, duración en días (mínimo 30) y observaciones.</span>

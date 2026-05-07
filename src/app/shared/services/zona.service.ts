@@ -18,6 +18,11 @@ export class ZonaService {
     return this.http.get(`${environment.API_SECURITY}/zonas/list`);
   }
 
+  /** GET /zonas/by-sala/{idSala} — zonas registradas para esa sala (diagrama de distribución). */
+  obtenerZonasPorSala(idSala: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/zonas/by-sala/${idSala}`);
+  }
+
   agregarZona(data: any) {
     return this.http.post(environment.API_SECURITY + '/zonas', data);
   }

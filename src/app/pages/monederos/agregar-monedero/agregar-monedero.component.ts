@@ -78,12 +78,12 @@ export class AgregarMonederoComponent implements OnInit {
   }
 
   private cargarListasIndividualmente() {
-    this.obtenerAfiliados();
+    this.obtenerAfiliadosSinMonedero();
     this.obtenerEstatusMonedero();
   }
 
-  obtenerAfiliados(): void {
-    this.monederosService.obtenerAfiliados().subscribe({
+  obtenerAfiliadosSinMonedero(): void {
+    this.monederosService.obtenerAfiliadosSinMonedero().subscribe({
       next: (response: any) => {
         this.listaAfiliados = (response.data || []).map((a: any) => {
           const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();

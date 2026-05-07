@@ -111,7 +111,7 @@
                                             </span>
                                             <div class="input-sleek">
                                                 <i class="fas fa-dollar-sign"></i>
-                                                <input formControlName="fondoInicial" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                                                <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0" (input)="onMontoFondoInicialInput($event)" (blur)="onMontoFondoInicialBlur($event)" />
                                                 <span class="sleek-line"></span>
                                             </div>
                                             <small class="form-text-hint">Dinero inicial que tiene la caja</small>

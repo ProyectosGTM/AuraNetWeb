@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ListaSalasComponent } from './lista-salas/lista-salas.component';
 import { AgregarSalaComponent } from './agregar-sala/agregar-sala.component';
-import { AgregarZonaComponent } from '../zonas/agregar-zona/agregar-zona.component';
+import { DistribucionSalaComponent } from './distribucion-sala/distribucion-sala.component';
 
 const routes: Routes = 
 [
@@ -14,7 +14,7 @@ const routes: Routes =
   },
   {
     path: 'distribucion/:idSala',
-    component: AgregarZonaComponent,
+    component: DistribucionSalaComponent,
     data: { modoDistribucionSala: true },
   },
   {

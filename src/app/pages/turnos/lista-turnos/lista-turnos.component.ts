@@ -14,6 +14,7 @@ import { AccionConControlRol, RolAccesoService } from 'src/app/shared/services/r
 import { TurnosService } from 'src/app/shared/services/turnos.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
+import { aplicarMontoBlurEnCampo, aplicarMontoInputEnCampo } from 'src/app/shared/utils/monto-input-formato.util';
 import Swal from 'sweetalert2';
 
 type SelectItem = { id: number; text: string };
@@ -135,6 +136,8 @@ export class ListaTurnosComponent {
   // Corte parcial (POST /pos/turnos/corte-parcial)
   corteParcialForm: FormGroup;
   listaCajasCorteParcial: { id: number; text: string }[] = [];
+  corteParcialData: any = null;
+  procesandoCorteParcial = false;
 
   // Consultar saldo caja
   consultarSaldoCajaForm: FormGroup;
@@ -875,6 +878,44 @@ export class ListaTurnosComponent {
     }).format(valor);
   }
 
+  private controlMontoTurnos(
+    formKey: 'abrir' | 'cerrar' | 'reponer' | 'retirar' | 'suspender' | 'corte',
+    controlName: 'fondoInicial' | 'fondoContado' | 'monto' | 'efectivoContado',
+  ) {
+    switch (formKey) {
+      case 'abrir':
+        return this.abrirTurnoForm.get(controlName);
+      case 'cerrar':
+        return this.cerrarTurnoForm.get(controlName);
+      case 'reponer':
+        return this.reponerTurnoForm.get(controlName);
+      case 'retirar':
+        return this.retirarTurnoForm.get(controlName);
+      case 'suspender':
+        return this.suspenderTurnoForm.get(controlName);
+      case 'corte':
+        return this.corteParcialForm.get(controlName);
+      default:
+        return null;
+    }
+  }
+
+  onMontoTurnosInput(
+    ev: Event,
+    formKey: 'abrir' | 'cerrar' | 'reponer' | 'retirar' | 'suspender' | 'corte',
+    controlName: 'fondoInicial' | 'fondoContado' | 'monto' | 'efectivoContado',
+  ): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, this.controlMontoTurnos(formKey, controlName));
+  }
+
+  onMontoTurnosBlur(
+    ev: Event,
+    formKey: 'abrir' | 'cerrar' | 'reponer' | 'retirar' | 'suspender' | 'corte',
+    controlName: 'fondoInicial' | 'fondoContado' | 'monto' | 'efectivoContado',
+  ): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, this.controlMontoTurnos(formKey, controlName));
+  }
+
   guardarAbrirTurno() {
     if (this.abrirTurnoForm.invalid) {
       Swal.fire({
@@ -1422,6 +1463,8 @@ export class ListaTurnosComponent {
     }
     this.corteParcialForm.reset({ idCaja: null, efectivoContado: '', observaciones: '' });
     this.listaCajasCorteParcial = [];
+    this.corteParcialData = null;
+    this.procesandoCorteParcial = false;
     this.modalRef = this.modalService.open(this.modalCorteParcial, {
       size: 'lg',
       windowClass: 'modal-holder modal-corte-parcial',
@@ -1465,6 +1508,8 @@ export class ListaTurnosComponent {
     const idPre = Number(row.idCaja);
     this.corteParcialForm.reset({ idCaja: null, efectivoContado: '', observaciones: '' });
     this.listaCajasCorteParcial = [];
+    this.corteParcialData = null;
+    this.procesandoCorteParcial = false;
     this.modalRef = this.modalService.open(this.modalCorteParcial, {
       size: 'lg',
       windowClass: 'modal-holder modal-corte-parcial',
@@ -1512,24 +1557,18 @@ export class ListaTurnosComponent {
       efectivoContado: Number(this.corteParcialForm.value.efectivoContado),
       observaciones: (this.corteParcialForm.value.observaciones || '').trim() || undefined
     };
+    this.procesandoCorteParcial = true;
     this.turnosService.corteParcial(payload).subscribe({
-      next: () => {
-        Swal.fire({
-          title: '¡Operación Exitosa!',
-          text: 'Se ha generado el corte parcial (Corte X) correctamente.',
-          icon: 'success',
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-        this.cerrarModal();
-        this.corteParcialForm.reset();
+      next: (response) => {
+        this.procesandoCorteParcial = false;
+        this.corteParcialData = response?.data ?? response ?? null;
         this.cargarTurnosActivos();
         this.cargarMiTurnoActivo();
         this.setupDataSource();
         if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
       },
       error: (error) => {
+        this.procesandoCorteParcial = false;
         Swal.fire({
           title: '¡Error!',
           text: error?.error?.message || error?.error || 'No se pudo realizar el corte parcial.',
@@ -1817,6 +1856,8 @@ export class ListaTurnosComponent {
       this.suspenderTurnoForm.reset();
       this.reactivarTurnoForm.reset();
       this.corteParcialForm.reset();
+      this.corteParcialData = null;
+      this.procesandoCorteParcial = false;
       this.consultarSaldoCajaForm.reset();
       this.saldoCajaData = null;
       this.detalleTurnoData = null;

@@ -42,12 +42,16 @@ export class ListaAfiliadosComponent implements OnInit {
   @ViewChild('modalAutoexclusionAfiliado', { static: false }) modalAutoexclusionAfiliado!: TemplateRef<any>;
   @ViewChild('modalNivelVipAfiliado', { static: false }) modalNivelVipAfiliado!: TemplateRef<any>;
   @ViewChild('modalCumpleanerosTipo', { static: false }) modalCumpleanerosTipo!: TemplateRef<any>;
+  @ViewChild('modalResumenAfiliado', { static: false }) modalResumenAfiliado!: TemplateRef<any>;
+  @ViewChild('modalMonederosAfiliado', { static: false }) modalMonederosAfiliado!: TemplateRef<any>;
 
   private modalFiltrosRef?: NgbModalRef;
   private modalBloquearRef?: NgbModalRef;
   private modalAutoexclusionRef?: NgbModalRef;
   private modalNivelVipRef?: NgbModalRef;
   private modalCumpleanerosRef?: NgbModalRef;
+  private modalResumenRef?: NgbModalRef;
+  private modalMonederosRef?: NgbModalRef;
 
   /** Contexto del modal POST /afiliados/{id}/bloquear */
   afiliadoBloqueoId: number | null = null;
@@ -73,6 +77,12 @@ export class ListaAfiliadosComponent implements OnInit {
   vipMotivo = '';
   vipEnProceso = false;
   nivelesVipOpciones: { id: number; text: string }[] = [];
+  resumenAfiliadoData: any = null;
+  resumenAfiliadoCargando = false;
+  resumenAfiliadoEtiqueta = '';
+  monederosAfiliadoData: any[] = [];
+  monederosAfiliadoCargando = false;
+  monederosAfiliadoEtiqueta = '';
 
   public autoExpandAllGroups: boolean = true;
   isGrouped: boolean = false;
@@ -847,19 +857,27 @@ export class ListaAfiliadosComponent implements OnInit {
   verResumenAfiliado(row: any) {
     const id = row?.id;
     if (id == null) return;
+    this.resumenAfiliadoData = null;
+    this.resumenAfiliadoCargando = true;
+    this.resumenAfiliadoEtiqueta =
+      row?.nombreCompleto ||
+      [row?.nombre, row?.apellidoPaterno, row?.apellidoMaterno].filter(Boolean).join(' ').trim() ||
+      `Afiliado #${id}`;
+    this.modalResumenRef = this.modalService.open(this.modalResumenAfiliado, {
+      size: 'xl',
+      windowClass: 'modal-holder modal-afiliados-resumen',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+    });
     this.afiliadosService.obtenerResumenAfiliado(Number(id)).subscribe({
       next: (res: any) => {
-        const payload = res?.data ?? res;
-        const json = typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2);
-        Swal.fire({
-          title: 'Resumen del afiliado',
-          html: `<pre style="text-align:left;max-height:360px;overflow:auto;font-size:12px;color:#e2e8f0;background:#0f1419;padding:12px;border-radius:8px;">${this.escapeHtml(json)}</pre>`,
-          width: 640,
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-        });
+        this.resumenAfiliadoData = res?.data ?? res ?? null;
+        this.resumenAfiliadoCargando = false;
       },
       error: (error) => {
+        this.resumenAfiliadoCargando = false;
+        this.cerrarModalResumenAfiliado();
         Swal.fire({
           title: 'Error',
           text: error?.error || 'No se pudo cargar el resumen.',
@@ -874,36 +892,27 @@ export class ListaAfiliadosComponent implements OnInit {
   verMonederosAfiliado(row: any) {
     const id = row?.id;
     if (id == null) return;
+    this.monederosAfiliadoData = [];
+    this.monederosAfiliadoCargando = true;
+    this.monederosAfiliadoEtiqueta =
+      row?.nombreCompleto ||
+      [row?.nombre, row?.apellidoPaterno, row?.apellidoMaterno].filter(Boolean).join(' ').trim() ||
+      `Afiliado #${id}`;
+    this.modalMonederosRef = this.modalService.open(this.modalMonederosAfiliado, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-afiliados-monederos',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+    });
     this.afiliadosService.obtenerMonederosAfiliado(Number(id)).subscribe({
       next: (res: any) => {
-        const raw = this.normalizarListaResponse(res);
-        if (!raw.length) {
-          Swal.fire({
-            title: 'Monederos',
-            text: 'Este afiliado no tiene monederos registrados.',
-            icon: 'info',
-            background: '#0d121d',
-            confirmButtonColor: '#3085d6',
-          });
-          return;
-        }
-        const rows = raw
-          .map(
-            (m: any) =>
-              `<tr><td style="padding:6px;border:1px solid #334">${this.escapeHtml(String(m?.numeroMonedero ?? m?.id ?? '—'))}</td>` +
-              `<td style="padding:6px;border:1px solid #334">${this.escapeHtml(String(m?.alias ?? '—'))}</td>` +
-              `<td style="padding:6px;border:1px solid #334">${this.escapeHtml(String(m?.estatus ?? m?.nombreEstatus ?? '—'))}</td></tr>`
-          )
-          .join('');
-        Swal.fire({
-          title: 'Monederos del afiliado',
-          html: `<table style="width:100%;color:#fff;border-collapse:collapse;font-size:13px"><thead><tr><th style="padding:6px;border:1px solid #334">Número</th><th style="padding:6px;border:1px solid #334">Alias</th><th style="padding:6px;border:1px solid #334">Estatus</th></tr></thead><tbody>${rows}</tbody></table>`,
-          width: 640,
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-        });
+        this.monederosAfiliadoData = this.normalizarListaResponse(res);
+        this.monederosAfiliadoCargando = false;
       },
       error: (error) => {
+        this.monederosAfiliadoCargando = false;
+        this.cerrarModalMonederosAfiliado();
         Swal.fire({
           title: 'Error',
           text: error?.error || 'No se pudieron cargar los monederos.',
@@ -915,6 +924,26 @@ export class ListaAfiliadosComponent implements OnInit {
     });
   }
 
+  cerrarModalResumenAfiliado() {
+    if (this.modalResumenRef) {
+      this.modalResumenRef.close();
+      this.modalResumenRef = undefined;
+    }
+    this.resumenAfiliadoCargando = false;
+    this.resumenAfiliadoData = null;
+    this.resumenAfiliadoEtiqueta = '';
+  }
+
+  cerrarModalMonederosAfiliado() {
+    if (this.modalMonederosRef) {
+      this.modalMonederosRef.close();
+      this.modalMonederosRef = undefined;
+    }
+    this.monederosAfiliadoCargando = false;
+    this.monederosAfiliadoData = [];
+    this.monederosAfiliadoEtiqueta = '';
+  }
+
   private escapeHtml(s: string): string {
     return String(s)
       .replace(/&/g, '&amp;')
@@ -922,6 +951,30 @@ export class ListaAfiliadosComponent implements OnInit {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
   }
+
+  toMoney(valor: unknown): string {
+    const n = Number(valor);
+    if (!Number.isFinite(n)) return '$0.00';
+    return n.toLocaleString('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  toNumber(valor: unknown): string {
+    const n = Number(valor);
+    if (!Number.isFinite(n)) return '0';
+    return n.toLocaleString('es-MX');
+  }
+
+  safeText(valor: unknown, fallback = 'Sin registro'): string {
+    if (valor == null) return fallback;
+    const s = String(valor).trim();
+    return s ? this.escapeHtml(s) : fallback;
+  }
+
 
   formatearFecha(fecha: string | null): string {
     if (!fecha) return 'Sin registro';
