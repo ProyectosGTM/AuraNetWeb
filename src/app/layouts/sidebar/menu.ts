@@ -16,8 +16,8 @@ export const MENU: MenuItem[] = [
             { id: 31, label: 'Modulos', link: '/modulos' },
             { id: 29, label: 'Permisos', link: '/permisos' },
             { id: 30, label: 'Roles', link: '/roles' },
-            { id: 28, label: 'Usuarios', link: '/usuarios' },
             { id: 3, label: 'Clientes', link: '/clientes' },
+            { id: 28, label: 'Usuarios', link: '/usuarios' },
             { id: 32, label: 'Bitacora', link: '/bitacora' }
         ]
     },

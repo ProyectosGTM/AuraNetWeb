@@ -301,11 +301,12 @@ export class AgregarSalaComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
+  /* root, dev, cliente y admin */
   private uploadLogotipoAuto(): void {
     const fd = new FormData();
     if (this.logotipoFile) fd.append('file', this.logotipoFile, this.logotipoFile.name);
-    fd.append('folder', 'usuarios');
-    fd.append('idModule', '2');
+    fd.append('folder', 'salas');
+    fd.append('idModule', '6');
 
     this.usuaService.uploadFile(fd).subscribe({
       next: (res: any) => {
@@ -324,8 +325,8 @@ export class AgregarSalaComponent implements OnInit {
   private uploadLicenciaAuto(): void {
     const fd = new FormData();
     if (this.licenciaFile) fd.append('file', this.licenciaFile, this.licenciaFile.name);
-    fd.append('folder', 'usuarios');
-    fd.append('idModule', '2');
+    fd.append('folder', 'salas');
+    fd.append('idModule', '6');
 
     this.usuaService.uploadFile(fd).subscribe({
       next: (res: any) => {
@@ -498,8 +499,8 @@ export class AgregarSalaComponent implements OnInit {
       fd.append('file', this.DEFAULT_PLANO_URL);
     }
 
-    fd.append('folder', 'usuarios');
-    fd.append('idModule', '2');
+    fd.append('folder', 'salas');
+    fd.append('idModule', '6');
 
     this.usuaService.uploadFile(fd).subscribe({
       next: (res: any) => {
@@ -589,8 +590,8 @@ export class AgregarSalaComponent implements OnInit {
       fd.append('file', this.DEFAULT_PLANO_URL);
     }
 
-    fd.append('folder', 'usuarios');
-    fd.append('idModule', '2');
+    fd.append('folder', 'salas');
+    fd.append('idModule', '6');
 
     this.usuaService.uploadFile(fd).subscribe({
       next: (res: any) => {

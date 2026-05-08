@@ -322,8 +322,8 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
     if (!this.imagenFile) return;
     const fd = new FormData();
     fd.append('file', this.imagenFile, this.imagenFile.name);
-    fd.append('folder', 'usuarios');
-    fd.append('idModule', '2');
+    fd.append('folder', 'maquinas');
+    fd.append('idModule', '8');
 
     this.usuaService.uploadFile(fd).subscribe({
       next: (res: any) => {
@@ -341,8 +341,8 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
     if (!this.iconoFile) return;
     const fd = new FormData();
     fd.append('file', this.iconoFile, this.iconoFile.name);
-    fd.append('folder', 'usuarios');
-    fd.append('idModule', '2');
+    fd.append('folder', 'maquinas');
+    fd.append('idModule', '8');
 
     this.usuaService.uploadFile(fd).subscribe({
       next: (res: any) => {

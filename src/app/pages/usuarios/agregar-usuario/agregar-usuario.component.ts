@@ -28,6 +28,8 @@ export class AgregarUsuarioComponent implements OnInit {
   public listaSalas: any[] = [];
 
   public permisosIds: number[] = [];
+  /** idSala recibido al abrir edición; si no cambia, no se incluye en el PATCH. */
+  private idSalaOriginal: number | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -184,6 +186,8 @@ export class AgregarUsuarioComponent implements OnInit {
         .filter((n: any) => Number.isFinite(n));
 
       const idSalaNum = u?.idSala != null ? Number(u.idSala) : null;
+      this.idSalaOriginal =
+        typeof idSalaNum === 'number' && Number.isFinite(idSalaNum) ? idSalaNum : null;
 
       this.usuarioForm.patchValue({
         userName: u?.userName ?? '',
@@ -195,7 +199,7 @@ export class AgregarUsuarioComponent implements OnInit {
         estatus: Number(u?.estatus ?? 1),
         idRol: idRolNum,
         idCliente: u?.idCliente != null ? Number(u.idCliente) : null,
-        idSala: idSalaNum,
+        idSala: this.idSalaOriginal,
         permisosIds: this.permisosIds,
       });
 
@@ -722,9 +726,13 @@ export class AgregarUsuarioComponent implements OnInit {
       fotoPerfil,
       idRol: toNumOrNull(idRol),
       idCliente: toNumOrNull(idCliente),
-      idSala: toNumOrNull(idSala),
       permisosIds: (permisosIds || []).map((x: any) => Number(x)),
     };
+
+    const idSalaActual = toNumOrNull(idSala);
+    if (idSalaActual !== this.idSalaOriginal) {
+      payload.idSala = idSalaActual;
+    }
 
     if (this.inputContrasena && passwordHash) {
       payload.passwordHash = passwordHash;
