@@ -14,6 +14,8 @@ type DoorType = 'ENTRADA' | 'SALIDA';
 interface MachineItem {
   id: number;
   label: number;
+  /** Id de catálogo/API cuando hay varias instancias de la misma máquina en el lienzo. */
+  catalogMachineId?: number;
   type: MachineType;
   name: string;
   status: MachineStatus;
@@ -28,6 +30,8 @@ interface MachineItem {
 
 interface ZoneItem {
   id: number;
+  /** Id de zona en BD cuando hay varias piezas del mismo catálogo en el lienzo. */
+  catalogZoneId?: number;
   type: ZoneType;
   x: number;
   y: number;
@@ -106,6 +110,17 @@ export class AgregarZonaComponent implements OnInit {
   private resizeHandle: 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null = null;
   private resizeStart = { x: 0, y: 0 };
   private resizeStartRect = { x: 0, y: 0, w: 0, h: 0 };
+  /** Misma anchura/alto visual que `.door` en el SCSS (arrastre y límites). */
+  private readonly doorVisW = 130;
+  private readonly doorVisH = 54;
+  /** Máquinas y puertas con centro dentro de la zona al iniciar arrastre de esa zona. */
+  private zoneDragCapturedMachineIds: number[] = [];
+  private zoneDragMoveEntrada = false;
+  private zoneDragMoveSalida = false;
+  /** Igual al redimensionar la zona cuando cambia el origen (handles N/W). */
+  private zoneResizeCapturedMachineIds: number[] = [];
+  private zoneResizeMoveEntrada = false;
+  private zoneResizeMoveSalida = false;
   private rotateTickId: any = null;
   private rotateAccelId: any = null;
   private rotateStep = 3;
@@ -615,12 +630,18 @@ export class AgregarZonaComponent implements OnInit {
     }
     const o = p as Record<string, unknown>;
     const id = o['id'];
-    if (id != null && String(id).trim() !== '') {
-      return `id:${String(id)}`;
-    }
     const serial = o['serial'];
+    const x = o['x'];
+    const y = o['y'];
+    const pos =
+      x != null && y != null && String(x).trim() !== '' && String(y).trim() !== ''
+        ? `@${String(x)},${String(y)}`
+        : '';
+    if (id != null && String(id).trim() !== '') {
+      return `id:${String(id)}${pos}`;
+    }
     if (serial != null && String(serial).trim() !== '') {
-      return `s:${String(serial)}`;
+      return `s:${String(serial)}${pos}`;
     }
     return null;
   }
@@ -657,12 +678,14 @@ export class AgregarZonaComponent implements OnInit {
       const machines: MachineItem[] = [];
 
       zonasApi.forEach((z: any, zi: number) => {
-        const zid = Number(z.id ?? zi + 1);
+        const catalogZid = Number(z.id ?? zi + 1);
+        const zoneInstanceId = this.nextId(zones.map((x) => x.id));
         const tipoZona = String(
           z.type ?? z.nombre ?? z.nombreTipoZona ?? z.tipo ?? 'Sala'
         ).trim();
         zones.push({
-          id: zid,
+          id: zoneInstanceId,
+          catalogZoneId: catalogZid > 0 ? catalogZid : undefined,
           type: (tipoZona || 'Sala') as ZoneType,
           x: Number(z.x ?? 0),
           y: Number(z.y ?? 0),
@@ -670,14 +693,16 @@ export class AgregarZonaComponent implements OnInit {
           h: Number(z.h ?? 160),
         });
         const mas = Array.isArray(z.maquinas) ? z.maquinas : [];
-        mas.forEach((p: any, mi: number) => {
-          machines.push(this.mapApiMachineFromDistribucion(p, zid * 10000 + mi + 1));
+        mas.forEach((p: any) => {
+          const instanceId = this.nextId(machines.map((x) => x.id));
+          machines.push(this.mapApiMachineFromDistribucion(p, instanceId));
         });
       });
 
       const sin = this.mergeMaquinasSinZonaLists(inner.maquinasSinZona ?? [], rootMaquinasSinZona);
-      sin.forEach((p: any, mi: number) => {
-        machines.push(this.mapApiMachineFromDistribucion(p, mi + 1));
+      sin.forEach((p: any) => {
+        const instanceId = this.nextId(machines.map((x) => x.id));
+        machines.push(this.mapApiMachineFromDistribucion(p, instanceId));
       });
 
       this.zones = zones.map((zz) => this.snapZone(zz));
@@ -700,18 +725,22 @@ export class AgregarZonaComponent implements OnInit {
     this.defaultMachineH = 120;
   }
 
-  private mapApiMachineFromDistribucion(p: any, fallbackId: number): MachineItem {
+  private mapApiMachineFromDistribucion(p: any, instanceId: number): MachineItem {
     const type = this.inferMachineTypeFromApi(p);
-    const id = Number(p?.id ?? fallbackId);
+    const catalogId = Number(p?.id ?? 0);
     const dw = Number(p?.w ?? this.defaultMachineW);
     const dh = Number(p?.h ?? this.defaultMachineH);
-    const name = String(p?.name ?? p?.nombre ?? `${type} ${id}`).trim();
-    const serial = String(p?.serial ?? p?.numeroSerie ?? this.makeSerial(type, id)).trim();
+    const labelNum = Number(p?.label ?? (catalogId > 0 ? catalogId : instanceId));
+    const name = String(p?.name ?? p?.nombre ?? `${type} ${catalogId || instanceId}`).trim();
+    const serial = String(
+      p?.serial ?? p?.numeroSerie ?? this.makeSerial(type, catalogId || instanceId)
+    ).trim();
     const status = this.mapEstatusMaquinaApi(p);
     const img = this.resolveMachineDisplayImg(p, type);
     return {
-      id,
-      label: Number(p?.label ?? id),
+      id: instanceId,
+      label: labelNum,
+      catalogMachineId: catalogId > 0 ? catalogId : undefined,
       type,
       name,
       status,
@@ -725,16 +754,83 @@ export class AgregarZonaComponent implements OnInit {
     };
   }
 
-  private maquinaCentroEnZona(m: MachineItem, z: ZoneItem): boolean {
+  private maquinaCentroEnRect(
+    m: MachineItem,
+    rect: { x: number; y: number; w: number; h: number }
+  ): boolean {
     const cx = m.x + m.w / 2;
     const cy = m.y + m.h / 2;
-    return cx >= z.x && cx <= z.x + z.w && cy >= z.y && cy <= z.y + z.h;
+    return cx >= rect.x && cx <= rect.x + rect.w && cy >= rect.y && cy <= rect.y + rect.h;
+  }
+
+  private maquinaCentroEnZona(m: MachineItem, z: ZoneItem): boolean {
+    return this.maquinaCentroEnRect(m, z);
+  }
+
+  private doorCentroEnRect(
+    d: DoorPoint,
+    rect: { x: number; y: number; w: number; h: number }
+  ): boolean {
+    const cx = d.x + this.doorVisW / 2;
+    const cy = d.y + this.doorVisH / 2;
+    return cx >= rect.x && cx <= rect.x + rect.w && cy >= rect.y && cy <= rect.y + rect.h;
+  }
+
+  /** Desplaza máquinas y puertas capturadas junto con la zona (mismo delta que el rectángulo). */
+  private shiftMaquinasYPuertasConZona(
+    machineIds: readonly number[],
+    moveEntrada: boolean,
+    moveSalida: boolean,
+    dx: number,
+    dy: number
+  ): void {
+    if (dx === 0 && dy === 0) {
+      return;
+    }
+    const SW = this.logicalStageW();
+    const SH = this.logicalStageH();
+    const idSet = new Set(machineIds);
+    if (idSet.size > 0) {
+      this.machines = this.machines.map((m) => {
+        if (!idSet.has(m.id)) {
+          return m;
+        }
+        return this.snapMachine({
+          ...m,
+          x: this.clamp(m.x + dx, 0, Math.max(0, SW - m.w)),
+          y: this.clamp(m.y + dy, 0, Math.max(0, SH - m.h)),
+        });
+      });
+    }
+    if (moveEntrada && this.entrada) {
+      this.entrada = {
+        ...this.entrada,
+        x: this.clamp(this.entrada.x + dx, 0, Math.max(0, SW - this.doorVisW)),
+        y: this.clamp(this.entrada.y + dy, 0, Math.max(0, SH - this.doorVisH)),
+      };
+    }
+    if (moveSalida && this.salida) {
+      this.salida = {
+        ...this.salida,
+        x: this.clamp(this.salida.x + dx, 0, Math.max(0, SW - this.doorVisW)),
+        y: this.clamp(this.salida.y + dy, 0, Math.max(0, SH - this.doorVisH)),
+      };
+    }
+  }
+
+  private clearZoneMoveCaptures(): void {
+    this.zoneDragCapturedMachineIds = [];
+    this.zoneDragMoveEntrada = false;
+    this.zoneDragMoveSalida = false;
+    this.zoneResizeCapturedMachineIds = [];
+    this.zoneResizeMoveEntrada = false;
+    this.zoneResizeMoveSalida = false;
   }
 
   /** API: solo id + posición; dentro de zona no se envía idZona (la zona viene del padre). */
   private serializeMachineParaLayoutApi(m: MachineItem): Record<string, unknown> {
     return {
-      id: m.id,
+      id: m.catalogMachineId ?? m.id,
       x: m.x,
       y: m.y,
     };
@@ -742,7 +838,7 @@ export class AgregarZonaComponent implements OnInit {
 
   private buildAreaPoligonoJsonForPut(): Record<string, unknown> {
     const zonas = this.zones.map((z) => ({
-      id: z.id,
+      id: z.catalogZoneId ?? z.id,
       x: z.x,
       y: z.y,
       w: z.w,
@@ -867,26 +963,18 @@ export class AgregarZonaComponent implements OnInit {
   agregarMaquinaDesdeCatalogo(row: any): void {
     const tipo = this.mapTipoMaquinaDesdeApi(row);
     const idBd = Number(row?.idMaquina ?? row?.id ?? 0);
-    const id = idBd > 0 ? idBd : this.nextId(this.machines.map((x) => x.id));
-    if (this.machines.some((m) => m.id === id)) {
-      Swal.fire({
-        title: 'Ya agregada',
-        text: 'Esta máquina ya está en el diagrama.',
-        icon: 'info',
-        background: '#0d121d',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
-    const nombre = String(row?.nombreMaquina ?? row?.nombre ?? `${tipo} ${id}`).trim();
-    const serial = String(row?.numeroSerie ?? row?.serial ?? this.makeSerial(tipo, id)).trim();
+    const instanceId = this.nextId(this.machines.map((x) => x.id));
+    const nombre = String(row?.nombreMaquina ?? row?.nombre ?? `${tipo} ${idBd || instanceId}`).trim();
+    const serial = String(
+      row?.numeroSerie ?? row?.serial ?? this.makeSerial(tipo, idBd || instanceId)
+    ).trim();
     const img = this.resolveMachineDisplayImg(row, tipo);
     const status = this.mapEstatusMaquinaApi(row);
-    const label = idBd > 0 ? idBd : id;
+    const label = idBd > 0 ? idBd : instanceId;
     const base: MachineItem = {
-      id,
+      id: instanceId,
       label,
+      catalogMachineId: idBd > 0 ? idBd : undefined,
       type: tipo,
       name: nombre,
       status,
@@ -900,7 +988,7 @@ export class AgregarZonaComponent implements OnInit {
     };
     const placed = this.placeWithoutOverlap(base);
     this.machines = [...this.machines, placed];
-    this.selectedMachineId = id;
+    this.selectedMachineId = instanceId;
     this.selectedZoneId = null;
     this.placingDoor = null;
     this.persistPlanoToForm();
@@ -910,20 +998,10 @@ export class AgregarZonaComponent implements OnInit {
     const nombreZona = String(row?.nombreZona ?? row?.nombre ?? 'Zona').trim();
     const tipoEtiqueta = String(row?.nombreTipoZona ?? row?.tipoZona ?? nombreZona ?? 'Sala').trim();
     const idBd = Number(row?.idZona ?? row?.id ?? 0);
-    const id = idBd > 0 ? idBd : this.nextId(this.zones.map((x) => x.id));
-    if (this.zones.some((z) => z.id === id)) {
-      Swal.fire({
-        title: 'Ya agregada',
-        text: 'Esta zona ya está en el diagrama.',
-        icon: 'info',
-        background: '#0d121d',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
+    const instanceId = this.nextId(this.zones.map((x) => x.id));
     const z: ZoneItem = {
-      id,
+      id: instanceId,
+      catalogZoneId: idBd > 0 ? idBd : undefined,
       type: (tipoEtiqueta || 'Sala') as ZoneType,
       x: 40 + (this.zones.length % 8) * 80,
       y: 40 + (this.zones.length % 5) * 60,
@@ -931,7 +1009,7 @@ export class AgregarZonaComponent implements OnInit {
       h: 160,
     };
     this.zones = [...this.zones, this.snapZone(z)];
-    this.selectedZoneId = id;
+    this.selectedZoneId = instanceId;
     this.selectedMachineId = null;
     this.placingDoor = null;
     this.persistPlanoToForm();
@@ -1272,6 +1350,11 @@ export class AgregarZonaComponent implements OnInit {
     this.selectedZoneId = z.id;
     this.selectedMachineId = null;
     this.placingDoor = null;
+    this.zoneDragCapturedMachineIds = this.machines
+      .filter((m) => this.maquinaCentroEnZona(m, z))
+      .map((m) => m.id);
+    this.zoneDragMoveEntrada = !!(this.entrada && this.doorCentroEnRect(this.entrada, z));
+    this.zoneDragMoveSalida = !!(this.salida && this.doorCentroEnRect(this.salida, z));
     const { x: px, y: py } = this.clientToCanvas(ev.clientX, ev.clientY);
     this.dragOffsetX = px - z.x;
     this.dragOffsetY = py - z.y;
@@ -1295,6 +1378,12 @@ export class AgregarZonaComponent implements OnInit {
     const { x: px, y: py } = this.clientToCanvas(ev.clientX, ev.clientY);
     this.resizeStart = { x: px, y: py };
     this.resizeStartRect = { x: z.x, y: z.y, w: z.w, h: z.h };
+    const sr = this.resizeStartRect;
+    this.zoneResizeCapturedMachineIds = this.machines
+      .filter((m) => this.maquinaCentroEnRect(m, sr))
+      .map((m) => m.id);
+    this.zoneResizeMoveEntrada = !!(this.entrada && this.doorCentroEnRect(this.entrada, sr));
+    this.zoneResizeMoveSalida = !!(this.salida && this.doorCentroEnRect(this.salida, sr));
     (ev.target as HTMLElement).setPointerCapture(ev.pointerId);
     window.addEventListener('pointermove', this.onPointerMove, { passive: false });
     window.addEventListener('pointerup', this.onPointerUp, { passive: false });
@@ -1329,13 +1418,25 @@ export class AgregarZonaComponent implements OnInit {
       const idx = this.zones.findIndex(x => x.id === this.draggingZoneId);
       if (idx < 0) return;
       const z = this.zones[idx];
+      const oldX = z.x;
+      const oldY = z.y;
       const maxX = Math.max(0, SW - z.w);
       const maxY = Math.max(0, SH - z.h);
       const nx = this.clamp(px - this.dragOffsetX, 0, maxX);
       const ny = this.clamp(py - this.dragOffsetY, 0, maxY);
+      const newZ = this.snapZone({ ...z, x: nx, y: ny });
+      const dx = newZ.x - oldX;
+      const dy = newZ.y - oldY;
       const next = [...this.zones];
-      next[idx] = this.snapZone({ ...z, x: nx, y: ny });
+      next[idx] = newZ;
       this.zones = next;
+      this.shiftMaquinasYPuertasConZona(
+        this.zoneDragCapturedMachineIds,
+        this.zoneDragMoveEntrada,
+        this.zoneDragMoveSalida,
+        dx,
+        dy
+      );
       return;
     }
 
@@ -1343,8 +1444,8 @@ export class AgregarZonaComponent implements OnInit {
       const idx = this.zones.findIndex(x => x.id === this.resizingZoneId);
       if (idx < 0) return;
       const z = this.zones[idx];
-      const dx = px - this.resizeStart.x;
-      const dy = py - this.resizeStart.y;
+      const pdx = px - this.resizeStart.x;
+      const pdy = py - this.resizeStart.y;
       const sr = this.resizeStartRect;
       const h = this.resizeHandle;
       let nx = sr.x;
@@ -1352,22 +1453,34 @@ export class AgregarZonaComponent implements OnInit {
       let nw = sr.w;
       let nh = sr.h;
       if (h === 'e' || h === 'ne' || h === 'se') {
-        nw = this.clamp(sr.w + dx, 140, Math.max(140, SW - sr.x));
+        nw = this.clamp(sr.w + pdx, 140, Math.max(140, SW - sr.x));
       }
       if (h === 'w' || h === 'nw' || h === 'sw') {
-        nw = this.clamp(sr.w - dx, 140, sr.x + sr.w);
+        nw = this.clamp(sr.w - pdx, 140, sr.x + sr.w);
         nx = sr.x + sr.w - nw;
       }
       if (h === 's' || h === 'se' || h === 'sw') {
-        nh = this.clamp(sr.h + dy, 90, Math.max(90, SH - sr.y));
+        nh = this.clamp(sr.h + pdy, 90, Math.max(90, SH - sr.y));
       }
       if (h === 'n' || h === 'ne' || h === 'nw') {
-        nh = this.clamp(sr.h - dy, 90, sr.y + sr.h);
+        nh = this.clamp(sr.h - pdy, 90, sr.y + sr.h);
         ny = sr.y + sr.h - nh;
       }
+      const oldX = z.x;
+      const oldY = z.y;
+      const newZ = this.snapZone({ ...z, x: nx, y: ny, w: nw, h: nh });
+      const dx = newZ.x - oldX;
+      const dy = newZ.y - oldY;
       const next = [...this.zones];
-      next[idx] = this.snapZone({ ...z, x: nx, y: ny, w: nw, h: nh });
+      next[idx] = newZ;
       this.zones = next;
+      this.shiftMaquinasYPuertasConZona(
+        this.zoneResizeCapturedMachineIds,
+        this.zoneResizeMoveEntrada,
+        this.zoneResizeMoveSalida,
+        dx,
+        dy
+      );
     }
   };
 
@@ -1377,6 +1490,7 @@ export class AgregarZonaComponent implements OnInit {
     this.draggingMachineId = null;
     this.draggingZoneId = null;
     this.resizingZoneId = null;
+    this.clearZoneMoveCaptures();
     this.snapGuide.showV = false;
     this.snapGuide.showH = false;
     window.removeEventListener('pointermove', this.onPointerMove);
@@ -1671,7 +1785,7 @@ export class AgregarZonaComponent implements OnInit {
   }
 
   /**
-   * Icono del plano: siempre assets bajo `assets/maquinas/`.
+   * Icono del plano: rutas bajo `assets/maquinas/` (PNG locales).
    * No se usan URLs remotas (iconoMaquina / imagenMaquina del servicio).
    */
   private maquinaImgFromApiPayload(p: any, type: MachineType): string {
@@ -1695,7 +1809,7 @@ export class AgregarZonaComponent implements OnInit {
       return 'assets/maquinas/Tragamonedas.png';
     }
     if (h.includes('ruleta')) {
-      return 'assets/maquinas/ruleta.svg';
+      return 'assets/maquinas/RuletaElectronica.png';
     }
     return this.machineImg(type);
   }
@@ -1716,11 +1830,12 @@ export class AgregarZonaComponent implements OnInit {
     return local;
   }
 
+  /** Fallback por tipo cuando el texto del API no coincide: mismos PNG que en `assets/maquinas/`. */
   private machineImg(type: MachineType) {
-    if (type === 'Tragamonedas') return 'assets/maquinas/tragamonedas.svg';
-    if (type === 'Ruleta') return 'assets/maquinas/ruleta.svg';
-    if (type === 'Blackjack') return 'assets/maquinas/blackjack.svg';
-    return 'assets/maquinas/poker.svg';
+    if (type === 'Tragamonedas') return 'assets/maquinas/Tragamonedas.png';
+    if (type === 'Ruleta') return 'assets/maquinas/RuletaElectronica.png';
+    if (type === 'Blackjack') return 'assets/maquinas/BlackJacElectronico.png';
+    return 'assets/maquinas/VideoPoker.png';
   }
 
   private makeSerial(type: MachineType, id: number) {
@@ -1761,8 +1876,8 @@ export class AgregarZonaComponent implements OnInit {
     const { x, y } = this.clientToCanvas(e.clientX, e.clientY);
     const SW = this.logicalStageW();
     const SH = this.logicalStageH();
-    const nx = this.clamp(x - this.doorDragOffset.x, 0, SW - 130);
-    const ny = this.clamp(y - this.doorDragOffset.y, 0, SH - 54);
+    const nx = this.clamp(x - this.doorDragOffset.x, 0, SW - this.doorVisW);
+    const ny = this.clamp(y - this.doorDragOffset.y, 0, SH - this.doorVisH);
     if (this.draggingDoor === 'ENTRADA' && this.entrada) {
       this.entrada = { ...this.entrada, x: nx, y: ny };
     }

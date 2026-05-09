@@ -64,11 +64,13 @@
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
                       <span class="field-label text-white">Fecha de nacimiento <span class="field-req" aria-hidden="true">*</span></span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-alt"></i>
-                        <input formControlName="fechaNacimiento" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="fechaNacimiento"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
@@ -161,11 +163,13 @@
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
                       <span class="field-label text-white">Vigencia de identificación</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-check"></i>
-                        <input formControlName="vigenciaIdentificacion" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="vigenciaIdentificacion"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                 </div>

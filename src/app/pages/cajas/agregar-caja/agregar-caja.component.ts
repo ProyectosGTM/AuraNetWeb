@@ -202,6 +202,11 @@ export class AgregarCajaComponent implements OnInit, AfterViewInit {
     });
   }
 
+  private textoConFallback(valor: unknown): string {
+    const texto = typeof valor === 'string' ? valor.trim() : '';
+    return texto || 'Sin registro';
+  }
+
   allowOnlyNumbers(event: KeyboardEvent): void {
     const charCode = event.keyCode ? event.keyCode : event.which;
     const key = event.key;
@@ -236,9 +241,9 @@ export class AgregarCajaComponent implements OnInit, AfterViewInit {
     return {
       idSala: Number(formValue.idSala ?? 0),
       idZona: Number(formValue.idZona ?? 0),
-      codigo: formValue.codigo || '',
-      nombre: formValue.nombre || '',
-      descripcion: formValue.descripcion || null,
+      codigo: this.textoConFallback(formValue.codigo),
+      nombre: this.textoConFallback(formValue.nombre),
+      descripcion: this.textoConFallback(formValue.descripcion),
       idTipoCaja: Number(formValue.idTipoCaja ?? 0),
       idEstatusCaja: Number(this.idEstatusCajaDefault),
       limiteEfectivo: Number(formValue.limiteEfectivo ?? 0),

@@ -96,6 +96,7 @@ export class ListaAfiliadosComponent implements OnInit {
   cumpleanerosTipoSeleccion: CumpleanerosTipo | null = null;
   /** Último `tipo` confirmado para la carga del grid (hoy | mes). */
   cumpleanerosTipoActivo: CumpleanerosTipo | null = null;
+  cumpleanerosTotal = 0;
 
   /** Filtros para GET /afiliados/buscar (nombres de query alineados al backend). */
   filtroTexto = '';
@@ -176,8 +177,15 @@ export class ListaAfiliadosComponent implements OnInit {
    * Valida y normaliza `fechaFinBloqueo` para POST /afiliados/{id}/bloquear (solo fecha, YYYY-MM-DD).
    * Discriminante `error` | `fecha` para que el compilador estreche bien en el llamador.
    */
-  private parseFechaFinBloqueoSwagger(raw: string): { fecha: string } | { error: string } {
-    let s = (raw || '').trim();
+  private parseFechaFinBloqueoSwagger(raw: unknown): { fecha: string } | { error: string } {
+    let s = '';
+    if (raw instanceof Date) {
+      if (!isNaN(raw.getTime())) {
+        s = ListaAfiliadosComponent.fechaLocalYYYYMMDD(raw);
+      }
+    } else {
+      s = String(raw || '').trim();
+    }
     if (!s) {
       return { error: 'Selecciona la fecha fin del bloqueo (AAAA-MM-DD).' };
     }
@@ -207,6 +215,7 @@ export class ListaAfiliadosComponent implements OnInit {
   setModoLista(modo: ModoLista) {
     if (modo !== 'cumpleaneros') {
       this.cumpleanerosTipoActivo = null;
+      this.cumpleanerosTotal = 0;
     }
     this.modoLista = modo;
     this.setupDataSource();
@@ -678,29 +687,163 @@ export class ListaAfiliadosComponent implements OnInit {
     return f;
   }
 
-  private transformarFila(item: any): any {
-    const nombreCompleto = [
-      item?.nombre || '',
-      item?.apellidoPaterno || '',
-      item?.apellidoMaterno || ''
-    ].filter(Boolean).join(' ').trim() || 'Sin registro';
+  private normalizarAfiliadoItem(item: any): any {
+    if (!item || typeof item !== 'object') {
+      return item;
+    }
 
     return {
       ...item,
-      nombreCompleto,
-      nombreSala: item?.nombreSala || 'Sin registro',
-      nombreComercialSala: item?.nombreComercialSala || 'Sin registro',
-      nombreTipoIdentificacion: item?.nombreTipoIdentificacion || 'Sin registro',
-      nombreEstatusAfiliado: item?.nombreEstatusAfiliado || 'Sin registro',
-      numeroIdentificacion: this.sinRegistro(item?.numeroIdentificacion),
-      email: this.sinRegistro(item?.email),
-      telefonoCelular: this.sinRegistro(item?.telefonoCelular),
-      estatusTexto: item?.estatus === 1 ? 'Activo' : 'Inactivo',
-      sexoTexto: item?.sexo === 'M' ? 'Masculino' : item?.sexo === 'F' ? 'Femenino' : 'Sin registro',
-      fechaNacimientoFormateada: this.formatearFecha(item?.fechaNacimiento),
-      fechaCreacionFormateada: this.formatearFechaHora(item?.fechaCreacion),
-      fechaActualizacionFormateada: this.formatearFechaHora(item?.fechaActualizacion)
+      id: item?.id ?? item?.Id ?? null,
+      idSala: item?.idSala ?? item?.IdSala ?? null,
+      idTipoIdentificacion: item?.idTipoIdentificacion ?? item?.IdTipoIdentificacion ?? null,
+      numeroIdentificacion: item?.numeroIdentificacion ?? item?.NumeroIdentificacion ?? null,
+      nombre: item?.nombre ?? item?.Nombre ?? null,
+      apellidoPaterno: item?.apellidoPaterno ?? item?.ApellidoPaterno ?? null,
+      apellidoMaterno: item?.apellidoMaterno ?? item?.ApellidoMaterno ?? null,
+      fechaNacimiento: item?.fechaNacimiento ?? item?.FechaNacimiento ?? null,
+      sexo: item?.sexo ?? item?.Sexo ?? null,
+      email: item?.email ?? item?.Email ?? null,
+      telefonoCelular: item?.telefonoCelular ?? item?.TelefonoCelular ?? item?.Telefono ?? null,
+      nombreSala: item?.nombreSala ?? item?.NombreSala ?? null,
+      nombreComercialSala: item?.nombreComercialSala ?? item?.NombreComercialSala ?? null,
+      nombreTipoIdentificacion:
+        item?.nombreTipoIdentificacion ?? item?.NombreTipoIdentificacion ?? null,
+      nombreEstatusAfiliado: item?.nombreEstatusAfiliado ?? item?.NombreEstatusAfiliado ?? null,
+      estatus: item?.estatus ?? item?.Estatus ?? null,
+      fechaCreacion: item?.fechaCreacion ?? item?.FechaRegistro ?? null,
+      fechaActualizacion: item?.fechaActualizacion ?? item?.FechaActualizacion ?? null,
     };
+  }
+
+  private resolverMetaEstatusAfiliado(item: any): { codigo: string; nombre: string } {
+    const idEstatus = Number(item?.idEstatusAfiliado ?? item?.estatusAfiliado?.id ?? NaN);
+    const codigoRaw = String(item?.codigoEstatusAfiliado ?? item?.estatusAfiliado?.codigo ?? '').trim();
+    const nombreRaw = String(item?.nombreEstatusAfiliado ?? item?.estatusAfiliado?.nombre ?? '').trim();
+
+    if (codigoRaw || nombreRaw) {
+      return {
+        codigo: codigoRaw || this.codigoEstatusPorId(idEstatus),
+        nombre: nombreRaw || this.nombreEstatusPorId(idEstatus),
+      };
+    }
+
+    return {
+      codigo: this.codigoEstatusPorId(idEstatus),
+      nombre: this.nombreEstatusPorId(idEstatus),
+    };
+  }
+
+  private codigoEstatusPorId(id: number): string {
+    switch (id) {
+      case 1:
+        return 'ACTIVO';
+      case 2:
+        return 'BLOQUEADO';
+      case 3:
+        return 'SUSPENDIDO';
+      case 4:
+        return 'CERRADO';
+      case 5:
+        return 'AUTOEXCLUIDO';
+      default:
+        return '';
+    }
+  }
+
+  private nombreEstatusPorId(id: number): string {
+    switch (id) {
+      case 1:
+        return 'Activo';
+      case 2:
+        return 'Bloqueado';
+      case 3:
+        return 'Suspendido';
+      case 4:
+        return 'Cerrado';
+      case 5:
+        return 'Autoexcluido';
+      default:
+        return 'Sin registro';
+    }
+  }
+
+  private transformarFila(item: any): any {
+    const fila = this.normalizarAfiliadoItem(item);
+    const estatusMeta = this.resolverMetaEstatusAfiliado(fila);
+    const nombreCompleto = [
+      fila?.nombre || '',
+      fila?.apellidoPaterno || '',
+      fila?.apellidoMaterno || ''
+    ].filter(Boolean).join(' ').trim() || 'Sin registro';
+
+    return {
+      ...fila,
+      nombreCompleto,
+      nombreSala: fila?.nombreSala || 'Sin registro',
+      nombreComercialSala: fila?.nombreComercialSala || 'Sin registro',
+      nombreTipoIdentificacion: fila?.nombreTipoIdentificacion || 'Sin registro',
+      nombreEstatusAfiliado: estatusMeta.nombre || 'Sin registro',
+      codigoEstatusAfiliado: estatusMeta.codigo || '',
+      numeroIdentificacion: this.sinRegistro(fila?.numeroIdentificacion),
+      email: this.sinRegistro(fila?.email),
+      telefonoCelular: this.sinRegistro(fila?.telefonoCelular),
+      estatusTexto: Number(fila?.estatus) === 1 ? 'Activo' : 'Inactivo',
+      sexoTexto: fila?.sexo === 'M' ? 'Masculino' : fila?.sexo === 'F' ? 'Femenino' : 'Sin registro',
+      fechaNacimientoFormateada: this.formatearFecha(fila?.fechaNacimiento),
+      fechaCreacionFormateada: this.formatearFechaHora(fila?.fechaCreacion),
+      fechaActualizacionFormateada: this.formatearFechaHora(fila?.fechaActualizacion)
+    };
+  }
+
+  get esVistaCumpleanerosHoy(): boolean {
+    return this.modoLista === 'cumpleaneros' && this.cumpleanerosTipoActivo === 'hoy';
+  }
+
+  get esVistaCumpleanerosMes(): boolean {
+    return this.modoLista === 'cumpleaneros' && this.cumpleanerosTipoActivo === 'mes';
+  }
+
+  get hayCumpleaneros(): boolean {
+    return this.modoLista === 'cumpleaneros' && this.cumpleanerosTotal > 0;
+  }
+
+  private extraerMesDia(fecha: unknown): { mes: number; dia: number } | null {
+    if (fecha == null) return null;
+    const raw = String(fecha).trim();
+    if (!raw) return null;
+    const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) return null;
+    const mes = Number(match[2]);
+    const dia = Number(match[3]);
+    if (!Number.isFinite(mes) || !Number.isFinite(dia)) return null;
+    return { mes, dia };
+  }
+
+  esCumpleaneroHoy(row: any): boolean {
+    const md = this.extraerMesDia(row?.fechaNacimiento);
+    if (!md) return false;
+    const hoy = new Date();
+    return md.mes === hoy.getMonth() + 1 && md.dia === hoy.getDate();
+  }
+
+  getEdadDesdeFechaNacimiento(fecha: unknown): string {
+    const raw = String(fecha ?? '').trim();
+    if (!raw) return 'Sin registro';
+    const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) return 'Sin registro';
+    const y = Number(match[1]);
+    const m = Number(match[2]);
+    const d = Number(match[3]);
+    const nacimiento = new Date(y, m - 1, d);
+    if (isNaN(nacimiento.getTime())) return 'Sin registro';
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const aunNoCumple =
+      hoy.getMonth() < nacimiento.getMonth() ||
+      (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate());
+    if (aunNoCumple) edad--;
+    return edad >= 0 ? `${edad} años` : 'Sin registro';
   }
 
   private normalizarListaResponse(res: any): any[] {
@@ -721,6 +864,7 @@ export class ListaAfiliadosComponent implements OnInit {
           if (this.modoLista === 'inactivos') {
             const response: any = await lastValueFrom(this.afiliadosService.obtenerAfiliadosInactivos());
             this.loading = false;
+            this.cumpleanerosTotal = 0;
             const raw = this.normalizarListaResponse(response);
             const all = raw.map((item: any) => this.transformarFila(item));
             return {
@@ -732,6 +876,7 @@ export class ListaAfiliadosComponent implements OnInit {
           if (this.modoLista === 'cumpleaneros') {
             if (!this.cumpleanerosTipoActivo) {
               this.loading = false;
+              this.cumpleanerosTotal = 0;
               return { data: [], totalCount: 0 };
             }
             const response: any = await lastValueFrom(
@@ -740,6 +885,7 @@ export class ListaAfiliadosComponent implements OnInit {
             this.loading = false;
             const raw = this.normalizarListaResponse(response);
             const all = raw.map((item: any) => this.transformarFila(item));
+            this.cumpleanerosTotal = all.length;
             return {
               data: all.slice(skip, skip + take),
               totalCount: all.length
@@ -747,6 +893,7 @@ export class ListaAfiliadosComponent implements OnInit {
           }
 
           if (this.modoLista === 'buscar') {
+            this.cumpleanerosTotal = 0;
             const filtros = this.construirFiltrosBusqueda();
             const response: any = await lastValueFrom(
               this.afiliadosService.buscarAfiliados(filtros)
@@ -772,6 +919,7 @@ export class ListaAfiliadosComponent implements OnInit {
           );
 
           this.loading = false;
+          this.cumpleanerosTotal = 0;
 
           const totalRegistros = Number(response?.paginated?.total) || 0;
           const paginaActual = Number(response?.paginated?.page) || page;
@@ -791,6 +939,9 @@ export class ListaAfiliadosComponent implements OnInit {
           };
         } catch (error: any) {
           this.loading = false;
+          if (this.modoLista === 'cumpleaneros') {
+            this.cumpleanerosTotal = 0;
+          }
           console.error('Error al cargar afiliados:', error);
           return {
             data: [],
@@ -979,7 +1130,15 @@ export class ListaAfiliadosComponent implements OnInit {
   formatearFecha(fecha: string | null): string {
     if (!fecha) return 'Sin registro';
     try {
-      const d = new Date(fecha);
+      const raw = String(fecha).trim();
+      const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        const yyyy = match[1];
+        const mm = match[2];
+        const dd = match[3];
+        return `${dd}/${mm}/${yyyy}`;
+      }
+      const d = new Date(raw);
       if (isNaN(d.getTime())) return 'Sin registro';
       const dd = String(d.getDate()).padStart(2, '0');
       const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -993,7 +1152,17 @@ export class ListaAfiliadosComponent implements OnInit {
   formatearFechaHora(fecha: string | null): string {
     if (!fecha) return 'Sin registro';
     try {
-      const d = new Date(fecha);
+      const raw = String(fecha).trim();
+      const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
+      if (match) {
+        const yyyy = match[1];
+        const mm = match[2];
+        const dd = match[3];
+        const hh = match[4] ?? '00';
+        const min = match[5] ?? '00';
+        return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+      }
+      const d = new Date(raw);
       if (isNaN(d.getTime())) return 'Sin registro';
       const dd = String(d.getDate()).padStart(2, '0');
       const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -1011,6 +1180,33 @@ export class ListaAfiliadosComponent implements OnInit {
       return 'Sin registro';
     }
     return valor;
+  }
+
+  obtenerClaseEstatusAfiliado(row: any): string {
+    const codigo = String(row?.codigoEstatusAfiliado ?? row?.estatusAfiliado?.codigo ?? '')
+      .trim()
+      .toUpperCase();
+    const nombre = String(row?.nombreEstatusAfiliado ?? row?.estatusAfiliado?.nombre ?? '')
+      .trim()
+      .toUpperCase();
+    const key = codigo || nombre;
+    if (key.includes('ACTIVO')) return 'estatus-afiliado-pill--activo';
+    if (key.includes('BLOQUEADO')) return 'estatus-afiliado-pill--bloqueado';
+    if (key.includes('SUSPENDIDO')) return 'estatus-afiliado-pill--suspendido';
+    if (key.includes('CERRADO')) return 'estatus-afiliado-pill--cerrado';
+    if (key.includes('AUTOEXCLUIDO')) return 'estatus-afiliado-pill--autoexcluido';
+    return 'estatus-afiliado-pill--default';
+  }
+
+  esAfiliadoBloqueado(row: any): boolean {
+    const codigo = String(row?.codigoEstatusAfiliado ?? row?.estatusAfiliado?.codigo ?? '')
+      .trim()
+      .toUpperCase();
+    const nombre = String(row?.nombreEstatusAfiliado ?? row?.estatusAfiliado?.nombre ?? '')
+      .trim()
+      .toUpperCase();
+    const idEstatus = Number(row?.idEstatusAfiliado ?? row?.estatusAfiliado?.id ?? NaN);
+    return codigo.includes('BLOQUEADO') || nombre.includes('BLOQUEADO') || idEstatus === 2;
   }
 
   onPageIndexChanged(event: any) {
@@ -1214,6 +1410,11 @@ export class ListaAfiliadosComponent implements OnInit {
   }
 
   desbloquearAfiliado(rowData: any) {
+    const rolUsuario = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('bloquearAfiliado', rolUsuario)) {
+      this.rolAcceso.mostrarAccesoDenegado('bloquearAfiliado');
+      return;
+    }
     Swal.fire({
       title: '¡Desbloquear!',
       html: `¿Está seguro que requiere desbloquear el afiliado: <strong>${rowData.nombreCompleto || rowData.numeroIdentificacion}</strong>?`,

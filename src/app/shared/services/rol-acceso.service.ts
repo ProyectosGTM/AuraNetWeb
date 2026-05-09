@@ -77,7 +77,7 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
   /** Alta y edición de cajas en consola: solo perfil Cliente (misma regla que la validación actual). */
   gestionarCajasCliente: {
     rolesPermitidosIds: ['3'],
-    titulo: 'No puedes registrar ni modificar cajas',
+    titulo: 'No puedes registrar, ni modificar cajas',
     subtitulo:
       'Con tu usuario no está permitido dar de alta ni modificar cajas. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
@@ -85,14 +85,14 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
   registrarAfiliado: {
     /** Alta y edición de afiliados en consola: solo perfil Cliente (misma regla que la validación actual). */
     rolesPermitidosIds: ['3'],
-    titulo: 'No puedes agregar ni actualizar afiliados',
+    titulo: 'No puedes agregar, ni actualizar afiliados',
     subtitulo:
       'Con tu usuario no está permitido dar de alta ni modificar afiliados. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   actualizarNivelVipAfiliado: {
     rolesPermitidosIds: ['5'],
-    titulo: 'No puedes actualizar el nivel VIP',
+    titulo: 'No puedes actualizar, el nivel VIP',
     subtitulo: 'Tu rol no tiene permiso para cambiar el nivel VIP de un afiliado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },

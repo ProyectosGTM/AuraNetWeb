@@ -369,10 +369,23 @@ export class AgregarAfiliadoComponent implements OnInit, AfterViewInit {
     });
   }
 
-  formatDate(dateString: string | null): string {
-    if (!dateString) return '';
+  formatDate(dateValue: string | Date | null): string {
+    if (!dateValue) return '';
+    if (dateValue instanceof Date) {
+      if (isNaN(dateValue.getTime())) return '';
+      const year = dateValue.getFullYear();
+      const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+      const day = String(dateValue.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    const raw = String(dateValue).trim();
+    if (!raw) return '';
+    const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return `${match[1]}-${match[2]}-${match[3]}`;
+    }
     try {
-      const d = new Date(dateString);
+      const d = new Date(raw);
       if (isNaN(d.getTime())) return '';
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -381,6 +394,27 @@ export class AgregarAfiliadoComponent implements OnInit, AfterViewInit {
     } catch {
       return '';
     }
+  }
+
+  private normalizarFechaParaApi(valor: unknown): string | null {
+    if (valor == null || valor === '') {
+      return null;
+    }
+    if (valor instanceof Date) {
+      if (isNaN(valor.getTime())) {
+        return null;
+      }
+      return this.formatDate(valor);
+    }
+    const texto = String(valor).trim();
+    if (!texto) {
+      return null;
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) {
+      return texto;
+    }
+    const normalizada = this.formatDate(texto);
+    return normalizada || null;
   }
 
   initForm() {
@@ -521,13 +555,13 @@ export class AgregarAfiliadoComponent implements OnInit, AfterViewInit {
       nombre: t(v.nombre),
       apellidoPaterno: t(v.apellidoPaterno),
       apellidoMaterno: t(v.apellidoMaterno) || null,
-      fechaNacimiento: v.fechaNacimiento || null,
+      fechaNacimiento: this.normalizarFechaParaApi(v.fechaNacimiento),
       sexo: v.sexo,
       idEstatusAfiliado: v.idEstatusAfiliado,
       pais: 'MEX',
       email: t(v.email) || null,
       telefonoCelular: t(v.telefonoCelular) || null,
-      vigenciaIdentificacion: v.vigenciaIdentificacion || null,
+      vigenciaIdentificacion: this.normalizarFechaParaApi(v.vigenciaIdentificacion),
       archivoIdentificacionFrente: t(v.archivoIdentificacionFrente) || null,
       curp: t(v.curp) || null,
       rfc: t(v.rfc) || null,
@@ -584,7 +618,7 @@ export class AgregarAfiliadoComponent implements OnInit, AfterViewInit {
     const fd = new FormData();
     fd.append('file', file, file.name);
     fd.append('folder', 'afiliados');
-    fd.append('idModule', '40');
+    fd.append('idModule', '6');
     this.usuariosService.uploadFile(fd).subscribe({
       next: (res: any) => {
         const url = res?.url ?? res?.Location ?? res?.data?.url ?? '';

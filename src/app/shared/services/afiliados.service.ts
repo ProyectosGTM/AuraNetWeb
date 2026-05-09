@@ -99,9 +99,9 @@ export class AfiliadosService {
     return this.http.get(`${this.baseUrl}/cumpleaneros`, { params });
   }
 
-  /** GET /afiliados/inactivos */
+  /** GET /afiliados/inactivos/sin-actividad */
   obtenerAfiliadosInactivos(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/inactivos`);
+    return this.http.get(`${this.baseUrl}/inactivos/sin-actividad`);
   }
 
   /** GET /cattiposidentificacion/list (catálogo para formularios) */

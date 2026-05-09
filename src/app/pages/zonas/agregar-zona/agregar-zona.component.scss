@@ -314,18 +314,25 @@
 .zone {
   position: absolute;
   border-radius: 16px;
-  border: 1px dashed rgba(255, 26, 91, .35);
-  background: rgba(255, 255, 255, .005);
+  border: 2px dashed rgba(255, 79, 138, .92);
+  background: rgba(255, 26, 91, .045);
   backdrop-filter: none;
-  box-shadow: none;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, .45),
+    0 0 18px rgba(255, 26, 91, .28),
+    inset 0 0 0 1px rgba(255, 255, 255, .06);
   z-index: 2;
   user-select: none;
   touch-action: none;
 }
 .zone.is-selected {
-  border-color: rgba(255, 26, 91, .55);
-  background: rgba(255, 26, 91, .015);
-  box-shadow: 0 0 0 2px rgba(255, 26, 91, .12);
+  border-color: rgba(255, 130, 170, .98);
+  border-style: dashed;
+  background: rgba(255, 26, 91, .07);
+  box-shadow:
+    0 0 0 2px rgba(255, 26, 91, .35),
+    0 0 26px rgba(255, 26, 91, .42),
+    inset 0 0 0 1px rgba(255, 255, 255, .08);
 }
 
 
@@ -511,8 +518,9 @@
 .mini-zone {
   position: absolute;
   border-radius: 10px;
-  border: 1px dashed rgba(255, 26, 91, .35);
-  background: rgba(255, 26, 91, .08);
+  border: 2px dashed rgba(255, 79, 138, .88);
+  background: rgba(255, 26, 91, .14);
+  box-shadow: 0 0 8px rgba(255, 26, 91, .35);
 }
 
 .mini-dot {

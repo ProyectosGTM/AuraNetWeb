@@ -83,7 +83,56 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mt-3 gy-4">
+                <div class="row mt-3" *ngIf="modoLista === 'cumpleaneros'">
+                    <div class="col-12">
+                        <div class="cumpleaneros-hero" [ngClass]="{
+                                'cumpleaneros-hero--hoy': esVistaCumpleanerosHoy,
+                                'cumpleaneros-hero--mes': esVistaCumpleanerosMes,
+                                'cumpleaneros-hero--has-data': hayCumpleaneros
+                            }">
+                            <div class="cumpleaneros-hero__aurora"></div>
+                            <div class="cumpleaneros-hero__stars" *ngIf="hayCumpleaneros">
+                                <i class="fas fa-star star star--1"></i>
+                                <i class="fas fa-star star star--2"></i>
+                                <i class="fas fa-star star star--3"></i>
+                            </div>
+                            <div class="cumpleaneros-hero__confetti" *ngIf="hayCumpleaneros">
+                                <span class="confetti confetti--1"></span>
+                                <span class="confetti confetti--2"></span>
+                                <span class="confetti confetti--3"></span>
+                                <span class="confetti confetti--4"></span>
+                                <span class="confetti confetti--5"></span>
+                            </div>
+                            <div class="cumpleaneros-hero__sparkle">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                            <div class="cumpleaneros-hero__content">
+                                <span class="cumpleaneros-hero__eyebrow">
+                                    Panel destacado
+                                </span>
+                                <h5 class="cumpleaneros-hero__title" *ngIf="esVistaCumpleanerosHoy">Celebraciones de hoy</h5>
+                                <h5 class="cumpleaneros-hero__title" *ngIf="esVistaCumpleanerosMes">Agenda De Celebraciones Del Mes</h5>
+                                <p class="cumpleaneros-hero__text" *ngIf="esVistaCumpleanerosHoy">
+                                    Afiliados con cumpleaños durante el día de hoy.
+                                </p>
+                                <p class="cumpleaneros-hero__text" *ngIf="esVistaCumpleanerosMes">
+                                    Vista consolidada para organizar acciones durante todo el período.
+                                </p>
+                            </div>
+                            <div class="cumpleaneros-hero__badge">
+                                <i class="fas fa-gift"></i>
+                                <div class="cumpleaneros-hero__badge-copy">
+                                    <strong>{{ cumpleanerosTotal }}</strong>
+                                    <span>
+                                        {{ cumpleanerosTotal === 1 ? 'cumpleañero' : 'cumpleañeros' }}
+                                        {{ esVistaCumpleanerosHoy ? 'hoy' : 'del mes' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-1 gy-4">
                     <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
                         [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="'true'"
                         [dataSource]="listaAfiliados" [keyExpr]="'id'" [width]="'100%'"
@@ -103,15 +152,17 @@
                         <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]"
                             [showInfo]="true"></dxo-pager>
                         <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="350"></dxi-column>
-                        <dxi-column dataField="nombreCompleto" caption="Nombre Completo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreCompleto" caption="Nombre Completo" alignment="center" dataType="string" [allowSearch]="true"
+                            cellTemplate="nombreCumpleTemplate"></dxi-column>
                         <dxi-column dataField="numeroIdentificacion" caption="Número Identificación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column dataField="nombreEstatusAfiliado" caption="Estatus Afiliado" alignment="center" dataType="string" [allowSearch]="true"
+                            cellTemplate="estatusAfiliadoTpl"></dxi-column>
                         <dxi-column dataField="email" caption="Email" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="telefonoCelular" caption="Teléfono" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="sexoTexto" caption="Sexo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fechaNacimientoFormateada" caption="Fecha Nacimiento" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreTipoIdentificacion" caption="Tipo Identificación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreEstatusAfiliado" caption="Estatus Afiliado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string" [width]="100"></dxi-column>
                         <dxi-column dataField="fechaCreacionFormateada" caption="Fecha Creación" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="fechaActualizacionFormateada" caption="Fecha Actualización" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -121,6 +172,38 @@
                         <dxi-column dataField="apellidoPaterno" caption="Apellido Paterno" dataType="string" [visible]="false"></dxi-column>
                         <dxi-column dataField="apellidoMaterno" caption="Apellido Materno" dataType="string" [visible]="false"></dxi-column>
                         <dxi-column dataField="nombreComercialSala" caption="Nombre Comercial Sala" dataType="string" [visible]="false"></dxi-column>
+
+                        <div *dxTemplate="let row of 'nombreCumpleTemplate'" class="cumple-grid-nombre"
+                            [ngClass]="{
+                                'cumple-grid-nombre--hoy': modoLista === 'cumpleaneros' && esCumpleaneroHoy(row.data),
+                                'cumple-grid-nombre--mes': modoLista === 'cumpleaneros' && !esCumpleaneroHoy(row.data)
+                            }">
+                            <div class="cumple-grid-nombre__main">{{ row.data.nombreCompleto }}</div>
+                            <div class="cumple-grid-nombre__meta" *ngIf="modoLista === 'cumpleaneros'">
+                                <span class="cumple-chip cumple-chip--hoy" *ngIf="esCumpleaneroHoy(row.data)">
+                                    <i class="fas fa-cake-candles"></i>
+                                    Cumple hoy
+                                </span>
+                                <span class="cumple-chip cumple-chip--mes" *ngIf="!esCumpleaneroHoy(row.data)">
+                                    <i class="fas fa-calendar-star"></i>
+                                    Cumple este mes
+                                </span>
+                                <span class="cumple-chip cumple-chip--edad">
+                                    <i class="fas fa-user-clock"></i>
+                                    {{ getEdadDesdeFechaNacimiento(row.data.fechaNacimiento) }}
+                                </span>
+                                <span class="cumple-chip cumple-chip--fecha">
+                                    <i class="fas fa-calendar-day"></i>
+                                    {{ formatearFecha(row.data.fechaNacimiento) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div *dxTemplate="let row of 'estatusAfiliadoTpl'" class="d-flex justify-content-center">
+                            <span class="estatus-afiliado-pill" [ngClass]="obtenerClaseEstatusAfiliado(row.data)">
+                                {{ sinRegistro(row.data?.nombreEstatusAfiliado || row.data?.estatusAfiliado?.nombre) }}
+                            </span>
+                        </div>
 
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex flex-wrap gap-2 justify-content-center align-items-center">  
                             <ng-container>
@@ -151,11 +234,19 @@
                                     <i class="fas fa-crown"></i>
                                 </button>
                             </ng-container>
-                            <ng-container>
+                            <ng-container *ngIf="!esAfiliadoBloqueado(row.data)">
                                 <button type="button" id="bloquearAfiliadoButton" class="btnAcciones btnAcciones--bloquear"
                                     (click)="abrirModalBloquearAfiliado(row.data)"
                                     ngbTooltip="Bloquear afiliado y monederos" placement="top">
                                     <i class="fa fa-ban"></i>
+                                </button>
+                            </ng-container>
+                            <ng-container>
+                                <button *ngIf="esAfiliadoBloqueado(row.data)" type="button" id="pinButton"
+                                    class="btnAcciones btnAcciones--desbloquear"
+                                    (click)="desbloquearAfiliado(row.data)"
+                                    ngbTooltip="Desbloquear afiliado y monederos" placement="top">
+                                    <i class="fa fa-unlock"></i>
                                 </button>
                             </ng-container>
                             <ng-container *ngIf="puedeRegistrarAutoexclusion(row.data)">
@@ -165,7 +256,7 @@
                                     <i class="fa fa-hand-paper"></i>
                                 </button>
                             </ng-container>
-                            <ng-container>
+                            <ng-container *ngIf="!puedeRegistrarAutoexclusion(row.data)">
                                 <button type="button" id="cancelarAutoexclusionButton" class="btnAcciones btnAcciones--cancelar-autoexclusion"
                                     (click)="cancelarAutoexclusionAfiliado(row.data)"
                                     ngbTooltip="Cancelar autoexclusión (tras fecha de fin del periodo)" placement="top">
@@ -173,14 +264,7 @@
                                 </button>
                             </ng-container>
                             <!-- PATCH /afiliados/estatus/{id} — AfiliadosEstatusService (mismo patrón que zonas, máquinas, etc.) -->
-                            <ng-container>
-                                <button *ngIf="row.data.estatus === 0" type="button" id="pinButton"
-                                    class="btnAcciones btnAcciones--desbloquear"
-                                    (click)="desbloquearAfiliado(row.data)"
-                                    ngbTooltip="Desbloquear afiliado y monederos" placement="top">
-                                    <i class="fa fa-unlock"></i>
-                                </button>
-                            </ng-container>
+                            
                             <ng-container>
                                 <button *ngIf="row.data.estatus === 0" type="button" id="activarAfiliadoButton"
                                     class="btnAcciones btnAcciones--activar"
@@ -533,7 +617,7 @@
             </span>
         </div>
         <div class="d-flex align-items-center gap-3">
-            <span class="header-badge">{{ cumpleanerosTipoSeleccion ? '1 seleccionado' : 'Sin selección' }}</span>
+            <!-- <span class="header-badge">{{ cumpleanerosTipoSeleccion ? '1 seleccionado' : 'Sin selección' }}</span> -->
             <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalCumpleanerosTipo()">
                 <i class="fas fa-times"></i>
             </button>
@@ -610,13 +694,15 @@
             <div class="col-12 col-md-6">
                 <label class="field">
                     <span class="field-label text-white">Fecha fin de bloqueo <span class="field-req" aria-hidden="true">*</span></span>
-                    <div class="input-sleek">
-                        <i class="fas fa-calendar-alt"></i>
-                        <input type="date" class="sleek-control" name="bloqueoFechaFin"
-                            [(ngModel)]="bloqueoFechaFin" [min]="bloqueoFechaMin"
-                            [ngModelOptions]="{standalone: true}">
-                        <span class="sleek-line"></span>
-                    </div>
+                    <dx-date-box
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        [(ngModel)]="bloqueoFechaFin"
+                        [min]="bloqueoFechaMin"
+                        [ngModelOptions]="{standalone: true}"
+                        class="dx-select-box-custom">
+                    </dx-date-box>
                 </label>
             </div>
         </div>
