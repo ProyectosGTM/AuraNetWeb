@@ -815,20 +815,43 @@ export class ListaMonederosComponent {
     this.isGrouped = false;
   }
 
-  /** Cajas activas u operativas para selects POS (mismo criterio que Recarga). */
+  /**
+   * Cajas donde el POS puede mover efectivo (cargar/descargar monedero, traspaso).
+   * Incluye estatus legados 1/2 y cajas DISPONIBLE (p. ej. id 5 con turno), según /cajas/list.
+   */
   private mapearCajasDisponiblesParaSelect(respCajas: any): any[] {
     const cajasData = respCajas?.data ?? respCajas ?? [];
     const arr = Array.isArray(cajasData) ? cajasData : [];
     return arr
       .filter((c: any) => {
         const estatus = Number(c.idEstatusCaja);
-        return estatus === 1 || estatus === 2;
+        if (estatus === 1 || estatus === 2 || estatus === 5) {
+          return true;
+        }
+        const cod = String(c.codigoEstatusCaja ?? c.nombreEstatusCaja ?? '')
+          .trim()
+          .toUpperCase();
+        return cod === 'DISPONIBLE';
       })
-      .map((c: any) => ({
-        ...c,
-        id: Number(c.id),
-        text: `${c.codigo || ''} - ${c.nombre || ''}`.trim() || 'Caja sin nombre'
-      }));
+      .map((c: any) => {
+        const codigo = String(c.codigo ?? '').trim();
+        const nombre = String(c.nombre ?? '').trim();
+        let text = '';
+        if (codigo && nombre) {
+          text = `Nombre: ${nombre} · Código: ${codigo}`;
+        } else if (codigo) {
+          text = `Código: ${codigo}`;
+        } else if (nombre) {
+          text = `Nombre: ${nombre}`;
+        } else {
+          text = 'Caja sin nombre';
+        }
+        return {
+          ...c,
+          id: Number(c.id),
+          text,
+        };
+      });
   }
 
   cargarMonedero() {

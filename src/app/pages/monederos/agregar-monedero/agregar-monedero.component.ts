@@ -37,14 +37,14 @@ export class AgregarMonederoComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    
+
     this.activatedRoute.params.subscribe((params) => {
       this.idMonedero = params['idMonedero'];
       if (this.idMonedero) {
         this.title = 'Actualizar Monedero';
         this.submitButton = 'Actualizar';
         forkJoin({
-          afiliados: this.monederosService.obtenerAfiliados(),
+          afiliados: this.monederosService.obtenerAfiliadosSinMonedero(),
           estatusMonedero: this.monederosService.obtenerEstatusMonedero()
         }).subscribe({
           next: (responses) => {
@@ -60,7 +60,13 @@ export class AgregarMonederoComponent implements OnInit {
           }
         });
       } else {
-        this.cargarListasIndividualmente();
+        forkJoin({
+          afiliados: this.monederosService.obtenerAfiliadosSinMonedero(),
+          estatusMonedero: this.monederosService.obtenerEstatusMonedero()
+        }).subscribe({
+          next: (responses) => this.procesarListas(responses),
+          error: () => this.cargarListasIndividualmente()
+        });
       }
     });
   }
@@ -110,10 +116,25 @@ export class AgregarMonederoComponent implements OnInit {
     });
   }
 
+  /** En edición el afiliado ya tiene monedero y suele no aparecer en /sin-monedero; se agrega para que el select muestre el valor. */
+  private asegurarAfiliadoEnListaDesdeMonedero(data: any): void {
+    const idAf = data.idAfiliado != null ? Number(data.idAfiliado) : null;
+    if (idAf == null || isNaN(idAf)) return;
+    if (this.listaAfiliados.some((a) => Number(a.id) === idAf)) return;
+
+    const nombre = `${data.nombreAfiliado ?? data.nombre ?? ''} ${data.apellidoPaternoAfiliado ?? data.apellidoPaterno ?? ''} ${data.apellidoMaternoAfiliado ?? data.apellidoMaterno ?? ''}`.trim();
+    this.listaAfiliados = [
+      { id: idAf, text: nombre || `Afiliado ${idAf}` },
+      ...this.listaAfiliados,
+    ];
+  }
+
   obtenerMonedero(): void {
     this.monederosService.obtenerMonedero(this.idMonedero).subscribe({
       next: (response: any) => {
         const data = response.data || response;
+
+        this.asegurarAfiliadoEnListaDesdeMonedero(data);
 
         this.monederoForm.patchValue({
           idAfiliado: data.idAfiliado ? Number(data.idAfiliado) : null,
@@ -142,23 +163,37 @@ export class AgregarMonederoComponent implements OnInit {
     this.monederoForm = this.fb.group({
       idAfiliado: [null, Validators.required],
       numeroMonedero: ['', Validators.required],
-      codigoRFID: ['', Validators.required],
-      esPrincipal: [0, Validators.required],
+      codigoRFID: [''],
+      esPrincipal: [0],
       alias: [''],
       idEstatusMonedero: [null, Validators.required],
     });
   }
 
+  private mensajeError(error: any): string {
+    const e = error?.error;
+    if (typeof e === 'string') return e;
+    if (e?.message) return String(e.message);
+    if (Array.isArray(e?.errors)) return e.errors.map((x: any) => String(x)).join(', ');
+    return 'Ocurrió un error al procesar la solicitud.';
+  }
+
   buildPayloadMonedero(): any {
     const formValue = this.monederoForm.value;
-    return {
+    const payload: any = {
       idAfiliado: Number(formValue.idAfiliado ?? 0),
       numeroMonedero: formValue.numeroMonedero || '',
-      codigoRFID: formValue.codigoRFID || '',
-      esPrincipal: Number(formValue.esPrincipal ?? 0),
-      alias: formValue.alias || null,
       idEstatusMonedero: Number(formValue.idEstatusMonedero ?? 0),
+      esPrincipal: Number(formValue.esPrincipal ?? 0),
     };
+
+    const codigo = String(formValue.codigoRFID ?? '').trim();
+    if (codigo) payload.codigoRFID = codigo;
+
+    const alias = String(formValue.alias ?? '').trim();
+    payload.alias = alias || null;
+
+    return payload;
   }
 
   agregarMonedero(): void {
@@ -181,7 +216,7 @@ export class AgregarMonederoComponent implements OnInit {
         this.loading = false;
         Swal.fire({
           title: '¡Error!',
-          text: error.error,
+          text: this.mensajeError(error),
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -211,7 +246,7 @@ export class AgregarMonederoComponent implements OnInit {
         this.loading = false;
         Swal.fire({
           title: '¡Error!',
-          text: error.error,
+          text: this.mensajeError(error),
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
