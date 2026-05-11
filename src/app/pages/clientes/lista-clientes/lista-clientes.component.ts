@@ -5,6 +5,7 @@ import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { NgxPermissionsService } from 'ngx-permissions';
 import { lastValueFrom } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { previewModalAnimation } from 'src/app/core/modal-animation';
 import { ClientesService } from 'src/app/shared/services/clientes.service';
@@ -36,6 +37,7 @@ export class ListaClientesComponent implements OnInit {
   isGrouped: boolean = false;
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
+  procesandoEstatusClienteId: number | null = null;
 
   constructor(private cliService: ClientesService,
     private route: Router, private sanitizer: DomSanitizer,
@@ -252,32 +254,35 @@ export class ListaClientesComponent implements OnInit {
       background: '#0d121d',
     }).then((result) => {
       if (result.value) {
-        this.cliService.updateEstatus(rowData.id, 1).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `El cliente ha sido activado.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
+        this.procesandoEstatusClienteId = rowData.id;
+        this.cliService
+          .updateEstatus(rowData.id, 1)
+          .pipe(finalize(() => (this.procesandoEstatusClienteId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `El cliente ha sido activado.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
 
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerListaModulos();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
   }
@@ -295,31 +300,34 @@ export class ListaClientesComponent implements OnInit {
       background: '#0d121d',
     }).then((result) => {
       if (result.value) {
-        this.cliService.updateEstatus(rowData.id, 0).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `El cliente ha sido desactivado.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerListaModulos();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+        this.procesandoEstatusClienteId = rowData.id;
+        this.cliService
+          .updateEstatus(rowData.id, 0)
+          .pipe(finalize(() => (this.procesandoEstatusClienteId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `El cliente ha sido desactivado.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
     // console.log('Desactivar:', rowData);

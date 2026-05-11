@@ -5,6 +5,8 @@ import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { MaquinasService } from 'src/app/shared/services/maquinas.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import { ZonaService } from 'src/app/shared/services/zona.service';
+import { ClientesService } from 'src/app/shared/services/clientes.service';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import Swal from 'sweetalert2';
 type MachineType = 'Tragamonedas' | 'Ruleta' | 'Blackjack' | 'Poker';
 type ZoneType = 'VIP' | 'Caja' | 'Baños' | 'Sala';
@@ -20,6 +22,10 @@ interface MachineItem {
   name: string;
   status: MachineStatus;
   serial: string;
+  /** Etiquetas alineadas al API (tooltip / persistencia en JSON del plano). */
+  nombreMaquina?: string;
+  numeroSerieMaquina?: string;
+  nombreEstatusMaquina?: string;
   img: string;
   x: number;
   y: number;
@@ -63,6 +69,9 @@ export class AgregarZonaComponent implements OnInit {
   nombreSalaDistribucion = '';
   canvasLogicalW = 3048;
   canvasLogicalH = 3684;
+  /** Origen mundial para pintar (solo distribución sala). Las posiciones guardadas siguen siendo x,y mundo. */
+  layoutWorldMinX = 0;
+  layoutWorldMinY = 0;
   defaultMachineW = 80;
   defaultMachineH = 120;
   public listaClientes: any[] = [];
@@ -113,6 +122,11 @@ export class AgregarZonaComponent implements OnInit {
   /** Misma anchura/alto visual que `.door` en el SCSS (arrastre y límites). */
   private readonly doorVisW = 130;
   private readonly doorVisH = 54;
+  /**
+   * Franja bajo el borde superior de cada zona (coordenadas de mundo) reservada a cabecera + etiqueta.
+   * Mantener coherente con `.zone-head` / `.zone-badge` en SCSS.
+   */
+  private readonly zoneTitleStripPx = 72;
   /** Máquinas y puertas con centro dentro de la zona al iniciar arrastre de esa zona. */
   private zoneDragCapturedMachineIds: number[] = [];
   private zoneDragMoveEntrada = false;
@@ -128,14 +142,14 @@ export class AgregarZonaComponent implements OnInit {
   private rotateDoorTarget: DoorType | null = null;
   private rotateMachineTarget = false;
   public listaTipoZona: any[] = [];
-  public listaSalas: any;
+  public listaSalas: any[] = [];
 
   isTipoZonaOpen = false;
   tipoZonaLabel = '';
 
   isMaquinaOpen = false;
   maquinaLabel = '';
-  /** Catálogo GET /maquinas/list — solo modo distribución sala. */
+  /** Catálogo GET /maquinas/by-sala/{idSala} — solo modo distribución sala. */
   listaMaquinasDistribucion: any[] = [];
   /** GET /zonas/by-sala/{idSala} — solo modo distribución sala. */
   listaZonasPorSalaDistribucion: any[] = [];
@@ -162,8 +176,43 @@ export class AgregarZonaComponent implements OnInit {
     }
   }
 
-  /** Coloca una máquina del catálogo (/maquinas/list) en el diagrama. */
+  /** Id de catálogo/API de la fila de máquina (dropdown distribución). */
+  private idCatalogoMaquinaDistribucion(row: any): number {
+    const n = Number(row?.idMaquina ?? row?.id ?? 0);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  /** Id de catálogo/API de la fila de zona (dropdown distribución). */
+  private idCatalogoZonaDistribucion(row: any): number {
+    const n = Number(row?.idZona ?? row?.id ?? 0);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  /** Ya hay una pieza en el diagrama ligada a esa máquina del catálogo. */
+  maquinaCatalogoOcupadaEnPlano(maquina: any): boolean {
+    const idCat = this.idCatalogoMaquinaDistribucion(maquina);
+    if (!idCat) {
+      return false;
+    }
+    return this.machines.some((m) => m.catalogMachineId === idCat);
+  }
+
+  /** Ya hay una pieza en el diagrama ligada a esa zona del catálogo. */
+  zonaCatalogoOcupadaEnPlano(zona: any): boolean {
+    const idCat = this.idCatalogoZonaDistribucion(zona);
+    if (!idCat) {
+      return false;
+    }
+    return this.zones.some((z) => z.catalogZoneId === idCat);
+  }
+
+  /** Coloca una máquina del catálogo de la sala en el diagrama. */
   seleccionarMaquinaDistribucion(maquina: any, event: MouseEvent) {
+    if (this.maquinaCatalogoOcupadaEnPlano(maquina)) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     event.preventDefault();
     event.stopPropagation();
     const nombre = String(maquina?.nombreMaquina ?? maquina?.nombre ?? 'Máquina').trim();
@@ -174,6 +223,11 @@ export class AgregarZonaComponent implements OnInit {
 
   /** Coloca una zona de la sala (/zonas/by-sala/{idSala}) en el diagrama. */
   seleccionarZonaDistribucion(zona: any, event: MouseEvent) {
+    if (this.zonaCatalogoOcupadaEnPlano(zona)) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     event.preventDefault();
     event.stopPropagation();
     const nombreZona = String(zona?.nombreZona ?? zona?.nombre ?? 'Zona').trim();
@@ -216,10 +270,13 @@ export class AgregarZonaComponent implements OnInit {
     private zonaService: ZonaService,
     private salaService: SalaService,
     private maquinasService: MaquinasService,
+    private clientesService: ClientesService,
+    private rolAcceso: RolAccesoService,
   ) { }
 
   ngOnInit(): void {
     this.initForm();
+    this.enlazarClienteSalasZona();
     this.modoDistribucionSala = this.activatedRouted.snapshot.data['modoDistribucionSala'] === true;
     this.activatedRouted.data.subscribe((d) => {
       this.modoDistribucionSala = d['modoDistribucionSala'] === true;
@@ -270,7 +327,7 @@ export class AgregarZonaComponent implements OnInit {
         this.submitButton = 'Guardar';
       }
       this.obtenerTipoZona();
-      this.obtenerSalas();
+      this.obtenerClientes();
       if (this.idZona) {
         setTimeout(() => {
           this.obtenerZona();
@@ -291,8 +348,120 @@ export class AgregarZonaComponent implements OnInit {
       areaPoligonoJSON: [{}],
       capacidadMaximaPersonas: [null],
       capacidadMaximaMaquinas: [null],
+      idCliente: [null, Validators.required],
       idSala: [null, Validators.required]
     });
+  }
+
+  get salaZonaReadonly(): boolean {
+    const v = this.zonaForm?.get('idCliente')?.value;
+    const n = Number(v);
+    return !Number.isFinite(n) || n <= 0;
+  }
+
+  /**
+   * Plano distribución: oculta máquinas asignadas a una zona (centro dentro de ella)
+   * si el rectángulo no está totalmente contenido en esa zona.
+   * Las máquinas con centro fuera de cualquier zona se siguen mostrando (p. ej. sin zona).
+   */
+  get machinesVisiblesEnDistribucion(): MachineItem[] {
+    if (!this.modoDistribucionSala) {
+      return this.machines;
+    }
+    const dragId = this.draggingMachineId;
+    return this.machines.filter(
+      (m) =>
+        (dragId != null && m.id === dragId) || this.maquinaDebeMostrarseEnPlanoDistribucion(m)
+    );
+  }
+
+  private mapearSalasPorClienteRespuesta(response: any): any[] {
+    const rows = response?.data ?? response ?? [];
+    const arr = Array.isArray(rows) ? rows : [];
+    return arr.map((c: any) => {
+      const id = Number(c.idSala ?? c.id);
+      const text = (c.nombreSala ?? c.nombre ?? 'Sin nombre').trim();
+      return { ...c, id, idSala: id, text };
+    });
+  }
+
+  private enlazarClienteSalasZona(): void {
+    this.zonaForm.get('idCliente')?.valueChanges.subscribe((v) => {
+      const id = Number(v);
+      this.listaSalas = [];
+      this.zonaForm.patchValue({ idSala: null }, { emitEvent: false });
+      if (!Number.isFinite(id) || id <= 0) {
+        return;
+      }
+      this.salaService.obtenerSalasPorCliente(id).subscribe({
+        next: (response: any) => {
+          this.listaSalas = this.mapearSalasPorClienteRespuesta(response);
+        },
+        error: () => {
+          this.listaSalas = [];
+        },
+      });
+    });
+  }
+
+  /** En edición: obtiene idCliente desde la sala y carga el combo de salas del cliente. */
+  private hidratarClienteSalasDesdeIdSala(idSala: number): void {
+    const idS = Number(idSala);
+    if (!Number.isFinite(idS) || idS <= 0) {
+      return;
+    }
+    this.salaService.obtenerSala(idS).subscribe({
+      next: (res: any) => {
+        const sala = res?.data ?? res ?? {};
+        const idCliente = Number(sala.idCliente ?? 0);
+        if (!Number.isFinite(idCliente) || idCliente <= 0) {
+          return;
+        }
+        this.salaService.obtenerSalasPorCliente(idCliente).subscribe({
+          next: (sr: any) => {
+            this.listaSalas = this.mapearSalasPorClienteRespuesta(sr);
+            this.zonaForm.patchValue({ idCliente, idSala: idS }, { emitEvent: false });
+          },
+          error: () => {
+            this.listaSalas = [];
+          },
+        });
+      },
+      error: () => {
+        this.listaSalas = [];
+      },
+    });
+  }
+
+  obtenerClientes(): void {
+    this.clientesService.obtenerClientes().subscribe({
+      next: (response: any) => {
+        this.listaClientes = (response.data || []).map((c: any) => ({
+          ...c,
+          id: Number(c.id),
+          text: (c.nombre ?? '').trim() || 'Sin nombre',
+        }));
+        this.aplicarIdClienteSesionSiAltaZona();
+      },
+      error: () => {
+        this.listaClientes = [];
+      },
+    });
+  }
+
+  private aplicarIdClienteSesionSiAltaZona(): void {
+    if (this.idZona || this.modoDistribucionSala) {
+      return;
+    }
+    const id = this.rolAcceso.obtenerIdClientePorDefectoFormulario();
+    if (id == null) {
+      return;
+    }
+    const cur = this.zonaForm.get('idCliente')?.value;
+    if (cur != null && cur !== '' && Number(cur) > 0) {
+      return;
+    }
+    this.zonaForm.patchValue({ idCliente: id });
   }
 
   obtenerTipoZona() {
@@ -313,35 +482,32 @@ export class AgregarZonaComponent implements OnInit {
     });
   }
 
-  obtenerSalas() {
-    this.salaService.obtenerSalas().subscribe((response) => {
-      this.listaSalas = (response.data || []).map((c: any) => {
-        const id = Number(c.idSala ?? c.id);
-        const text = (c.nombreSala ?? c.nombre ?? 'Sin nombre').trim();
-        return { ...c, id, idSala: id, text };
-      });
-    });
-  }
-
   obtenerZona() {
     this.zonaService.obtenerZona(this.idZona).subscribe(
       (response: any) => {
         const data = response.data || {};
         
         // Mapear los campos del servicio a los del formulario
-        this.zonaForm.patchValue({
-          nombre: data.nombreZona ?? data.nombre ?? '',
-          descripcion: data.descripcionZona ?? data.descripcion ?? '',
-          idTipoZona: data.idTipoZona ?? 0,
-          nivel: data.nivelZona ?? data.nivel ?? '',
-          anchoMetros: data.anchoMetrosZona ?? data.anchoMetros ?? 0,
-          altoMetros: data.altoMetrosZona ?? data.altoMetros ?? 0,
-          areaMetrosCuadrados: data.areaMetrosCuadradosZona ?? data.areaMetrosCuadrados ?? 0,
-          areaPoligonoJSON: data.areaPoligonoJSON ?? {},
-          capacidadMaximaPersonas: data.capacidadMaximaPersonas ?? 0,
-          capacidadMaximaMaquinas: data.capacidadMaximaMaquinas ?? 0,
-          idSala: data.idSala ?? 0,
-        });
+        const idSalaRec = Number(data.idSala ?? 0);
+
+        this.zonaForm.patchValue(
+          {
+            nombre: data.nombreZona ?? data.nombre ?? '',
+            descripcion: data.descripcionZona ?? data.descripcion ?? '',
+            idTipoZona: data.idTipoZona ?? 0,
+            nivel: data.nivelZona ?? data.nivel ?? '',
+            anchoMetros: data.anchoMetrosZona ?? data.anchoMetros ?? 0,
+            altoMetros: data.altoMetrosZona ?? data.altoMetros ?? 0,
+            areaMetrosCuadrados: data.areaMetrosCuadradosZona ?? data.areaMetrosCuadrados ?? 0,
+            areaPoligonoJSON: data.areaPoligonoJSON ?? {},
+            capacidadMaximaPersonas: data.capacidadMaximaPersonas ?? 0,
+            capacidadMaximaMaquinas: data.capacidadMaximaMaquinas ?? 0,
+            idSala: Number.isFinite(idSalaRec) && idSalaRec > 0 ? idSalaRec : null,
+          },
+          { emitEvent: false }
+        );
+
+        this.hidratarClienteSalasDesdeIdSala(idSalaRec);
 
         // Establecer labels después de que las listas estén cargadas
         const idTipoZona = Number(data.idTipoZona ?? 0);
@@ -399,6 +565,7 @@ export class AgregarZonaComponent implements OnInit {
         idTipoZona: 'Tipo de zona',
         anchoMetros: 'Ancho (metros)',
         altoMetros: 'Alto (metros)',
+        idCliente: 'Cliente',
         idSala: 'Sala',
       };
 
@@ -472,7 +639,7 @@ export class AgregarZonaComponent implements OnInit {
     this.loading = true;
 
     if (this.zonaForm.invalid) {
-      this.submitButton = 'Guardar';
+      this.submitButton = 'Actualizar';
       this.loading = false;
 
       const etiquetas: Record<string, string> = {
@@ -480,6 +647,7 @@ export class AgregarZonaComponent implements OnInit {
         idTipoZona: 'Tipo de zona',
         anchoMetros: 'Ancho (metros)',
         altoMetros: 'Alto (metros)',
+        idCliente: 'Cliente',
         idSala: 'Sala',
       };
 
@@ -683,7 +851,7 @@ export class AgregarZonaComponent implements OnInit {
         const tipoZona = String(
           z.type ?? z.nombre ?? z.nombreTipoZona ?? z.tipo ?? 'Sala'
         ).trim();
-        zones.push({
+        const rawZone: ZoneItem = {
           id: zoneInstanceId,
           catalogZoneId: catalogZid > 0 ? catalogZid : undefined,
           type: (tipoZona || 'Sala') as ZoneType,
@@ -691,11 +859,17 @@ export class AgregarZonaComponent implements OnInit {
           y: Number(z.y ?? 0),
           w: Number(z.w ?? 260),
           h: Number(z.h ?? 160),
-        });
+        };
+        const zoneSnap = this.snapZone(rawZone);
+        zones.push(zoneSnap);
         const mas = Array.isArray(z.maquinas) ? z.maquinas : [];
         mas.forEach((p: any) => {
+          const pos = this.resolveMachineXYForZonaChild(p, zoneSnap);
+          if (!pos) {
+            return;
+          }
           const instanceId = this.nextId(machines.map((x) => x.id));
-          machines.push(this.mapApiMachineFromDistribucion(p, instanceId));
+          machines.push(this.mapApiMachineFromDistribucion(p, instanceId, pos));
         });
       });
 
@@ -709,6 +883,7 @@ export class AgregarZonaComponent implements OnInit {
       this.machines = machines.map((mm) => this.snapMachine(mm));
       this.entrada = inner.entrada ? this.safeParsePoint(inner.entrada) : null;
       this.salida = inner.salida ? this.safeParsePoint(inner.salida) : null;
+      this.recomputeDistribucionLayoutBounds();
       this.persistPlanoToForm();
       return;
     }
@@ -725,18 +900,31 @@ export class AgregarZonaComponent implements OnInit {
     this.defaultMachineH = 120;
   }
 
-  private mapApiMachineFromDistribucion(p: any, instanceId: number): MachineItem {
+  private mapApiMachineFromDistribucion(
+    p: any,
+    instanceId: number,
+    xy?: { x: number; y: number } | null
+  ): MachineItem {
     const type = this.inferMachineTypeFromApi(p);
     const catalogId = Number(p?.id ?? 0);
     const dw = Number(p?.w ?? this.defaultMachineW);
     const dh = Number(p?.h ?? this.defaultMachineH);
     const labelNum = Number(p?.label ?? (catalogId > 0 ? catalogId : instanceId));
-    const name = String(p?.name ?? p?.nombre ?? `${type} ${catalogId || instanceId}`).trim();
-    const serial = String(
-      p?.serial ?? p?.numeroSerie ?? this.makeSerial(type, catalogId || instanceId)
+    const nombreMaquina = String(
+      p?.nombreMaquina ?? p?.name ?? p?.nombre ?? `${type} ${catalogId || instanceId}`
     ).trim();
+    const name = nombreMaquina;
+    const serial = String(
+      p?.numeroSerieMaquina ??
+        p?.serial ??
+        p?.numeroSerie ??
+        this.makeSerial(type, catalogId || instanceId)
+    ).trim();
+    const nombreEstatusMaquinaRaw = String(p?.nombreEstatusMaquina ?? '').trim();
     const status = this.mapEstatusMaquinaApi(p);
     const img = this.resolveMachineDisplayImg(p, type);
+    const px = xy != null ? xy.x : Number(p?.x ?? 60);
+    const py = xy != null ? xy.y : Number(p?.y ?? 80);
     return {
       id: instanceId,
       label: labelNum,
@@ -745,13 +933,63 @@ export class AgregarZonaComponent implements OnInit {
       name,
       status,
       serial,
+      nombreMaquina,
+      numeroSerieMaquina: serial,
+      nombreEstatusMaquina: nombreEstatusMaquinaRaw || undefined,
       img,
-      x: Number(p?.x ?? 60),
-      y: Number(p?.y ?? 80),
+      x: px,
+      y: py,
       w: Math.max(dw, 40),
       h: Math.max(dh, 40),
       r: this.normalizeRotation(Number(p?.r ?? 0)),
     };
+  }
+
+  /** Rectángulo de máquina totalmente dentro del rectángulo de zona (coordenadas mundo). */
+  private maquinaFullyInsideRect(
+    m: { x: number; y: number; w: number; h: number },
+    r: { x: number; y: number; w: number; h: number }
+  ): boolean {
+    return (
+      m.x >= r.x &&
+      m.y >= r.y &&
+      m.x + m.w <= r.x + r.w &&
+      m.y + m.h <= r.y + r.h
+    );
+  }
+
+  /**
+   * Posición en mundo para una máquina hija de `zonas[].maquinas` en el API.
+   * Prueba absoluta y relativa a la esquina superior izquierda de la zona.
+   */
+  private resolveMachineXYForZonaChild(p: any, z: ZoneItem): { x: number; y: number } | null {
+    const dw = Number(p?.w ?? this.defaultMachineW);
+    const dh = Number(p?.h ?? this.defaultMachineH);
+    const mw = Math.max(dw, 40);
+    const mh = Math.max(dh, 40);
+    const ax = Number(p?.x ?? 0);
+    const ay = Number(p?.y ?? 0);
+    const candidates: { x: number; y: number }[] = [
+      { x: ax, y: ay },
+      { x: z.x + ax, y: z.y + ay },
+    ];
+    const g = this.grid;
+    for (const c of candidates) {
+      const rx = Math.round(c.x / g) * g;
+      const ry = Math.round(c.y / g) * g;
+      if (this.maquinaFullyInsideRect({ x: rx, y: ry, w: mw, h: mh }, z)) {
+        return { x: rx, y: ry };
+      }
+    }
+    return null;
+  }
+
+  private maquinaDebeMostrarseEnPlanoDistribucion(m: MachineItem): boolean {
+    const z = this.zones.find((zz) => this.maquinaCentroEnZona(m, zz));
+    if (z == null) {
+      return true;
+    }
+    return this.maquinaFullyInsideRect(m, z);
   }
 
   private maquinaCentroEnRect(
@@ -795,6 +1033,13 @@ export class AgregarZonaComponent implements OnInit {
         if (!idSet.has(m.id)) {
           return m;
         }
+        if (this.modoDistribucionSala) {
+          return this.snapMachine({
+            ...m,
+            x: m.x + dx,
+            y: m.y + dy,
+          });
+        }
         return this.snapMachine({
           ...m,
           x: this.clamp(m.x + dx, 0, Math.max(0, SW - m.w)),
@@ -803,18 +1048,34 @@ export class AgregarZonaComponent implements OnInit {
       });
     }
     if (moveEntrada && this.entrada) {
-      this.entrada = {
-        ...this.entrada,
-        x: this.clamp(this.entrada.x + dx, 0, Math.max(0, SW - this.doorVisW)),
-        y: this.clamp(this.entrada.y + dy, 0, Math.max(0, SH - this.doorVisH)),
-      };
+      if (this.modoDistribucionSala) {
+        this.entrada = {
+          ...this.entrada,
+          x: this.entrada.x + dx,
+          y: this.entrada.y + dy,
+        };
+      } else {
+        this.entrada = {
+          ...this.entrada,
+          x: this.clamp(this.entrada.x + dx, 0, Math.max(0, SW - this.doorVisW)),
+          y: this.clamp(this.entrada.y + dy, 0, Math.max(0, SH - this.doorVisH)),
+        };
+      }
     }
     if (moveSalida && this.salida) {
-      this.salida = {
-        ...this.salida,
-        x: this.clamp(this.salida.x + dx, 0, Math.max(0, SW - this.doorVisW)),
-        y: this.clamp(this.salida.y + dy, 0, Math.max(0, SH - this.doorVisH)),
-      };
+      if (this.modoDistribucionSala) {
+        this.salida = {
+          ...this.salida,
+          x: this.salida.x + dx,
+          y: this.salida.y + dy,
+        };
+      } else {
+        this.salida = {
+          ...this.salida,
+          x: this.clamp(this.salida.x + dx, 0, Math.max(0, SW - this.doorVisW)),
+          y: this.clamp(this.salida.y + dy, 0, Math.max(0, SH - this.doorVisH)),
+        };
+      }
     }
   }
 
@@ -885,14 +1146,15 @@ export class AgregarZonaComponent implements OnInit {
       next: () => {
         this.loading = false;
         this.submitButton = 'Guardar distribución';
+        this.regresar();
         Swal.fire({
-          title: 'Guardado',
+          title: '¡Operación Exitosa!',
           text: 'La distribución se guardó correctamente.',
           icon: 'success',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Aceptar',
-        }).then(() => this.regresar());
+        })
       },
       error: (error) => {
         this.loading = false;
@@ -919,9 +1181,9 @@ export class AgregarZonaComponent implements OnInit {
     return [];
   }
 
-  /** Catálogos del diagrama: máquinas globales y zonas de esta sala. */
+  /** Catálogos del diagrama: máquinas y zonas de esta sala. */
   cargarCatalogosDistribucionSala(idSala: number): void {
-    this.maquinasService.obtenerMaquinas().subscribe({
+    this.maquinasService.obtenerMaquinasPorSala(idSala).subscribe({
       next: (resp: any) => {
         this.listaMaquinasDistribucion = this.normalizarListaApi(resp);
       },
@@ -966,24 +1228,36 @@ export class AgregarZonaComponent implements OnInit {
     const instanceId = this.nextId(this.machines.map((x) => x.id));
     const nombre = String(row?.nombreMaquina ?? row?.nombre ?? `${tipo} ${idBd || instanceId}`).trim();
     const serial = String(
-      row?.numeroSerie ?? row?.serial ?? this.makeSerial(tipo, idBd || instanceId)
+      row?.numeroSerieMaquina ??
+        row?.numeroSerie ??
+        row?.serial ??
+        this.makeSerial(tipo, idBd || instanceId)
     ).trim();
+    const nombreEstatusApi = String(row?.nombreEstatusMaquina ?? '').trim();
     const img = this.resolveMachineDisplayImg(row, tipo);
     const status = this.mapEstatusMaquinaApi(row);
     const label = idBd > 0 ? idBd : instanceId;
+    const mw = Math.max(this.defaultMachineW, 40);
+    const mh = Math.max(this.defaultMachineH, 40);
+    const vc = this.viewportCenterInPlanoCoords();
+    const ix = vc ? vc.x - mw / 2 : 60 + (this.machines.length % 10) * 58;
+    const iy = vc ? vc.y - mh / 2 : 80 + (this.machines.length % 6) * 48;
     const base: MachineItem = {
       id: instanceId,
       label,
       catalogMachineId: idBd > 0 ? idBd : undefined,
       type: tipo,
       name: nombre,
+      nombreMaquina: nombre,
+      numeroSerieMaquina: serial,
+      nombreEstatusMaquina: nombreEstatusApi || undefined,
       status,
       serial,
       img,
-      x: 60 + (this.machines.length % 10) * 58,
-      y: 80 + (this.machines.length % 6) * 48,
-      w: Math.max(this.defaultMachineW, 40),
-      h: Math.max(this.defaultMachineH, 40),
+      x: ix,
+      y: iy,
+      w: mw,
+      h: mh,
       r: 0,
     };
     const placed = this.placeWithoutOverlap(base);
@@ -991,6 +1265,9 @@ export class AgregarZonaComponent implements OnInit {
     this.selectedMachineId = instanceId;
     this.selectedZoneId = null;
     this.placingDoor = null;
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
     this.persistPlanoToForm();
   }
 
@@ -1008,10 +1285,14 @@ export class AgregarZonaComponent implements OnInit {
       w: 260,
       h: 160,
     };
-    this.zones = [...this.zones, this.snapZone(z)];
+    const snapped = this.snapZone(z);
+    this.zones = [...this.zones, snapped];
     this.selectedZoneId = instanceId;
     this.selectedMachineId = null;
     this.placingDoor = null;
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
     this.persistPlanoToForm();
   }
 
@@ -1021,6 +1302,11 @@ export class AgregarZonaComponent implements OnInit {
     const id = this.nextId(this.machines.map(x => x.id));
     const img = this.machineImg(t);
     const label = id;
+    const mw = Math.max(this.defaultMachineW, 40);
+    const mh = Math.max(this.defaultMachineH, 40);
+    const vc = this.viewportCenterInPlanoCoords();
+    const ix = vc ? vc.x - mw / 2 : 60 + (id % 10) * 58;
+    const iy = vc ? vc.y - mh / 2 : 80 + (id % 6) * 48;
     const base: MachineItem = {
       id,
       label,
@@ -1029,10 +1315,10 @@ export class AgregarZonaComponent implements OnInit {
       status: 'Activa',
       serial: this.makeSerial(t, id),
       img,
-      x: 60 + (id % 10) * 58,
-      y: 80 + (id % 6) * 48,
-      w: Math.max(this.defaultMachineW, 40),
-      h: Math.max(this.defaultMachineH, 40),
+      x: ix,
+      y: iy,
+      w: mw,
+      h: mh,
       r: 0
     };
     const placed = this.placeWithoutOverlap(base);
@@ -1075,6 +1361,9 @@ export class AgregarZonaComponent implements OnInit {
     this.zones = this.zones.filter(z => z.id !== id);
     this.selectedZoneId = null;
     this.persistPlanoToForm();
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
   }
 
   startPlacingDoor(type: DoorType) {
@@ -1082,12 +1371,52 @@ export class AgregarZonaComponent implements OnInit {
     this.selectedMachineId = null;
     this.selectedZoneId = null;
     this.editNameId = null;
+    const doorW = this.doorVisW;
+    const doorH = this.doorVisH;
+    if (this.modoDistribucionSala) {
+      const vc = this.viewportCenterInPlanoCoords();
+      let cx: number;
+      let cy: number;
+      if (vc) {
+        cx = Math.round((vc.x - doorW / 2) / this.grid) * this.grid;
+        cy = Math.round((vc.y - doorH / 2) / this.grid) * this.grid;
+      } else {
+        cx =
+          this.layoutWorldMinX +
+          Math.round((this.canvasLogicalW - doorW) / 2 / this.grid) * this.grid;
+        cy =
+          this.layoutWorldMinY +
+          Math.round((this.canvasLogicalH - doorH) / 2 / this.grid) * this.grid;
+      }
+      if (type === 'ENTRADA' && !this.entrada) {
+        this.entrada = { x: cx, y: cy, r: 0 };
+        this.recomputeDistribucionLayoutBounds();
+        this.persistPlanoToForm();
+      }
+      if (type === 'SALIDA' && !this.salida) {
+        this.salida = { x: cx, y: cy, r: 0 };
+        this.recomputeDistribucionLayoutBounds();
+        this.persistPlanoToForm();
+      }
+      return;
+    }
     const w = this.logicalStageW();
     const h = this.logicalStageH();
-    const doorW = 130;
-    const doorH = 54;
-    const cx = this.clamp(Math.round(((w - doorW) / 2) / this.grid) * this.grid, 0, Math.max(0, w - doorW));
-    const cy = this.clamp(Math.round(((h - doorH) / 2) / this.grid) * this.grid, 0, Math.max(0, h - doorH));
+    const vc = this.viewportCenterInPlanoCoords();
+    const cx = vc
+      ? this.clamp(
+          Math.round((vc.x - doorW / 2) / this.grid) * this.grid,
+          0,
+          Math.max(0, w - doorW)
+        )
+      : this.clamp(Math.round(((w - doorW) / 2) / this.grid) * this.grid, 0, Math.max(0, w - doorW));
+    const cy = vc
+      ? this.clamp(
+          Math.round((vc.y - doorH / 2) / this.grid) * this.grid,
+          0,
+          Math.max(0, h - doorH)
+        )
+      : this.clamp(Math.round(((h - doorH) / 2) / this.grid) * this.grid, 0, Math.max(0, h - doorH));
     if (type === 'ENTRADA' && !this.entrada) {
       this.entrada = { x: cx, y: cy, r: 0 };
       this.persistPlanoToForm();
@@ -1113,11 +1442,21 @@ export class AgregarZonaComponent implements OnInit {
     if (!this.placingDoor) return;
     const SW = this.logicalStageW();
     const SH = this.logicalStageH();
-    const px = this.clamp(Math.round(x / this.grid) * this.grid, 0, Math.max(0, SW - 46));
-    const py = this.clamp(Math.round(y / this.grid) * this.grid, 0, Math.max(0, SH - 46));
+    let px: number;
+    let py: number;
+    if (this.modoDistribucionSala) {
+      px = Math.round(x / this.grid) * this.grid;
+      py = Math.round(y / this.grid) * this.grid;
+    } else {
+      px = this.clamp(Math.round(x / this.grid) * this.grid, 0, Math.max(0, SW - 46));
+      py = this.clamp(Math.round(y / this.grid) * this.grid, 0, Math.max(0, SH - 46));
+    }
     const point: DoorPoint = { x: px, y: py, r: 0 };
     if (this.placingDoor === 'ENTRADA') this.entrada = point;
     else this.salida = point;
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
     this.placingDoor = null;
     this.persistPlanoToForm();
   }
@@ -1126,6 +1465,9 @@ export class AgregarZonaComponent implements OnInit {
     if (type === 'ENTRADA') this.entrada = null;
     else this.salida = null;
     this.persistPlanoToForm();
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
   }
 
   selectMachine(id: number) {
@@ -1155,7 +1497,9 @@ export class AgregarZonaComponent implements OnInit {
     this.editNameId = null;
     const v = (value ?? '').trim();
     if (!v) return;
-    this.machines = this.machines.map(m => m.id === id ? { ...m, name: v } : m);
+    this.machines = this.machines.map((m) =>
+      m.id === id ? { ...m, name: v, nombreMaquina: v } : m
+    );
     this.persistPlanoToForm();
   }
 
@@ -1174,12 +1518,18 @@ export class AgregarZonaComponent implements OnInit {
     this.machines = this.machines.filter(m => m.id !== id);
     this.selectedMachineId = null;
     this.persistPlanoToForm();
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
   }
 
   removeZone(id: number) {
     this.zones = this.zones.filter(z => z.id !== id);
     if (this.selectedZoneId === id) this.selectedZoneId = null;
     this.persistPlanoToForm();
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
   }
 
   zoomIn() {
@@ -1250,10 +1600,46 @@ export class AgregarZonaComponent implements OnInit {
     if (!rect) {
       return { x: 0, y: 0 };
     }
-    return {
-      x: (clientX - rect.left - this.viewPanX) / this.zoom,
-      y: (clientY - rect.top - this.viewPanY) / this.zoom,
-    };
+    const dispX = (clientX - rect.left - this.viewPanX) / this.zoom;
+    const dispY = (clientY - rect.top - this.viewPanY) / this.zoom;
+    if (this.modoDistribucionSala) {
+      return {
+        x: dispX + this.layoutWorldMinX,
+        y: dispY + this.layoutWorldMinY,
+      };
+    }
+    return { x: dispX, y: dispY };
+  }
+
+  /**
+   * Centro del área visible del plano (viewport actual con pan/zoom).
+   * Coordenadas de mundo en distribución sala; en flujo clásico, mismas unidades que `clientToCanvas` sin `layoutWorldMin`.
+   */
+  private viewportCenterInPlanoCoords(): { x: number; y: number } | null {
+    const rect = this.stageRect();
+    if (!rect || this.zoom <= 0) {
+      return null;
+    }
+    const lx = rect.width / 2;
+    const ly = rect.height / 2;
+    const dispX = (lx - this.viewPanX) / this.zoom;
+    const dispY = (ly - this.viewPanY) / this.zoom;
+    if (this.modoDistribucionSala) {
+      return {
+        x: dispX + this.layoutWorldMinX,
+        y: dispY + this.layoutWorldMinY,
+      };
+    }
+    return { x: dispX, y: dispY };
+  }
+
+  /** Coordenadas de pantalla (espacio del plano-content) a partir de mundo. */
+  dispX(worldX: number): number {
+    return worldX - this.layoutWorldMinX;
+  }
+
+  dispY(worldY: number): number {
+    return worldY - this.layoutWorldMinY;
   }
 
   private onViewportPanMove = (ev: PointerEvent) => {
@@ -1398,38 +1784,63 @@ export class AgregarZonaComponent implements OnInit {
     this.snapGuide.showV = false;
     this.snapGuide.showH = false;
     if (this.draggingMachineId) {
-      const idx = this.machines.findIndex(x => x.id === this.draggingMachineId);
+      const idx = this.machines.findIndex((x) => x.id === this.draggingMachineId);
       if (idx < 0) return;
       const m = this.machines[idx];
-      const maxX = Math.max(0, SW - m.w);
-      const maxY = Math.max(0, SH - m.h);
-      const nx = this.clamp(px - this.dragOffsetX, 0, maxX);
-      const ny = this.clamp(py - this.dragOffsetY, 0, maxY);
+      let nx: number;
+      let ny: number;
+      if (this.modoDistribucionSala) {
+        nx = px - this.dragOffsetX;
+        ny = py - this.dragOffsetY;
+      } else {
+        const maxX = Math.max(0, SW - m.w);
+        const maxY = Math.max(0, SH - m.h);
+        nx = this.clamp(px - this.dragOffsetX, 0, maxX);
+        ny = this.clamp(py - this.dragOffsetY, 0, maxY);
+      }
       const snapped = this.snapWithGuides(nx, ny);
-      const candidate = { ...m, x: snapped.x, y: snapped.y };
-      const placed = this.resolveOverlap(candidate);
-      const next = [...this.machines];
-      next[idx] = placed;
-      this.machines = next;
+      let candidate = { ...m, x: snapped.x, y: snapped.y };
+      candidate = this.snapMachineClearOfZoneTitleStrips(candidate, candidate.x, candidate.y);
+      let placed: MachineItem;
+      if (this.modoDistribucionSala) {
+        placed = this.snapMachine(candidate);
+      } else {
+        const afterOverlap = this.resolveOverlap(candidate);
+        placed = this.snapMachine(
+          this.snapMachineClearOfZoneTitleStrips(afterOverlap, afterOverlap.x, afterOverlap.y)
+        );
+      }
+      const nextMachines = [...this.machines];
+      nextMachines[idx] = placed;
+      this.machines = nextMachines;
+      if (this.modoDistribucionSala) {
+        this.expandDistribucionCanvasRightBottomFromContent();
+      }
       return;
     }
-
     if (this.draggingZoneId) {
-      const idx = this.zones.findIndex(x => x.id === this.draggingZoneId);
+      const idx = this.zones.findIndex((x) => x.id === this.draggingZoneId);
       if (idx < 0) return;
       const z = this.zones[idx];
       const oldX = z.x;
       const oldY = z.y;
-      const maxX = Math.max(0, SW - z.w);
-      const maxY = Math.max(0, SH - z.h);
-      const nx = this.clamp(px - this.dragOffsetX, 0, maxX);
-      const ny = this.clamp(py - this.dragOffsetY, 0, maxY);
+      let nx: number;
+      let ny: number;
+      if (this.modoDistribucionSala) {
+        nx = px - this.dragOffsetX;
+        ny = py - this.dragOffsetY;
+      } else {
+        const maxX = Math.max(0, SW - z.w);
+        const maxY = Math.max(0, SH - z.h);
+        nx = this.clamp(px - this.dragOffsetX, 0, maxX);
+        ny = this.clamp(py - this.dragOffsetY, 0, maxY);
+      }
       const newZ = this.snapZone({ ...z, x: nx, y: ny });
       const dx = newZ.x - oldX;
       const dy = newZ.y - oldY;
-      const next = [...this.zones];
-      next[idx] = newZ;
-      this.zones = next;
+      const nextZones = [...this.zones];
+      nextZones[idx] = newZ;
+      this.zones = nextZones;
       this.shiftMaquinasYPuertasConZona(
         this.zoneDragCapturedMachineIds,
         this.zoneDragMoveEntrada,
@@ -1437,33 +1848,54 @@ export class AgregarZonaComponent implements OnInit {
         dx,
         dy
       );
+      if (this.modoDistribucionSala) {
+        this.expandDistribucionCanvasRightBottomFromContent();
+      }
       return;
     }
-
     if (this.resizingZoneId) {
-      const idx = this.zones.findIndex(x => x.id === this.resizingZoneId);
+      const idx = this.zones.findIndex((x) => x.id === this.resizingZoneId);
       if (idx < 0) return;
       const z = this.zones[idx];
       const pdx = px - this.resizeStart.x;
       const pdy = py - this.resizeStart.y;
       const sr = this.resizeStartRect;
       const h = this.resizeHandle;
+      const minW = this.grid;
+      const minH = this.grid;
+      const salaSinTope = this.modoDistribucionSala;
       let nx = sr.x;
       let ny = sr.y;
       let nw = sr.w;
       let nh = sr.h;
       if (h === 'e' || h === 'ne' || h === 'se') {
-        nw = this.clamp(sr.w + pdx, 140, Math.max(140, SW - sr.x));
+        if (salaSinTope) {
+          nw = Math.max(minW, sr.w + pdx);
+        } else {
+          nw = this.clamp(sr.w + pdx, minW, Math.max(minW, SW - sr.x));
+        }
       }
       if (h === 'w' || h === 'nw' || h === 'sw') {
-        nw = this.clamp(sr.w - pdx, 140, sr.x + sr.w);
+        if (salaSinTope) {
+          nw = Math.max(minW, sr.w - pdx);
+        } else {
+          nw = this.clamp(sr.w - pdx, minW, Math.max(minW, sr.x + sr.w));
+        }
         nx = sr.x + sr.w - nw;
       }
       if (h === 's' || h === 'se' || h === 'sw') {
-        nh = this.clamp(sr.h + pdy, 90, Math.max(90, SH - sr.y));
+        if (salaSinTope) {
+          nh = Math.max(minH, sr.h + pdy);
+        } else {
+          nh = this.clamp(sr.h + pdy, minH, Math.max(minH, SH - sr.y));
+        }
       }
       if (h === 'n' || h === 'ne' || h === 'nw') {
-        nh = this.clamp(sr.h - pdy, 90, sr.y + sr.h);
+        if (salaSinTope) {
+          nh = Math.max(minH, sr.h - pdy);
+        } else {
+          nh = this.clamp(sr.h - pdy, minH, Math.max(minH, sr.y + sr.h));
+        }
         ny = sr.y + sr.h - nh;
       }
       const oldX = z.x;
@@ -1471,9 +1903,9 @@ export class AgregarZonaComponent implements OnInit {
       const newZ = this.snapZone({ ...z, x: nx, y: ny, w: nw, h: nh });
       const dx = newZ.x - oldX;
       const dy = newZ.y - oldY;
-      const next = [...this.zones];
-      next[idx] = newZ;
-      this.zones = next;
+      const nextZones = [...this.zones];
+      nextZones[idx] = newZ;
+      this.zones = nextZones;
       this.shiftMaquinasYPuertasConZona(
         this.zoneResizeCapturedMachineIds,
         this.zoneResizeMoveEntrada,
@@ -1481,6 +1913,9 @@ export class AgregarZonaComponent implements OnInit {
         dx,
         dy
       );
+      if (this.modoDistribucionSala) {
+        this.expandDistribucionCanvasRightBottomFromContent();
+      }
     }
   };
 
@@ -1495,6 +1930,9 @@ export class AgregarZonaComponent implements OnInit {
     this.snapGuide.showH = false;
     window.removeEventListener('pointermove', this.onPointerMove);
     window.removeEventListener('pointerup', this.onPointerUp);
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
     this.persistPlanoToForm();
   };
 
@@ -1512,7 +1950,31 @@ export class AgregarZonaComponent implements OnInit {
     const others = this.machines.filter(m => m.id !== candidate.id);
     if (!others.some(o => this.overlaps(candidate, o))) return this.snapMachine(candidate);
     const step = this.grid;
-    for (let r = step; r <= 140; r += step) {
+    const maxReach = this.modoDistribucionSala ? 250000 : 140;
+    if (this.modoDistribucionSala) {
+      for (let r = step; r <= maxReach; r += step) {
+        const tries = [
+          { x: candidate.x + r, y: candidate.y },
+          { x: candidate.x - r, y: candidate.y },
+          { x: candidate.x, y: candidate.y + r },
+          { x: candidate.x, y: candidate.y - r },
+          { x: candidate.x + r, y: candidate.y + r },
+          { x: candidate.x - r, y: candidate.y + r },
+          { x: candidate.x + r, y: candidate.y - r },
+          { x: candidate.x - r, y: candidate.y - r }
+        ];
+        for (const t of tries) {
+          const test = this.snapMachine({
+            ...candidate,
+            x: Math.round(t.x / this.grid) * this.grid,
+            y: Math.round(t.y / this.grid) * this.grid,
+          });
+          if (!others.some(o => this.overlaps(test, o))) return test;
+        }
+      }
+      return this.snapMachine(candidate);
+    }
+    for (let r = step; r <= maxReach; r += step) {
       const tries = [
         { x: candidate.x + r, y: candidate.y },
         { x: candidate.x - r, y: candidate.y },
@@ -1536,7 +1998,73 @@ export class AgregarZonaComponent implements OnInit {
   }
 
   private placeWithoutOverlap(base: MachineItem) {
-    return this.resolveOverlap(this.snapMachine(base));
+    const initial = this.resolveOverlap(this.snapMachine(base));
+    return this.snapMachine(this.snapMachineClearOfZoneTitleStrips(initial, initial.x, initial.y));
+  }
+
+  private zoneTitleStripRect(z: ZoneItem): { x: number; y: number; w: number; h: number } {
+    const padTop = 6;
+    const innerH = Math.min(this.zoneTitleStripPx, Math.max(this.grid, z.h));
+    return { x: z.x, y: z.y - padTop, w: z.w, h: innerH + padTop };
+  }
+
+  private rectIntersectsWorld(
+    ax: number,
+    ay: number,
+    aw: number,
+    ah: number,
+    bx: number,
+    by: number,
+    bw: number,
+    bh: number
+  ): boolean {
+    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  }
+
+  private machineIntersectsAnyZoneTitleStrip(m: { x: number; y: number; w: number; h: number }): boolean {
+    for (const z of this.zones) {
+      const s = this.zoneTitleStripRect(z);
+      if (this.rectIntersectsWorld(m.x, m.y, m.w, m.h, s.x, s.y, s.w, s.h)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Evita que el rectángulo de la máquina solape la franja del título de cualquier zona. */
+  private snapMachineClearOfZoneTitleStrips(m: MachineItem, x: number, y: number): MachineItem {
+    if (this.zones.length === 0) {
+      return { ...m, x, y };
+    }
+    const g = this.grid;
+    const nx = Math.round(x / g) * g;
+    const ny = Math.round(y / g) * g;
+    if (!this.machineIntersectsAnyZoneTitleStrip({ x: nx, y: ny, w: m.w, h: m.h })) {
+      return { ...m, x: nx, y: ny };
+    }
+    const maxSteps = this.modoDistribucionSala ? 800 : 160;
+    for (let s = 1; s <= maxSteps; s++) {
+      const step = s * g;
+      const candidates: [number, number][] = [
+        [nx, ny + step],
+        [nx, ny - step],
+        [nx + step, ny],
+        [nx - step, ny],
+        [nx + step, ny + step],
+        [nx - step, ny + step],
+        [nx + step, ny - step],
+        [nx - step, ny - step],
+      ];
+      for (const [tx, ty] of candidates) {
+        const rx = Math.round(tx / g) * g;
+        const ry = Math.round(ty / g) * g;
+        if (!this.machineIntersectsAnyZoneTitleStrip({ x: rx, y: ry, w: m.w, h: m.h })) {
+          return { ...m, x: rx, y: ry };
+        }
+      }
+    }
+    const pushDown = Math.round((ny + this.zoneTitleStripPx + g) / g) * g;
+    return { ...m, x: nx, y: pushDown };
   }
 
   private overlaps(a: MachineItem, b: MachineItem) {
@@ -1574,19 +2102,28 @@ export class AgregarZonaComponent implements OnInit {
     const ms = this.safeParseArray(rawPlano).map((p: any, i: number) => {
       const type = this.inferMachineTypeFromApi(p);
       const id = Number(p.id ?? (i + 1));
+      const serial = String(
+        p.numeroSerieMaquina ?? p.serial ?? p.numeroSerie ?? this.makeSerial(type, id)
+      );
+      const nombreM = p.nombreMaquina != null ? String(p.nombreMaquina).trim() : '';
+      const nombreEstatusM =
+        p.nombreEstatusMaquina != null ? String(p.nombreEstatusMaquina).trim() : '';
       return {
         id,
         label: Number(p.label ?? id),
         type,
-        name: String(p.name ?? p.nombre ?? `${type} ${id}`),
+        name: nombreM || String(p.name ?? p.nombre ?? `${type} ${id}`),
+        nombreMaquina: nombreM || undefined,
         status: this.mapEstatusMaquinaApi(p),
-        serial: String(p.serial ?? p.numeroSerie ?? this.makeSerial(type, id)),
+        serial,
+        numeroSerieMaquina: serial,
+        nombreEstatusMaquina: nombreEstatusM || undefined,
         img: this.resolveMachineDisplayImg(p, type),
         x: Number(p.x ?? 60),
         y: Number(p.y ?? 80),
         w: Math.max(Number(p.w ?? 180), 180),
         h: Math.max(Number(p.h ?? 130), 130),
-        r: this.normalizeRotation(Number(p.r ?? 0))
+        r: this.normalizeRotation(Number(p.r ?? 0)),
       } as MachineItem;
     }).map(m => this.snapMachine(m));
     const zs = this.safeParseArray(rawZonas).map((p: any, i: number) => {
@@ -1604,6 +2141,9 @@ export class AgregarZonaComponent implements OnInit {
     this.zones = zs;
     this.entrada = this.safeParsePoint(rawEntrada);
     this.salida = this.safeParsePoint(rawSalida);
+    if (this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+    }
     this.persistPlanoToForm();
   }
 
@@ -1657,9 +2197,15 @@ export class AgregarZonaComponent implements OnInit {
       const y = Number(parsed.y);
       const r = this.normalizeRotation(Number(parsed.r ?? 0));
       if (Number.isNaN(x) || Number.isNaN(y)) return null;
+      const gx = Math.round(x / this.grid) * this.grid;
+      const gy = Math.round(y / this.grid) * this.grid;
+      if (Number.isNaN(gx) || Number.isNaN(gy)) return null;
+      if (this.modoDistribucionSala) {
+        return { x: gx, y: gy, r };
+      }
       return {
-        x: this.clamp(Math.round(x / this.grid) * this.grid, 0, Math.max(0, this.logicalStageW() - 46)),
-        y: this.clamp(Math.round(y / this.grid) * this.grid, 0, Math.max(0, this.logicalStageH() - 46)),
+        x: this.clamp(gx, 0, Math.max(0, this.logicalStageW() - 46)),
+        y: this.clamp(gy, 0, Math.max(0, this.logicalStageH() - 46)),
         r
       };
     } catch {
@@ -1694,6 +2240,85 @@ export class AgregarZonaComponent implements OnInit {
     return rect ? rect.height / this.zoom : this.stageH;
   }
 
+  /** Espacio libre que se mantiene más allá del borde derecho/inferior del contenido (solo distribución sala). */
+  private readonly canvasContentMargin = 160;
+
+  /** Durante arrastre/redimensionamiento: solo agranda W/H según el contenido, sin mover layoutWorldMin (evita saltos). */
+  private expandDistribucionCanvasRightBottomFromContent(): void {
+    if (!this.modoDistribucionSala) {
+      return;
+    }
+    const m = this.canvasContentMargin;
+    let maxR = -Infinity;
+    let maxB = -Infinity;
+    for (const z of this.zones) {
+      maxR = Math.max(maxR, z.x + z.w);
+      maxB = Math.max(maxB, z.y + z.h);
+    }
+    for (const mm of this.machines) {
+      maxR = Math.max(maxR, mm.x + mm.w);
+      maxB = Math.max(maxB, mm.y + mm.h);
+    }
+    if (this.entrada) {
+      maxR = Math.max(maxR, this.entrada.x + this.doorVisW);
+      maxB = Math.max(maxB, this.entrada.y + this.doorVisH);
+    }
+    if (this.salida) {
+      maxR = Math.max(maxR, this.salida.x + this.doorVisW);
+      maxB = Math.max(maxB, this.salida.y + this.doorVisH);
+    }
+    if (!Number.isFinite(maxR)) {
+      return;
+    }
+    this.canvasLogicalW = Math.max(this.canvasLogicalW, maxR + m - this.layoutWorldMinX);
+    this.canvasLogicalH = Math.max(this.canvasLogicalH, maxB + m - this.layoutWorldMinY);
+  }
+
+  /** Ajusta origen y tamaño del lienzo mundial según todo el contenido (incluye coords negativas o muy alejadas). */
+  private recomputeDistribucionLayoutBounds(): void {
+    if (!this.modoDistribucionSala) {
+      return;
+    }
+    const margin = this.canvasContentMargin;
+    const DEF_W = 3048;
+    const DEF_H = 3684;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxR = -Infinity;
+    let maxB = -Infinity;
+    const bump = (x: number, y: number, w: number, h: number) => {
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxR = Math.max(maxR, x + w);
+      maxB = Math.max(maxB, y + h);
+    };
+    for (const z of this.zones) {
+      bump(z.x, z.y, z.w, z.h);
+    }
+    for (const mm of this.machines) {
+      bump(mm.x, mm.y, mm.w, mm.h);
+    }
+    if (this.entrada) {
+      bump(this.entrada.x, this.entrada.y, this.doorVisW, this.doorVisH);
+    }
+    if (this.salida) {
+      bump(this.salida.x, this.salida.y, this.doorVisW, this.doorVisH);
+    }
+    if (!Number.isFinite(minX)) {
+      this.layoutWorldMinX = 0;
+      this.layoutWorldMinY = 0;
+      this.canvasLogicalW = Math.max(DEF_W, this.canvasLogicalW);
+      this.canvasLogicalH = Math.max(DEF_H, this.canvasLogicalH);
+      return;
+    }
+    this.layoutWorldMinX = minX - margin;
+    this.layoutWorldMinY = minY - margin;
+    const needW = maxR + margin - this.layoutWorldMinX;
+    const needH = maxB + margin - this.layoutWorldMinY;
+    this.canvasLogicalW = Math.max(DEF_W, this.canvasLogicalW, needW);
+    this.canvasLogicalH = Math.max(DEF_H, this.canvasLogicalH, needH);
+  }
+
   private normalizeRotation(r: number) {
     return ((r % 360) + 360) % 360;
   }
@@ -1712,12 +2337,14 @@ export class AgregarZonaComponent implements OnInit {
   }
 
   private snapZone(z: ZoneItem) {
+    const rw = Math.round(z.w / this.grid) * this.grid;
+    const rh = Math.round(z.h / this.grid) * this.grid;
     return {
       ...z,
       x: Math.round(z.x / this.grid) * this.grid,
       y: Math.round(z.y / this.grid) * this.grid,
-      w: Math.round(z.w / this.grid) * this.grid,
-      h: Math.round(z.h / this.grid) * this.grid
+      w: Math.max(this.grid, rw),
+      h: Math.max(this.grid, rh),
     };
   }
 
@@ -1844,10 +2471,30 @@ export class AgregarZonaComponent implements OnInit {
     return `${t}-${stamp}-${id}`;
   }
 
-  miniX(x: number) { return (x / this.logicalStageW()) * 100; }
-  miniY(y: number) { return (y / this.logicalStageH()) * 100; }
-  miniW(w: number) { return (w / this.logicalStageW()) * 100; }
-  miniH(h: number) { return (h / this.logicalStageH()) * 100; }
+  miniX(x: number) {
+    if (this.modoDistribucionSala && this.canvasLogicalW > 0) {
+      return ((x - this.layoutWorldMinX) / this.canvasLogicalW) * 100;
+    }
+    return (x / this.logicalStageW()) * 100;
+  }
+  miniY(y: number) {
+    if (this.modoDistribucionSala && this.canvasLogicalH > 0) {
+      return ((y - this.layoutWorldMinY) / this.canvasLogicalH) * 100;
+    }
+    return (y / this.logicalStageH()) * 100;
+  }
+  miniW(w: number) {
+    if (this.modoDistribucionSala && this.canvasLogicalW > 0) {
+      return (w / this.canvasLogicalW) * 100;
+    }
+    return (w / this.logicalStageW()) * 100;
+  }
+  miniH(h: number) {
+    if (this.modoDistribucionSala && this.canvasLogicalH > 0) {
+      return (h / this.canvasLogicalH) * 100;
+    }
+    return (h / this.logicalStageH()) * 100;
+  }
 
   onDoorPointerDown(e: PointerEvent, type: DoorType) {
     const target = e.target as HTMLElement;
@@ -1876,22 +2523,40 @@ export class AgregarZonaComponent implements OnInit {
     const { x, y } = this.clientToCanvas(e.clientX, e.clientY);
     const SW = this.logicalStageW();
     const SH = this.logicalStageH();
-    const nx = this.clamp(x - this.doorDragOffset.x, 0, SW - this.doorVisW);
-    const ny = this.clamp(y - this.doorDragOffset.y, 0, SH - this.doorVisH);
+    let nx: number;
+    let ny: number;
+    if (this.modoDistribucionSala) {
+      nx = x - this.doorDragOffset.x;
+      ny = y - this.doorDragOffset.y;
+    } else {
+      nx = this.clamp(x - this.doorDragOffset.x, 0, SW - this.doorVisW);
+      ny = this.clamp(y - this.doorDragOffset.y, 0, SH - this.doorVisH);
+    }
     if (this.draggingDoor === 'ENTRADA' && this.entrada) {
       this.entrada = { ...this.entrada, x: nx, y: ny };
+      if (this.modoDistribucionSala) {
+        this.expandDistribucionCanvasRightBottomFromContent();
+      }
     }
     if (this.draggingDoor === 'SALIDA' && this.salida) {
       this.salida = { ...this.salida, x: nx, y: ny };
+      if (this.modoDistribucionSala) {
+        this.expandDistribucionCanvasRightBottomFromContent();
+      }
     }
     this.persistPlanoToForm();
   }
 
   @HostListener('window:pointerup', ['$event'])
   onDoorPointerUp(_: PointerEvent) {
+    const wasDoor = this.draggingDoor;
     this.draggingDoor = null;
     this.doorPointerId = null;
     this.stopHoldRotate();
+    if (wasDoor && this.modoDistribucionSala) {
+      this.recomputeDistribucionLayoutBounds();
+      this.persistPlanoToForm();
+    }
   }
 
   private clamp(v: number, min: number, max: number) {
@@ -1964,6 +2629,10 @@ export class AgregarZonaComponent implements OnInit {
     this.zoom = 1;
     this.viewPanX = 0;
     this.viewPanY = 0;
+    this.layoutWorldMinX = 0;
+    this.layoutWorldMinY = 0;
+    this.canvasLogicalW = 3048;
+    this.canvasLogicalH = 3684;
     this.snapGuide = { showV: false, showH: false, v: 0, h: 0 };
     this.persistPlanoToForm();
   }

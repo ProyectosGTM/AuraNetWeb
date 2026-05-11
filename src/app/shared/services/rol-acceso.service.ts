@@ -190,6 +190,9 @@ export class RolAccesoService {
   /** Valor de `user.rol` en sesión para perfil cliente (login). Solo uso interno; no mostrar en mensajes al usuario. */
   private readonly rolPerfilClienteSesion = '3';
 
+  /** SA (`1`) y Dev (`2`) deben elegir cliente manualmente en formularios; no usar `idCliente` del login como valor inicial. */
+  private readonly idsRolSinClientePorDefecto = new Set<string>(['1', '2']);
+
   constructor(private auth: AuthenticationService) {}
 
   /**
@@ -245,6 +248,44 @@ export class RolAccesoService {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Roles que no deben recibir el cliente del login precargado en combos (Super Administrador y Desarrollador).
+   */
+  esRolSinClientePorDefectoEnFormularios(): boolean {
+    const r = this.obtenerRolUsuarioLogueado();
+    if (r == null || r === '') {
+      return false;
+    }
+    return this.idsRolSinClientePorDefecto.has(r);
+  }
+
+  /**
+   * `idCliente` del usuario en sesión (respuesta de login en `sessionStorage` user), para precargar combos en altas.
+   * No aplica para rol SA (`1`) ni Dev (`2`). Devuelve null si no hay dato válido.
+   */
+  obtenerIdClientePorDefectoFormulario(): number | null {
+    if (this.esRolSinClientePorDefectoEnFormularios()) {
+      return null;
+    }
+    try {
+      const u = this.auth.getUser();
+      if (u == null) {
+        return null;
+      }
+      const nested = u.user as { idCliente?: unknown } | undefined;
+      const raw = u.idCliente ?? nested?.idCliente;
+      if (raw != null && raw !== '') {
+        const n = Number(raw);
+        if (Number.isFinite(n) && n > 0) {
+          return n;
+        }
+      }
+    } catch {
+      /* sesión ausente o JSON inválido */
+    }
+    return null;
   }
 
   /** Indica si el usuario en sesión tiene perfil cliente (`rol` del login). */

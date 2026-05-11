@@ -20,7 +20,7 @@
           </div>
         </div>
         <div class="row mt-3 gy-4">
-          <form [formGroup]="salaForm">
+          <form [formGroup]="salaForm" autocomplete="off">
             <div class="col-12">
               <!-- Sección: Información General -->
               <div class="form-section">
@@ -270,11 +270,17 @@
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Fecha Vencimiento Licencia</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-alt"></i>
-                        <input formControlName="fechaVencimientoLicencia" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="fechaVencimientoLicencia"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        [showClearButton]="true"
+                        [openOnFieldClick]="true"
+                        [inputAttr]="dateBoxAttr('vencimiento-licencia')"
+                        placeholder="Selecciona una fecha"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4">
@@ -310,21 +316,33 @@
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Fecha Inicio Contrato</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-check"></i>
-                        <input formControlName="fechaInicioContrato" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="fechaInicioContrato"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        [showClearButton]="true"
+                        [openOnFieldClick]="true"
+                        [inputAttr]="dateBoxAttr('inicio-contrato')"
+                        placeholder="Selecciona una fecha"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Fecha Fin Contrato</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-times"></i>
-                        <input formControlName="fechaFinContrato" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="fechaFinContrato"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        [showClearButton]="true"
+                        [openOnFieldClick]="true"
+                        [inputAttr]="dateBoxAttr('fin-contrato')"
+                        placeholder="Selecciona una fecha"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                 </div>

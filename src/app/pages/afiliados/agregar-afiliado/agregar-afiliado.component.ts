@@ -20,6 +20,7 @@ import {
   aplicarMontoInputEnCampo,
   textoMontoDesdeValorControl,
 } from 'src/app/shared/utils/monto-input-formato.util';
+import { dxDateBoxInputAttr } from 'src/app/shared/utils/dx-date-box-input-attr';
 
 type SelectItem = { id: number; text: string };
 
@@ -71,6 +72,8 @@ export class AgregarAfiliadoComponent implements OnInit, AfterViewInit {
     { id: 'Amigo(a)', text: 'Amigo(a)' },
     { id: 'Otro', text: 'Otro' },
   ];
+
+  readonly dateBoxAttr = dxDateBoxInputAttr;
 
   afiliadoForm: FormGroup;
 

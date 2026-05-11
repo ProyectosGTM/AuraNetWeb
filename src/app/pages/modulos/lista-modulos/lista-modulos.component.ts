@@ -4,6 +4,7 @@ import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { NgxPermissionsService } from 'ngx-permissions';
 import { forkJoin, lastValueFrom, map, of, switchMap } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { ModulosService } from 'src/app/shared/services/modulos.service';
 import Swal from 'sweetalert2';
@@ -31,7 +32,7 @@ export class ListaModulosComponent {
   isGrouped: boolean = false;
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
-
+  procesandoEstatusModuloId: number | null = null;
 
   constructor(
     private router: Router,
@@ -76,32 +77,35 @@ export class ListaModulosComponent {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.moduloService.updateEstatus(rowData.id, 1).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `El módulo ha sido activado.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
+        this.procesandoEstatusModuloId = rowData.id;
+        this.moduloService
+          .updateEstatus(rowData.id, 1)
+          .pipe(finalize(() => (this.procesandoEstatusModuloId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `El módulo ha sido activado.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
 
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerListaModulos();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
   }
@@ -119,31 +123,34 @@ export class ListaModulosComponent {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.moduloService.updateEstatus(rowData.id, 0).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `El módulo ha sido desactivado.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerListaModulos();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+        this.procesandoEstatusModuloId = rowData.id;
+        this.moduloService
+          .updateEstatus(rowData.id, 0)
+          .pipe(finalize(() => (this.procesandoEstatusModuloId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `El módulo ha sido desactivado.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
     // console.log('Desactivar:', rowData);

@@ -4,6 +4,7 @@ import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { NgxPermissionsService } from 'ngx-permissions';
 import { forkJoin, lastValueFrom, map, of, switchMap } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { ModulosService } from 'src/app/shared/services/modulos.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
@@ -32,7 +33,8 @@ export class ListaSalasComponent {
   isGrouped: boolean = false;
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
-
+  /** Mientras se actualiza estatus vía API (activar/desactivar). */
+  procesandoEstatusSalaId: number | null = null;
 
   constructor(
     private router: Router,
@@ -88,32 +90,35 @@ export class ListaSalasComponent {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.salasService.updateEstatus(rowData.id, 1).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `La sala ha sido activada.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
+        this.procesandoEstatusSalaId = rowData.id;
+        this.salasService
+          .updateEstatus(rowData.id, 1)
+          .pipe(finalize(() => (this.procesandoEstatusSalaId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `La sala ha sido activada.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
 
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerlistaSalas();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
   }
@@ -131,31 +136,34 @@ export class ListaSalasComponent {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.salasService.updateEstatus(rowData.id, 0).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `La sala ha sido desactivada.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerlistaSalas();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+        this.procesandoEstatusSalaId = rowData.id;
+        this.salasService
+          .updateEstatus(rowData.id, 0)
+          .pipe(finalize(() => (this.procesandoEstatusSalaId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `La sala ha sido desactivada.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
     // console.log('Desactivar:', rowData);

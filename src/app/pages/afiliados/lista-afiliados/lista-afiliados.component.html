@@ -245,8 +245,10 @@
                                 <button *ngIf="esAfiliadoBloqueado(row.data)" type="button" id="pinButton"
                                     class="btnAcciones btnAcciones--desbloquear"
                                     (click)="desbloquearAfiliado(row.data)"
+                                    [disabled]="procesandoDesbloqueoAfiliadoId === row.data.id"
                                     ngbTooltip="Desbloquear afiliado y monederos" placement="top">
-                                    <i class="fa fa-unlock"></i>
+                                    <i class="fa fa-spinner fa-spin" *ngIf="procesandoDesbloqueoAfiliadoId === row.data.id"></i>
+                                    <i class="fa fa-unlock" *ngIf="procesandoDesbloqueoAfiliadoId !== row.data.id"></i>
                                 </button>
                             </ng-container>
                             <ng-container *ngIf="puedeRegistrarAutoexclusion(row.data)">
@@ -269,14 +271,18 @@
                                 <button *ngIf="row.data.estatus === 0" type="button" id="activarAfiliadoButton"
                                     class="btnAcciones btnAcciones--activar"
                                     (click)="activarAfiliado(row.data)"
+                                    [disabled]="procesandoEstatusAfiliadoId === row.data.id"
                                     ngbTooltip="Activar afiliado (estatus en listado)" placement="top">
-                                    <i class="fa fa-arrow-up"></i>
+                                    <i class="fa fa-spinner fa-spin" *ngIf="procesandoEstatusAfiliadoId === row.data.id"></i>
+                                    <i class="fa fa-arrow-up" *ngIf="procesandoEstatusAfiliadoId !== row.data.id"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" type="button" id="deleteButton"
                                     class="btnAcciones btnAcciones--desactivar"
                                     (click)="desactivar(row.data)"
+                                    [disabled]="procesandoEstatusAfiliadoId === row.data.id"
                                     ngbTooltip="Desactivar afiliado (estatus en listado)" placement="top">
-                                    <i class="fa fa-arrow-down"></i>
+                                    <i class="fa fa-spinner fa-spin" *ngIf="procesandoEstatusAfiliadoId === row.data.id"></i>
+                                    <i class="fa fa-arrow-down" *ngIf="procesandoEstatusAfiliadoId !== row.data.id"></i>
                                 </button>
                             </ng-container>
                             <!-- POST /afiliados/{id}/desbloquear — AfiliadosService (bloqueo de monederos; no es el PATCH de estatus) -->
@@ -701,6 +707,8 @@
                         [(ngModel)]="bloqueoFechaFin"
                         [min]="bloqueoFechaMin"
                         [ngModelOptions]="{standalone: true}"
+                        [openOnFieldClick]="true"
+                        [inputAttr]="dateBoxAttr('bloqueo-fecha-fin')"
                         class="dx-select-box-custom">
                     </dx-date-box>
                 </label>

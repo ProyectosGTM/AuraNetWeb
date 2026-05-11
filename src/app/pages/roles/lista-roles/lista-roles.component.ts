@@ -4,6 +4,7 @@ import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { NgxPermissionsService } from 'ngx-permissions';
 import { forkJoin, lastValueFrom, map, of, switchMap } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { RolesService } from 'src/app/shared/services/roles.service';
 import Swal from 'sweetalert2';
@@ -35,7 +36,7 @@ export class ListaRolesComponent implements OnInit {
   isGrouped: boolean = false;
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
-
+  procesandoEstatusRolId: number | null = null;
 
   constructor(
     private router: Router,
@@ -84,32 +85,35 @@ export class ListaRolesComponent implements OnInit {
       background: '#0d121d',
     }).then((result) => {
       if (result.value) {
-        this.rolService.updateEstatus(rowData.id, 1).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `El rol ha sido activado.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
+        this.procesandoEstatusRolId = rowData.id;
+        this.rolService
+          .updateEstatus(rowData.id, 1)
+          .pipe(finalize(() => (this.procesandoEstatusRolId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `El rol ha sido activado.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
 
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerlistaRoles();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
   }
@@ -127,31 +131,34 @@ export class ListaRolesComponent implements OnInit {
       background: '#0d121d',
     }).then((result) => {
       if (result.value) {
-        this.rolService.updateEstatus(rowData.id, 0).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `El rol ha sido desactivado.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerlistaRoles();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+        this.procesandoEstatusRolId = rowData.id;
+        this.rolService
+          .updateEstatus(rowData.id, 0)
+          .pipe(finalize(() => (this.procesandoEstatusRolId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `El rol ha sido desactivado.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
     // console.log('Desactivar:', rowData);

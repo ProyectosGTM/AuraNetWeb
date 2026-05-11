@@ -20,7 +20,7 @@
           </div>
         </div>
         <div class="row mt-3 gy-4">
-          <form [formGroup]="afiliadoForm">
+          <form [formGroup]="afiliadoForm" autocomplete="off">
             <div class="col-12">
 
               <!-- Datos personales -->
@@ -69,6 +69,8 @@
                         type="date"
                         displayFormat="yyyy-MM-dd"
                         dateSerializationFormat="yyyy-MM-dd"
+                        [openOnFieldClick]="true"
+                        [inputAttr]="dateBoxAttr('fecha-nacimiento')"
                         class="dx-select-box-custom">
                       </dx-date-box>
                     </label>
@@ -168,6 +170,8 @@
                         type="date"
                         displayFormat="yyyy-MM-dd"
                         dateSerializationFormat="yyyy-MM-dd"
+                        [openOnFieldClick]="true"
+                        [inputAttr]="dateBoxAttr('vigencia-identificacion')"
                         class="dx-select-box-custom">
                       </dx-date-box>
                     </label>

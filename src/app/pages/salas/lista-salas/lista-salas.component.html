@@ -99,12 +99,16 @@
                             </div>
                             <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones" (click)="activar(row.data)"
+                                    [disabled]="procesandoEstatusSalaId === row.data.id"
                                     ngbTooltip="Activar sala" placement="top">
-                                    <i class="fa fa-arrow-up"></i>
+                                    <i class="fa fa-spinner fa-spin" *ngIf="procesandoEstatusSalaId === row.data.id"></i>
+                                    <i class="fa fa-arrow-up" *ngIf="procesandoEstatusSalaId !== row.data.id"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones" (click)="desactivar(row.data)"
+                                    [disabled]="procesandoEstatusSalaId === row.data.id"
                                     ngbTooltip="Desactivar sala" placement="top">
-                                    <i class="fa fa-arrow-down"></i>
+                                    <i class="fa fa-spinner fa-spin" *ngIf="procesandoEstatusSalaId === row.data.id"></i>
+                                    <i class="fa fa-arrow-down" *ngIf="procesandoEstatusSalaId !== row.data.id"></i>
                                 </button>
                             </div>
                         </div>

@@ -4,6 +4,7 @@ import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { NgxPermissionsService } from 'ngx-permissions';
 import { lastValueFrom } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { PermisosService } from 'src/app/shared/services/permisos.service';
 import Swal from 'sweetalert2';
@@ -33,6 +34,7 @@ export class ListaPermisosComponent implements OnInit {
   public data: string;
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
+  procesandoEstatusPermisoId: number | null = null;
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
 
   constructor(private permService: PermisosService, private route: Router) {
@@ -278,32 +280,35 @@ export class ListaPermisosComponent implements OnInit {
       background: '#0d121d',
     }).then((result) => {
       if (result.value) {
-        this.permService.updateEstatus(rowData.id, 1).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `El permiso ha sido activado.`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
+        this.procesandoEstatusPermisoId = rowData.id;
+        this.permService
+          .updateEstatus(rowData.id, 1)
+          .pipe(finalize(() => (this.procesandoEstatusPermisoId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `El permiso ha sido activado.`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
 
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerListaModulos();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
   }
@@ -321,31 +326,34 @@ export class ListaPermisosComponent implements OnInit {
       background: '#0d121d',
     }).then((result) => {
       if (result.value) {
-        this.permService.updateEstatus(rowData.id, 0).subscribe(
-          (response) => {
-            Swal.fire({
-              title: '¡Confirmación Realizada!',
-              html: `El permiso ha sido desactivado`,
-              icon: 'success',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-            this.setupDataSource();
-            this.dataGrid.instance.refresh();
-            // this.obtenerListaModulos();
-          },
-          (error) => {
-            Swal.fire({
-              title: '¡Ops!',
-              html: `${error}`,
-              icon: 'error',
-              background: '#0d121d',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'Confirmar',
-            })
-          }
-        );
+        this.procesandoEstatusPermisoId = rowData.id;
+        this.permService
+          .updateEstatus(rowData.id, 0)
+          .pipe(finalize(() => (this.procesandoEstatusPermisoId = null)))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Confirmación Realizada!',
+                html: `El permiso ha sido desactivado`,
+                icon: 'success',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+              this.setupDataSource();
+              this.dataGrid.instance.refresh();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: '¡Ops!',
+                html: `${error}`,
+                icon: 'error',
+                background: '#0d121d',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Confirmar',
+              });
+            },
+          });
       }
     });
   }

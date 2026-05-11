@@ -246,6 +246,55 @@
   box-shadow:
     0 14px 30px rgba(0, 0, 0, .55),
     0 0 0 1px rgba(0, 209, 255, .08);
+  /* Lista acotada: scroll con muchas máquinas/zonas */
+  max-height: min(240px, 42vh);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 209, 255, 0.5) rgba(0, 17, 32, 0.85);
+}
+
+.plano-select.select-sleek .select-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.plano-select.select-sleek .select-panel::-webkit-scrollbar-track {
+  background: rgba(0, 209, 255, 0.06);
+  border-radius: 10px;
+  margin: 4px 0;
+}
+
+.plano-select.select-sleek .select-panel::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(0, 209, 255, 0.5), rgba(0, 170, 220, 0.4));
+  border-radius: 10px;
+  border: 2px solid rgba(13, 18, 29, 0.9);
+}
+
+.plano-select.select-sleek .select-panel::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(0, 209, 255, 0.72), rgba(0, 200, 240, 0.55));
+}
+
+/* Filas de opción: texto centrado en alto */
+.plano-select.select-sleek .select-option {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  line-height: 1.25;
+}
+
+.plano-select.select-sleek .select-option:disabled,
+.plano-select.select-sleek .select-option[disabled] {
+  opacity: 0.42;
+  cursor: not-allowed;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.plano-select.select-sleek .select-option:disabled:hover,
+.plano-select.select-sleek .select-option[disabled]:hover {
+  background: transparent;
 }
 
 .plano-select.select-sleek .select-empty-hint {
@@ -314,25 +363,38 @@
 .zone {
   position: absolute;
   border-radius: 16px;
-  border: 2px dashed rgba(255, 79, 138, .92);
-  background: rgba(255, 26, 91, .045);
+  /* Borde doble: contorno sólido visible + trazo interior (se nota más con zoom bajo) */
+  border: 3px solid rgba(255, 138, 178, 0.98);
+  outline: 1px dashed rgba(255, 56, 118, 0.85);
+  outline-offset: -5px;
+  background: rgba(255, 26, 91, 0.03);
   backdrop-filter: none;
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, .45),
-    0 0 18px rgba(255, 26, 91, .28),
-    inset 0 0 0 1px rgba(255, 255, 255, .06);
-  z-index: 2;
+    0 0 0 2px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 200, 220, 0.35),
+    0 0 28px rgba(255, 26, 91, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  /* Encima de máquinas (7): cabecera y agarres capturan puntero; el rect sin hijos deja pasar a la máquina */
+  z-index: 8;
+  pointer-events: none;
   user-select: none;
   touch-action: none;
 }
+
+.zone .zone-head,
+.zone .zone-hit,
+.zone .zone-del {
+  pointer-events: auto;
+}
 .zone.is-selected {
-  border-color: rgba(255, 130, 170, .98);
-  border-style: dashed;
-  background: rgba(255, 26, 91, .07);
+  border-color: rgba(255, 176, 210, 1);
+  outline-color: rgba(255, 120, 180, 0.95);
+  background: rgba(255, 26, 91, 0.08);
   box-shadow:
-    0 0 0 2px rgba(255, 26, 91, .35),
-    0 0 26px rgba(255, 26, 91, .42),
-    inset 0 0 0 1px rgba(255, 255, 255, .08);
+    0 0 0 2px rgba(255, 26, 91, 0.5),
+    0 0 0 1px rgba(0, 209, 255, 0.35),
+    0 0 36px rgba(255, 26, 91, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 
@@ -340,17 +402,65 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 10px 0;
+  gap: 10px;
+  padding: 10px 10px 8px;
+  margin: -4px -4px 0 -4px;
+  min-height: 52px;
+  box-sizing: border-box;
+  cursor: grab;
+}
+
+.zone-head-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.zone-drag-hint {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 32px;
+  border-radius: 10px;
+  color: rgba(0, 209, 255, 0.92);
+  background: rgba(0, 209, 255, 0.12);
+  border: 1px solid rgba(0, 209, 255, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.zone-drag-hint i {
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.zone-head:active {
+  cursor: grabbing;
 }
 
 .zone-badge {
-  padding: 6px 10px;
+  padding: 10px 16px;
   border-radius: 999px;
-  background: rgba(255, 26, 91, .10);
-  border: 1px solid rgba(255, 26, 91, .28);
-  color: rgba(255, 255, 255, .92);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 26, 91, 0.35) 0%,
+    rgba(255, 26, 91, 0.2) 100%
+  );
+  border: 1px solid rgba(255, 160, 195, 0.65);
+  color: #fff;
   font-weight: 900;
-  font-size: 12px;
+  font-size: 17px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 0 12px rgba(255, 26, 91, 0.9),
+    0 1px 2px rgba(0, 0, 0, 0.85);
+  box-shadow:
+    0 0 16px rgba(255, 26, 91, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .zone-del {
@@ -382,7 +492,8 @@
   cursor: grab;
   user-select: none;
   touch-action: none;
-  z-index: 6;
+  /* Debajo del marco de zona (8); en el DOM van antes que las zonas para clic a través del cuerpo */
+  z-index: 7;
 }
 
 .machine:active {
@@ -518,9 +629,13 @@
 .mini-zone {
   position: absolute;
   border-radius: 10px;
-  border: 2px dashed rgba(255, 79, 138, .88);
-  background: rgba(255, 26, 91, .14);
-  box-shadow: 0 0 8px rgba(255, 26, 91, .35);
+  border: 2px solid rgba(255, 138, 178, 0.95);
+  outline: 1px dashed rgba(255, 56, 118, 0.75);
+  outline-offset: -3px;
+  background: rgba(255, 26, 91, 0.2);
+  box-shadow:
+    0 0 10px rgba(255, 26, 91, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 .mini-dot {
@@ -1002,7 +1117,7 @@
 .zone-hit--w {
   top: 0;
   bottom: 0;
-  width: 14px;
+  width: 20px;
 }
 
 .zone-hit--e { right: 0; cursor: ew-resize; }

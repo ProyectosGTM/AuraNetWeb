@@ -8,6 +8,7 @@ import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
+import { dxDateBoxInputAttr } from 'src/app/shared/utils/dx-date-box-input-attr';
 
 type SelectItem = { id: number; text: string };
 
@@ -30,6 +31,8 @@ export class AgregarSalaComponent implements OnInit {
   public idEstatusLicItems: SelectItem[] = [];
   salaForm: FormGroup;
   private pendingSubmitAfterLocation = false;
+
+  readonly dateBoxAttr = dxDateBoxInputAttr;
 
   constructor(
     private fb: FormBuilder,
@@ -128,6 +131,15 @@ export class AgregarSalaComponent implements OnInit {
         id: Number(c.id),
         text: (c.nombre ?? '').trim() || 'Sin nombre',
       }));
+      if (!this.idSala) {
+        const id = this.rolAcceso.obtenerIdClientePorDefectoFormulario();
+        if (id != null) {
+          const cur = this.salaForm.get('idCliente')?.value;
+          if (cur == null || cur === '' || Number(cur) <= 0) {
+            this.salaForm.patchValue({ idCliente: id });
+          }
+        }
+      }
     });
   }
 

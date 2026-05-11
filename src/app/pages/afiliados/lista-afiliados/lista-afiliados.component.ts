@@ -4,12 +4,14 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { lastValueFrom } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { AfiliadosEstatusService } from 'src/app/shared/services/afiliados-estatus.service';
 import { AfiliadosService } from 'src/app/shared/services/afiliados.service';
 import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import Swal from 'sweetalert2';
+import { dxDateBoxInputAttr } from 'src/app/shared/utils/dx-date-box-input-attr';
 
 type ModoLista = 'paginado' | 'inactivos' | 'cumpleaneros' | 'buscar';
 
@@ -22,6 +24,8 @@ type CumpleanerosTipo = 'hoy' | 'mes';
   animations: [fadeInRightAnimation],
 })
 export class ListaAfiliadosComponent implements OnInit {
+
+  readonly dateBoxAttr = dxDateBoxInputAttr;
 
   isLoading: boolean = false;
   listaAfiliados: any;
@@ -61,6 +65,8 @@ export class ListaAfiliadosComponent implements OnInit {
   /** Límite inferior del datepicker (hoy local, YYYY-MM-DD), alineado al contrato de fecha fin. */
   bloqueoFechaMin = '';
   bloqueoEnProceso = false;
+  procesandoEstatusAfiliadoId: number | null = null;
+  procesandoDesbloqueoAfiliadoId: number | null = null;
 
   /** Contexto del modal POST /afiliados/{id}/autoexclusion */
   afiliadoAutoexclusionId: number | null = null;
@@ -1381,7 +1387,11 @@ export class ListaAfiliadosComponent implements OnInit {
       background: '#0d121d',
     }).then((result) => {
       if (result.value) {
-        this.afiliadosEstatusService.updateEstatus(rowData.id, 1).subscribe({
+        this.procesandoEstatusAfiliadoId = rowData.id;
+        this.afiliadosEstatusService
+          .updateEstatus(rowData.id, 1)
+          .pipe(finalize(() => (this.procesandoEstatusAfiliadoId = null)))
+          .subscribe({
           next: () => {
             Swal.fire({
               title: '¡Confirmación realizada!',
@@ -1427,7 +1437,11 @@ export class ListaAfiliadosComponent implements OnInit {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.afiliadosService.desbloquearAfiliado(rowData.id).subscribe({
+        this.procesandoDesbloqueoAfiliadoId = rowData.id;
+        this.afiliadosService
+          .desbloquearAfiliado(rowData.id)
+          .pipe(finalize(() => (this.procesandoDesbloqueoAfiliadoId = null)))
+          .subscribe({
           next: (_response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',
@@ -1468,7 +1482,11 @@ export class ListaAfiliadosComponent implements OnInit {
       background: '#0d121d'
     }).then((result) => {
       if (result.value) {
-        this.afiliadosEstatusService.updateEstatus(rowData.id, 0).subscribe({
+        this.procesandoEstatusAfiliadoId = rowData.id;
+        this.afiliadosEstatusService
+          .updateEstatus(rowData.id, 0)
+          .pipe(finalize(() => (this.procesandoEstatusAfiliadoId = null)))
+          .subscribe({
           next: (response) => {
             Swal.fire({
               title: '¡Confirmación Realizada!',

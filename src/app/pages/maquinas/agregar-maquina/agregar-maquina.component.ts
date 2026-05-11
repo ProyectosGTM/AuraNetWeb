@@ -7,6 +7,7 @@ import { SalaService } from 'src/app/shared/services/salas.service';
 import { ZonaService } from 'src/app/shared/services/zona.service';
 import { MaquinasService } from 'src/app/shared/services/maquinas.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 import {
@@ -14,6 +15,7 @@ import {
   aplicarMontoInputEnCampo,
   textoMontoDesdeValorControl,
 } from 'src/app/shared/utils/monto-input-formato.util';
+import { dxDateBoxInputAttr } from 'src/app/shared/utils/dx-date-box-input-attr';
 
 type SelectItem = { id: number; text: string };
 
@@ -36,13 +38,15 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
   public idMaquina: number;
   public title = 'Agregar Máquina';
   public listaClientes: any;
-  public listaZonas: any;
-  public listaSalas: any;
+  public listaZonas: any[] = [];
+  public listaSalas: any[] = [];
   public listaTipoMaquina: any;
   public listaFabricantes: any;
   public listaEstatusMaquina: any;
   public listaSiNo: SelectItem[] = LISTA_SI_NO;
   maquinaForm: FormGroup;
+
+  readonly dateBoxAttr = dxDateBoxInputAttr;
 
   constructor(
     private fb: FormBuilder,
@@ -53,11 +57,13 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
     private clienService: ClientesService,
     private salasService: SalaService,
     private zonaService: ZonaService,
+    private rolAcceso: RolAccesoService,
   ) { }
 
   ngOnInit(): void {
     this.initForm();
-    
+    this.enlazarCascadaUbicacionMaquina();
+
     this.activatedRoute.params.subscribe((params) => {
       this.idMaquina = params['idMaquina'];
       if (this.idMaquina) {
@@ -66,8 +72,6 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
         // Cargar todas las listas primero, luego obtener la máquina
         forkJoin({
           clientes: this.clienService.obtenerClientes(),
-          zonas: this.zonaService.obtenerZonas(),
-          salas: this.salasService.obtenerSalas(),
           tipoMaquina: this.maquinasService.obtenerTiposMaquina(),
           fabricantes: this.maquinasService.obtenerFabricantes(),
           estatusMaquina: this.maquinasService.obtenerEstatusMaquina()
@@ -100,17 +104,6 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
       id: Number(c.id),
       text: (c.nombre ?? '').trim() || 'Sin nombre',
     }));
-    this.listaZonas = (responses.zonas.data || []).map((z: any) => ({
-      id: Number(z.idZona || z.id),
-      nombre: z.nombreZona || z.nombre || '',
-      text: (z.nombreZona ?? z.nombre ?? 'Sin nombre').trim(),
-    }));
-    this.listaSalas = (responses.salas.data || []).map((s: any) => ({
-      id: Number(s.idSala || s.id),
-      nombre: s.nombreSala || s.nombre || '',
-      text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
-    }));
-    
     // Procesar tipo máquina
     this.listaTipoMaquina = (responses.tipoMaquina.data || []).map((t: any) => ({
       id: Number(t.id),
@@ -132,8 +125,6 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
 
   private cargarListasIndividualmente() {
     this.obtenerClientes();
-    this.obtenerZonas();
-    this.obtenerSalas();
     this.obtenerTiposMaquina();
     this.obtenerFabricantes();
     this.obtenerEstatusMaquina();
@@ -146,26 +137,109 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
         id: Number(c.id),
         text: (c.nombre ?? '').trim() || 'Sin nombre',
       }));
+      if (!this.idMaquina) {
+        this.aplicarIdClienteSesionSiAltaMaquina();
+      }
     });
   }
 
-  obtenerZonas() {
-    this.zonaService.obtenerZonas().subscribe((response) => {
-      this.listaZonas = (response.data || []).map((z: any) => ({
-        id: Number(z.idZona || z.id),
-        nombre: z.nombreZona || z.nombre || '',
-        text: (z.nombreZona ?? z.nombre ?? 'Sin nombre').trim(),
-      }));
+  /** Precarga cliente del login en altas (no SA/Dev); dispara cascada sala/zona vía valueChanges. */
+  private aplicarIdClienteSesionSiAltaMaquina(): void {
+    const id = this.rolAcceso.obtenerIdClientePorDefectoFormulario();
+    if (id == null) {
+      return;
+    }
+    const cur = this.maquinaForm.get('idCliente')?.value;
+    if (cur != null && cur !== '' && Number(cur) > 0) {
+      return;
+    }
+    this.maquinaForm.patchValue({ idCliente: id });
+  }
+
+  private mapearSalasDesdeRespuesta(response: any): any[] {
+    const rows = response?.data ?? response ?? [];
+    const arr = Array.isArray(rows) ? rows : [];
+    return arr.map((s: any) => ({
+      ...s,
+      id: Number(s.idSala ?? s.id),
+      nombre: s.nombreSala || s.nombre || '',
+      text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
+    }));
+  }
+
+  private mapearZonasDesdeRespuesta(response: any): any[] {
+    const rows = response?.data ?? response ?? [];
+    const arr = Array.isArray(rows) ? rows : [];
+    return arr.map((z: any) => ({
+      ...z,
+      id: Number(z.idZona ?? z.id),
+      nombre: z.nombreZona || z.nombre || '',
+      text: (z.nombreZona ?? z.nombre ?? 'Sin nombre').trim(),
+    }));
+  }
+
+  private cargarSalasPorCliente(idCliente: number): void {
+    this.salasService.obtenerSalasPorCliente(idCliente).subscribe({
+      next: (response: any) => {
+        this.listaSalas = this.mapearSalasDesdeRespuesta(response);
+      },
+      error: () => {
+        this.listaSalas = [];
+      },
     });
   }
 
-  obtenerSalas() {
-    this.salasService.obtenerSalas().subscribe((response) => {
-      this.listaSalas = (response.data || []).map((s: any) => ({
-        id: Number(s.idSala || s.id),
-        nombre: s.nombreSala || s.nombre || '',
-        text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
-      }));
+  private cargarZonasPorSala(idSala: number): void {
+    this.zonaService.obtenerZonasPorSala(idSala).subscribe({
+      next: (response: any) => {
+        this.listaZonas = this.mapearZonasDesdeRespuesta(response);
+      },
+      error: () => {
+        this.listaZonas = [];
+      },
+    });
+  }
+
+  /** Tras cargar registro: llena listas en cascada sin disparar valueChanges. */
+  private aplicarUbicacionJerarquicaMaquina(idCliente: number, idSala: number, idZona: number): void {
+    this.listaSalas = [];
+    this.listaZonas = [];
+    const idC = Number(idCliente);
+    const idS = Number(idSala);
+    const idZ = Number(idZona);
+    if (!Number.isFinite(idC) || idC <= 0) {
+      this.maquinaForm.patchValue({ idCliente: null, idSala: null, idZona: null }, { emitEvent: false });
+      return;
+    }
+    this.salasService.obtenerSalasPorCliente(idC).subscribe({
+      next: (response: any) => {
+        this.listaSalas = this.mapearSalasDesdeRespuesta(response);
+        this.maquinaForm.patchValue(
+          { idCliente: idC, idSala: Number.isFinite(idS) && idS > 0 ? idS : null },
+          { emitEvent: false }
+        );
+        if (!Number.isFinite(idS) || idS <= 0) {
+          this.maquinaForm.patchValue({ idZona: null }, { emitEvent: false });
+          return;
+        }
+        this.zonaService.obtenerZonasPorSala(idS).subscribe({
+          next: (zr: any) => {
+            this.listaZonas = this.mapearZonasDesdeRespuesta(zr);
+            this.maquinaForm.patchValue(
+              { idZona: Number.isFinite(idZ) && idZ > 0 ? idZ : null },
+              { emitEvent: false }
+            );
+          },
+          error: () => {
+            this.listaZonas = [];
+            this.maquinaForm.patchValue({ idZona: null }, { emitEvent: false });
+          },
+        });
+      },
+      error: () => {
+        this.listaSalas = [];
+        this.maquinaForm.patchValue({ idSala: null, idZona: null }, { emitEvent: false });
+      },
     });
   }
 
@@ -215,14 +289,15 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
           }
         };
         
+        const idClienteRec = Number(data.idCliente ?? 0);
+        const idSalaRec = Number(data.idSala ?? 0);
+        const idZonaRec = Number(data.idZona ?? 0);
+
         this.maquinaForm.patchValue({
           numeroSerie: data.numeroSerieMaquina || data.numeroSerie || '',
           nombre: data.nombreMaquina || data.nombre || '',
           marca: data.marcaMaquina || data.marca || '',
           modelo: data.modeloMaquina || data.modelo || '',
-          idZona: Number(data.idZona ?? 0),
-          idSala: Number(data.idSala ?? 0),
-          idCliente: Number(data.idCliente ?? 0),
           idTipoMaquina: Number(data.idTipoMaquina ?? 0),
           idFabricante: Number(data.idFabricante ?? 0),
           idEstatusMaquina: Number(data.idEstatusMaquina ?? 0),
@@ -242,6 +317,8 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
           imagenMaquina: data.imagenMaquina || '',
           iconoMaquina: data.iconoMaquina || '',
         });
+
+        this.aplicarUbicacionJerarquicaMaquina(idClienteRec, idSalaRec, idZonaRec);
 
         // Cargar imágenes si existen
         if (data.imagenMaquina) {
@@ -266,7 +343,43 @@ export class AgregarMaquinaComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private   initForm(): void {
+  /** Sala solo tras elegir cliente; zona solo tras elegir sala. */
+  get ubicacionMaquinaSalaReadonly(): boolean {
+    const v = this.maquinaForm?.get('idCliente')?.value;
+    const n = Number(v);
+    return !Number.isFinite(n) || n <= 0;
+  }
+
+  get ubicacionMaquinaZonaReadonly(): boolean {
+    const v = this.maquinaForm?.get('idSala')?.value;
+    const n = Number(v);
+    return !Number.isFinite(n) || n <= 0;
+  }
+
+  private enlazarCascadaUbicacionMaquina(): void {
+    this.maquinaForm.get('idCliente')?.valueChanges.subscribe((v) => {
+      const id = Number(v);
+      this.listaSalas = [];
+      this.listaZonas = [];
+      this.maquinaForm.patchValue({ idSala: null, idZona: null }, { emitEvent: false });
+      if (!Number.isFinite(id) || id <= 0) {
+        return;
+      }
+      this.cargarSalasPorCliente(id);
+    });
+
+    this.maquinaForm.get('idSala')?.valueChanges.subscribe((v) => {
+      const id = Number(v);
+      this.listaZonas = [];
+      this.maquinaForm.patchValue({ idZona: null }, { emitEvent: false });
+      if (!Number.isFinite(id) || id <= 0) {
+        return;
+      }
+      this.cargarZonasPorSala(id);
+    });
+  }
+
+  private initForm(): void {
     this.maquinaForm = this.fb.group({
       numeroSerie: ['', Validators.required],
       nombre: [''],

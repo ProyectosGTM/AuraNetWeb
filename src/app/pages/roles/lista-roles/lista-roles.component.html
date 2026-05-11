@@ -83,13 +83,17 @@
                             <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
                                     (click)="activar(row.data)"
+                                    [disabled]="procesandoEstatusRolId === row.data.id"
                                     ngbTooltip="Activar rol" placement="top">
-                                    <i class="fa fa-arrow-up"></i>
+                                    <i class="fa fa-spinner fa-spin" *ngIf="procesandoEstatusRolId === row.data.id"></i>
+                                    <i class="fa fa-arrow-up" *ngIf="procesandoEstatusRolId !== row.data.id"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
                                     (click)="desactivar(row.data)"
+                                    [disabled]="procesandoEstatusRolId === row.data.id"
                                     ngbTooltip="Desactivar rol" placement="top">
-                                    <i class="fa fa-arrow-down"></i>
+                                    <i class="fa fa-spinner fa-spin" *ngIf="procesandoEstatusRolId === row.data.id"></i>
+                                    <i class="fa fa-arrow-down" *ngIf="procesandoEstatusRolId !== row.data.id"></i>
                                 </button>
                             </div>
                         </div>

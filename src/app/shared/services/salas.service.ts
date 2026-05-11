@@ -46,6 +46,11 @@ export class SalaService {
     return this.http.get(`${environment.API_SECURITY}/salas/list`);
   }
 
+  /** GET /salas/by-cliente/{idCliente} */
+  obtenerSalasPorCliente(idCliente: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/salas/by-cliente/${idCliente}`);
+  }
+
   agregarSala(data: any) {
     return this.http.post(environment.API_SECURITY + '/salas', data);
   }

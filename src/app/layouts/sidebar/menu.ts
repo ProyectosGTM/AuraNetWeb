@@ -32,7 +32,8 @@ export const MENU: MenuItem[] = [
             { id: 4, label: 'Zonas', link: '/zonas' },
             { id: 6, label: 'Maquinas', link: '/maquinas' },
             { id: 37, label: 'Cajas', link: '/cajas' },
-            { id: 40, label: 'Afiliados', link: '/afiliados' }, 
+            { id: 40, label: 'Afiliados', link: '/afiliados' },
+            { id: 11, label: 'Monederos', icon: 'uil-moneybag-alt', link: '/monederos' },
         ]
     },    
 
@@ -40,7 +41,6 @@ export const MENU: MenuItem[] = [
     { id: 36, label: 'Boveda', icon: 'uil-wallet', link: '/tesoreria' },
     { id: 38, label: 'Ap. Turnos', icon: 'uil-clock', link: '/turnos' },
     /* { id: 58, label: 'Cajero', icon: 'uil-money-stack', link: '/cajero' }, */
-    { id: 11, label: 'Monederos', icon: 'uil-moneybag-alt', link: '/monederos' },
     { id: 41, label: 'Transacciones', icon: 'uil-exchange-alt', link: '/transacciones' },
     { id: 50, label: 'Promociones', icon: 'uil-gift', link: '/promociones' },
     { id: 27, label: 'Monitoreo', icon: 'uil-map', link: '/monitoreo' },

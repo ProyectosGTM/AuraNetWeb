@@ -18,6 +18,11 @@ export class MaquinasService {
     return this.http.get(`${environment.API_SECURITY}/maquinas/list`);
   }
 
+  /** GET /maquinas/by-sala/{idSala} — máquinas asignadas a esa sala (diagrama de distribución). */
+  obtenerMaquinasPorSala(idSala: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/maquinas/by-sala/${idSala}`);
+  }
+
   agregarMaquina(data: any) {
     return this.http.post(environment.API_SECURITY + '/maquinas', data);
   }

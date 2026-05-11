@@ -20,7 +20,7 @@
           </div>
         </div>
         <div class="row mt-3 gy-4">
-          <form [formGroup]="maquinaForm">
+          <form [formGroup]="maquinaForm" autocomplete="off">
             <div class="col-12">
               <!-- Sección: Información General -->
               <div class="form-section">
@@ -138,7 +138,8 @@
                           aria-hidden="true">*</span></span>
                       <dx-select-box [dataSource]="listaSalas" displayExpr="text" valueExpr="id"
                         formControlName="idSala" placeholder="Selecciona una sala..." searchEnabled="true"
-                        searchMode="contains" [showClearButton]="true" class="dx-select-box-custom dx-select-box-sala">
+                        searchMode="contains" [showClearButton]="true" [readOnly]="ubicacionMaquinaSalaReadonly"
+                        class="dx-select-box-custom dx-select-box-sala">
                       </dx-select-box>
                     </label>
                   </div>
@@ -147,7 +148,8 @@
                       <span class="field-label text-white">Zona</span>
                       <dx-select-box [dataSource]="listaZonas" displayExpr="text" valueExpr="id"
                         formControlName="idZona" placeholder="Selecciona una zona..." searchEnabled="true"
-                        searchMode="contains" [showClearButton]="true" class="dx-select-box-custom dx-select-box-zona">
+                        searchMode="contains" [showClearButton]="true" [readOnly]="ubicacionMaquinaZonaReadonly"
+                        class="dx-select-box-custom dx-select-box-zona">
                       </dx-select-box>
                     </label>
                   </div>
@@ -167,21 +169,33 @@
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Año de Fabricación</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar"></i>
-                        <input formControlName="anioFabricacion" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="anioFabricacion"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        [showClearButton]="true"
+                        [openOnFieldClick]="true"
+                        placeholder="Selecciona una fecha"
+                        [inputAttr]="dateBoxAttr('anio-fabricacion')"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Fecha de Adquisición</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-shopping-cart"></i>
-                        <input formControlName="fechaAdquisicion" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="fechaAdquisicion"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        [showClearButton]="true"
+                        [openOnFieldClick]="true"
+                        placeholder="Selecciona una fecha"
+                        [inputAttr]="dateBoxAttr('fecha-adquisicion')"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">
@@ -278,21 +292,33 @@
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Fecha Último Mantenimiento</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-wrench"></i>
-                        <input formControlName="fechaUltimoMantenimiento" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="fechaUltimoMantenimiento"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        [showClearButton]="true"
+                        [openOnFieldClick]="true"
+                        placeholder="Selecciona una fecha"
+                        [inputAttr]="dateBoxAttr('ultimo-mantenimiento')"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">
                     <label class="field">
                       <span class="field-label text-white">Próximo Mantenimiento</span>
-                      <div class="input-sleek">
-                        <i class="fas fa-calendar-check"></i>
-                        <input formControlName="proximoMantenimiento" class="sleek-control" type="date" />
-                        <span class="sleek-line"></span>
-                      </div>
+                      <dx-date-box
+                        formControlName="proximoMantenimiento"
+                        type="date"
+                        displayFormat="yyyy-MM-dd"
+                        dateSerializationFormat="yyyy-MM-dd"
+                        [showClearButton]="true"
+                        [openOnFieldClick]="true"
+                        placeholder="Selecciona una fecha"
+                        [inputAttr]="dateBoxAttr('proximo-mantenimiento')"
+                        class="dx-select-box-custom">
+                      </dx-date-box>
                     </label>
                   </div>
                   <div class="col-12 col-lg-4">

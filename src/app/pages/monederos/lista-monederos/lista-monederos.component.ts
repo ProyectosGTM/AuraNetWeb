@@ -1,18 +1,24 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
 import { forkJoin, lastValueFrom } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { MonederosServices } from 'src/app/shared/services/monederos.service';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import Swal from 'sweetalert2';
+import {
+  aplicarMontoBlurEnCampo,
+  aplicarMontoInputEnCampo,
+  textoMontoDesdeValorControl,
+} from 'src/app/shared/utils/monto-input-formato.util';
 
 /** Pestañas del panel Centro de Operaciones (mismo patrón que Promociones). */
-export type TabAccionesMonederos = 'movimientos' | 'transferencias' | 'administracion';
+export type TabAccionesMonederos = 'movimientos' | 'administracion';
 
 const promoTabPanelAnimation = trigger('promoTabPanel', [
   transition('* => *', [
@@ -77,6 +83,9 @@ export class ListaMonederosComponent {
   consultarSaldoForm: FormGroup;
   saldoData: any = null;
   consultandoSaldo = false;
+  /** Lista de monederos para el select de «Consultar saldo» (`GET monederos/list`). */
+  listaMonederosConsultaSaldo: { id?: number; numeroMonedero: string; text: string }[] = [];
+  cargandoMonederosConsultaSaldo = false;
 
   // Formulario para cambiar estatus de monedero
   cambiarEstatusForm: FormGroup;
@@ -102,11 +111,19 @@ export class ListaMonederosComponent {
   // Formulario para ajuste de saldo (solo GERENTE)
   ajusteMonederoForm: FormGroup;
   public listaMonederosDisponiblesAjuste: any[] = [];
-  public listaTipoSaldoAjuste: { id: number; text: string }[] = [
-    { id: 1, text: 'Efectivo' },
-    { id: 2, text: 'Promocional' },
-    { id: 3, text: 'Puntos' }
-  ];
+  public listaTipoSaldoAjuste: { id: number; text: string }[] = [];
+
+  guardandoCargarMonedero = false;
+  guardandoDescargarMonedero = false;
+  guardandoCambiarEstatusMonedero = false;
+  guardandoAjusteMonedero = false;
+  guardandoReemplazarMonedero = false;
+  guardandoTraspasoMonedero = false;
+  abriendoModalDescargar = false;
+  abriendoModalTraspaso = false;
+  abriendoModalAjuste = false;
+  abriendoModalMonederosAfiliado = false;
+  cargandoHistorialMonederoId: number | null = null;
 
   constructor(
     private router: Router,
@@ -154,7 +171,7 @@ export class ListaMonederosComponent {
     this.ajusteMonederoForm = this.fb.group({
       idMonedero: [null, Validators.required],
       tipoAjuste: ['positivo', Validators.required],
-      idTipoSaldo: [1, Validators.required],
+      idTipoSaldo: [null, Validators.required],
       monto: ['', [Validators.required, Validators.min(0.01)]],
       justificacion: ['', [Validators.required, Validators.minLength(1)]]
     });
@@ -258,10 +275,46 @@ export class ListaMonederosComponent {
     });
   }
 
+  private mapearTiposSaldoAjuste(resp: any): { id: number; text: string }[] {
+    const rows = Array.isArray(resp?.data) ? resp.data : [];
+    return rows
+      .filter((t: any) => {
+        if (t == null) return false;
+        if (t.estatus === undefined || t.estatus === null || t.estatus === '') return true;
+        return Number(t.estatus) === 1;
+      })
+      .slice()
+      .sort((a: any, b: any) => Number(a?.prioridadUso ?? 999) - Number(b?.prioridadUso ?? 999))
+      .map((t: any) => ({
+        id: Number(t.id),
+        text: String(t.nombre ?? t.codigo ?? '').trim() || 'Tipo saldo'
+      }))
+      .filter((row: { id: number }) => Number.isFinite(row.id));
+  }
+
   ajusteMonedero() {
-    this.monederosService.obtenerMonederos().subscribe({
-      next: (response) => {
-        this.listaMonederosDisponiblesAjuste = (response.data || []).map((m: any) => {
+    this.abriendoModalAjuste = true;
+    forkJoin({
+      monederos: this.monederosService.obtenerMonederos(),
+      tiposSaldo: this.monederosService.obtenerCatTiposSaldo()
+    })
+      .pipe(finalize(() => (this.abriendoModalAjuste = false)))
+      .subscribe({
+      next: (responses) => {
+        this.listaTipoSaldoAjuste = this.mapearTiposSaldoAjuste(responses.tiposSaldo);
+        if (this.listaTipoSaldoAjuste.length === 0) {
+          Swal.fire({
+            title: '¡Atención!',
+            text: 'No hay tipos de saldo disponibles en el catálogo.',
+            icon: 'warning',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Confirmar',
+          });
+          return;
+        }
+
+        this.listaMonederosDisponiblesAjuste = (responses.monederos.data || []).map((m: any) => {
           const nombreCompletoAfiliado = `${m?.nombreAfiliado || ''} ${m?.apellidoPaternoAfiliado || ''} ${m?.apellidoMaternoAfiliado || ''}`.trim() || 'Sin afiliado';
           return {
             ...m,
@@ -270,10 +323,13 @@ export class ListaMonederosComponent {
             text: `${m.numeroMonedero || ''} - ${m.alias || ''}`.trim()
           };
         });
+
+        const firstTipo = this.listaTipoSaldoAjuste[0]?.id ?? null;
+
         this.ajusteMonederoForm.reset({
           idMonedero: null,
           tipoAjuste: 'positivo',
-          idTipoSaldo: 1,
+          idTipoSaldo: firstTipo,
           monto: '',
           justificacion: ''
         });
@@ -288,7 +344,10 @@ export class ListaMonederosComponent {
       error: (error) => {
         Swal.fire({
           title: '¡Error!',
-          text: 'No se pudieron cargar los monederos.',
+          text:
+            error?.error?.message ||
+            error?.error ||
+            'No se pudieron cargar los datos para el ajuste de saldo.',
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -317,10 +376,14 @@ export class ListaMonederosComponent {
       monto: Number(this.ajusteMonederoForm.value.monto),
       justificacion: (this.ajusteMonederoForm.value.justificacion || '').trim()
     };
-    this.monederosService.ajusteMonedero(payload).subscribe({
+    this.guardandoAjusteMonedero = true;
+    this.monederosService
+      .ajusteMonedero(payload)
+      .pipe(finalize(() => (this.guardandoAjusteMonedero = false)))
+      .subscribe({
       next: () => {
         Swal.fire({
-          title: '¡Operación exitosa!',
+          title: '¡Operación Exitosa!',
           text: 'Se ha realizado el ajuste de saldo correctamente.',
           icon: 'success',
           background: '#0d121d',
@@ -347,7 +410,11 @@ export class ListaMonederosComponent {
 
   verHistorialMonedero(id: number, rowData?: any) {
     this.monederoSeleccionadoHistorial = rowData ? { id: rowData.id, numeroMonedero: rowData.numeroMonedero, alias: rowData.alias } : null;
-    this.monederosService.obtenerHistorialMovimientosMonedero(id).subscribe({
+    this.cargandoHistorialMonederoId = id;
+    this.monederosService
+      .obtenerHistorialMovimientosMonedero(id)
+      .pipe(finalize(() => (this.cargandoHistorialMonederoId = null)))
+      .subscribe({
       next: (response: any) => {
         const raw = response?.data !== undefined ? response.data : response;
         this.historialData = Array.isArray(raw) ? raw : Array.isArray(raw?.movimientos) ? raw.movimientos : [];
@@ -376,6 +443,24 @@ export class ListaMonederosComponent {
     if (this.modalRef) this.modalRef.close();
     this.historialData = [];
     this.monederoSeleccionadoHistorial = null;
+  }
+
+  /** Misma línea visual que el listado de afiliados (píldoras suaves por código CAT). */
+  obtenerClaseEstatusMonedero(row: any): string {
+    const codigo = String(row?.estatusMonederoCodigo ?? row?.codigoEstatusMonedero ?? '')
+      .trim()
+      .toUpperCase();
+    const nombre = String(row?.nombreEstatusMonedero ?? row?.estatusMonederoTexto ?? '')
+      .trim()
+      .toUpperCase();
+    const key = codigo || nombre;
+    if (key.includes('ACTIVO')) return 'estatus-afiliado-pill--activo';
+    if (key.includes('BLOQUEADO')) return 'estatus-afiliado-pill--bloqueado';
+    if (key.includes('EXTRAVIADO')) return 'estatus-afiliado-pill--extraviado';
+    if (key.includes('ROBADO')) return 'estatus-afiliado-pill--robado';
+    if (key.includes('REEMPLAZADO')) return 'estatus-afiliado-pill--reemplazado';
+    if (key.includes('CANCELADO')) return 'estatus-afiliado-pill--cancelado';
+    return 'estatus-afiliado-pill--default';
   }
 
   /** Usa icono/color del API si existe, sino fallback por nombre */
@@ -449,10 +534,14 @@ export class ListaMonederosComponent {
       motivo: (this.reemplazarMonederoForm.value.motivo || '').trim(),
       transferirSaldo: !!this.reemplazarMonederoForm.value.transferirSaldo
     };
-    this.monederosService.reemplazarMonedero(payload).subscribe({
+    this.guardandoReemplazarMonedero = true;
+    this.monederosService
+      .reemplazarMonedero(payload)
+      .pipe(finalize(() => (this.guardandoReemplazarMonedero = false)))
+      .subscribe({
       next: () => {
         Swal.fire({
-          title: '¡Operación exitosa!',
+          title: '¡Operación Exitosa!',
           text: 'Se ha reemplazado el monedero correctamente.',
           icon: 'success',
           background: '#0d121d',
@@ -495,10 +584,14 @@ export class ListaMonederosComponent {
       idEstatusMonedero: Number(this.cambiarEstatusForm.value.idEstatusMonedero),
       motivo: (this.cambiarEstatusForm.value.motivo || '').trim()
     };
-    this.monederosService.cambiarEstatus(payload).subscribe({
+    this.guardandoCambiarEstatusMonedero = true;
+    this.monederosService
+      .cambiarEstatus(payload)
+      .pipe(finalize(() => (this.guardandoCambiarEstatusMonedero = false)))
+      .subscribe({
       next: () => {
         Swal.fire({
-          title: '¡Operación exitosa!',
+          title: '¡Operación Exitosa!',
           text: 'Se ha cambiado el estatus del monedero.',
           icon: 'success',
           background: '#0d121d',
@@ -610,7 +703,7 @@ export class ListaMonederosComponent {
             const idEstatusMonedero = item?.idEstatusMonedero;
             const estatusMonedero = this.listaEstatusMonedero.find((e: any) => e.id === idEstatusMonedero);
             const estatusMonederoTexto = estatusMonedero?.nombre || item?.nombreEstatusMonedero || 'Sin registro';
-            const estatusMonederoColor = estatusMonedero?.color || '#6c757d';
+            const estatusMonederoCodigo = String(estatusMonedero?.codigo ?? item?.codigoEstatusMonedero ?? '').trim();
 
             return {
               ...item,
@@ -620,7 +713,7 @@ export class ListaMonederosComponent {
               esPrincipalTexto: item?.esPrincipal === 1 ? 'Sí' : 'No',
               nombreCompletoAfiliado: `${item?.nombreAfiliado || ''} ${item?.apellidoPaternoAfiliado || ''} ${item?.apellidoMaternoAfiliado || ''}`.trim(),
               estatusMonederoTexto,
-              estatusMonederoColor
+              estatusMonederoCodigo
             };
           });
 
@@ -797,7 +890,11 @@ export class ListaMonederosComponent {
       monto: Number(this.cargarMonederoForm.value.monto)
     };
 
-    this.monederosService.cargarMonedero(payload).subscribe({
+    this.guardandoCargarMonedero = true;
+    this.monederosService
+      .cargarMonedero(payload)
+      .pipe(finalize(() => (this.guardandoCargarMonedero = false)))
+      .subscribe({
       next: (response) => {
         Swal.fire({
           title: '¡Operación Exitosa!',
@@ -845,10 +942,13 @@ export class ListaMonederosComponent {
 
   descargarMonedero() {
     // Cargar listas necesarias
+    this.abriendoModalDescargar = true;
     forkJoin({
       cajas: this.cajasService.obtenerCajas(),
       monederos: this.monederosService.obtenerMonederos()
-    }).subscribe({
+    })
+      .pipe(finalize(() => (this.abriendoModalDescargar = false)))
+      .subscribe({
       next: (responses) => {
         this.listaCajasDescargar = this.mapearCajasDisponiblesParaSelect(responses.cajas);
 
@@ -886,6 +986,7 @@ export class ListaMonederosComponent {
   consultarSaldo() {
     this.saldoData = null;
     this.consultarSaldoForm.reset();
+    this.cargarListaMonederosConsultaSaldo();
     this.modalRef = this.modalService.open(this.modalConsultarSaldo, {
       size: 'lg',
       windowClass: 'modal-holder modal-consultar-saldo',
@@ -895,11 +996,38 @@ export class ListaMonederosComponent {
     });
   }
 
+  private cargarListaMonederosConsultaSaldo(): void {
+    this.cargandoMonederosConsultaSaldo = true;
+    this.monederosService
+      .obtenerMonederos()
+      .pipe(finalize(() => (this.cargandoMonederosConsultaSaldo = false)))
+      .subscribe({
+      next: (response: any) => {
+        const rows = Array.isArray(response?.data) ? response.data : [];
+        this.listaMonederosConsultaSaldo = rows
+          .map((m: any) => {
+            const numeroMonedero = String(m?.numeroMonedero ?? '').trim();
+            const alias = String(m?.alias ?? '').trim();
+            const suf = alias ? ` · ${alias}` : '';
+            return {
+              id: m?.id != null ? Number(m.id) : undefined,
+              numeroMonedero,
+              text: numeroMonedero ? `${numeroMonedero}${suf}` : (alias || 'Sin número'),
+            };
+          })
+          .filter((row: { numeroMonedero: string }) => row.numeroMonedero.length > 0);
+      },
+      error: () => {
+        this.listaMonederosConsultaSaldo = [];
+      },
+    });
+  }
+
   buscarSaldo() {
     if (this.consultarSaldoForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
-        text: 'Por favor ingrese el número del monedero.',
+        text: 'Selecciona el monedero que deseas consultar.',
         icon: 'warning',
         background: '#0d121d',
         confirmButtonColor: '#3085d6',
@@ -908,16 +1036,18 @@ export class ListaMonederosComponent {
       return;
     }
 
-    const numero = this.consultarSaldoForm.value.numero.trim();
+    const raw = this.consultarSaldoForm.value.numero;
+    const numero = raw == null ? '' : String(raw).trim();
     this.consultandoSaldo = true;
 
-    this.monederosService.consultarSaldoMonedero(numero).subscribe({
+    this.monederosService
+      .consultarSaldoMonedero(numero)
+      .pipe(finalize(() => (this.consultandoSaldo = false)))
+      .subscribe({
       next: (response) => {
-        this.consultandoSaldo = false;
         this.saldoData = response;
       },
       error: (error) => {
-        this.consultandoSaldo = false;
         Swal.fire({
           title: '¡Error!',
           text: error.error || 'No se pudo consultar el saldo del monedero.',
@@ -928,6 +1058,20 @@ export class ListaMonederosComponent {
         });
       }
     });
+  }
+
+  /** Mismo formato monetario visual que Cajas (`agregar-caja` → `monto-input-formato.util`). El `FormControl` sigue guardando número. */
+  onMontoModalInput(ev: Event, ctrl: AbstractControl | null): void {
+    aplicarMontoInputEnCampo(ev.target as HTMLInputElement, ctrl);
+  }
+
+  onMontoModalBlur(ev: Event, ctrl: AbstractControl | null): void {
+    aplicarMontoBlurEnCampo(ev.target as HTMLInputElement, ctrl);
+  }
+
+  onMontoModalFocus(ev: FocusEvent, ctrl: AbstractControl | null): void {
+    const el = ev.target as HTMLInputElement;
+    el.value = textoMontoDesdeValorControl(ctrl?.value);
   }
 
   formatearMoneda(valor: number | null | undefined): string {
@@ -984,7 +1128,11 @@ export class ListaMonederosComponent {
       monto: Number(this.descargarMonederoForm.value.monto)
     };
 
-    this.monederosService.descargarMonedero(payload).subscribe({
+    this.guardandoDescargarMonedero = true;
+    this.monederosService
+      .descargarMonedero(payload)
+      .pipe(finalize(() => (this.guardandoDescargarMonedero = false)))
+      .subscribe({
       next: (response) => {
         Swal.fire({
           title: '¡Operación Exitosa!',
@@ -1011,10 +1159,13 @@ export class ListaMonederosComponent {
   }
 
   traspasoMonedero() {
+    this.abriendoModalTraspaso = true;
     forkJoin({
       afiliados: this.monederosService.obtenerAfiliados(),
       cajas: this.cajasService.obtenerCajas()
-    }).subscribe({
+    })
+      .pipe(finalize(() => (this.abriendoModalTraspaso = false)))
+      .subscribe({
       next: (responses) => {
         this.listaAfiliadosTraspaso = (responses.afiliados.data || []).map((a: any) => {
           const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();
@@ -1097,7 +1248,11 @@ export class ListaMonederosComponent {
       idMonederoDestino: Number(vals.idMonederoDestino),
       monto: Number(vals.monto)
     };
-    this.monederosService.traspasoMonedero(payload).subscribe({
+    this.guardandoTraspasoMonedero = true;
+    this.monederosService
+      .traspasoMonedero(payload)
+      .pipe(finalize(() => (this.guardandoTraspasoMonedero = false)))
+      .subscribe({
       next: () => {
         Swal.fire({
           title: '¡Operación Exitosa!',
@@ -1127,7 +1282,11 @@ export class ListaMonederosComponent {
   }
 
   verMonederosPorAfiliado() {
-    this.monederosService.obtenerAfiliados().subscribe({
+    this.abriendoModalMonederosAfiliado = true;
+    this.monederosService
+      .obtenerAfiliados()
+      .pipe(finalize(() => (this.abriendoModalMonederosAfiliado = false)))
+      .subscribe({
       next: (response) => {
         this.listaAfiliadosMonederos = (response.data || []).map((a: any) => {
           const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();
@@ -1307,6 +1466,12 @@ export class ListaMonederosComponent {
       this.ajusteMonederoForm.reset();
       this.saldoData = null;
       this.consultandoSaldo = false;
+      this.guardandoCargarMonedero = false;
+      this.guardandoDescargarMonedero = false;
+      this.guardandoCambiarEstatusMonedero = false;
+      this.guardandoAjusteMonedero = false;
+      this.guardandoReemplazarMonedero = false;
+      this.guardandoTraspasoMonedero = false;
       this.monederoSeleccionadoCambio = null;
       this.monederoSeleccionadoReemplazar = null;
       this.listaMonederosAfiliado = [];

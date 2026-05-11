@@ -55,6 +55,11 @@ export class MonederosServices {
     return this.http.get(`${environment.API_SECURITY}/catestatusmonedero/list`);
   }
 
+  /** GET /cattipossaldo/list — catálogo de tipos de saldo (ajuste de monedero, etc.). */
+  obtenerCatTiposSaldo(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/cattipossaldo/list`);
+  }
+
   cargarMonedero(data: any): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/monederos/cargar`, data);
   }

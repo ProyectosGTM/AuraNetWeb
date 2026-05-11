@@ -380,6 +380,175 @@
   font-size: 14px;
 }
 
+/* Modal reemplazar: opción transferir saldo — checkbox a medida y texto muy visible */
+.reemplazar-transfer-highlight {
+  position: relative;
+  padding: 16px 18px 14px;
+  margin-top: 4px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(155, 89, 182, 0.14) 0%, rgba(80, 165, 241, 0.1) 55%, rgba(13, 18, 29, 0.65) 100%);
+  border: 1px solid rgba(155, 89, 182, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 28px rgba(80, 165, 241, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.25);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    background: linear-gradient(180deg, #f1b44c 0%, #9b59b6 50%, #50a5f1 100%);
+    opacity: 0.92;
+    pointer-events: none;
+  }
+}
+
+.reemplazar-transfer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  margin-left: 2px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fef3c7;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: rgba(245, 158, 11, 0.16);
+
+  i {
+    font-size: 12px;
+    color: #fbbf24;
+  }
+}
+
+.reemplazar-transfer-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.reemplazar-transfer-check__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.reemplazar-transfer-check__box {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+  border-radius: 8px;
+  border: 2px solid rgba(155, 89, 182, 0.75);
+  background: rgba(13, 18, 29, 0.95);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(80, 165, 241, 0.12);
+  display: grid;
+  place-items: center;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &::after {
+    content: '';
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg) translate(-0.5px, -1px);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
+}
+
+.reemplazar-transfer-check__input:checked + .reemplazar-transfer-check__box {
+  border-color: transparent;
+  background: linear-gradient(145deg, #9b59b6 0%, #7d3c98 52%, #3d8bd9 100%);
+  box-shadow:
+    0 4px 16px rgba(155, 89, 182, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+  &::after {
+    opacity: 1;
+  }
+}
+
+.reemplazar-transfer-check__input:focus-visible + .reemplazar-transfer-check__box {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(80, 165, 241, 0.45),
+    0 0 0 1px rgba(155, 89, 182, 0.55);
+}
+
+.reemplazar-transfer-check__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.reemplazar-transfer-check__lead {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #f8fafc;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 16px rgba(155, 89, 182, 0.35);
+
+  &::after {
+    content: '';
+    display: block;
+    margin-top: 8px;
+    height: 2px;
+    max-width: 220px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #9b59b6, #50a5f1, rgba(251, 191, 36, 0.65));
+    opacity: 0.95;
+  }
+}
+
+.reemplazar-transfer-check__detail {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: rgba(186, 230, 253, 0.95);
+
+  strong {
+    font-weight: 800;
+    color: #fde68a;
+  }
+}
+
+@media (hover: hover) {
+  .reemplazar-transfer-check:hover .reemplazar-transfer-check__box {
+    border-color: rgba(80, 165, 241, 0.65);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.35),
+      0 0 14px rgba(80, 165, 241, 0.15);
+  }
+}
+
 
 ::ng-deep {
 
@@ -489,6 +658,20 @@
 
   .modal-body-historial {
     padding: 24px;
+
+    .modal-afiliado-nombre-autoexclusion {
+      margin-bottom: 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(217, 119, 6, 0.12));
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(217, 119, 6, 0.15);
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.02em;
+      line-height: 1.35;
+    }
   }
 
   .modal-body-resumen {
@@ -1313,7 +1496,7 @@
 
   .empty-promociones {
     text-align: center;
-    padding: 40px 20px;
+    padding: 20px 20px;
     color: #9ca3af;
 
     i {
@@ -1336,7 +1519,7 @@
     .modal-header-consultar-saldo,
     .modal-header-reemplazar-monedero,
     .modal-header-traspaso-monedero,
-    .modal-header-monederos-afiliado {
+    .modal-header-monederos-por-afiliado-info {
       padding: 16px 20px;
 
       .modal-title {
@@ -1426,34 +1609,6 @@
   gap: 12px;
   margin-bottom: 16px;
   flex-wrap: wrap;
-}
-
-.historial-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  color: rgba(255, 255, 255, 0.9);
-
-  i {
-    color: #50a5f1;
-  }
-
-  span {
-    color: #9ca3af;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  b {
-    font-size: 13px;
-    font-weight: 800;
-  }
 }
 
 .historial-count {
@@ -2004,5 +2159,420 @@
   .saldos-grid {
     grid-template-columns: 1fr;
     max-height: 420px;
+  }
+}
+
+/* Píldoras de estatus monedero: mismo lenguaje visual que lista-afiliados */
+.estatus-afiliado-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.16);
+  color: #e2e8f0;
+  min-width: 112px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.estatus-afiliado-pill--activo {
+  background: rgba(34, 197, 94, 0.16);
+  border-color: rgba(34, 197, 94, 0.46);
+  color: #bbf7d0;
+}
+
+.estatus-afiliado-pill--bloqueado {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fde68a;
+}
+
+.estatus-afiliado-pill--extraviado {
+  background: rgba(249, 115, 22, 0.18);
+  border-color: rgba(249, 115, 22, 0.48);
+  color: #ffedd5;
+}
+
+.estatus-afiliado-pill--robado {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #fecaca;
+}
+
+.estatus-afiliado-pill--reemplazado {
+  background: rgba(107, 114, 128, 0.2);
+  border-color: rgba(148, 163, 184, 0.42);
+  color: #e5e7eb;
+}
+
+.estatus-afiliado-pill--cancelado {
+  background: rgba(55, 65, 81, 0.35);
+  border-color: rgba(100, 116, 139, 0.45);
+  color: #cbd5e1;
+}
+
+.estatus-afiliado-pill--default {
+  background: rgba(14, 165, 233, 0.16);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #bae6fd;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Modales de SOLO información (paleta resumen/monederos de afiliados)        */
+/* -------------------------------------------------------------------------- */
+
+.modal-info-moned-section-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  i {
+    color: #93c5fd;
+  }
+}
+
+@mixin afiliados-info-close-btn() {
+  filter: none !important;
+  opacity: 1 !important;
+  padding: 0.45rem 0.55rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+
+  &::before {
+    display: none;
+  }
+
+  i {
+    display: block;
+    color: #fff;
+    font-size: 1.15rem;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+  }
+}
+
+::ng-deep .modal-holder.modal-consultar-saldo {
+  .modal-header-consultar-saldo {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+    border-bottom: none !important;
+
+    .modal-title i {
+      color: #fff;
+    }
+  }
+
+  .modal-header-consultar-saldo .btn-close {
+    @include afiliados-info-close-btn();
+  }
+
+  .saldo-consultar-resultados.saldo-result-content {
+    padding: 8px 0 16px;
+  }
+
+  .saldo-consultar-resultados .saldo-section-title {
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: #f8fafc;
+    border-bottom-color: rgba(148, 163, 184, 0.22);
+
+    i {
+      color: #93c5fd;
+    }
+  }
+
+  .saldo-consultar-resultados .saldo-info-item {
+    background: linear-gradient(165deg, rgba(15, 23, 42, 0.85), rgba(2, 6, 23, 0.9));
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 8px 22px rgba(2, 6, 23, 0.32);
+
+    &:hover {
+      border-color: rgba(129, 140, 248, 0.32);
+      background: linear-gradient(165deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.93));
+      transform: translateY(-1px);
+    }
+
+    .saldo-info-label {
+      color: #94a3b8;
+      letter-spacing: 0.035em;
+    }
+
+    .saldo-info-value {
+      color: #f8fafc;
+      font-weight: 700;
+    }
+  }
+
+  .saldo-consultar-resultados .saldo-card {
+    background: linear-gradient(165deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.91));
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 10px 26px rgba(2, 6, 23, 0.35);
+
+    &::before {
+      height: 2px;
+      background: rgba(129, 140, 248, 0.35);
+      opacity: 1;
+    }
+
+    &:hover {
+      border-color: rgba(147, 197, 253, 0.28);
+      box-shadow: 0 14px 32px rgba(2, 6, 23, 0.42);
+      transform: translateY(-2px);
+    }
+
+    .saldo-card-label {
+      color: #94a3b8;
+      letter-spacing: 0.035em;
+    }
+
+    .saldo-card-value {
+      color: #f8fafc;
+    }
+
+    .saldo-card-icon {
+      background: rgba(56, 189, 248, 0.12) !important;
+      border: 1px solid rgba(147, 197, 253, 0.38);
+      color: #93c5fd !important;
+      box-shadow: none;
+      width: 48px !important;
+      height: 48px !important;
+    }
+  }
+
+  .saldo-consultar-resultados .estatus-badge.estatus-activo-badge {
+    color: #bbf7d0;
+    background-color: rgba(34, 197, 94, 0.16);
+    border: 1px solid rgba(74, 222, 128, 0.42);
+  }
+
+  .saldo-consultar-resultados .estatus-badge.estatus-inactivo-badge {
+    color: #fecaca;
+    background-color: rgba(239, 68, 68, 0.16);
+    border: 1px solid rgba(248, 113, 113, 0.42);
+  }
+
+  .saldo-consultar-resultados .promocion-item {
+    background: linear-gradient(165deg, rgba(15, 23, 42, 0.86), rgba(2, 6, 23, 0.9));
+    border: 1px solid rgba(148, 163, 184, 0.22);
+
+    &:hover {
+      border-color: rgba(147, 197, 253, 0.3);
+      background: linear-gradient(165deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.93));
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .promocion-icon {
+      background: rgba(56, 189, 248, 0.14) !important;
+      border: 1px solid rgba(147, 197, 253, 0.35);
+      color: #93c5fd;
+    }
+
+    .promocion-label {
+      color: #94a3b8;
+    }
+  }
+
+  .saldo-consultar-resultados .promocion-progress-fill {
+    background: linear-gradient(90deg, rgba(147, 197, 253, 0.95), rgba(167, 139, 250, 0.85));
+  }
+
+  .saldo-consultar-resultados .empty-promociones {
+    color: #94a3b8;
+
+    i {
+      opacity: 0.55;
+      color: #93c5fd;
+    }
+  }
+}
+
+::ng-deep .modal-holder.modal-historial-movimientos {
+  .modal-header-historial-monedero {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+    border-bottom: none !important;
+
+    .modal-title i {
+      color: #fff;
+    }
+
+    .header-badge {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+  }
+
+  .modal-header-historial-monedero .btn-close {
+    @include afiliados-info-close-btn();
+  }
+
+  .movimientos-list {
+    &::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.32);
+      border-radius: 10px;
+    }
+  }
+
+  .movimiento-item {
+    background: linear-gradient(165deg, rgba(15, 23, 42, 0.82), rgba(2, 6, 23, 0.88));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+
+    &:hover {
+      border-color: rgba(129, 140, 248, 0.3);
+      background: linear-gradient(165deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.92));
+      transform: translateX(2px);
+    }
+  }
+
+  .movimiento-icon {
+    border-radius: 10px !important;
+    border: 1px solid rgba(147, 197, 253, 0.32) !important;
+    box-shadow: none !important;
+
+    &, &.icon-retiro,
+    &.icon-reposicion,
+    &.icon-apertura,
+    &.icon-dotacion,
+    &.icon-devolucion,
+    &.icon-cierre,
+    &.icon-otro,
+    &.icon-carga,
+    &.icon-descarga,
+    &.icon-dinamico,
+    &.icon-traspaso,
+    &.icon-ajuste,
+    &.icon-reemplazo,
+    &.icon-juego,
+    &.icon-promo {
+      background: rgba(56, 189, 248, 0.12) !important;
+      color: #93c5fd !important;
+    }
+  }
+
+  .movimiento-tipo {
+    color: #f8fafc;
+  }
+
+  .movimiento-concepto {
+    color: #cbd5e1;
+  }
+
+  .movimiento-fecha,
+  .movimiento-usuario,
+  .movimiento-referencia {
+    color: #94a3b8;
+  }
+
+  .empty-state {
+    .empty-icon {
+      border-color: rgba(147, 197, 253, 0.32);
+      background: radial-gradient(circle at 30% 30%, rgba(124, 58, 237, 0.2), rgba(15, 23, 42, 0.6));
+      color: #93c5fd;
+    }
+
+    .empty-text {
+      color: #94a3b8;
+      font-weight: 600;
+    }
+  }
+
+  .modal-body-historial .modal-afiliado-nombre-autoexclusion {
+    border-color: rgba(196, 181, 253, 0.45);
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.16), rgba(124, 58, 237, 0.1));
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.22), 0 8px 26px rgba(124, 58, 237, 0.12);
+  }
+}
+
+::ng-deep .modal-holder.modal-monederos-afiliado {
+  .modal-header-info-afiliados.modal-header-monederos-por-afiliado-info {
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    border: none;
+    background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+    box-shadow: 0 4px 20px rgba(20, 184, 166, 0.28);
+    border-bottom: none !important;
+
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      i {
+        font-size: 22px;
+        color: #ecfdf9;
+      }
+    }
+  }
+
+  .modal-header-monederos-por-afiliado-info .btn-close {
+    @include afiliados-info-close-btn();
+  }
+
+  .monederos-por-afiliado-info-resultados .monederos-afiliado-list {
+    &::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.32);
+    }
+  }
+
+  .monederos-por-afiliado-info-resultados .monedero-afiliado-item {
+    background: linear-gradient(165deg, rgba(15, 23, 42, 0.85), rgba(2, 6, 23, 0.9));
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 8px 22px rgba(2, 6, 23, 0.3);
+
+    &:hover {
+      border-color: rgba(45, 212, 191, 0.32);
+      background: linear-gradient(165deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.93));
+    }
+  }
+
+  .monederos-por-afiliado-info-resultados .monedero-afiliado-title {
+    color: #f8fafc;
+    font-weight: 700;
+  }
+
+  .monederos-por-afiliado-info-resultados dt {
+    color: #94a3b8;
+  }
+
+  .monederos-por-afiliado-info-resultados dd {
+    color: #f1f5f9;
+  }
+
+  .monederos-por-afiliado-info-resultados .estatus-principal-badge {
+    color: #ccfbf1;
+    background-color: rgba(45, 212, 191, 0.16);
+    border: 1px solid rgba(45, 212, 191, 0.42);
+  }
+
+  .monederos-por-afiliado-info-resultados .estatus-badge.estatus-activo-badge {
+    color: #bbf7d0;
+    background-color: rgba(34, 197, 94, 0.16);
+    border: 1px solid rgba(74, 222, 128, 0.42);
+  }
+
+  .monederos-por-afiliado-info-resultados .estatus-badge.estatus-inactivo-badge {
+    color: #fecaca;
+    background-color: rgba(239, 68, 68, 0.16);
+    border: 1px solid rgba(248, 113, 113, 0.42);
   }
 }
