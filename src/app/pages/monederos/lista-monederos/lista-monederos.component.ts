@@ -8,14 +8,17 @@ import CustomStore from 'devextreme/data/custom_store';
 import { forkJoin, lastValueFrom } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
+import { AuthenticationService } from 'src/app/core/services/auth.service';
 import { MonederosServices } from 'src/app/shared/services/monederos.service';
 import { CajasService } from 'src/app/shared/services/cajas.service';
+import { TurnosActivosDescargaMonederoService } from 'src/app/shared/services/turnos-activos-descarga-monedero.service';
 import Swal from 'sweetalert2';
 import {
   aplicarMontoBlurEnCampo,
   aplicarMontoInputEnCampo,
   textoMontoDesdeValorControl,
 } from 'src/app/shared/utils/monto-input-formato.util';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
 
 /** Pestañas del panel Centro de Operaciones (mismo patrón que Promociones). */
 export type TabAccionesMonederos = 'movimientos' | 'administracion';
@@ -131,6 +134,9 @@ export class ListaMonederosComponent {
     private modalService: NgbModal,
     private fb: FormBuilder,
     private cajasService: CajasService,
+    private turnosActivosDescargaMonedero: TurnosActivosDescargaMonederoService,
+    private auth: AuthenticationService,
+    private rolAcceso: RolAccesoService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -154,7 +160,7 @@ export class ListaMonederosComponent {
     });
     this.traspasoMonederoForm = this.fb.group({
       idAfiliado: [null, Validators.required],
-      idCaja: [null, Validators.required],
+      idTurnoCaja: [null, Validators.required],
       idMonederoOrigen: [null, Validators.required],
       idMonederoDestino: [null, Validators.required],
       monto: ['', [Validators.required, Validators.min(0.01)]]
@@ -320,7 +326,7 @@ export class ListaMonederosComponent {
             ...m,
             id: Number(m.id),
             nombreCompletoAfiliado,
-            text: `${m.numeroMonedero || ''} - ${m.alias || ''}`.trim()
+            text: this.textoEtiquetaSelectMonedero(m)
           };
         });
 
@@ -815,6 +821,144 @@ export class ListaMonederosComponent {
     this.isGrouped = false;
   }
 
+  /** `idSala` del login para filtrar turnos activos en el modal de descarga. */
+  private obtenerIdSalaUsuarioLogueado(): number | null {
+    try {
+      const u = this.auth.getUser();
+      if (u == null) {
+        return null;
+      }
+      const raw = (u as unknown as { idSala?: unknown }).idSala;
+      if (raw === undefined || raw === null || raw === '') {
+        return null;
+      }
+      const n = Number(raw);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Etiqueta del combo: `Monedero: {número}` y `Nombre: {titular}` (nombre + apellido paterno del afiliado). */
+  private textoEtiquetaSelectMonedero(m: any): string {
+    const num = String(m?.numeroMonedero ?? '').trim();
+    const nom = String(m?.nombreAfiliado ?? '').trim();
+    const apPat = String(m?.apellidoPaternoAfiliado ?? '').trim();
+    const titular = `${nom} ${apPat}`.trim();
+    const parteMonedero = num ? `Monedero: ${num}` : 'Monedero: —';
+    const parteNombre = titular ? `Nombre: ${titular}` : '';
+    if (parteNombre) {
+      return `${parteMonedero} · ${parteNombre}`;
+    }
+    if (num) {
+      return parteMonedero;
+    }
+    if (titular) {
+      return `Nombre: ${titular}`;
+    }
+    const alias = String(m?.alias ?? '').trim();
+    return alias ? `Monedero: ${alias}` : 'Monedero';
+  }
+
+  /**
+   * Traspaso (GET /monederos/afiliado/…): `Monedero: {número}` y `Saldo: {redimible}` desde `saldos.redimible`.
+   * Acepta `numero` o `numeroMonedero` según el contrato del API.
+   */
+  private textoEtiquetaSelectMonederoTraspaso(m: any): string {
+    const num = String(m?.numeroMonedero ?? m?.numero ?? '').trim();
+    const rawRed = m?.saldos?.redimible ?? m?.redimible;
+    let saldoTxt = '—';
+    if (rawRed !== undefined && rawRed !== null && rawRed !== '') {
+      const n = Number(rawRed);
+      if (Number.isFinite(n)) {
+        saldoTxt = this.formatearMoneda(n);
+      }
+    }
+    const parteMonedero = num ? `Monedero: ${num}` : 'Monedero: —';
+    const parteSaldo = `Saldo: ${saldoTxt}`;
+    return `${parteMonedero} · ${parteSaldo}`;
+  }
+
+  /**
+   * Normaliza la respuesta de `GET /monederos/afiliado/{idAfiliado}` a un arreglo de monederos.
+   */
+  private extraerListaMonederosRespuestaAfiliado(response: any): any[] {
+    if (response == null) {
+      return [];
+    }
+    const root = response.data != null ? response.data : response;
+    if (Array.isArray(root)) {
+      return root;
+    }
+    if (root && typeof root === 'object') {
+      if (Array.isArray(root.monederos)) {
+        return root.monederos;
+      }
+      if (Array.isArray(root.data)) {
+        return root.data;
+      }
+      if (Array.isArray(root.items)) {
+        return root.items;
+      }
+    }
+    return [];
+  }
+
+  /**
+   * Cajas derivadas de turnos abiertos (`GET /pos/turnos/activos`).
+   * - `idCaja` (defecto): `id` del combo = id de caja → `POST /pos/monederos/descargar`.
+   * - `idTurnoCaja`: `id` del combo = id del turno → `POST /monederos/traspaso`.
+   */
+  private mapearCajasDesdeTurnosActivos(
+    respTurnos: any,
+    valorSelect: 'idCaja' | 'idTurnoCaja' = 'idCaja'
+  ): any[] {
+    const raw = respTurnos?.data ?? respTurnos;
+    const arr = Array.isArray(raw) ? raw : raw != null ? [raw] : [];
+    const seen = new Set<number>();
+    const out: any[] = [];
+    for (const t of arr) {
+      const cajaNested = t?.caja;
+      const cajaSrc =
+        cajaNested != null && typeof cajaNested === 'object' && !Array.isArray(cajaNested) ? cajaNested : t;
+      const idCaja = Number(cajaSrc?.id ?? t?.idCaja);
+      const idTurnoVal = Number(t?.idTurnoCaja ?? t?.idTurno ?? t?.id);
+
+      if (valorSelect === 'idTurnoCaja') {
+        if (!Number.isFinite(idTurnoVal) || idTurnoVal <= 0 || seen.has(idTurnoVal)) {
+          continue;
+        }
+        seen.add(idTurnoVal);
+      } else {
+        if (!Number.isFinite(idCaja) || idCaja <= 0 || seen.has(idCaja)) {
+          continue;
+        }
+        seen.add(idCaja);
+      }
+
+      const codigo = String(cajaSrc?.codigo ?? t?.codigoCaja ?? t?.codigo ?? '').trim();
+      const nombre = String(cajaSrc?.nombre ?? t?.nombreCaja ?? t?.nombre ?? '').trim();
+      let text = '';
+      if (codigo && nombre) {
+        text = `Nombre: ${nombre} · Código: ${codigo}`;
+      } else if (codigo) {
+        text = `Código: ${codigo}`;
+      } else if (nombre) {
+        text = `Nombre: ${nombre}`;
+      } else {
+        text = Number.isFinite(idCaja) && idCaja > 0 ? `Caja #${idCaja}` : 'Caja';
+      }
+      const idTurnoTexto = t?.id ?? t?.idTurno ?? t?.idTurnoCaja;
+      if (idTurnoTexto != null && idTurnoTexto !== '') {
+        text = `${text} · Turno #${idTurnoTexto}`;
+      }
+
+      const comboId = valorSelect === 'idTurnoCaja' ? idTurnoVal : idCaja;
+      out.push({ ...t, id: comboId, idCaja, idTurnoCaja: idTurnoVal, text });
+    }
+    return out;
+  }
+
   /**
    * Cajas donde el POS puede mover efectivo (cargar/descargar monedero, traspaso).
    * Incluye estatus legados 1/2 y cajas DISPONIBLE (p. ej. id 5 con turno), según /cajas/list.
@@ -869,7 +1013,7 @@ export class ListaMonederosComponent {
             ...m,
             id: Number(m.id),
             nombreCompletoAfiliado,
-            text: `${m.numeroMonedero || ''} - ${m.alias || ''}`.trim()
+            text: this.textoEtiquetaSelectMonedero(m)
           };
         });
 
@@ -963,17 +1107,43 @@ export class ListaMonederosComponent {
     }
   }
 
+  /**
+   * `fechaMovimiento` del historial en ISO con `Z` (UTC). Usa componentes UTC para que la hora
+   * en pantalla coincida con la del JSON del servicio (p. ej. 12:03 en `...T12:03:00.000Z`).
+   */
+  formatearFechaHoraMovimientoHistorial(fecha: string | null): string {
+    if (!fecha) return 'Sin registro';
+    try {
+      const d = new Date(fecha);
+      if (isNaN(d.getTime())) return 'Sin registro';
+      const dd = String(d.getUTCDate()).padStart(2, '0');
+      const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const yyyy = d.getUTCFullYear();
+      const hh = String(d.getUTCHours()).padStart(2, '0');
+      const min = String(d.getUTCMinutes()).padStart(2, '0');
+      return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+    } catch {
+      return 'Sin registro';
+    }
+  }
+
   descargarMonedero() {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('descargarEfectivoMonedero', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('descargarEfectivoMonedero');
+      return;
+    }
     // Cargar listas necesarias
     this.abriendoModalDescargar = true;
+    const idSala = this.obtenerIdSalaUsuarioLogueado();
     forkJoin({
-      cajas: this.cajasService.obtenerCajas(),
+      turnosActivos: this.turnosActivosDescargaMonedero.obtenerTurnosActivosConSala(idSala),
       monederos: this.monederosService.obtenerMonederos()
     })
       .pipe(finalize(() => (this.abriendoModalDescargar = false)))
       .subscribe({
       next: (responses) => {
-        this.listaCajasDescargar = this.mapearCajasDisponiblesParaSelect(responses.cajas);
+        this.listaCajasDescargar = this.mapearCajasDesdeTurnosActivos(responses.turnosActivos);
 
         this.listaMonederosDisponiblesDescargar = (responses.monederos.data || []).map((m: any) => {
           const nombreCompletoAfiliado = `${m?.nombreAfiliado || ''} ${m?.apellidoPaternoAfiliado || ''} ${m?.apellidoMaternoAfiliado || ''}`.trim() || 'Sin afiliado';
@@ -981,7 +1151,7 @@ export class ListaMonederosComponent {
             ...m,
             id: Number(m.id),
             nombreCompletoAfiliado,
-            text: `${m.numeroMonedero || ''} - ${m.alias || ''}`.trim()
+            text: this.textoEtiquetaSelectMonedero(m)
           };
         });
 
@@ -1030,12 +1200,10 @@ export class ListaMonederosComponent {
         this.listaMonederosConsultaSaldo = rows
           .map((m: any) => {
             const numeroMonedero = String(m?.numeroMonedero ?? '').trim();
-            const alias = String(m?.alias ?? '').trim();
-            const suf = alias ? ` · ${alias}` : '';
             return {
               id: m?.id != null ? Number(m.id) : undefined,
               numeroMonedero,
-              text: numeroMonedero ? `${numeroMonedero}${suf}` : (alias || 'Sin número'),
+              text: this.textoEtiquetaSelectMonedero(m),
             };
           })
           .filter((row: { numeroMonedero: string }) => row.numeroMonedero.length > 0);
@@ -1133,6 +1301,11 @@ export class ListaMonederosComponent {
   }
 
   guardarDescargarMonedero() {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('descargarEfectivoMonedero', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('descargarEfectivoMonedero');
+      return;
+    }
     if (this.descargarMonederoForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
@@ -1183,9 +1356,10 @@ export class ListaMonederosComponent {
 
   traspasoMonedero() {
     this.abriendoModalTraspaso = true;
+    const idSala = this.obtenerIdSalaUsuarioLogueado();
     forkJoin({
       afiliados: this.monederosService.obtenerAfiliados(),
-      cajas: this.cajasService.obtenerCajas()
+      turnosActivos: this.turnosActivosDescargaMonedero.obtenerTurnosActivosConSala(idSala)
     })
       .pipe(finalize(() => (this.abriendoModalTraspaso = false)))
       .subscribe({
@@ -1194,9 +1368,13 @@ export class ListaMonederosComponent {
           const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();
           return { ...a, id: Number(a.id), text: text || 'Sin nombre' };
         });
-        this.listaCajasTraspaso = this.mapearCajasDisponiblesParaSelect(responses.cajas);
+        this.listaCajasTraspaso = this.mapearCajasDesdeTurnosActivos(responses.turnosActivos, 'idTurnoCaja');
         this.listaMonederosTraspaso = [];
-        this.traspasoMonederoForm.patchValue({ idMonederoOrigen: null, idMonederoDestino: null });
+        this.traspasoMonederoForm.patchValue({
+          idTurnoCaja: null,
+          idMonederoOrigen: null,
+          idMonederoDestino: null,
+        });
         this.modalRef = this.modalService.open(this.modalTraspaso, {
           size: 'lg',
           windowClass: 'modal-holder modal-traspaso',
@@ -1219,25 +1397,29 @@ export class ListaMonederosComponent {
   }
 
   onAfiliadoChangeTraspaso(event: any) {
-    const idAfiliado = event.value;
-    this.traspasoMonederoForm.patchValue({ idMonederoOrigen: null, idMonederoDestino: null });
-    if (!idAfiliado) {
+    const idRaw = event?.value ?? this.traspasoMonederoForm.get('idAfiliado')?.value;
+    const idAfiliado = idRaw != null && idRaw !== '' ? Number(idRaw) : NaN;
+    this.traspasoMonederoForm.patchValue({
+      idTurnoCaja: null,
+      idMonederoOrigen: null,
+      idMonederoDestino: null,
+    });
+    if (!Number.isFinite(idAfiliado) || idAfiliado <= 0) {
       this.listaMonederosTraspaso = [];
       return;
     }
     this.monederosService.obtenerMonederosPorAfiliado(idAfiliado).subscribe({
       next: (response) => {
-        const data = response.data || response;
-        const lista = Array.isArray(data) ? data : (data?.monederos || []);
+        const lista = this.extraerListaMonederosRespuestaAfiliado(response);
         this.listaMonederosTraspaso = lista.map((m: any) => ({
           ...m,
           id: Number(m.id),
-          text: `${m.numeroMonedero || ''} - ${m.alias || ''}`.trim()
+          text: this.textoEtiquetaSelectMonederoTraspaso(m),
         }));
       },
       error: () => {
         this.listaMonederosTraspaso = [];
-      }
+      },
     });
   }
 
@@ -1266,7 +1448,7 @@ export class ListaMonederosComponent {
       return;
     }
     const payload = {
-      idCaja: Number(vals.idCaja),
+      idTurnoCaja: Number(vals.idTurnoCaja),
       idMonederoOrigen: Number(vals.idMonederoOrigen),
       idMonederoDestino: Number(vals.idMonederoDestino),
       monto: Number(vals.monto)
@@ -1466,8 +1648,7 @@ export class ListaMonederosComponent {
     this.monederosService.obtenerMonederosPorAfiliado(idAfiliado).subscribe({
       next: (response) => {
         this.cargandoMonederosAfiliado = false;
-        const data = response.data || response;
-        this.listaMonederosAfiliado = Array.isArray(data) ? data : (data?.monederos || []);
+        this.listaMonederosAfiliado = this.extraerListaMonederosRespuestaAfiliado(response);
       },
       error: () => {
         this.cargandoMonederosAfiliado = false;

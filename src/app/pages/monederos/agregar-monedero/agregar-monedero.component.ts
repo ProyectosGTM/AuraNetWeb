@@ -44,7 +44,7 @@ export class AgregarMonederoComponent implements OnInit {
         this.title = 'Actualizar Monedero';
         this.submitButton = 'Actualizar';
         forkJoin({
-          afiliados: this.monederosService.obtenerAfiliadosSinMonedero(),
+          afiliados: this.monederosService.obtenerAfiliados(),
           estatusMonedero: this.monederosService.obtenerEstatusMonedero()
         }).subscribe({
           next: (responses) => {
@@ -61,7 +61,7 @@ export class AgregarMonederoComponent implements OnInit {
         });
       } else {
         forkJoin({
-          afiliados: this.monederosService.obtenerAfiliadosSinMonedero(),
+          afiliados: this.monederosService.obtenerAfiliados(),
           estatusMonedero: this.monederosService.obtenerEstatusMonedero()
         }).subscribe({
           next: (responses) => this.procesarListas(responses),
@@ -84,12 +84,12 @@ export class AgregarMonederoComponent implements OnInit {
   }
 
   private cargarListasIndividualmente() {
-    this.obtenerAfiliadosSinMonedero();
+    this.obtenerAfiliados();
     this.obtenerEstatusMonedero();
   }
 
-  obtenerAfiliadosSinMonedero(): void {
-    this.monederosService.obtenerAfiliadosSinMonedero().subscribe({
+  obtenerAfiliados(): void {
+    this.monederosService.obtenerAfiliados().subscribe({
       next: (response: any) => {
         this.listaAfiliados = (response.data || []).map((a: any) => {
           const text = `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim();

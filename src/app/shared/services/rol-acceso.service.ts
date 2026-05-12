@@ -21,7 +21,8 @@ export type AccionConControlRol =
   | 'suspenderTurno'
   | 'reactivarTurno'
   | 'corteParcialTurno'
-  | 'registrarPromocion';
+  | 'registrarPromocion'
+  | 'descargarEfectivoMonedero';
 
 /** Nombres por id de `user.rol` / login; alineado con `GET /roles/list` (contrato en docs). */
 const ROLES_CATALOGO: Record<string, string> = {
@@ -179,6 +180,14 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
     titulo: 'No puedes registrar promociones',
     subtitulo:
       'Con tu usuario no está permitido dar de alta promociones. Pide apoyo a un usuario con perfil Cliente o Administrador.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  /** Descarga de efectivo desde monedero a caja — solo Cajero (`user.rol` `7`). */
+  descargarEfectivoMonedero: {
+    rolesPermitidosIds: ['7'],
+    titulo: 'No puedes descargar efectivo del monedero',
+    subtitulo:
+      'Con tu usuario no está permitido retirar efectivo de un monedero hacia caja. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
 };

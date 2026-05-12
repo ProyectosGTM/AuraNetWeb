@@ -79,7 +79,7 @@ export class MonederosServices {
 
   /** POST monederos/traspaso - Traspasar saldo entre monederos del mismo afiliado */
   traspasoMonedero(payload: {
-    idCaja: number;
+    idTurnoCaja: number;
     idMonederoOrigen: number;
     idMonederoDestino: number;
     monto: number;
@@ -87,7 +87,7 @@ export class MonederosServices {
     return this.http.post(`${environment.API_SECURITY}/monederos/traspaso`, payload);
   }
 
-  /** GET monederos/afiliado/{idAfiliado} - Obtener monederos de un afiliado */
+  /** GET /monederos/afiliado/{idAfiliado} — monederos del afiliado (p. ej. traspaso origen/destino). */
   obtenerMonederosPorAfiliado(idAfiliado: number): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/monederos/afiliado/${idAfiliado}`);
   }

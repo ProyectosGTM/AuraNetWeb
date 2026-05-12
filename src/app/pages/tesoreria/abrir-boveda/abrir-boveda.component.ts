@@ -84,6 +84,27 @@ export class AbrirBovedaComponent implements OnInit, AfterViewInit {
   }
 
   /**
+   * Misma lógica que en monederos (`mapearCajasDisponiblesParaSelect`): /cajas/list puede traer
+   * "Disponible" con id numérico distinto de 1/2 (p. ej. 5); sin esto el select queda vacío.
+   */
+  private esCajaDisponibleParaAbrirBoveda(c: any): boolean {
+    const estatus = Number(c.idEstatusCaja ?? c.IdEstatusCaja ?? NaN);
+    if (estatus === 1 || estatus === 2 || estatus === 5) {
+      return true;
+    }
+    const cod = String(
+      c.codigoEstatusCaja ??
+        c.CodigoEstatusCaja ??
+        c.nombreEstatusCaja ??
+        c.NombreEstatusCaja ??
+        '',
+    )
+      .trim()
+      .toUpperCase();
+    return cod === 'DISPONIBLE';
+  }
+
+  /**
    * Actualiza el select de cajas según la sala (mismo listado que recarga /cajas/list).
    */
   private refrescarOpcionesCajasPorSala(idSala: number | string | null | undefined): void {
@@ -155,15 +176,12 @@ export class AbrirBovedaComponent implements OnInit, AfterViewInit {
 
         const cajasData = responses.cajas?.data ?? responses.cajas ?? [];
         const cajasArray = Array.isArray(cajasData) ? cajasData : [];
-        const cajasDisponibles = cajasArray.filter((c: any) => {
-          const estatus = Number(c.idEstatusCaja);
-          return estatus === 1 || estatus === 2;
-        });
+        const cajasDisponibles = cajasArray.filter((c: any) => this.esCajaDisponibleParaAbrirBoveda(c));
         this.listaCajasTodas = cajasDisponibles.map((c: any) => ({
           ...c,
-          id: Number(c.id),
+          id: Number(c.id ?? c.Id),
           idSala: Number(c.idSala ?? c.IdSala ?? 0),
-          text: `${c.nombre || ''}`.trim() || 'Caja sin nombre'
+          text: `${c.codigo || c.Codigo || ''} - ${c.nombre || c.Nombre || ''}`.trim() || 'Caja sin nombre',
         }));
         this.refrescarOpcionesCajasPorSala(this.abrirTesoreriaForm.get('idSala')?.value);
       },

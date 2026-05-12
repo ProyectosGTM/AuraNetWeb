@@ -362,7 +362,7 @@
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-turno">
                         </dx-select-box>
-                        <div *ngIf="listaCajasDescargar.length === 0" class="text-muted small mt-1">No hay cajas disponibles</div>
+                        <div *ngIf="listaCajasDescargar.length === 0" class="text-muted small mt-1">No hay cajas con turno activo disponibles</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
@@ -515,7 +515,7 @@
                     <div class="movimiento-meta">
                         <span class="movimiento-fecha" *ngIf="m.fechaMovimiento">
                             <i class="fas fa-clock"></i>
-                            {{ formatearFechaHora(m.fechaMovimiento) }}
+                            {{ formatearFechaHoraMovimientoHistorial(m.fechaMovimiento) }}
                         </span>
                         <span class="movimiento-usuario" *ngIf="m.contextoOperacion?.nombre">
                             <i class="fas fa-cash-register"></i>
@@ -966,14 +966,14 @@
                             [dataSource]="listaCajasTraspaso"
                             displayExpr="text"
                             valueExpr="id"
-                            formControlName="idCaja"
+                            formControlName="idTurnoCaja"
                             placeholder="Selecciona una caja..."
                             searchEnabled="true"
                             searchMode="contains"
                             [showClearButton]="true"
                             class="dx-select-box-custom dx-select-box-turno">
                         </dx-select-box>
-                        <div *ngIf="listaCajasTraspaso.length === 0" class="text-muted small mt-1">No hay cajas disponibles</div>
+                        <div *ngIf="listaCajasTraspaso.length === 0" class="text-muted small mt-1">No hay cajas con turno activo disponibles</div>
                     </label>
                 </div>
                 <div class="col-12 col-md-6">
