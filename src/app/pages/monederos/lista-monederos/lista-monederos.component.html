@@ -28,6 +28,18 @@
                                 <i class="fas fa-expand"></i>
                                 <span>Contraer Grid</span>
                             </button>
+                            <button
+                                type="button"
+                                class="btn-title btn-title--toggle"
+                                [class.btn-title--toggle-on]="mostrarTodosEstatus"
+                                [attr.aria-pressed]="mostrarTodosEstatus"
+                                (click)="toggleMostrarTodosEstatus()"
+                                ngbTooltip="Incluye monederos en todos los estatus"
+                                placement="top">
+                                <i class="fas" [ngClass]="mostrarTodosEstatus ? 'fa-eye' : 'fa-eye-slash'"></i>
+                                <span>Todos los estatus</span>
+                                <span class="btn-title-toggle-pill">{{ mostrarTodosEstatus ? 'ON' : 'OFF' }}</span>
+                            </button>
                             <button (click)="limpiarCampos()" type="button" class="btn-title btn-title--danger">
                                 <i class="fas fa-sync-alt"></i>
                                 <span>Restablecer</span>
@@ -172,7 +184,7 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
-                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="220"></dxi-column>
+                        <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="270"></dxi-column>
                         <dxi-column dataField="numeroMonedero" caption="Número Monedero" alignment="center" dataType="string" [width]="200" [allowSearch]="true"></dxi-column>
                         <dxi-column caption="Estatus Monedero" cellTemplate="EstatusMonedero" alignment="center" dataType="string" [width]="150"></dxi-column>
                         <dxi-column dataField="codigoRFID" caption="Código RFID" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
@@ -214,6 +226,14 @@
                                     ngbTooltip="Ver historial de movimientos" placement="top">
                                     <i class="fa fa-spinner fa-spin" *ngIf="cargandoHistorialMonederoId === row.data.id"></i>
                                     <i class="fa fa-history" *ngIf="cargandoHistorialMonederoId !== row.data.id"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" class="btnAcciones btnAcciones--monederos-consultar-saldo-grid"
+                                    (click)="consultarSaldoDesdeAccionesFila(row.data)"
+                                    ngbTooltip="Consultar saldo de este monedero" placement="top"
+                                    aria-label="Consultar saldo de este monedero">
+                                    <i class="fas fa-search-dollar" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div>
@@ -552,7 +572,7 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--info">
             <i class="fas fa-info-circle"></i>
-            <span>Realiza un ajuste manual de saldo. Solo GERENTE puede realizar ajustes. Requiere justificación obligatoria.</span>
+            <span>Realiza un ajuste manual de saldo. Requiere justificación obligatoria y un perfil con permiso para esta operación.</span>
         </div>
         <form [formGroup]="ajusteMonederoForm">
             <div class="row g-3">
@@ -723,7 +743,11 @@
         </button>
     </div>
     <div class="modal-body modal-body-resumen">
-        <div *ngIf="!saldoData">
+        <div *ngIf="cargandoConsultaSaldoFila" class="saldo-consulta-fila-loading text-center py-5 px-3">
+            <i class="fas fa-spinner fa-spin fa-2x saldo-consulta-fila-loading__icon mb-3" aria-hidden="true"></i>
+            <p class="text-white-50 mb-0">Consultando saldo del monedero…</p>
+        </div>
+        <div *ngIf="!saldoData && !cargandoConsultaSaldoFila">
             <div class="form-indication form-indication--info">
                 <i class="fas fa-search-dollar"></i>
                 <span>Consulta el saldo disponible (efectivo, promocional, puntos) y los datos del monedero seleccionándolo del listado.</span>
@@ -911,12 +935,11 @@
         </div>
     </div>
     <div class="modal-footer modal-accion-footer">
-        <button type="button" class="btn-alt btn-alt--cancel" (click)="saldoData ? saldoData = null : cerrarModal()">
-            <i class="fas fa-arrow-left" *ngIf="saldoData"></i>
-            <i class="fas fa-times" *ngIf="!saldoData"></i>
-            <span>{{ saldoData ? 'Nueva Consulta' : 'Cancelar' }}</span>
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="onPieIzquierdoModalConsultarSaldo()">
+            <i class="fas" [ngClass]="iconoPieIzquierdoConsultarSaldo()" aria-hidden="true"></i>
+            <span>{{ etiquetaPieIzquierdoConsultarSaldo() }}</span>
         </button>
-        <button *ngIf="!saldoData" type="button" class="btn btn-monederos-consultar-saldo" (click)="buscarSaldo()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo || cargandoMonederosConsultaSaldo">
+        <button *ngIf="!saldoData && !cargandoConsultaSaldoFila" type="button" class="btn btn-monederos-consultar-saldo" (click)="buscarSaldo()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo || cargandoMonederosConsultaSaldo">
             <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i>
             <i class="fas fa-search" *ngIf="!consultandoSaldo"></i>
             {{ consultandoSaldo ? 'Consultando...' : 'Consultar' }}

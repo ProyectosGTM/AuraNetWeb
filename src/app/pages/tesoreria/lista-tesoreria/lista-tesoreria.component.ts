@@ -19,6 +19,31 @@ import {
 /** Pestañas del panel Centro de Operaciones (mismo patrón que Promociones). */
 export type TabAccionesBoveda = 'apertura' | 'efectivo';
 
+/** Catálogo de estatus de tesorería (UI); alineado con `GET /catestatustesoreria/list`. */
+const CATALOGO_ESTATUS_TESORERIA_UI: Record<
+  string,
+  { codigo: string; nombre: string; color: string; descripcion: string }
+> = {
+  '1': {
+    codigo: 'ABIERTA',
+    nombre: 'Abierta',
+    color: '#22c55e',
+    descripcion: 'Tesorería operativa',
+  },
+  '2': {
+    codigo: 'CERRANDO',
+    nombre: 'En cierre',
+    color: '#f59e0b',
+    descripcion: 'Tesorería en proceso de cierre',
+  },
+  '3': {
+    codigo: 'CERRADA',
+    nombre: 'Cerrada',
+    color: '#6b7280',
+    descripcion: 'Tesorería cerrada del día',
+  },
+};
+
 const promoTabPanelAnimation = trigger('promoTabPanel', [
   transition('* => *', [
     style({ opacity: 0, transform: 'translateY(10px)' }),
@@ -54,6 +79,7 @@ export class ListaTesoreriaComponent {
   tabAcciones: TabAccionesBoveda = 'apertura';
 
   @ViewChild('modalResumen', { static: false }) modalResumen!: TemplateRef<any>;
+  @ViewChild('modalBovedaAbiertaSala', { static: false }) modalBovedaAbiertaSala!: TemplateRef<any>;
   @ViewChild('modalHistorial', { static: false }) modalHistorial!: TemplateRef<any>;
   @ViewChild('modalCerrarTesoreria', { static: false }) modalCerrarTesoreria!: TemplateRef<any>;
   @ViewChild('modalReponerTesoreria', { static: false }) modalReponerTesoreria!: TemplateRef<any>;
@@ -64,6 +90,10 @@ export class ListaTesoreriaComponent {
   @ViewChild('inpMontoRetirar', { static: false }) inpMontoRetirar?: ElementRef<HTMLInputElement>;
   
   public resumenData: any = null;
+  /** Respuesta de bóveda abierta por sala (`GET .../abierta/creada/sala/{id}`). */
+  bovedaAbiertaSalaData: any = null;
+  /** Sin tesorería abierta: mismo modal con mensaje claro. */
+  bovedaAbiertaSalaVacio: { mensaje: string; nombreSala?: string } | null = null;
   public historialData: any[] = [];
   private modalRef?: NgbModalRef;
 
@@ -184,6 +214,21 @@ export class ListaTesoreriaComponent {
     }
   }
 
+  /**
+   * Fecha contable `YYYY-MM-DD` sin pasar por medianoche UTC (evita cambio de día en zona local).
+   */
+  formatearFechaContable(fecha: string | null | undefined): string {
+    if (fecha == null || String(fecha).trim() === '') {
+      return 'Sin registro';
+    }
+    const s = String(fecha).trim();
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+    if (m) {
+      return `${m[3]}/${m[2]}/${m[1]}`;
+    }
+    return this.formatearFecha(s);
+  }
+
   formatearFechaHora(fecha: string | null): string {
     if (!fecha) return 'Sin registro';
     try {
@@ -200,9 +245,133 @@ export class ListaTesoreriaComponent {
     }
   }
 
+  /**
+   * ISO con `Z` (UTC): componentes UTC para alinear la hora con el JSON del servicio (mismo criterio que historial de monederos).
+   */
+  formatearFechaHoraUtc(fecha: string | null | undefined): string {
+    if (fecha == null || String(fecha).trim() === '') {
+      return 'Sin registro';
+    }
+    try {
+      const d = new Date(fecha);
+      if (isNaN(d.getTime())) {
+        return 'Sin registro';
+      }
+      const dd = String(d.getUTCDate()).padStart(2, '0');
+      const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const yyyy = d.getUTCFullYear();
+      const hh = String(d.getUTCHours()).padStart(2, '0');
+      const min = String(d.getUTCMinutes()).padStart(2, '0');
+      return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+    } catch {
+      return 'Sin registro';
+    }
+  }
+
   formatearMoneda(valor: number | null | undefined): string {
     if (valor === null || valor === undefined) return 'Sin registro';
     return `$${Number(valor).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  /**
+   * Metadatos de estatus de tesorería para chips (color del catálogo).
+   */
+  metaEstatusTesoreriaParaVista(d: any): { codigo: string; nombre: string; color: string; descripcion: string } {
+    const idRaw = d?.idEstatusTesoreria;
+    const id = idRaw != null ? String(idRaw).trim() : '';
+    if (id && CATALOGO_ESTATUS_TESORERIA_UI[id]) {
+      return CATALOGO_ESTATUS_TESORERIA_UI[id];
+    }
+    const cod = String(
+      d?.codigoEstatusTesoreria ?? d?.codigo ?? (typeof d?.estatus === 'string' ? d.estatus : '') ?? ''
+    )
+      .trim()
+      .toUpperCase();
+    const porCodigo = Object.values(CATALOGO_ESTATUS_TESORERIA_UI).find((e) => e.codigo === cod);
+    if (porCodigo) {
+      return porCodigo;
+    }
+    const nombreBusq = String(d?.nombreEstatusTesoreria ?? d?.nombre ?? '').trim();
+    if (nombreBusq) {
+      const porNombreLbl = Object.values(CATALOGO_ESTATUS_TESORERIA_UI).find(
+        (e) => e.nombre.toLowerCase() === nombreBusq.toLowerCase()
+      );
+      if (porNombreLbl) {
+        return porNombreLbl;
+      }
+    }
+    return {
+      codigo: cod || '—',
+      nombre: String(d?.nombreEstatusTesoreria ?? d?.nombre ?? d?.estatus ?? 'Sin dato'),
+      color: '#64748b',
+      descripcion: '',
+    };
+  }
+
+  /** Estatus tesorería para el modal «Resumen» (misma pill que bóveda abierta por sala). */
+  metaEstatusDesdeResumen(r: any): { codigo: string; nombre: string; color: string; descripcion: string } {
+    return this.metaEstatusTesoreriaParaVista({
+      idEstatusTesoreria: r?.idEstatusTesoreria,
+      codigoEstatusTesoreria: r?.codigoEstatusTesoreria,
+      nombreEstatusTesoreria: r?.nombreEstatusTesoreria,
+      estatus: typeof r?.estatus === 'string' ? r.estatus : undefined,
+    });
+  }
+
+  /** Nombre completo + cuenta de quien abrió (concatenado). */
+  textoUsuarioAperturaBoveda(u: any): string {
+    if (u == null || typeof u !== 'object') {
+      return 'Sin registro';
+    }
+    const partes = [
+      u.nombre,
+      u.apellidoPaterno,
+      u.apellidoMaterno,
+    ]
+      .map((p: unknown) => (p == null ? '' : String(p).trim()))
+      .filter((s: string) => s.length > 0);
+    const nombreCompleto = partes.join(' ').trim();
+    const userName = u.userName != null ? String(u.userName).trim() : '';
+    if (nombreCompleto && userName) {
+      return `${nombreCompleto} · ${userName}`;
+    }
+    if (nombreCompleto) {
+      return nombreCompleto;
+    }
+    if (userName) {
+      return userName;
+    }
+    return 'Sin registro';
+  }
+
+  nombreSalaDesdeBovedaAbierta(d: any): string {
+    const desdeApi = d?.sala?.nombre ?? d?.nombreSala ?? d?.nombreComercialSala;
+    if (desdeApi != null && String(desdeApi).trim()) {
+      return String(desdeApi).trim();
+    }
+    return 'Sala';
+  }
+
+  observacionesBovedaNoVacias(texto: unknown): boolean {
+    return texto != null && String(texto).trim().length > 0;
+  }
+
+  cerrarModalBovedaAbiertaSala(): void {
+    this.bovedaAbiertaSalaData = null;
+    this.bovedaAbiertaSalaVacio = null;
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+  }
+
+  private abrirModalBovedaAbiertaSala(): void {
+    this.modalRef = this.modalService.open(this.modalBovedaAbiertaSala, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-boveda-abierta-sala',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+    });
   }
 
   /** Texto seguro para usar dentro de `html` en SweetAlert2. */
@@ -410,13 +579,13 @@ export class ListaTesoreriaComponent {
     });
   }
 
-  /** GET tesorerias/abierta/creada/sala/{idSala} - Ver bóveda abierta de la sala */
+  /** GET tesorerias/abierta/creada/sala/{idSala} — modal de detalle (no SweetAlert). */
   verBovedaAbiertaSala(rowData: any) {
     const idSala = rowData.idSala ?? rowData.id_sala ?? rowData.sala?.id;
     if (!idSala) {
       Swal.fire({
         title: '¡Atención!',
-        text: 'No se encontró el ID de la sala para consultar.',
+        text: 'No se encontró el identificador de la sala para consultar.',
         icon: 'warning',
         background: '#0d121d',
         confirmButtonColor: '#3085d6',
@@ -424,6 +593,8 @@ export class ListaTesoreriaComponent {
       });
       return;
     }
+    this.bovedaAbiertaSalaData = null;
+    this.bovedaAbiertaSalaVacio = null;
     this.tesoreriaService.obtenerTesoreriaAbiertaPorSala(Number(idSala)).subscribe({
       next: (response: any) => {
         const rawData =
@@ -432,9 +603,7 @@ export class ListaTesoreriaComponent {
             : response;
         const tieneListaVacia = Array.isArray(rawData) && rawData.length === 0;
         const sinRegistro =
-          rawData === null ||
-          rawData === undefined ||
-          tieneListaVacia;
+          rawData === null || rawData === undefined || tieneListaVacia;
 
         if (sinRegistro) {
           const mensajeApi =
@@ -445,48 +614,18 @@ export class ListaTesoreriaComponent {
             rowData?.nombreSala ??
             rowData?.nombreComercialSala ??
             rowData?.nombreComercial ??
-            '';
-          const bloqueSala = nombreSala
-            ? `<p class="mb-2" style="color:#94a3b8;font-size:13px"><strong>Sala:</strong> ${this.escapeHtml(
-                String(nombreSala)
-              )}</p>`
-            : '';
-          Swal.fire({
-            title: 'Sin bóveda abierta',
-            html:
-              `${bloqueSala}` +
-              `<p class="mb-0" style="color:#e2e8f0;line-height:1.45">${this.escapeHtml(mensajeApi)}</p>`,
-            icon: 'info',
-            background: '#0d121d',
-            color: '#e2e8f0',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Entendido',
-          });
+            undefined;
+          this.bovedaAbiertaSalaVacio = {
+            mensaje: mensajeApi,
+            nombreSala: nombreSala != null && String(nombreSala).trim() ? String(nombreSala).trim() : undefined,
+          };
+          this.abrirModalBovedaAbiertaSala();
           return;
         }
 
         const t = Array.isArray(rawData) ? rawData[0] : rawData;
-        const sala =
-          t?.nombreSala ?? t?.nombreComercialSala ?? rowData?.nombreSala ?? rowData?.nombreComercialSala ?? 'Sala';
-        const fondo =
-          t?.fondoInicial != null && t?.fondoInicial !== ''
-            ? this.formatearMoneda(t.fondoInicial)
-            : 'Sin registro';
-        const estatus =
-          t?.nombreEstatusTesoreria ?? t?.codigoEstatusTesoreria ?? 'Sin registro';
-        Swal.fire({
-          title: 'Bóveda abierta',
-          html: `
-            <p class="mb-1" style="color:#e2e8f0"><strong>Sala:</strong> ${this.escapeHtml(String(sala))}</p>
-            <p class="mb-1" style="color:#e2e8f0"><strong>Fondo inicial:</strong> ${this.escapeHtml(String(fondo))}</p>
-            <p class="mb-0" style="color:#e2e8f0"><strong>Estatus:</strong> ${this.escapeHtml(String(estatus))}</p>
-          `,
-          icon: 'success',
-          background: '#0d121d',
-          color: '#e2e8f0',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Cerrar',
-        });
+        this.bovedaAbiertaSalaData = t;
+        this.abrirModalBovedaAbiertaSala();
       },
       error: (error) => {
         Swal.fire({
@@ -497,7 +636,7 @@ export class ListaTesoreriaComponent {
           confirmButtonColor: '#3085d6',
           confirmButtonText: 'Confirmar',
         });
-      }
+      },
     });
   }
 

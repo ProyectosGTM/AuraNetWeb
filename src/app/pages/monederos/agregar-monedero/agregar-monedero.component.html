@@ -29,6 +29,7 @@
                     <dx-select-box [dataSource]="listaAfiliados" displayExpr="text" valueExpr="id"
                       formControlName="idAfiliado" placeholder="Selecciona un afiliado..." searchEnabled="true"
                       searchMode="contains" [showClearButton]="true"
+                      (onValueChanged)="onAfiliadoChange($event)"
                       class="dx-select-box-custom dx-select-box-afiliado">
                     </dx-select-box>
                   </label>
@@ -57,11 +58,15 @@
                 </div>
                 <div class="col-12 col-md-6 col-lg-4">
                   <label class="field">
-                    <span class="field-label text-white">Es Principal</span>
+                    <span class="field-label text-white">Monedero Principal</span>
                     <dx-select-box [dataSource]="listaEsPrincipal" displayExpr="text" valueExpr="id"
                       formControlName="esPrincipal" placeholder="Selecciona..." searchEnabled="false"
                       [showClearButton]="true" class="dx-select-box-custom dx-select-box-es-principal">
                     </dx-select-box>
+                    <small *ngIf="afiliadoTienePrincipal" class="text-warning d-block mt-1">
+                      <i class="fas fa-info-circle me-1"></i>
+                      Este afiliado ya tiene un monedero principal.
+                    </small>
                   </label>
                 </div>
                 <div class="col-12 col-md-6 col-lg-4">

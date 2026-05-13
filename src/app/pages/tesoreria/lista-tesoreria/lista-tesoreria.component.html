@@ -297,11 +297,14 @@
             <div class="resumen-header">
                 <span class="resumen-sala">{{ resumenData.nombreSala || 'Sin registro' }}</span>
                 <span class="resumen-fecha">{{ formatearFecha(resumenData.fecha) }}</span>
-                <span class="resumen-estatus"
-                    [class.estatus-abierta]="(resumenData.estatus || resumenData.nombreEstatusTesoreria || '').toUpperCase() === 'ABIERTA'"
-                    [class.estatus-cerrada]="(resumenData.estatus || resumenData.nombreEstatusTesoreria || '').toUpperCase() === 'CERRADA'">
-                    {{ resumenData.estatus || resumenData.nombreEstatusTesoreria || 'Sin registro' }}
-                </span>
+                <ng-container *ngIf="metaEstatusDesdeResumen(resumenData) as stRes">
+                    <span
+                        class="bas-estatus-pill"
+                        [style.background-color]="stRes.color"
+                        [attr.title]="stRes.descripcion?.trim() ? stRes.descripcion : null"
+                        >{{ stRes.nombre }}</span
+                    >
+                </ng-container>
             </div>
             <div class="resumen-destacados">
                 <div class="resumen-destacado resumen-saldo">
@@ -336,20 +339,126 @@
                 </div>
             </div>
             <div class="resumen-turnos">
-                <span class="resumen-turnos-label">Turnos de caja (según servicio resumen)</span>
-                <div class="resumen-turnos-valores">
-                    <span class="resumen-turno abiertos">
-                        <i class="fas fa-door-open"></i> {{ resumenData.turnosAbiertos ?? 0 }} turnos abiertos
-                    </span>
-                    <span class="resumen-turno cerrados">
-                        <i class="fas fa-door-closed"></i> {{ resumenData.turnosCerrados ?? 0 }} turnos cerrados
-                    </span>
+                <p class="resumen-turnos-label">Turnos de caja</p>
+                <div class="resumen-turnos-grid">
+                    <div class="resumen-turno-tile resumen-turno-tile--abiertos">
+                        <span class="resumen-turno-tile-ico" aria-hidden="true"><i class="fas fa-door-open"></i></span>
+                        <span class="resumen-turno-tile-num">{{ resumenData.turnosAbiertos ?? 0 }}</span>
+                        <span class="resumen-turno-tile-caption">Abiertos</span>
+                    </div>
+                    <div class="resumen-turno-tile resumen-turno-tile--cerrados">
+                        <span class="resumen-turno-tile-ico" aria-hidden="true"><i class="fas fa-door-closed"></i></span>
+                        <span class="resumen-turno-tile-num">{{ resumenData.turnosCerrados ?? 0 }}</span>
+                        <span class="resumen-turno-tile-caption">Cerrados</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="modal-footer modal-footer-resumen">
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarResumen()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Bóveda abierta de la sala -->
+<ng-template #modalBovedaAbiertaSala let-modal>
+    <div class="modal-header modal-header-boveda-abierta-sala">
+        <div class="modal-header-left">
+            <h5 class="modal-title">
+                <i class="fas fa-coins" aria-hidden="true"></i>
+                <span>Bóveda abierta de la sala</span>
+            </h5>
+        </div>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalBovedaAbiertaSala()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-body-boveda-abierta-sala">
+        <div *ngIf="bovedaAbiertaSalaVacio" class="bas-empty-state">
+            <div class="bas-empty-icon">
+                <i class="fas fa-door-closed" aria-hidden="true"></i>
+            </div>
+            <h6 class="bas-empty-title">Sin tesorería abierta</h6>
+            <p *ngIf="bovedaAbiertaSalaVacio.nombreSala" class="bas-empty-sala">
+                <i class="fas fa-building" aria-hidden="true"></i>
+                {{ bovedaAbiertaSalaVacio.nombreSala }}
+            </p>
+            <p class="bas-empty-msg">{{ bovedaAbiertaSalaVacio.mensaje }}</p>
+        </div>
+
+        <ng-container *ngIf="bovedaAbiertaSalaData as d">
+            <ng-container *ngIf="metaEstatusTesoreriaParaVista(d) as st">
+                <div class="bas-hero">
+                    <div class="bas-hero-main">
+                        <span class="bas-sala-titulo">{{ nombreSalaDesdeBovedaAbierta(d) }}</span>
+                        <span class="bas-fecha-operativa">
+                            <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                            Fecha operativa: {{ formatearFechaContable(d.fecha) }}
+                        </span>
+                    </div>
+                    <div class="bas-estatus-wrap">
+                        <span
+                            class="bas-estatus-pill"
+                            [style.background-color]="st.color"
+                            [attr.title]="st.descripcion?.trim() ? st.descripcion : null"
+                            >{{ st.nombre }}</span>
+                    </div>
+                </div>
+                <p *ngIf="st.descripcion" class="bas-estatus-hint">{{ st.descripcion }}</p>
+
+                <div class="bas-dinero-grid">
+                    <div class="bas-dinero-card bas-dinero-card--saldo">
+                        <span class="bas-dinero-label">Saldo actual</span>
+                        <span class="bas-dinero-valor">{{ formatearMoneda(d.saldoActual) }}</span>
+                        <span class="bas-dinero-sub">Efectivo disponible en tesorería</span>
+                    </div>
+                    <div class="bas-dinero-card bas-dinero-card--fondo">
+                        <span class="bas-dinero-label">Fondo inicial del día</span>
+                        <span class="bas-dinero-valor">{{ formatearMoneda(d.fondoInicial) }}</span>
+                        <span class="bas-dinero-sub">Al momento de la apertura</span>
+                    </div>
+                </div>
+
+                <div class="bas-section bas-section-apertura">
+                    <h6 class="bas-section-title"><i class="fas fa-clock" aria-hidden="true"></i> Apertura y cierre</h6>
+                    <div class="bas-kv-grid">
+                        <div class="bas-kv">
+                            <span class="bas-kv-label">Fecha y hora de apertura</span>
+                            <span class="bas-kv-value">{{ formatearFechaHoraUtc(d.fechaApertura) }}</span>
+                        </div>
+                        <div class="bas-kv">
+                            <span class="bas-kv-label">Fecha de cierre</span>
+                            <span class="bas-kv-value">{{ d.fechaCierre ? formatearFechaHoraUtc(d.fechaCierre) : '— Pendiente' }}</span>
+                        </div>
+                        <div class="bas-kv bas-kv--wide">
+                            <span class="bas-kv-label">Fondo contado (cierre)</span>
+                            <span
+                                class="bas-kv-value"
+                                [class.bas-kv-value--dinero]="d.fondoContado != null && d.fondoContado !== ''"
+                                >{{ d.fondoContado != null && d.fondoContado !== '' ? formatearMoneda(d.fondoContado) : '— Sin arqueo de cierre' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bas-section">
+                    <h6 class="bas-section-title"><i class="fas fa-user-check" aria-hidden="true"></i> Usuario que abrió</h6>
+                    <div class="bas-usuario-card">
+                        <i class="fas fa-user-circle bas-usuario-ico" aria-hidden="true"></i>
+                        <p class="bas-usuario-texto">{{ textoUsuarioAperturaBoveda(d.usuarioApertura) }}</p>
+                    </div>
+                </div>
+
+                <div class="bas-section" *ngIf="observacionesBovedaNoVacias(d.observaciones)">
+                    <h6 class="bas-section-title"><i class="fas fa-comment-dots" aria-hidden="true"></i> Observaciones</h6>
+                    <div class="bas-obs-box">{{ d.observaciones }}</div>
+                </div>
+            </ng-container>
+        </ng-container>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModalBovedaAbiertaSala()">
             <i class="fas fa-times"></i><span>Cerrar</span>
         </button>
     </div>

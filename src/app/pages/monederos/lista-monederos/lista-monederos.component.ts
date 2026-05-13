@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
-import { forkJoin, lastValueFrom } from 'rxjs';
+import { forkJoin, lastValueFrom, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
 import { AuthenticationService } from 'src/app/core/services/auth.service';
@@ -54,6 +54,8 @@ export class ListaMonederosComponent {
   public paginaActualData: any[] = [];
   public filtroActivo: string = '';
   public listaEstatusMonedero: any[] = [];
+  /** Cuando es `true`, el grid solicita el listado completo (`?todos=true`) y muestra monederos en cualquier estatus. */
+  public mostrarTodosEstatus: boolean = false;
 
   /** Pestaña visible del panel de acciones rápidas. */
   tabAcciones: TabAccionesMonederos = 'movimientos';
@@ -89,6 +91,11 @@ export class ListaMonederosComponent {
   /** Lista de monederos para el select de «Consultar saldo» (`GET monederos/list`). */
   listaMonederosConsultaSaldo: { id?: number; numeroMonedero: string; text: string }[] = [];
   cargandoMonederosConsultaSaldo = false;
+  /** Consulta directa desde la grilla: sin paso de selección en el modal. */
+  cargandoConsultaSaldoFila = false;
+  /** Si true, al ver resultados el pie izquierdo cierra el modal (no ofrece «Nueva consulta» con el formulario). */
+  consultaSaldoDesdeAccionFila = false;
+  private consultaSaldoFilaSub?: Subscription;
 
   // Formulario para cambiar estatus de monedero
   cambiarEstatusForm: FormGroup;
@@ -111,7 +118,7 @@ export class ListaMonederosComponent {
   reemplazarMonederoForm: FormGroup;
   monederoSeleccionadoReemplazar: { id?: number; numeroMonedero?: string; alias?: string } | null = null;
 
-  // Formulario para ajuste de saldo (solo GERENTE)
+  // Formulario para ajuste de saldo (perfiles autorizados vía RolAccesoService)
   ajusteMonederoForm: FormGroup;
   public listaMonederosDisponiblesAjuste: any[] = [];
   public listaTipoSaldoAjuste: { id: number; text: string }[] = [];
@@ -299,6 +306,11 @@ export class ListaMonederosComponent {
   }
 
   ajusteMonedero() {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('ajustarSaldoMonedero', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('ajustarSaldoMonedero');
+      return;
+    }
     this.abriendoModalAjuste = true;
     forkJoin({
       monederos: this.monederosService.obtenerMonederos(),
@@ -364,6 +376,11 @@ export class ListaMonederosComponent {
   }
 
   guardarAjusteMonedero() {
+    const rol = this.rolAcceso.obtenerRolUsuarioLogueado();
+    if (!this.rolAcceso.puedeRealizarAccion('ajustarSaldoMonedero', rol)) {
+      this.rolAcceso.mostrarAccesoDenegado('ajustarSaldoMonedero');
+      return;
+    }
     if (this.ajusteMonederoForm.invalid) {
       Swal.fire({
         title: '¡Atención!',
@@ -684,7 +701,7 @@ export class ListaMonederosComponent {
 
         try {
           const resp: any = await lastValueFrom(
-            this.monederosService.obtenerMonederosData(page, take)
+            this.monederosService.obtenerMonederosData(page, take, this.mostrarTodosEstatus)
           );
           this.loading = false;
           const rows: any[] = Array.isArray(resp?.data) ? resp.data : [];
@@ -821,6 +838,19 @@ export class ListaMonederosComponent {
     this.isGrouped = false;
   }
 
+  /**
+   * Alterna el alcance del listado: por defecto solo monederos operativos; activado, incluye todos.
+   * Reconstruye el `CustomStore` para que la siguiente carga refleje el nuevo parámetro.
+   */
+  toggleMostrarTodosEstatus(): void {
+    this.mostrarTodosEstatus = !this.mostrarTodosEstatus;
+    this.setupDataSource();
+    if (this.dataGrid?.instance) {
+      this.dataGrid.instance.pageIndex(0);
+      this.dataGrid.instance.refresh();
+    }
+  }
+
   /** `idSala` del login para filtrar turnos activos en el modal de descarga. */
   private obtenerIdSalaUsuarioLogueado(): number | null {
     try {
@@ -844,7 +874,8 @@ export class ListaMonederosComponent {
     const num = String(m?.numeroMonedero ?? '').trim();
     const nom = String(m?.nombreAfiliado ?? '').trim();
     const apPat = String(m?.apellidoPaternoAfiliado ?? '').trim();
-    const titular = `${nom} ${apPat}`.trim();
+    const apMat = String(m?.apellidoMaternoAfiliado ?? '').trim();
+    const titular = `${nom} ${apPat} ${apMat}`.trim();
     const parteMonedero = num ? `Monedero: ${num}` : 'Monedero: —';
     const parteNombre = titular ? `Nombre: ${titular}` : '';
     if (parteNombre) {
@@ -1177,6 +1208,7 @@ export class ListaMonederosComponent {
   }
 
   consultarSaldo() {
+    this.consultaSaldoDesdeAccionFila = false;
     this.saldoData = null;
     this.consultarSaldoForm.reset();
     this.cargarListaMonederosConsultaSaldo();
@@ -1187,6 +1219,97 @@ export class ListaMonederosComponent {
       backdrop: 'static',
       keyboard: true
     });
+  }
+
+  /**
+   * Desde acciones de la fila: consulta el saldo al instante y abre el modal solo en resultados
+   * (no muestra el paso de selección de monedero).
+   */
+  consultarSaldoDesdeAccionesFila(rowData: any): void {
+    const numero = String(rowData?.numeroMonedero ?? '').trim();
+    if (!numero) {
+      Swal.fire({
+        title: '¡Atención!',
+        text: 'Este registro no tiene número de monedero para consultar.',
+        icon: 'warning',
+        background: '#0d121d',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Confirmar',
+      });
+      return;
+    }
+    this.consultaSaldoFilaSub?.unsubscribe();
+    this.consultaSaldoFilaSub = undefined;
+    this.consultaSaldoDesdeAccionFila = true;
+    this.saldoData = null;
+    this.consultarSaldoForm.reset();
+    this.cargandoConsultaSaldoFila = true;
+    this.modalRef = this.modalService.open(this.modalConsultarSaldo, {
+      size: 'lg',
+      windowClass: 'modal-holder modal-consultar-saldo',
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+    this.consultaSaldoFilaSub = this.monederosService
+      .consultarSaldoMonedero(numero)
+      .pipe(
+        finalize(() => {
+          this.cargandoConsultaSaldoFila = false;
+          this.consultaSaldoFilaSub = undefined;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (!this.modalRef) {
+            return;
+          }
+          this.saldoData = response;
+        },
+        error: (error) => {
+          const texto =
+            error?.error?.message || error?.error || 'No se pudo consultar el saldo del monedero.';
+          this.cerrarModal();
+          Swal.fire({
+            title: '¡Error!',
+            text: texto,
+            icon: 'error',
+            background: '#0d121d',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Confirmar',
+          });
+        },
+      });
+  }
+
+  /** Pie izquierdo del modal «Consultar saldo»: según origen (fila vs pestaña) y si hay resultados. */
+  onPieIzquierdoModalConsultarSaldo(): void {
+    if (this.consultaSaldoDesdeAccionFila && this.saldoData) {
+      this.cerrarModal();
+      return;
+    }
+    if (this.saldoData) {
+      this.saldoData = null;
+      return;
+    }
+    this.cerrarModal();
+  }
+
+  etiquetaPieIzquierdoConsultarSaldo(): string {
+    if (this.saldoData && this.consultaSaldoDesdeAccionFila) {
+      return 'Cerrar';
+    }
+    if (this.saldoData) {
+      return 'Nueva Consulta';
+    }
+    return 'Cancelar';
+  }
+
+  iconoPieIzquierdoConsultarSaldo(): string {
+    if (this.saldoData && !this.consultaSaldoDesdeAccionFila) {
+      return 'fa-arrow-left';
+    }
+    return 'fa-times';
   }
 
   private cargarListaMonederosConsultaSaldo(): void {
@@ -1658,6 +1781,10 @@ export class ListaMonederosComponent {
   }
 
   cerrarModal() {
+    this.consultaSaldoFilaSub?.unsubscribe();
+    this.consultaSaldoFilaSub = undefined;
+    this.cargandoConsultaSaldoFila = false;
+    this.consultaSaldoDesdeAccionFila = false;
     if (this.modalRef) {
       this.modalRef.close();
       this.cargarMonederoForm.reset();

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -10,8 +10,13 @@ export class MonederosServices {
 
   constructor(private http: HttpClient) { }
 
-  obtenerMonederosData(page: number, pageSize: number): Observable<any> {
-    return this.http.get(`${environment.API_SECURITY}/monederos/${page}/${pageSize}`);
+  obtenerMonederosData(page: number, pageSize: number, todos: boolean = false): Observable<any> {
+    const url = `${environment.API_SECURITY}/monederos/${page}/${pageSize}`;
+    if (todos) {
+      const params = new HttpParams().set('todos', 'true');
+      return this.http.get(url, { params });
+    }
+    return this.http.get(url);
   }
 
   obtenerMonederos(): Observable<any> {

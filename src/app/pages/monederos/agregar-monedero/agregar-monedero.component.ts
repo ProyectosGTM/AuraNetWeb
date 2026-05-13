@@ -25,6 +25,7 @@ export class AgregarMonederoComponent implements OnInit {
     { id: 0, text: 'No' },
     { id: 1, text: 'Sí' },
   ];
+  public afiliadoTienePrincipal: boolean = false;
 
   monederoForm: FormGroup;
 
@@ -77,10 +78,12 @@ export class AgregarMonederoComponent implements OnInit {
       return { ...a, id: Number(a.id), text: text || 'Sin nombre' };
     });
 
-    this.listaEstatusMonedero = (responses.estatusMonedero.data || []).map((e: any) => ({
-      id: Number(e.id),
-      text: e.nombre || ''
-    } as SelectItem));
+    this.listaEstatusMonedero = (responses.estatusMonedero.data || [])
+      .filter((e: any) => Number(e.id) === 1 || Number(e.id) === 2)
+      .map((e: any) => ({
+        id: Number(e.id),
+        text: e.nombre || ''
+      } as SelectItem));
   }
 
   private cargarListasIndividualmente() {
@@ -105,10 +108,12 @@ export class AgregarMonederoComponent implements OnInit {
   obtenerEstatusMonedero(): void {
     this.monederosService.obtenerEstatusMonedero().subscribe({
       next: (response: any) => {
-        this.listaEstatusMonedero = (response.data || []).map((e: any) => ({
-          id: Number(e.id),
-          text: e.nombre || ''
-        } as SelectItem));
+        this.listaEstatusMonedero = (response.data || [])
+          .filter((e: any) => Number(e.id) === 1 || Number(e.id) === 2)
+          .map((e: any) => ({
+            id: Number(e.id),
+            text: e.nombre || ''
+          } as SelectItem));
       },
       error: (error) => {
         console.error('Error al obtener estatus de monedero:', error);
@@ -116,7 +121,57 @@ export class AgregarMonederoComponent implements OnInit {
     });
   }
 
-  /** En edición el afiliado ya tiene monedero y suele no aparecer en /sin-monedero; se agrega para que el select muestre el valor. */
+  onAfiliadoChange(event: any): void {
+    const idRaw = event?.value ?? this.monederoForm.get('idAfiliado')?.value;
+    const idAfiliado = idRaw != null && idRaw !== '' ? Number(idRaw) : NaN;
+    if (!Number.isFinite(idAfiliado) || idAfiliado <= 0) {
+      this.habilitarEsPrincipal();
+      return;
+    }
+    this.verificarMonederoPrincipalAfiliado(idAfiliado);
+  }
+
+  private verificarMonederoPrincipalAfiliado(idAfiliado: number): void {
+    this.monederosService.obtenerMonederosPorAfiliado(idAfiliado).subscribe({
+      next: (response: any) => {
+        const monederos: any[] = Array.isArray(response?.data) ? response.data : [];
+        const yaHayPrincipal = monederos.some((m: any) => {
+          if (this.idMonedero != null && Number(m?.id) === Number(this.idMonedero)) {
+            return false;
+          }
+          return m?.esPrincipal === true || m?.esPrincipal === 1;
+        });
+        if (yaHayPrincipal) {
+          this.bloquearEsPrincipalEnNo();
+        } else {
+          this.habilitarEsPrincipal();
+        }
+      },
+      error: (error) => {
+        console.error('Error al consultar monederos del afiliado:', error);
+        this.habilitarEsPrincipal();
+      }
+    });
+  }
+
+  private bloquearEsPrincipalEnNo(): void {
+    this.afiliadoTienePrincipal = true;
+    const ctrl = this.monederoForm.get('esPrincipal');
+    if (!ctrl) return;
+    ctrl.setValue(0, { emitEvent: false });
+    if (!ctrl.disabled) {
+      ctrl.disable({ emitEvent: false });
+    }
+  }
+
+  private habilitarEsPrincipal(): void {
+    this.afiliadoTienePrincipal = false;
+    const ctrl = this.monederoForm.get('esPrincipal');
+    if (ctrl && ctrl.disabled) {
+      ctrl.enable({ emitEvent: false });
+    }
+  }
+
   private asegurarAfiliadoEnListaDesdeMonedero(data: any): void {
     const idAf = data.idAfiliado != null ? Number(data.idAfiliado) : null;
     if (idAf == null || isNaN(idAf)) return;
@@ -144,6 +199,11 @@ export class AgregarMonederoComponent implements OnInit {
           alias: data.alias || '',
           idEstatusMonedero: data.idEstatusMonedero ? Number(data.idEstatusMonedero) : null,
         });
+
+        const idAfiliado = data.idAfiliado != null ? Number(data.idAfiliado) : NaN;
+        if (Number.isFinite(idAfiliado) && idAfiliado > 0) {
+          this.verificarMonederoPrincipalAfiliado(idAfiliado);
+        }
       },
       error: (error) => {
         console.error('Error al obtener monedero:', error);
@@ -180,11 +240,12 @@ export class AgregarMonederoComponent implements OnInit {
 
   buildPayloadMonedero(): any {
     const formValue = this.monederoForm.value;
+    const rawValue = this.monederoForm.getRawValue();
     const payload: any = {
       idAfiliado: Number(formValue.idAfiliado ?? 0),
       numeroMonedero: formValue.numeroMonedero || '',
       idEstatusMonedero: Number(formValue.idEstatusMonedero ?? 0),
-      esPrincipal: Number(formValue.esPrincipal ?? 0),
+      esPrincipal: Number(rawValue.esPrincipal ?? 0),
     };
 
     const codigo = String(formValue.codigoRFID ?? '').trim();

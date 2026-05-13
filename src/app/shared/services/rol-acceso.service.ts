@@ -22,7 +22,8 @@ export type AccionConControlRol =
   | 'reactivarTurno'
   | 'corteParcialTurno'
   | 'registrarPromocion'
-  | 'descargarEfectivoMonedero';
+  | 'descargarEfectivoMonedero'
+  | 'ajustarSaldoMonedero';
 
 /** Nombres por id de `user.rol` / login; alineado con `GET /roles/list` (contrato en docs). */
 const ROLES_CATALOGO: Record<string, string> = {
@@ -188,6 +189,14 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
     titulo: 'No puedes descargar efectivo del monedero',
     subtitulo:
       'Con tu usuario no está permitido retirar efectivo de un monedero hacia caja. Pide apoyo a alguien con el perfil indicado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  /** Ajuste manual de saldo en monedero — SA, Dev, Cliente, Administrador, Gerente y Sub-Gerente (no cajero ni recepción). */
+  ajustarSaldoMonedero: {
+    rolesPermitidosIds: ['1', '2', '3', '4', '5', '6'],
+    titulo: 'No puedes ajustar saldo de monederos',
+    subtitulo:
+      'Con tu usuario no está permitido realizar ajustes manuales de saldo en monederos. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
 };
