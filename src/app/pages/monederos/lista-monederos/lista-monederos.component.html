@@ -28,18 +28,6 @@
                                 <i class="fas fa-expand"></i>
                                 <span>Contraer Grid</span>
                             </button>
-                            <button
-                                type="button"
-                                class="btn-title btn-title--toggle"
-                                [class.btn-title--toggle-on]="mostrarTodosEstatus"
-                                [attr.aria-pressed]="mostrarTodosEstatus"
-                                (click)="toggleMostrarTodosEstatus()"
-                                ngbTooltip="Incluye monederos en todos los estatus"
-                                placement="top">
-                                <i class="fas" [ngClass]="mostrarTodosEstatus ? 'fa-eye' : 'fa-eye-slash'"></i>
-                                <span>Todos los estatus</span>
-                                <span class="btn-title-toggle-pill">{{ mostrarTodosEstatus ? 'ON' : 'OFF' }}</span>
-                            </button>
                             <button (click)="limpiarCampos()" type="button" class="btn-title btn-title--danger">
                                 <i class="fas fa-sync-alt"></i>
                                 <span>Restablecer</span>
@@ -63,22 +51,6 @@
                                         <button
                                             type="button"
                                             role="tab"
-                                            [attr.aria-selected]="esTabAcciones('movimientos')"
-                                            class="promo-tab w-100"
-                                            [class.promo-tab--active]="esTabAcciones('movimientos')"
-                                            (click)="setTabAcciones('movimientos')"
-                                            title="Cargar, descargar y consultar saldo"
-                                        >
-                                            <span class="promo-tab-inner">
-                                                <i class="fas fa-wallet" aria-hidden="true"></i>
-                                                <span class="promo-tab-caption">Movimientos de saldo</span>
-                                            </span>
-                                        </button>
-                                    </div>
-                                    <div class="col d-flex">
-                                        <button
-                                            type="button"
-                                            role="tab"
                                             [attr.aria-selected]="esTabAcciones('administracion')"
                                             class="promo-tab w-100"
                                             [class.promo-tab--active]="esTabAcciones('administracion')"
@@ -88,6 +60,22 @@
                                             <span class="promo-tab-inner">
                                                 <i class="fas fa-user-cog" aria-hidden="true"></i>
                                                 <span class="promo-tab-caption">Consultas y ajustes</span>
+                                            </span>
+                                        </button>
+                                    </div>
+                                    <div class="col d-flex">
+                                        <button
+                                            type="button"
+                                            role="tab"
+                                            [attr.aria-selected]="esTabAcciones('movimientos')"
+                                            class="promo-tab w-100"
+                                            [class.promo-tab--active]="esTabAcciones('movimientos')"
+                                            (click)="setTabAcciones('movimientos')"
+                                            title="Cargar, descargar y consultar saldo"
+                                        >
+                                            <span class="promo-tab-inner">
+                                                <i class="fas fa-wallet" aria-hidden="true"></i>
+                                                <span class="promo-tab-caption">Movimientos de saldo</span>
                                             </span>
                                         </button>
                                     </div>
@@ -111,20 +99,6 @@
                                                 </button>
                                             </div>
                                             <div class="col-12 col-md-6 col-xl-4 d-flex">
-                                                <button (click)="consultarSaldo()" type="button" class="btn-action-large btn-monederos-consultar w-100 align-self-stretch">
-                                                    <div class="btn-action-icon">
-                                                        <i class="fas fa-search-dollar"></i>
-                                                    </div>
-                                                    <div class="btn-action-text">
-                                                        <span class="btn-action-label">Consultar Saldo</span>
-                                                        <span class="btn-action-desc">Ver saldo por número</span>
-                                                    </div>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div *ngSwitchCase="'administracion'" class="row g-3 promo-tab-cards">
-                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
                                                 <button (click)="traspasoMonedero()" type="button" class="btn-action-large btn-monederos-traspaso w-100 align-self-stretch" [disabled]="abriendoModalTraspaso">
                                                     <div class="btn-action-icon">
                                                         <i class="fas fa-spinner fa-spin" *ngIf="abriendoModalTraspaso"></i>
@@ -133,6 +107,33 @@
                                                     <div class="btn-action-text">
                                                         <span class="btn-action-label">{{ abriendoModalTraspaso ? 'Cargando...' : 'Traspasar Saldo' }}</span>
                                                         <span class="btn-action-desc">Entre monederos del mismo afiliado</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="ajusteMonedero()" type="button" class="btn-action-large btn-monederos-ajuste w-100 align-self-stretch" [disabled]="abriendoModalAjuste">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-spinner fa-spin" *ngIf="abriendoModalAjuste"></i>
+                                                        <i class="fas fa-balance-scale" *ngIf="!abriendoModalAjuste"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">{{ abriendoModalAjuste ? 'Cargando...' : 'Ajustar Saldo' }}</span>
+                                                        <span class="btn-action-desc">Ajuste manual (solo Gerente)</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div *ngSwitchCase="'administracion'" class="row g-3 promo-tab-cards">
+                                            
+                                            <div class="col-12 col-md-6 col-xl-4 d-flex">
+                                                <button (click)="consultarSaldo()" type="button" class="btn-action-large btn-monederos-consultar w-100 align-self-stretch">
+                                                    <div class="btn-action-icon">
+                                                        <i class="fas fa-search-dollar"></i>
+                                                    </div>
+                                                    <div class="btn-action-text">
+                                                        <span class="btn-action-label">Consultar Saldo</span>
+                                                        <span class="btn-action-desc">Ver saldo por número</span>
                                                     </div>
                                                 </button>
                                             </div>
@@ -149,14 +150,20 @@
                                                 </button>
                                             </div>
                                             <div class="col-12 col-md-6 col-xl-4 d-flex">
-                                                <button (click)="ajusteMonedero()" type="button" class="btn-action-large btn-monederos-ajuste w-100 align-self-stretch" [disabled]="abriendoModalAjuste">
+                                                <button
+                                                    type="button"
+                                                    class="btn-action-large btn-monederos-filtro-estatus w-100 align-self-stretch"
+                                                    [class.btn-monederos-filtro-estatus--on]="mostrarTodosEstatus"
+                                                    [attr.aria-pressed]="mostrarTodosEstatus"
+                                                    (click)="toggleMostrarTodosEstatus()"
+                                                    ngbTooltip="Incluye monederos en todos los estatus"
+                                                    placement="top">
                                                     <div class="btn-action-icon">
-                                                        <i class="fas fa-spinner fa-spin" *ngIf="abriendoModalAjuste"></i>
-                                                        <i class="fas fa-balance-scale" *ngIf="!abriendoModalAjuste"></i>
+                                                        <i class="fas" [ngClass]="mostrarTodosEstatus ? 'fa-layer-group' : 'fa-filter'"></i>
                                                     </div>
                                                     <div class="btn-action-text">
-                                                        <span class="btn-action-label">{{ abriendoModalAjuste ? 'Cargando...' : 'Ajustar Saldo' }}</span>
-                                                        <span class="btn-action-desc">Ajuste manual (solo Gerente)</span>
+                                                        <span class="btn-action-label">{{ mostrarTodosEstatus ? 'Listado ampliado' : 'Ampliar por estatus' }}</span>
+                                                        <span class="btn-action-desc">Alterna qué monederos aparecen en la tabla según su estatus</span>
                                                     </div>
                                                 </button>
                                             </div>
@@ -444,7 +451,7 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication">
             <i class="fas fa-exchange-alt"></i>
-            <span>Cambia el estado del monedero (ej: Activo, Extraviado, Bloqueado). Indica el motivo del cambio.</span>
+            <span>Cambia el estado del monedero (ej.: Activo, Extraviado, Robado, Cancelado). Indica el motivo del cambio.</span>
         </div>
         <form [formGroup]="cambiarEstatusForm">
             <div class="row g-3">

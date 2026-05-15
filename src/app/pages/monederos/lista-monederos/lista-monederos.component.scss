@@ -1,47 +1,5 @@
 // Estilos para lista monederos (usando los estilos globales del sistema)
 
-/* Toggle "Todos los estatus" en la barra superior del grid */
-.btn-title--toggle {
-  position: relative;
-  border-color: rgba(106, 140, 255, 0.35);
-
-  i {
-    color: #8aa3ff;
-  }
-
-  .btn-title-toggle-pill {
-    margin-left: 4px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #cfd6e6;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-}
-
-.btn-title--toggle.btn-title--toggle-on {
-  background: rgba(34, 197, 94, 0.12);
-  border-color: rgba(34, 197, 94, 0.55);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.18) inset;
-
-  i {
-    color: #22c55e;
-  }
-
-  .btn-title-toggle-pill {
-    background: rgba(34, 197, 94, 0.18);
-    color: #b6f0c8;
-    border-color: rgba(34, 197, 94, 0.45);
-  }
-}
-
-.btn-title--toggle.btn-title--toggle-on:hover {
-  box-shadow: 0 12px 26px rgba(34, 197, 94, 0.18);
-}
-
 .action-buttons-card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -270,6 +228,29 @@
     background: rgba(23, 162, 184, 0.12);
     .btn-action-icon { background: #17a2b8; }
     &:hover { background: rgba(23, 162, 184, 0.22); border-color: #17a2b8; }
+  }
+  &.btn-monederos-filtro-estatus {
+    border-color: rgba(56, 189, 248, 0.55);
+    background: linear-gradient(145deg, rgba(8, 47, 73, 0.45) 0%, rgba(15, 23, 42, 0.35) 100%);
+    .btn-action-icon {
+      background: linear-gradient(145deg, #0ea5e9 0%, #0284c7 100%);
+    }
+    &:hover {
+      background: linear-gradient(145deg, rgba(8, 47, 73, 0.6) 0%, rgba(15, 23, 42, 0.48) 100%);
+      border-color: rgba(56, 189, 248, 0.85);
+    }
+  }
+  &.btn-monederos-filtro-estatus.btn-monederos-filtro-estatus--on {
+    border-color: rgba(45, 212, 191, 0.75);
+    background: linear-gradient(145deg, rgba(13, 148, 136, 0.35) 0%, rgba(15, 23, 42, 0.45) 100%);
+    box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.2) inset;
+    .btn-action-icon {
+      background: linear-gradient(145deg, #14b8a6 0%, #0d9488 100%);
+    }
+    &:hover {
+      border-color: rgba(94, 234, 212, 0.9);
+      background: linear-gradient(145deg, rgba(13, 148, 136, 0.48) 0%, rgba(15, 23, 42, 0.5) 100%);
+    }
   }
 }
 

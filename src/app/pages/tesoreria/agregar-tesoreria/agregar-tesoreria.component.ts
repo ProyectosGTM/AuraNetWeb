@@ -24,7 +24,7 @@ export class AgregarTesoreriaComponent implements OnInit, AfterViewInit {
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
   public idTesoreria: number;
-  public title = 'Agregar Tesorería';
+  public title = 'Agregar Bóveda';
   public listaSalas: any[] = [];
   public listaEstatusTesoreria: SelectItem[] = [];
 
@@ -46,7 +46,7 @@ export class AgregarTesoreriaComponent implements OnInit, AfterViewInit {
     this.activatedRoute.params.subscribe((params) => {
       this.idTesoreria = params['idTesoreria'];
       if (this.idTesoreria) {
-        this.title = 'Actualizar Tesorería';
+        this.title = 'Actualizar Bóveda';
         this.submitButton = 'Actualizar';
         // Cargar todas las listas primero, luego obtener el registro
         forkJoin({
@@ -61,7 +61,7 @@ export class AgregarTesoreriaComponent implements OnInit, AfterViewInit {
               text: (s.nombreSala ?? s.nombre ?? 'Sin nombre').trim(),
             }));
             
-            // Procesar estatus tesorería
+            // Procesar estatus bóveda
             const estatus = (responses.estatusTesoreria.data || []).map((e: any) => ({
               id: Number(e.id),
               text: e.nombre || ''
@@ -117,7 +117,7 @@ export class AgregarTesoreriaComponent implements OnInit, AfterViewInit {
         this.listaEstatusTesoreria = estatus;
       },
       error: (error) => {
-        console.error('Error al obtener estatus tesorería:', error);
+        console.error('Error al obtener estatus bóveda:', error);
       }
     });
   }
@@ -151,7 +151,7 @@ export class AgregarTesoreriaComponent implements OnInit, AfterViewInit {
         queueMicrotask(() => this.refrescarVistaFondoInicial());
       },
       error: (error) => {
-        console.error('Error al obtener tesorería:', error);
+        console.error('Error al obtener bóveda:', error);
         Swal.fire({
           title: '¡Error!',
           text: 'No se pudo cargar la información del registro.',
@@ -207,7 +207,7 @@ export class AgregarTesoreriaComponent implements OnInit, AfterViewInit {
         this.loading = false;
         Swal.fire({
           title: '¡Operación Exitosa!',
-          text: 'Se ha agregado el registro de tesorería de manera exitosa.',
+          text: 'Se ha agregado el registro de bóveda de manera exitosa.',
           icon: 'success',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -237,7 +237,7 @@ export class AgregarTesoreriaComponent implements OnInit, AfterViewInit {
         this.loading = false;
         Swal.fire({
           title: '¡Operación Exitosa!',
-          text: 'Se ha actualizado el registro de tesorería de manera exitosa.',
+          text: 'Se ha actualizado el registro de bóveda de manera exitosa.',
           icon: 'success',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',

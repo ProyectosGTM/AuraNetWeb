@@ -58,7 +58,7 @@ export class ListaMonederosComponent {
   public mostrarTodosEstatus: boolean = false;
 
   /** Pestaña visible del panel de acciones rápidas. */
-  tabAcciones: TabAccionesMonederos = 'movimientos';
+  tabAcciones: TabAccionesMonederos = 'administracion';
 
   @ViewChild('modalCargarMonedero', { static: false }) modalCargarMonedero!: TemplateRef<any>;
   @ViewChild('modalDescargarMonedero', { static: false }) modalDescargarMonedero!: TemplateRef<any>;
@@ -203,14 +203,33 @@ export class ListaMonederosComponent {
     return this.tabAcciones === tab;
   }
 
+  /** Bloqueado y reemplazado no se ofrecen en el selector del modal de cambio de estatus. */
+  private esEstatusExcluidoSelectorCambio(e: any): boolean {
+    const codigo = String(e?.codigo ?? '').trim().toUpperCase();
+    const nombre = String(e?.nombre ?? e?.nombreEstatusMonedero ?? '').trim().toUpperCase();
+    const key = codigo || nombre;
+    return key.includes('BLOQUEADO') || key.includes('REEMPLAZADO');
+  }
+
+  private esEstatusMonederoCanceladoPorId(idEstatusMonedero: number): boolean {
+    const e = this.listaEstatusMonedero.find((x: any) => Number(x.id) === Number(idEstatusMonedero));
+    if (!e) return false;
+    const codigo = String(e?.codigo ?? '').trim().toUpperCase();
+    const nombre = String(e?.nombre ?? e?.nombreEstatusMonedero ?? '').trim().toUpperCase();
+    const key = codigo || nombre;
+    return key.includes('CANCELADO');
+  }
+
   cargarEstatusMonedero() {
     this.monederosService.obtenerEstatusMonedero().subscribe({
       next: (response) => {
         this.listaEstatusMonedero = response?.data || [];
-        this.listaEstatusMonederoOpciones = this.listaEstatusMonedero.map((e: any) => ({
-          id: Number(e.id),
-          text: e.nombre || e.nombreEstatusMonedero || ''
-        }));
+        this.listaEstatusMonederoOpciones = this.listaEstatusMonedero
+          .filter((e: any) => !this.esEstatusExcluidoSelectorCambio(e))
+          .map((e: any) => ({
+            id: Number(e.id),
+            text: e.nombre || e.nombreEstatusMonedero || ''
+          }));
       },
       error: (error) => {
         console.error('Error al cargar estatus monedero:', error);
@@ -607,37 +626,63 @@ export class ListaMonederosComponent {
       idEstatusMonedero: Number(this.cambiarEstatusForm.value.idEstatusMonedero),
       motivo: (this.cambiarEstatusForm.value.motivo || '').trim()
     };
-    this.guardandoCambiarEstatusMonedero = true;
-    this.monederosService
-      .cambiarEstatus(payload)
-      .pipe(finalize(() => (this.guardandoCambiarEstatusMonedero = false)))
-      .subscribe({
-      next: () => {
-        Swal.fire({
-          title: '¡Operación Exitosa!',
-          text: 'Se ha cambiado el estatus del monedero.',
-          icon: 'success',
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
+
+    const enviar = () => {
+      this.guardandoCambiarEstatusMonedero = true;
+      this.monederosService
+        .cambiarEstatus(payload)
+        .pipe(finalize(() => (this.guardandoCambiarEstatusMonedero = false)))
+        .subscribe({
+          next: () => {
+            Swal.fire({
+              title: '¡Operación Exitosa!',
+              text: 'Se ha cambiado el estatus del monedero.',
+              icon: 'success',
+              background: '#0d121d',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'Confirmar',
+            });
+            if (this.modalRef) this.modalRef.close();
+            this.cambiarEstatusForm.reset();
+            this.monederoSeleccionadoCambio = null;
+            this.setupDataSource();
+            if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
+          },
+          error: (error) => {
+            Swal.fire({
+              title: '¡Error!',
+              text: error?.error?.message || error?.error || 'No se pudo cambiar el estatus del monedero.',
+              icon: 'error',
+              background: '#0d121d',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'Confirmar',
+            });
+          }
         });
-        if (this.modalRef) this.modalRef.close();
-        this.cambiarEstatusForm.reset();
-        this.monederoSeleccionadoCambio = null;
-        this.setupDataSource();
-        if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
-      },
-      error: (error) => {
-        Swal.fire({
-          title: '¡Error!',
-          text: error?.error?.message || error?.error || 'No se pudo cambiar el estatus del monedero.',
-          icon: 'error',
-          background: '#0d121d',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'Confirmar',
-        });
-      }
-    });
+    };
+
+    if (this.esEstatusMonederoCanceladoPorId(payload.idEstatusMonedero)) {
+      Swal.fire({
+        title: '¡Advertencia!',
+        html:
+          'Ha elegido <strong>Cancelado</strong>. Si confirma con <strong>OK</strong>, el monedero quedará cancelado por completo y <strong>no podrá volver a activarse</strong>.<br><br>' +
+          'Si no desea cancelarlo, use <strong>Cancelar</strong> en esta alerta.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancelar',
+        background: '#0d121d'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          enviar();
+        }
+      });
+      return;
+    }
+
+    enviar();
   }
 
   desactivar(rowData: any) {

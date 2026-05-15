@@ -52,7 +52,7 @@
                                             [attr.aria-selected]="esTabAcciones('apertura')" class="promo-tab w-100"
                                             [class.promo-tab--active]="esTabAcciones('apertura')"
                                             (click)="setTabAcciones('apertura')"
-                                            title="Abrir o cerrar tesorería de sala">
+                                            title="Abrir o cerrar bóveda de sala">
                                             <span class="promo-tab-inner">
                                                 <i class="fas fa-door-open" aria-hidden="true"></i>
                                                 <span class="promo-tab-caption">Apertura y cierre</span>
@@ -85,7 +85,7 @@
                                                     </div>
                                                     <div class="btn-action-text">
                                                         <span class="btn-action-label">Abrir Bóveda</span>
-                                                        <span class="btn-action-desc">Iniciar nueva tesorería de
+                                                        <span class="btn-action-desc">Iniciar nueva bóveda de
                                                             sala</span>
                                                     </div>
                                                 </button>
@@ -99,7 +99,7 @@
                                                     </div>
                                                     <div class="btn-action-text">
                                                         <span class="btn-action-label">Cerrar Bóveda</span>
-                                                        <span class="btn-action-desc">Finalizar tesorería activa</span>
+                                                        <span class="btn-action-desc">Finalizar bóveda activa</span>
                                                     </div>
                                                 </button>
                                             </div>
@@ -212,7 +212,7 @@
                                 </div>
                                 <div>
                                     <button type="button" id="resumenButton" class="btnAcciones"
-                                        (click)="verResumen(row.data.id)" ngbTooltip="Ver resumen de tesorería"
+                                        (click)="verResumen(row.data.id)" ngbTooltip="Ver resumen de bóveda"
                                         placement="top">
                                         <i class="fa fa-chart-line"></i>
                                     </button>
@@ -226,33 +226,33 @@
                                 </div>
                                 <!-- <div>
                                 <button type="button" id="saldoButton" class="btnAcciones" (click)="verSaldo(row.data.id)"
-                                    ngbTooltip="Obtener saldo de tesorería" placement="top">
+                                    ngbTooltip="Obtener saldo de bóveda" placement="top">
                                     <i class="fa fa-wallet"></i>
                                 </button>
                             </div> -->
                                 <div>
                                     <button type="button" id="eliminarTesoreriaButton" class="btnAcciones"
                                         (click)="eliminarTesoreria(row.data.id ?? row.data.Id)"
-                                        ngbTooltip="Eliminar tesorería" placement="top">
+                                        ngbTooltip="Eliminar bóveda" placement="top">
                                         <i class="fa fa-trash-alt"></i>
                                     </button>
                                 </div>
                                 <!-- <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarTesoreria(row.data.id)"
-                                    ngbTooltip="Editar tesorería" placement="top">
+                                    ngbTooltip="Editar bóveda" placement="top">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </div>
                             <div>
                                 <button *ngIf="row.data.estatus === 0" id="pinButton" class="btnAcciones"
                                     (click)="activar(row.data)"
-                                    ngbTooltip="Activar tesorería" placement="top">
+                                    ngbTooltip="Activar bóveda" placement="top">
                                     <i class="fa fa-arrow-up"></i>
                                 </button>
                                 <button *ngIf="row.data.estatus === 1" id="deleteButton" class="btnAcciones"
                                     (click)="desactivar(row.data)"
-                                    ngbTooltip="Desactivar tesorería" placement="top">
+                                    ngbTooltip="Desactivar bóveda" placement="top">
                                     <i class="fa fa-arrow-down"></i>
                                 </button>
                             </div> -->
@@ -380,7 +380,7 @@
             <div class="bas-empty-icon">
                 <i class="fas fa-door-closed" aria-hidden="true"></i>
             </div>
-            <h6 class="bas-empty-title">Sin tesorería abierta</h6>
+            <h6 class="bas-empty-title">Sin bóveda abierta</h6>
             <p *ngIf="bovedaAbiertaSalaVacio.nombreSala" class="bas-empty-sala">
                 <i class="fas fa-building" aria-hidden="true"></i>
                 {{ bovedaAbiertaSalaVacio.nombreSala }}
@@ -412,7 +412,7 @@
                     <div class="bas-dinero-card bas-dinero-card--saldo">
                         <span class="bas-dinero-label">Saldo actual</span>
                         <span class="bas-dinero-valor">{{ formatearMoneda(d.saldoActual) }}</span>
-                        <span class="bas-dinero-sub">Efectivo disponible en tesorería</span>
+                        <span class="bas-dinero-sub">Efectivo disponible en bóveda</span>
                     </div>
                     <div class="bas-dinero-card bas-dinero-card--fondo">
                         <span class="bas-dinero-label">Fondo inicial del día</span>
@@ -602,7 +602,7 @@
         <div class="form-indication">
             <i class="fas fa-arrow-up"></i>
             <span>Agrega efectivo a la bóveda desde una fuente externa. Aumenta el saldo disponible de la
-                tesorería.</span>
+                bóveda.</span>
         </div>
         <form [formGroup]="reponerTesoreriaForm">
             <div class="row g-3">
@@ -680,7 +680,7 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--warning">
             <i class="fas fa-arrow-down"></i>
-            <span>Retira efectivo de la bóveda. Requiere saldo suficiente en tesorería.</span>
+            <span>Retira efectivo de la bóveda. Requiere saldo suficiente en bóveda.</span>
         </div>
         <form [formGroup]="retirarTesoreriaForm">
             <div class="row g-3">
