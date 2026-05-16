@@ -1268,7 +1268,7 @@ export class ListaMonederosComponent {
 
   /**
    * Desde acciones de la fila: consulta el saldo al instante y abre el modal solo en resultados
-   * (no muestra el paso de selección de monedero).
+   * (no muestra el paso de selección de monedero).ss
    */
   consultarSaldoDesdeAccionesFila(rowData: any): void {
     const numero = String(rowData?.numeroMonedero ?? '').trim();
