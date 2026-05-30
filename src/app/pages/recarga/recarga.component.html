@@ -1,519 +1,558 @@
-<div class="container-fluid recarga-page" [@fadeInRight]>
-  <!-- Hero -->
-  <header class="recarga-hero">
-    <div class="recarga-hero-bg"></div>
-    <div class="recarga-hero-content">
-      <div class="recarga-hero-icon">
-        <i class="fas fa-bolt"></i>
+<div class="vt-shell" [@fadeInRight]>
+
+  <!-- ═══════════════════ FONDO ANIMADO ═══════════════════ -->
+  <div class="vt-bg" aria-hidden="true">
+    <div class="vt-bg-radial vt-bg-radial--1"></div>
+    <div class="vt-bg-radial vt-bg-radial--2"></div>
+    <div class="vt-scanline"></div>
+  </div>
+
+  <!-- ═══════════════════ HEADER ═══════════════════ -->
+  <header class="vt-header">
+    <div class="vt-header-left">
+      <div class="vt-logo-mark">
+        <span class="vt-logo-bolt">&#9889;</span>
       </div>
-      <h1 class="recarga-hero-title">Módulo de Recarga</h1>
-      <p class="recarga-hero-subtitle">Carga efectivo a monederos de forma rápida y segura</p>
-      <div class="recarga-hero-badge">
-        <span class="recarga-hero-badge-dot"></span>
-        <span>POS · Carga inmediata</span>
+      <div class="vt-header-text">
+        <span class="vt-header-eyebrow">SISTEMA POS · TERMINAL 01</span>
+        <h1 class="vt-header-title">CARGA DE MONEDERO</h1>
       </div>
+    </div>
+    <div class="vt-header-right">
+      <div class="vt-status-pill">
+        <span class="vt-status-led"></span>
+        <span class="vt-status-txt">EN LÍNEA</span>
+      </div>
+      <div class="vt-header-clock" id="vtClock">00:00:00</div>
     </div>
   </header>
 
-  <!-- Formulario principal -->
-  <div class="recarga-flow" [class.recarga-flow--ready]="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value">
-    <form [formGroup]="recargaForm">
-      <div class="row g-4 recarga-cards">
-        <!-- Caja -->
-        <div class="col-12 col-lg-4">
-          <div class="recarga-card recarga-card--caja h-100">
-          <div class="recarga-card-glow recarga-card-glow--caja"></div>
-          <div class="recarga-card-header">
-            <div class="recarga-card-icon recarga-card-icon--caja">
-              <i class="fas fa-cash-register"></i>
-            </div>
-            <div class="recarga-card-titles">
-              <h3 class="recarga-card-title">Caja</h3>
-              <p class="recarga-card-sub">Selecciona la caja</p>
-            </div>
-          </div>
-          <div class="recarga-card-body">
-            <label class="recarga-field">
-              <span class="recarga-field-label">Caja *</span>
-              <dx-select-box
-                [dataSource]="listaCajas"
-                displayExpr="text"
-                valueExpr="id"
-                formControlName="idCaja"
-                placeholder="Selecciona una caja..."
-                searchEnabled="true"
-                searchMode="contains"
-                [showClearButton]="true"
-                (onValueChanged)="onCajaChanged($event)"
-                class="dx-select-recarga dx-select-caja">
-              </dx-select-box>
-              <p *ngIf="listaCajas.length === 0" class="recarga-field-hint">No hay cajas disponibles. Abre un turno primero.</p>
-            </label>
-            <div class="recarga-chip" [class.recarga-chip--on]="cajaSeleccionada">
-              <i class="fas fa-warehouse"></i>
-              <span>{{ cajaSeleccionada ? 'Caja lista' : 'Pendiente' }}</span>
-            </div>
-            <div class="recarga-detail" *ngIf="cajaSeleccionada" [@slideDownFade] [@staggerFadeIn]>
-              <div class="recarga-detail-item">
-                <span class="recarga-detail-label"><i class="fas fa-building"></i> Sala</span>
-                <span class="recarga-detail-value">{{ cajaSeleccionada.nombreSala || '—' }}</span>
-              </div>
-              <div class="recarga-detail-item">
-                <span class="recarga-detail-label"><i class="fas fa-map-marker-alt"></i> Zona</span>
-                <span class="recarga-detail-value">{{ cajaSeleccionada.nombreZona || '—' }}</span>
-              </div>
-              <div class="recarga-detail-item">
-                <span class="recarga-detail-label"><i class="fas fa-barcode"></i> Código</span>
-                <span class="recarga-detail-value">{{ cajaSeleccionada.codigo || '—' }}</span>
-              </div>
-            </div>
-          </div>
-          </div>
-        </div>
+  <!-- ═══════════════════ CUERPO PRINCIPAL ═══════════════════ -->
+  <div class="vt-body">
 
-        <!-- Monedero -->
-        <div class="col-12 col-lg-4">
-          <div class="recarga-card recarga-card--monedero h-100">
-          <div class="recarga-card-glow recarga-card-glow--monedero"></div>
-          <div class="recarga-card-header">
-            <div class="recarga-card-icon recarga-card-icon--monedero">
-              <i class="fas fa-wallet"></i>
-            </div>
-            <div class="recarga-card-titles">
-              <h3 class="recarga-card-title">Monedero</h3>
-              <p class="recarga-card-sub">Monedero a recargar</p>
-            </div>
-          </div>
-          <div class="recarga-card-body">
-            <label class="recarga-field">
-              <span class="recarga-field-label">Monedero *</span>
-              <dx-select-box
-                [dataSource]="listaMonederos"
-                displayExpr="text"
-                valueExpr="id"
-                formControlName="idMonedero"
-                placeholder="Selecciona un monedero..."
-                searchEnabled="true"
-                searchMode="contains"
-                [showClearButton]="true"
-                (onValueChanged)="onMonederoChanged($event)"
-                class="dx-select-recarga dx-select-monedero">
-              </dx-select-box>
-            </label>
-            <div class="recarga-chip" [class.recarga-chip--on]="monederoSeleccionado">
-              <i class="fas fa-user-check"></i>
-              <span>{{ monederoSeleccionado ? 'Afiliado listo' : 'Pendiente' }}</span>
-            </div>
-            <div class="recarga-detail" *ngIf="monederoSeleccionado" [@slideDownFade] [@staggerFadeIn]>
-              <div class="recarga-detail-item">
-                <span class="recarga-detail-label"><i class="fas fa-barcode"></i> Número</span>
-                <span class="recarga-detail-value">{{ monederoSeleccionado.numeroMonedero || '—' }}</span>
-              </div>
-              <div class="recarga-detail-item">
-                <span class="recarga-detail-label"><i class="fas fa-tag"></i> Alias</span>
-                <span class="recarga-detail-value">{{ monederoSeleccionado.alias || '—' }}</span>
-              </div>
-              <div class="recarga-detail-item">
-                <span class="recarga-detail-label"><i class="fas fa-user"></i> Afiliado</span>
-                <span class="recarga-detail-value">{{ monederoSeleccionado.nombreCompletoAfiliado || '—' }}</span>
-              </div>
-            </div>
-          </div>
-          </div>
-        </div>
+    <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+    <div class="vt-main">
 
-        <!-- Monto -->
-        <div class="col-12 col-lg-4">
-          <div class="recarga-card recarga-card--monto h-100">
-          <div class="recarga-card-glow recarga-card-glow--monto"></div>
-          <div class="recarga-card-header">
-            <div class="recarga-card-icon recarga-card-icon--monto">
-              <i class="fas fa-coins"></i>
-            </div>
-            <div class="recarga-card-titles">
-              <h3 class="recarga-card-title">Monto</h3>
-              <p class="recarga-card-sub">Monto a cargar</p>
-            </div>
-          </div>
-          <div class="recarga-card-body">
-            <label class="recarga-field">
-              <span class="recarga-field-label">Monto *</span>
-              <div class="recarga-input-monto">
-                <i class="fas fa-dollar-sign"></i>
-                <input
-                  [value]="montoDisplay"
-                  class="recarga-input-control"
-                  type="text"
-                  inputmode="decimal"
-                  placeholder="0.00"
-                  (focus)="montoFocused = true"
-                  (input)="onMontoInput($event)"
-                  (blur)="onMontoBlur($event)" />
-              </div>
-            </label>
-            <div class="recarga-quick">
-              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(100)">
-                <span class="recarga-quick-val">$100</span>
-              </button>
-              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(500)">
-                <span class="recarga-quick-val">$500</span>
-              </button>
-              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(1000)">
-                <span class="recarga-quick-val">$1,000</span>
-              </button>
-              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(2000)">
-                <span class="recarga-quick-val">$2,000</span>
-              </button>
-              <button type="button" class="recarga-quick-btn col-6 col-sm-auto" (click)="setMontoRapido(5000)">
-                <span class="recarga-quick-val">$5,000</span>
-              </button>
-            </div>
-          </div>
-          </div>
+      <!-- TICKER / CARRUSEL -->
+      <div class="vt-ticker" aria-hidden="true">
+        <div class="vt-ticker-inner">
+          <span>CARGA INMEDIATA</span><span class="vt-ticker-sep">◆</span>
+          <span>MONEDERO ELECTRÓNICO</span><span class="vt-ticker-sep">◆</span>
+          <span>OPERACIÓN SEGURA</span><span class="vt-ticker-sep">◆</span>
+          <span>TURNO ACTIVO</span><span class="vt-ticker-sep">◆</span>
+          <span>POS CERTIFICADO</span><span class="vt-ticker-sep">◆</span>
+          <span>CARGA INMEDIATA</span><span class="vt-ticker-sep">◆</span>
+          <span>MONEDERO ELECTRÓNICO</span><span class="vt-ticker-sep">◆</span>
+          <span>OPERACIÓN SEGURA</span><span class="vt-ticker-sep">◆</span>
         </div>
       </div>
 
-      <!-- Confirmación -->
-      <div class="recarga-confirm-wrap" #resumenElement *ngIf="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value && !montoFocused">
-        <div class="recarga-confirm" *ngIf="mostrarResumen" [@slideDownFade] [@staggerFadeIn]>
-          <div class="recarga-confirm-header">
-            <div class="recarga-confirm-icon">
+      <form [formGroup]="recargaForm" class="vt-form">
+
+        <!-- PASO 1: CAJA -->
+        <div class="vt-step" [class.vt-step--active]="!cajaSeleccionada" [class.vt-step--done]="cajaSeleccionada">
+          <div class="vt-step-number">
+            <span class="vt-step-num-inner">
+              <span class="vt-num-default">01</span>
+              <i class="fas fa-check vt-num-check"></i>
+            </span>
+          </div>
+          <div class="vt-step-content">
+            <div class="vt-step-head">
+              <span class="vt-step-label">SELECCIONAR CAJA</span>
+              <div class="vt-step-tag" *ngIf="cajaSeleccionada">
+                <i class="fas fa-warehouse"></i>
+                <span>{{ cajaSeleccionada.codigo }}</span>
+              </div>
+            </div>
+            <div class="vt-field-wrap">
+              <i class="fas fa-cash-register vt-field-ico"></i>
+              <dx-select-box [dataSource]="listaCajas" displayExpr="text" valueExpr="id" formControlName="idCaja"
+                placeholder="Selecciona una caja..." searchEnabled="true" searchMode="contains" [showClearButton]="true"
+                (onValueChanged)="onCajaChanged($event)" class="dx-vt dx-vt--caja">
+              </dx-select-box>
+            </div>
+            <p *ngIf="listaCajas.length === 0" class="vt-hint">
+              <i class="fas fa-exclamation-triangle"></i> Sin cajas disponibles. Abre un turno primero.
+            </p>
+            <div class="vt-detail-row" *ngIf="cajaSeleccionada" [@slideDownFade]>
+              <span class="vt-dr-item">
+                <span class="vt-dr-k"><i class="fas fa-building"></i> Sala</span>
+                <span class="vt-dr-v">{{ cajaSeleccionada.nombreSala || '—' }}</span>
+              </span>
+              <span class="vt-dr-item">
+                <span class="vt-dr-k"><i class="fas fa-map-marker-alt"></i> Zona</span>
+                <span class="vt-dr-v">{{ cajaSeleccionada.nombreZona || '—' }}</span>
+              </span>
+              <span class="vt-dr-item">
+                <span class="vt-dr-k"><i class="fas fa-barcode"></i> Código</span>
+                <span class="vt-dr-v">{{ cajaSeleccionada.codigo || '—' }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIVISOR -->
+        <div class="vt-connector" [class.vt-connector--lit]="cajaSeleccionada" aria-hidden="true">
+          <div class="vt-connector-line"></div>
+          <div class="vt-connector-dot"></div>
+        </div>
+
+        <!-- PASO 2: MONEDERO -->
+        <div class="vt-step" [class.vt-step--active]="cajaSeleccionada && !monederoSeleccionado"
+          [class.vt-step--done]="monederoSeleccionado">
+          <div class="vt-step-number">
+            <span class="vt-step-num-inner">
+              <span class="vt-num-default">02</span>
+              <i class="fas fa-check vt-num-check"></i>
+            </span>
+          </div>
+          <div class="vt-step-content">
+            <div class="vt-step-head">
+              <span class="vt-step-label">MONEDERO DESTINO</span>
+              <div class="vt-step-tag" *ngIf="monederoSeleccionado">
+                <i class="fas fa-wallet"></i>
+                <span>{{ monederoSeleccionado.numeroMonedero }}</span>
+              </div>
+            </div>
+            <div class="vt-field-wrap">
+              <i class="fas fa-wallet vt-field-ico"></i>
+              <dx-select-box [dataSource]="listaMonederos" displayExpr="text" valueExpr="id"
+                formControlName="idMonedero" placeholder="Selecciona un monedero..." searchEnabled="true"
+                searchMode="contains" [showClearButton]="true" (onValueChanged)="onMonederoChanged($event)"
+                class="dx-vt dx-vt--monedero">
+              </dx-select-box>
+            </div>
+            <div class="vt-detail-row" *ngIf="monederoSeleccionado" [@slideDownFade]>
+              <span class="vt-dr-item">
+                <span class="vt-dr-k"><i class="fas fa-user"></i> Afiliado</span>
+                <span class="vt-dr-v">{{ monederoSeleccionado.nombreCompletoAfiliado || '—' }}</span>
+              </span>
+              <span class="vt-dr-item">
+                <span class="vt-dr-k"><i class="fas fa-tag"></i> Alias</span>
+                <span class="vt-dr-v">{{ monederoSeleccionado.alias || '—' }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIVISOR -->
+        <div class="vt-connector" [class.vt-connector--lit]="monederoSeleccionado" aria-hidden="true">
+          <div class="vt-connector-line"></div>
+          <div class="vt-connector-dot"></div>
+        </div>
+
+        <!-- PASO 3: MONTO -->
+        <div class="vt-step"
+          [class.vt-step--active]="cajaSeleccionada && monederoSeleccionado && !recargaForm.get('monto')?.value"
+          [class.vt-step--done]="recargaForm.get('monto')?.value">
+          <div class="vt-step-number">
+            <span class="vt-step-num-inner">
+              <span class="vt-num-default">03</span>
+              <i class="fas fa-check vt-num-check"></i>
+            </span>
+          </div>
+          <div class="vt-step-content">
+            <div class="vt-step-head">
+              <span class="vt-step-label">MONTO A CARGAR</span>
+            </div>
+
+            <!-- Display grande del monto -->
+            <div class="vt-amount-display">
+              <input [value]="montoDisplay" class="vt-amount-input" type="text" inputmode="decimal" placeholder="$0.00"
+                (focus)="montoFocused = true" (input)="onMontoInput($event)" (blur)="onMontoBlur($event)" />
+              <span class="vt-amount-cursor" aria-hidden="true"></span>
+            </div>
+
+            <!-- Botones rápidos en grid -->
+            <div class="vt-quick-grid">
+              <button type="button" class="vt-qbtn" (click)="setMontoRapido(100)">$100</button>
+              <button type="button" class="vt-qbtn" (click)="setMontoRapido(500)">$500</button>
+              <button type="button" class="vt-qbtn" (click)="setMontoRapido(1000)">$1,000</button>
+              <button type="button" class="vt-qbtn" (click)="setMontoRapido(2000)">$2,000</button>
+              <button type="button" class="vt-qbtn vt-qbtn--xl" (click)="setMontoRapido(5000)">$5,000</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ RESUMEN PREVIO A CONFIRMAR ═══ -->
+        <div class="vt-receipt-wrap" #resumenElement
+          *ngIf="cajaSeleccionada && monederoSeleccionado && recargaForm.get('monto')?.value && !montoFocused">
+          <div class="vt-receipt" *ngIf="mostrarResumen" [@slideDownFade]>
+
+            <!-- Línea decorativa superior -->
+            <div class="vt-receipt-dashes" aria-hidden="true">- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+              - - - - -</div>
+
+            <div class="vt-receipt-head">
               <i class="fas fa-receipt"></i>
+              <span>COMPROBANTE DE OPERACIÓN</span>
+              <span class="vt-receipt-validated">
+                <i class="fas fa-shield-alt"></i> VALIDADO
+              </span>
             </div>
-            <div>
-              <h3 class="recarga-confirm-title">Confirmación</h3>
-              <p class="recarga-confirm-sub">Revisa los datos antes de confirmar</p>
+
+            <div class="vt-receipt-grid">
+              <div class="vt-rg-item">
+                <span class="vt-rg-k">CAJA</span>
+                <span class="vt-rg-v">{{ cajaSeleccionada.codigo || '—' }}</span>
+                <span class="vt-rg-sub">{{ cajaSeleccionada.nombre || '—' }}</span>
+              </div>
+              <div class="vt-rg-sep" aria-hidden="true"></div>
+              <div class="vt-rg-item">
+                <span class="vt-rg-k">MONEDERO</span>
+                <span class="vt-rg-v">{{ monederoSeleccionado.numeroMonedero || '—' }}</span>
+                <span class="vt-rg-sub">{{ monederoSeleccionado.alias || '—' }}</span>
+              </div>
+              <div class="vt-rg-sep" aria-hidden="true"></div>
+              <div class="vt-rg-item vt-rg-item--total">
+                <span class="vt-rg-k">TOTAL</span>
+                <span class="vt-rg-v vt-rg-v--big">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</span>
+                <span class="vt-rg-sub">CARGA INMEDIATA</span>
+              </div>
             </div>
-            <div class="recarga-confirm-badge">
-              <i class="fas fa-lock"></i>
-              <span>Validado</span>
-            </div>
+
+            <div class="vt-receipt-dashes" aria-hidden="true">- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+              - - - - -</div>
           </div>
-          <div class="row g-3 recarga-confirm-grid">
-            <div class="col-12 col-lg-4">
-              <div class="recarga-confirm-tile h-100">
-              <span class="recarga-confirm-tile-label"><i class="fas fa-cash-register"></i> Caja</span>
-              <span class="recarga-confirm-tile-main">{{ cajaSeleccionada.codigo || '—' }}</span>
-              <span class="recarga-confirm-tile-sub">{{ cajaSeleccionada.nombre || '—' }}</span>
-            </div>
-              </div>
-            <div class="col-12 col-lg-4">
-              <div class="recarga-confirm-tile h-100">
-              <span class="recarga-confirm-tile-label"><i class="fas fa-wallet"></i> Monedero</span>
-              <span class="recarga-confirm-tile-main">{{ monederoSeleccionado.numeroMonedero || '—' }}</span>
-              <span class="recarga-confirm-tile-sub">{{ monederoSeleccionado.alias || '—' }}</span>
-            </div>
-              </div>
-            <div class="col-12 col-lg-4">
-              <div class="recarga-confirm-tile recarga-confirm-tile--monto h-100">
-              <span class="recarga-confirm-tile-label"><i class="fas fa-coins"></i> Monto</span>
-              <span class="recarga-confirm-tile-main recarga-confirm-tile-main--big">{{ formatearMoneda(recargaForm.get('monto')?.value) }}</span>
-              <span class="recarga-confirm-tile-sub">Carga inmediata</span>
-            </div>
-              </div>
+
+          <!-- ACCIONES -->
+          <div class="vt-actions">
+            <button type="button" class="vt-btn vt-btn--ghost" *ngIf="hayDatosEnSelectsRecarga"
+              (click)="limpiarFormulario()">
+              <i class="fas fa-times-circle"></i>
+              <span>LIMPIAR</span>
+            </button>
+            <button type="button" class="vt-btn vt-btn--fire" (click)="procesarRecarga()"
+              [disabled]="recargaForm.invalid || procesando">
+              <span class="vt-btn-fire-bg" aria-hidden="true"></span>
+              <i class="fas fa-bolt" *ngIf="!procesando"></i>
+              <i class="fas fa-spinner fa-spin" *ngIf="procesando"></i>
+              <span>{{ procesando ? 'PROCESANDO...' : 'CONFIRMAR RECARGA' }}</span>
+            </button>
           </div>
         </div>
 
-        <div class="recarga-actions">
-          <button
-            type="button"
-            class="recarga-btn recarga-btn--cancel"
-            *ngIf="hayDatosEnSelectsRecarga"
-            (click)="limpiarFormulario()">
-            <i class="fas fa-times"></i>
-            <span>Limpiar</span>
+        <!-- BOTÓN LIMPIAR suelto -->
+        <div class="vt-actions vt-actions--solo"
+          *ngIf="hayDatosEnSelectsRecarga && (!cajaSeleccionada || !monederoSeleccionado || !recargaForm.get('monto')?.value || montoFocused)">
+          <button type="button" class="vt-btn vt-btn--ghost" (click)="limpiarFormulario()">
+            <i class="fas fa-redo-alt"></i>
+            <span>LIMPIAR FORMULARIO</span>
           </button>
-          <button type="button" class="recarga-btn recarga-btn--confirm" (click)="procesarRecarga()" [disabled]="recargaForm.invalid || procesando">
-            <i class="fas fa-check" *ngIf="!procesando"></i>
-            <i class="fas fa-spinner fa-spin" *ngIf="procesando"></i>
-            <span>{{ procesando ? 'Procesando...' : 'Confirmar Recarga' }}</span>
-          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- COLUMNA DERECHA: PANEL LATERAL -->
+    <aside class="vt-panel">
+
+      <!-- Instrucciones compactas -->
+      <div class="vt-panel-block vt-panel-block--help">
+        <h2 class="vt-panel-title">INSTRUCCIONES</h2>
+        <ol class="vt-help-list">
+          <li>Selecciona la caja de la que proviene el efectivo.</li>
+          <li>Elige el monedero electrónico destino.</li>
+          <li>Ingresa el monto o usa los accesos rápidos.</li>
+          <li>Revisa el comprobante y confirma.</li>
+        </ol>
+      </div>
+
+      <!-- Indicadores de estado -->
+      <!-- <div class="vt-panel-block">
+        <h2 class="vt-panel-title">ESTADO DEL SISTEMA</h2>
+        <ul class="vt-sys-list">
+          <li class="vt-sys-item vt-sys-item--ok">
+            <span class="vt-sys-led"></span>
+            <span class="vt-sys-name">Servidor POS</span>
+            <span class="vt-sys-val">OK</span>
+          </li>
+          <li class="vt-sys-item vt-sys-item--ok">
+            <span class="vt-sys-led"></span>
+            <span class="vt-sys-name">Monederos</span>
+            <span class="vt-sys-val">ACTIVO</span>
+          </li>
+          <li class="vt-sys-item" [class.vt-sys-item--ok]="listaCajas.length > 0" [class.vt-sys-item--warn]="listaCajas.length === 0">
+            <span class="vt-sys-led"></span>
+            <span class="vt-sys-name">Cajas abiertas</span>
+            <span class="vt-sys-val">{{ listaCajas.length }}</span>
+          </li>
+          <li class="vt-sys-item" [class.vt-sys-item--ok]="cajaSeleccionada" [class.vt-sys-item--idle]="!cajaSeleccionada">
+            <span class="vt-sys-led"></span>
+            <span class="vt-sys-name">Caja activa</span>
+            <span class="vt-sys-val">{{ cajaSeleccionada ? cajaSeleccionada.codigo : '—' }}</span>
+          </li>
+        </ul>
+      </div> -->
+
+      <!-- Mini progreso visual -->
+      <div class="vt-panel-block">
+        <h2 class="vt-panel-title">PROGRESO DE OPERACIÓN</h2>
+        <div class="vt-progress-steps">
+          <div class="vt-ps" [class.vt-ps--done]="cajaSeleccionada">
+            <div class="vt-ps-dot"></div>
+            <div class="vt-ps-info">
+              <span class="vt-ps-name">Caja</span>
+              <span class="vt-ps-state">{{ cajaSeleccionada ? cajaSeleccionada.codigo : 'Pendiente' }}</span>
+            </div>
+          </div>
+          <div class="vt-ps-line" [class.vt-ps-line--done]="cajaSeleccionada"></div>
+          <div class="vt-ps" [class.vt-ps--done]="monederoSeleccionado">
+            <div class="vt-ps-dot"></div>
+            <div class="vt-ps-info">
+              <span class="vt-ps-name">Monedero</span>
+              <span class="vt-ps-state">{{ monederoSeleccionado ? monederoSeleccionado.numeroMonedero : 'Pendiente'
+                }}</span>
+            </div>
+          </div>
+          <div class="vt-ps-line" [class.vt-ps-line--done]="monederoSeleccionado"></div>
+          <div class="vt-ps" [class.vt-ps--done]="recargaForm.get('monto')?.value">
+            <div class="vt-ps-dot"></div>
+            <div class="vt-ps-info">
+              <span class="vt-ps-name">Monto</span>
+              <span class="vt-ps-state">{{ recargaForm.get('monto')?.value ?
+                formatearMoneda(recargaForm.get('monto')?.value) : 'Pendiente' }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div
-        class="recarga-actions recarga-actions--single"
-        *ngIf="hayDatosEnSelectsRecarga && (!cajaSeleccionada || !monederoSeleccionado || !recargaForm.get('monto')?.value || montoFocused)">
-        <button type="button" class="recarga-btn recarga-btn--cancel" (click)="limpiarFormulario()">
-          <i class="fas fa-refresh"></i>
-          <span>Limpiar</span>
-        </button>
-      </div>
-    </form>
+      <!-- Ornamento decorativo de casino -->
+      <!-- <div class="vt-panel-ornament" aria-hidden="true">
+        <div class="vt-orn-ring vt-orn-ring--1"></div>
+        <div class="vt-orn-ring vt-orn-ring--2"></div>
+        <div class="vt-orn-ring vt-orn-ring--3"></div>
+        <div class="vt-orn-center">&#9670;</div>
+      </div> -->
+
+
+
+    </aside>
   </div>
 </div>
 
-<!-- Modales -->
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALES
+     ═══════════════════════════════════════════════════════ -->
+
+<!-- ABRIR TURNO -->
 <ng-template #modalAbrirTurno let-modal>
-  <div class="modal-header modal-accion-header modal-accion-header--abrir-turno">
-    <h5 class="modal-title">
-      <i class="fas fa-door-open"></i>
-      <span>Abrir Turno de Caja</span>
-    </h5>
-    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  <div class="modal-body modal-accion-body">
-    <div class="form-indication">
-      <i class="fas fa-door-open"></i>
-      <span>Inicia un nuevo turno de caja. Selecciona la caja, tesorería y registra el fondo inicial.</span>
+  <div class="vt-modal">
+    <div class="vt-modal-header vt-modal-header--open">
+      <div class="vt-modal-icon"><i class="fas fa-door-open"></i></div>
+      <div class="vt-modal-titles">
+        <h5 class="vt-modal-title">ABRIR TURNO DE CAJA</h5>
+        <p class="vt-modal-sub">Inicia un nuevo turno y registra el fondo inicial</p>
+      </div>
+      <button type="button" class="vt-modal-close" (click)="cerrarModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
-    <form [formGroup]="abrirTurnoForm">
-      <div class="row g-3">
-        <div class="col-12 col-md-6">
-          <label class="field">
-            <span class="field-label text-white">Caja *</span>
-            <dx-select-box
-              [dataSource]="listaCajasAbrir"
-              displayExpr="text"
-              valueExpr="id"
-              formControlName="idCaja"
-              placeholder="Selecciona una caja..."
-              searchEnabled="true"
-              searchMode="contains"
-              [showClearButton]="true"
-              class="dx-select-box-custom dx-select-box-caja">
-            </dx-select-box>
+    <div class="vt-modal-body">
+      <form [formGroup]="abrirTurnoForm">
+        <div class="vt-mrow">
+          <label class="vt-mfield">
+            <span class="vt-mfield-label">CAJA *</span>
+            <div class="vt-mfield-wrap">
+              <i class="fas fa-cash-register vt-mfield-ico"></i>
+              <dx-select-box [dataSource]="listaCajasAbrir" displayExpr="text" valueExpr="id" formControlName="idCaja"
+                placeholder="Selecciona una caja..." searchEnabled="true" [showClearButton]="true"
+                class="dx-vt-modal dx-vt--caja"></dx-select-box>
+            </div>
           </label>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="field">
-            <span class="field-label text-white">Tesorería *</span>
-            <dx-select-box
-              [dataSource]="listaTesoreria"
-              displayExpr="text"
-              valueExpr="id"
-              formControlName="idTesoreria"
-              placeholder="Selecciona una tesorería..."
-              searchEnabled="true"
-              searchMode="contains"
-              [showClearButton]="true"
-              class="dx-select-box-custom dx-select-box-boveda">
-            </dx-select-box>
+          <label class="vt-mfield">
+            <span class="vt-mfield-label">TESORERÍA *</span>
+            <div class="vt-mfield-wrap">
+              <i class="fas fa-landmark vt-mfield-ico"></i>
+              <dx-select-box [dataSource]="listaTesoreria" displayExpr="text" valueExpr="id"
+                formControlName="idTesoreria" placeholder="Selecciona tesorería..." searchEnabled="true"
+                [showClearButton]="true" class="dx-vt-modal dx-vt--boveda"></dx-select-box>
+            </div>
           </label>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="field">
-            <span class="field-label text-white">Estatus Turno *</span>
-            <dx-select-box
-              [dataSource]="listaEstatusTurno"
-              displayExpr="text"
-              valueExpr="id"
-              formControlName="idEstatusTurno"
-              placeholder="Selecciona un estatus..."
-              searchEnabled="true"
-              searchMode="contains"
-              [showClearButton]="true"
-              class="dx-select-box-custom">
-            </dx-select-box>
+          <label class="vt-mfield">
+            <span class="vt-mfield-label">ESTATUS TURNO *</span>
+            <div class="vt-mfield-wrap">
+              <i class="fas fa-toggle-on vt-mfield-ico"></i>
+              <dx-select-box [dataSource]="listaEstatusTurno" displayExpr="text" valueExpr="id"
+                formControlName="idEstatusTurno" placeholder="Selecciona estatus..." searchEnabled="true"
+                [showClearButton]="true" class="dx-vt-modal"></dx-select-box>
+            </div>
           </label>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="field">
-            <span class="field-label text-white">Fondo Inicial *</span>
-            <div class="input-sleek">
+          <label class="vt-mfield">
+            <span class="vt-mfield-label">FONDO INICIAL *</span>
+            <div class="vt-mfield-amount">
               <i class="fas fa-dollar-sign"></i>
-              <input formControlName="fondoInicial" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
-              <span class="sleek-line"></span>
+              <input formControlName="fondoInicial" type="number" min="0" step="0.01" placeholder="0.00" />
             </div>
           </label>
         </div>
-      </div>
-    </form>
-  </div>
-  <div class="modal-footer modal-accion-footer">
-    <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
-      <i class="fas fa-times"></i> <span>Cancelar</span>
-    </button>
-    <button type="button" class="btn btn-success" (click)="guardarAbrirTurno()" [disabled]="abrirTurnoForm.invalid">
-      <i class="fas fa-check"></i> Abrir Turno
-    </button>
+      </form>
+    </div>
+    <div class="vt-modal-footer">
+      <button type="button" class="vt-btn vt-btn--ghost" (click)="cerrarModal()">
+        <i class="fas fa-times"></i><span>CANCELAR</span>
+      </button>
+      <button type="button" class="vt-btn vt-btn--fire" (click)="guardarAbrirTurno()"
+        [disabled]="abrirTurnoForm.invalid">
+        <span class="vt-btn-fire-bg" aria-hidden="true"></span>
+        <i class="fas fa-door-open"></i><span>ABRIR TURNO</span>
+      </button>
+    </div>
   </div>
 </ng-template>
 
+<!-- CERRAR TURNO -->
 <ng-template #modalCerrarTurno let-modal>
-  <div class="modal-header modal-accion-header modal-accion-header--cerrar-turno">
-    <h5 class="modal-title">
-      <i class="fas fa-door-closed"></i>
-      <span>Cerrar Turno de Caja</span>
-    </h5>
-    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  <div class="modal-body modal-accion-body">
-    <div class="form-indication form-indication--warning">
-      <i class="fas fa-door-closed"></i>
-      <span>Finaliza un turno activo. Ingresa el fondo contado para el arqueo de caja.</span>
+  <div class="vt-modal">
+    <div class="vt-modal-header vt-modal-header--close">
+      <div class="vt-modal-icon vt-modal-icon--warn"><i class="fas fa-door-closed"></i></div>
+      <div class="vt-modal-titles">
+        <h5 class="vt-modal-title">CERRAR TURNO DE CAJA</h5>
+        <p class="vt-modal-sub">Finaliza el turno activo y realiza el arqueo</p>
+      </div>
+      <button type="button" class="vt-modal-close" (click)="cerrarModal()" aria-label="Cerrar"><i
+          class="fas fa-times"></i></button>
     </div>
-    <form [formGroup]="cerrarTurnoForm">
-      <div class="row g-3">
-        <div class="col-12">
-          <label class="field">
-            <span class="field-label text-white">Turno *</span>
-            <dx-select-box
-              [dataSource]="listaTurnosActivos"
-              displayExpr="text"
-              valueExpr="id"
-              formControlName="idTurno"
-              placeholder="Selecciona un turno..."
-              searchEnabled="true"
-              searchMode="contains"
-              [showClearButton]="true"
-              class="dx-select-box-custom dx-select-box-caja">
-            </dx-select-box>
-          </label>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="field">
-            <span class="field-label text-white">Fondo Contado *</span>
-            <div class="input-sleek">
-              <i class="fas fa-dollar-sign"></i>
-              <input formControlName="fondoContado" class="sleek-control" type="number" min="0" step="0.01" placeholder="0.00" />
-              <span class="sleek-line"></span>
+    <div class="vt-modal-body">
+      <form [formGroup]="cerrarTurnoForm">
+        <div class="vt-mrow">
+          <label class="vt-mfield vt-mfield--full">
+            <span class="vt-mfield-label">TURNO *</span>
+            <div class="vt-mfield-wrap">
+              <i class="fas fa-list-alt vt-mfield-ico"></i>
+              <dx-select-box [dataSource]="listaTurnosActivos" displayExpr="text" valueExpr="id"
+                formControlName="idTurno" placeholder="Selecciona un turno..." searchEnabled="true"
+                [showClearButton]="true" class="dx-vt-modal dx-vt--caja"></dx-select-box>
             </div>
           </label>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="field">
-            <span class="field-label text-white">Observaciones</span>
-            <div class="input-sleek">
+          <label class="vt-mfield">
+            <span class="vt-mfield-label">FONDO CONTADO *</span>
+            <div class="vt-mfield-amount">
+              <i class="fas fa-dollar-sign"></i>
+              <input formControlName="fondoContado" type="number" min="0" step="0.01" placeholder="0.00" />
+            </div>
+          </label>
+          <label class="vt-mfield">
+            <span class="vt-mfield-label">OBSERVACIONES</span>
+            <div class="vt-mfield-amount">
               <i class="fas fa-comment-alt"></i>
-              <input formControlName="observaciones" class="sleek-control" type="text" placeholder="Opcional" />
-              <span class="sleek-line"></span>
+              <input formControlName="observaciones" type="text" placeholder="Opcional" />
             </div>
           </label>
         </div>
-      </div>
-    </form>
-  </div>
-  <div class="modal-footer modal-accion-footer">
-    <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
-      <i class="fas fa-times"></i> <span>Cancelar</span>
-    </button>
-    <button type="button" class="btn btn-warning" (click)="guardarCerrarTurno()" [disabled]="cerrarTurnoForm.invalid">
-      <i class="fas fa-check"></i> Cerrar Turno
-    </button>
+      </form>
+    </div>
+    <div class="vt-modal-footer">
+      <button type="button" class="vt-btn vt-btn--ghost" (click)="cerrarModal()">
+        <i class="fas fa-times"></i><span>CANCELAR</span>
+      </button>
+      <button type="button" class="vt-btn vt-btn--warn" (click)="guardarCerrarTurno()"
+        [disabled]="cerrarTurnoForm.invalid">
+        <i class="fas fa-door-closed"></i><span>CERRAR TURNO</span>
+      </button>
+    </div>
   </div>
 </ng-template>
 
+<!-- DESCARGAR MONEDERO -->
 <ng-template #modalDescargarMonedero let-modal>
-  <div class="modal-header modal-accion-header modal-accion-header--descargar">
-    <h5 class="modal-title">
-      <i class="fas fa-arrow-down"></i>
-      <span>Descargar Efectivo de Monedero</span>
-    </h5>
-    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  <div class="modal-body modal-accion-body">
-    <div class="form-indication form-indication--warning">
-      <i class="fas fa-arrow-down"></i>
-      <span>Transfiere efectivo de <strong>Monedero</strong> a <strong>Caja</strong>. Requiere turno activo y saldo suficiente.</span>
+  <div class="vt-modal">
+    <div class="vt-modal-header vt-modal-header--download">
+      <div class="vt-modal-icon vt-modal-icon--warn"><i class="fas fa-arrow-down"></i></div>
+      <div class="vt-modal-titles">
+        <h5 class="vt-modal-title">DESCARGAR EFECTIVO</h5>
+        <p class="vt-modal-sub">Transfiere efectivo de monedero a caja</p>
+      </div>
+      <button type="button" class="vt-modal-close" (click)="cerrarModal()" aria-label="Cerrar"><i
+          class="fas fa-times"></i></button>
     </div>
-    <form [formGroup]="descargarMonederoForm">
-      <div class="row g-3">
-        <div class="col-12">
-          <label class="field">
-            <span class="field-label text-white">Turno de Caja *</span>
-            <dx-select-box
-              [dataSource]="listaTurnosDescargar"
-              displayExpr="text"
-              valueExpr="id"
-              formControlName="idTurnoCaja"
-              placeholder="Selecciona un turno..."
-              searchEnabled="true"
-              searchMode="contains"
-              [showClearButton]="true"
-              class="dx-select-box-custom dx-select-box-caja">
-            </dx-select-box>
+    <div class="vt-modal-body">
+      <div class="vt-modal-alert vt-modal-alert--warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Requiere turno activo y saldo suficiente en el monedero.</span>
+      </div>
+      <form [formGroup]="descargarMonederoForm">
+        <div class="vt-mrow">
+          <label class="vt-mfield vt-mfield--full">
+            <span class="vt-mfield-label">TURNO DE CAJA *</span>
+            <div class="vt-mfield-wrap">
+              <i class="fas fa-cash-register vt-mfield-ico"></i>
+              <dx-select-box [dataSource]="listaTurnosDescargar" displayExpr="text" valueExpr="id"
+                formControlName="idTurnoCaja" placeholder="Selecciona un turno..." searchEnabled="true"
+                [showClearButton]="true" class="dx-vt-modal dx-vt--caja"></dx-select-box>
+            </div>
           </label>
-        </div>
-        <div class="col-12">
-          <label class="field">
-            <span class="field-label text-white">Monedero *</span>
-            <dx-select-box
-              [dataSource]="listaMonederosDescargar"
-              displayExpr="text"
-              valueExpr="id"
-              formControlName="idMonedero"
-              placeholder="Selecciona un monedero..."
-              searchEnabled="true"
-              searchMode="contains"
-              [showClearButton]="true"
-              class="dx-select-box-custom dx-select-box-monedero">
-            </dx-select-box>
+          <label class="vt-mfield vt-mfield--full">
+            <span class="vt-mfield-label">MONEDERO *</span>
+            <div class="vt-mfield-wrap">
+              <i class="fas fa-wallet vt-mfield-ico"></i>
+              <dx-select-box [dataSource]="listaMonederosDescargar" displayExpr="text" valueExpr="id"
+                formControlName="idMonedero" placeholder="Selecciona un monedero..." searchEnabled="true"
+                [showClearButton]="true" class="dx-vt-modal dx-vt--monedero"></dx-select-box>
+            </div>
           </label>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="field">
-            <span class="field-label text-white">Monto *</span>
-            <div class="input-sleek">
+          <label class="vt-mfield">
+            <span class="vt-mfield-label">MONTO *</span>
+            <div class="vt-mfield-amount">
               <i class="fas fa-dollar-sign"></i>
-              <input formControlName="monto" class="sleek-control" type="number" min="0.01" step="0.01" placeholder="0.00" />
-              <span class="sleek-line"></span>
+              <input formControlName="monto" type="number" min="0.01" step="0.01" placeholder="0.00" />
             </div>
           </label>
         </div>
-      </div>
-    </form>
-  </div>
-  <div class="modal-footer modal-accion-footer">
-    <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
-      <i class="fas fa-times"></i> <span>Cancelar</span>
-    </button>
-    <button type="button" class="btn btn-warning" (click)="guardarDescargarMonedero()" [disabled]="descargarMonederoForm.invalid">
-      <i class="fas fa-check"></i> Descargar
-    </button>
+      </form>
+    </div>
+    <div class="vt-modal-footer">
+      <button type="button" class="vt-btn vt-btn--ghost" (click)="cerrarModal()">
+        <i class="fas fa-times"></i><span>CANCELAR</span>
+      </button>
+      <button type="button" class="vt-btn vt-btn--warn" (click)="guardarDescargarMonedero()"
+        [disabled]="descargarMonederoForm.invalid">
+        <i class="fas fa-arrow-down"></i><span>DESCARGAR</span>
+      </button>
+    </div>
   </div>
 </ng-template>
 
+<!-- CONSULTAR SALDO -->
 <ng-template #modalConsultarSaldo let-modal>
-  <div class="modal-header modal-accion-header modal-accion-header--consultar-saldo">
-    <h5 class="modal-title">
-      <i class="fas fa-search-dollar"></i>
-      <span>Consultar Saldo por Número</span>
-    </h5>
-    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  <div class="modal-body modal-accion-body">
-    <div class="form-indication">
-      <i class="fas fa-search-dollar"></i>
-      <span>Obtén el saldo de un monedero usando su número o identificador RFID.</span>
-    </div>
-    <form [formGroup]="consultarSaldoForm">
-      <div class="row g-3">
-        <div class="col-12">
-          <label class="field">
-            <span class="field-label text-white">Número de Monedero *</span>
-            <div class="input-sleek">
-              <i class="fas fa-barcode"></i>
-              <input formControlName="numero" class="sleek-control" type="text" placeholder="Número RFID o identificador" />
-              <span class="sleek-line"></span>
-            </div>
-          </label>
-        </div>
+  <div class="vt-modal">
+    <div class="vt-modal-header vt-modal-header--query">
+      <div class="vt-modal-icon"><i class="fas fa-search-dollar"></i></div>
+      <div class="vt-modal-titles">
+        <h5 class="vt-modal-title">CONSULTAR SALDO</h5>
+        <p class="vt-modal-sub">Saldo por número RFID o identificador</p>
       </div>
-      <div class="mt-3">
-        <button type="button" class="btn-alt btn-alt--success" (click)="buscarSaldoMonedero()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo">
+      <button type="button" class="vt-modal-close" (click)="cerrarModal()" aria-label="Cerrar"><i
+          class="fas fa-times"></i></button>
+    </div>
+    <div class="vt-modal-body">
+      <form [formGroup]="consultarSaldoForm">
+        <label class="vt-mfield vt-mfield--full">
+          <span class="vt-mfield-label">NÚMERO DE MONEDERO *</span>
+          <div class="vt-mfield-amount">
+            <i class="fas fa-barcode"></i>
+            <input formControlName="numero" type="text" placeholder="Número RFID o identificador" />
+          </div>
+        </label>
+        <button type="button" class="vt-btn vt-btn--fire vt-btn--sm" style="margin-top: 1rem;"
+          (click)="buscarSaldoMonedero()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo">
+          <span class="vt-btn-fire-bg" aria-hidden="true"></span>
           <i class="fas fa-search" *ngIf="!consultandoSaldo"></i>
-          <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i> <span>Buscar</span>
+          <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i>
+          <span>BUSCAR SALDO</span>
         </button>
-      </div>
-    </form>
-    <div *ngIf="saldoConsultado" class="mt-4 p-3 rounded panel-card">
-      <div class="panel-body">
-        <pre class="text-white mb-0 small">{{ saldoConsultado | json }}</pre>
+      </form>
+      <div *ngIf="saldoConsultado" class="vt-result-panel">
+        <div class="vt-result-head"><i class="fas fa-database"></i> RESULTADO</div>
+        <pre class="vt-result-json">{{ saldoConsultado | json }}</pre>
       </div>
     </div>
-  </div>
-  <div class="modal-footer modal-accion-footer">
-    <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
-      <i class="fas fa-times"></i> <span>Cerrar</span>
-    </button>
+    <div class="vt-modal-footer">
+      <button type="button" class="vt-btn vt-btn--ghost" (click)="cerrarModal()">
+        <i class="fas fa-times"></i><span>CERRAR</span>
+      </button>
+    </div>
   </div>
 </ng-template>

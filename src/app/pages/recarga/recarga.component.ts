@@ -33,6 +33,8 @@ export class RecargaComponent implements OnInit {
   mostrarResumen: boolean = false;
   montoFocused: boolean = false;
 
+  private clockInterval: any;
+
   @ViewChild('resumenElement', { static: false }) resumenElement!: ElementRef;
   @ViewChild('modalAbrirTurno', { static: false }) modalAbrirTurno!: TemplateRef<any>;
   @ViewChild('modalCerrarTurno', { static: false }) modalCerrarTurno!: TemplateRef<any>;
@@ -98,7 +100,26 @@ export class RecargaComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarListas();
+    this.startClock();
   }
+
+  ngOnDestroy(): void {
+    // ... tu código existente ...
+    if (this.clockInterval) clearInterval(this.clockInterval);
+  }
+  
+  private startClock(): void {
+    const update = () => {
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const str = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const el = document.getElementById('vtClock');
+      if (el) el.textContent = str;
+    };
+    update();
+    this.clockInterval = setInterval(update, 1000);
+  }
+  
 
   cargarListas() {
     forkJoin({
