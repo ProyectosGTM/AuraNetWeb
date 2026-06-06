@@ -53,13 +53,14 @@
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
                         <dxi-column caption="Acciones" cellTemplate="Acciones" alignment="center" dataType="string" [width]="180"></dxi-column>
+                        <dxi-column caption="Estatus Caja" cellTemplate="EstatusCaja" alignment="center" dataType="string"
+                            [width]="150" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="codigo" caption="Código" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombre" caption="Nombre" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="descripcion" caption="Descripción" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreSala" caption="Sala" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreZona" caption="Zona" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreTipoCaja" caption="Tipo Caja" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
-                        <dxi-column dataField="nombreEstatusCaja" caption="Estatus Caja" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="limiteEfectivo" caption="Límite Efectivo" alignment="center" dataType="number" [allowSearch]="true" [format]="'currency'"></dxi-column>
                         <dxi-column dataField="requiereArqueoTexto" caption="Requiere Arqueo" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="estatus" caption="Estatus" alignment="center" cellTemplate="est" dataType="string">
@@ -75,6 +76,12 @@
                         <dxo-export [enabled]="false" [allowExportSelectedData]="true"
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
+                        <div *dxTemplate="let row of 'EstatusCaja'" class="estatus-caja-cell">
+                            <span class="estatus-caja-pill" [ngClass]="obtenerClaseEstatusCaja(row.data)"
+                                [attr.title]="row.data.descripcionEstatusCaja || row.data.estatusCajaTexto">
+                                {{ row.data.estatusCajaTexto }}
+                            </span>
+                        </div>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"

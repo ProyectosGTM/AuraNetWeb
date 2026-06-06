@@ -23,6 +23,9 @@ $vt-text-soft:  rgba(255, 255, 255, 0.92);
 $vt-text-muted: rgba(255, 255, 255, 0.8);
 $vt-border:     rgba(255, 255, 255, 0.06);
 $vt-border-g:   rgba(255, 26, 91, 0.22);
+$vt-card-bg:    #0d121d;
+$vt-module-border: rgba(255, 255, 255, 0.1);
+$vt-radius-card: 18px;
 $vt-font-disp:  'Russo One', sans-serif;
 $vt-font-mono:  'IBM Plex Mono', monospace;
 $vt-font-body:  'Barlow', sans-serif;
@@ -124,7 +127,11 @@ $vt-font-body:  'Barlow', sans-serif;
 .vt-shell {
   position: relative;
   min-height: 100%;
-  background: $vt-bg;
+  margin: 0;
+  padding: 25px;
+  background: $vt-card-bg;
+  border: 1px solid $vt-module-border;
+  border-radius: $vt-radius-card;
   color: $vt-text;
   font-family: $vt-font-body;
   font-size: 14px;
@@ -132,35 +139,21 @@ $vt-font-body:  'Barlow', sans-serif;
   isolation: isolate;
 }
 
-// Fondo grid geométrico
+// Fondo decorativo — sin difuminado rojo
 .vt-bg {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
 }
 
-.vt-bg-grid {
-  display: none;
-}
-
-.vt-bg-radial {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.55;
-}
-
-.vt-bg-radial--1 {
-  width: 700px; height: 500px;
-  top: -10%; left: -5%;
-  background: radial-gradient(ellipse, vt-accent(0.22) 0%, vt-accent(0.06) 35%, transparent 68%);
-}
-
+.vt-bg-grid,
+.vt-bg-radial,
+.vt-bg-radial--1,
 .vt-bg-radial--2 {
-  width: 800px; height: 600px;
-  bottom: -20%; right: -8%;
-  background: radial-gradient(ellipse, rgba(0, 255, 170, 0.1) 0%, transparent 65%);
+  display: none !important;
 }
 
 .vt-scanline {
@@ -168,17 +161,10 @@ $vt-font-body:  'Barlow', sans-serif;
   inset: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    vt-accent(0.05) 35%,
-    vt-accent(0.2) 50%,
-    vt-accent(0.05) 65%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
   animation: vtScanSlide 8s linear infinite;
-  opacity: 0.75;
-  box-shadow: 0 0 20px vt-accent(0.15);
+  opacity: 0.25;
+  box-shadow: none;
 }
 
 // Todos los hijos en z-index > 0
@@ -192,25 +178,20 @@ $vt-font-body:  'Barlow', sans-serif;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid vt-accent(0.35);
-  background:
-    linear-gradient(180deg, vt-accent(0.1) 0%, vt-accent(0.02) 45%, transparent 100%),
-    linear-gradient(90deg, $vt-surface-2 0%, $vt-surface 50%, $vt-surface-2 100%);
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.35), 0 1px 0 vt-accent(0.12) inset;
+  padding: 0 0 1rem;
+  margin: 0 0 1rem;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   gap: 1rem;
   flex-wrap: wrap;
   position: relative;
+  z-index: 1;
 
   &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, vt-accent(0.65), transparent);
-    opacity: 0.7;
+    display: none;
   }
 }
 
@@ -224,15 +205,14 @@ $vt-font-body:  'Barlow', sans-serif;
   width: 52px; height: 52px;
   border-radius: 12px;
   border: 1px solid vt-accent(0.45);
-  background: linear-gradient(135deg, vt-accent(0.35) 0%, vt-accent(0.08) 55%, transparent 100%);
+  background: rgba(255, 26, 91, 0.12);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.6rem;
-  @include vt-accent-glow(16px, 0.25);
+  box-shadow: none;
 }
 
 .vt-logo-bolt {
   color: #fff;
-  animation: vtLogoPulse 2.4s ease-in-out infinite;
 }
 
 .vt-header-text { display: flex; flex-direction: column; }
@@ -244,7 +224,7 @@ $vt-font-body:  'Barlow', sans-serif;
   letter-spacing: 0.18em;
   line-height: 1;
   margin-bottom: 0.3rem;
-  text-shadow: 0 0 10px vt-accent(0.4);
+  text-shadow: none;
 }
 
 .vt-header-title {
@@ -256,7 +236,7 @@ $vt-font-body:  'Barlow', sans-serif;
   margin: 0;
   line-height: 1;
   text-transform: uppercase;
-  @include vt-text-glow;
+  text-shadow: none;
 }
 
 .vt-header-right {
@@ -295,11 +275,11 @@ $vt-font-body:  'Barlow', sans-serif;
   min-width: 80px;
   text-align: right;
   padding: 0.35rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid vt-accent(0.3);
-  background: vt-accent(0.08);
-  box-shadow: 0 0 16px vt-accent(0.15);
-  text-shadow: 0 0 12px vt-accent(0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+  text-shadow: none;
 }
 
 
@@ -354,9 +334,11 @@ $vt-font-body:  'Barlow', sans-serif;
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 2rem;
-  padding: 0 2rem 3rem;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 0;
+  max-width: none;
+  margin: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .vt-main {
@@ -1439,12 +1421,18 @@ $vt-font-body:  'Barlow', sans-serif;
 }
 
 @media (max-width: 640px) {
+  .vt-shell {
+    padding: 25px;
+    border-radius: $vt-radius-card;
+  }
+
   .vt-header {
-    padding: 0.85rem 1rem;
+    padding: 0 0 0.85rem;
+    margin-bottom: 0.85rem;
   }
 
   .vt-body {
-    padding: 0 1rem 2rem;
+    padding: 0;
   }
 
   .vt-step {

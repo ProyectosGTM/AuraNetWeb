@@ -181,13 +181,17 @@ export class ListaCajasComponent {
             toNum(resp?.pages) ??
             Math.max(1, Math.ceil(totalRegistros / take));
 
-          const dataTransformada = rows.map((item: any) => ({
-            ...item,
-            estatusTexto:
-              item?.estatus === 1 ? 'Activo' :
-                item?.estatus === 0 ? 'Inactivo' : null,
-            requiereArqueoTexto: item?.requiereArqueo === 1 ? 'Sí' : 'No'
-          }));
+          const dataTransformada = rows.map((item: any) => {
+            const estatusCajaTexto = item?.nombreEstatusCaja || 'Sin registro';
+            return {
+              ...item,
+              estatusCajaTexto,
+              estatusTexto:
+                item?.estatus === 1 ? 'Activo' :
+                  item?.estatus === 0 ? 'Inactivo' : null,
+              requiereArqueoTexto: item?.requiereArqueo === 1 ? 'Sí' : 'No'
+            };
+          });
 
           this.totalRegistros = totalRegistros;
           this.paginaActual = paginaActual;
@@ -249,6 +253,9 @@ export class ListaCajasComponent {
       const extras = [
         normalizar(row?.id),
         normalizar(row?.estatusTexto),
+        normalizar(row?.estatusCajaTexto),
+        normalizar(row?.nombreEstatusCaja),
+        normalizar(row?.codigoEstatusCaja),
         normalizar(row?.requiereArqueoTexto)
       ];
 
@@ -283,5 +290,29 @@ export class ListaCajasComponent {
     this.dataGrid.instance.pageIndex(0);
     this.dataGrid.instance.refresh();
     this.isGrouped = false;
+  }
+
+  /** Pills de estatus de caja (paleta UI oscura; no usa hex del catálogo API). */
+  obtenerClaseEstatusCaja(row: any): string {
+    const cod = String(row?.codigoEstatusCaja ?? '').trim().toUpperCase();
+    const id = String(row?.idEstatusCaja ?? '').trim();
+    const nombre = String(row?.nombreEstatusCaja ?? row?.estatusCajaTexto ?? '').trim().toUpperCase();
+
+    if (cod === 'ABIERTA' || id === '2' || nombre.includes('ABIERT')) {
+      return 'estatus-caja-pill--abierta';
+    }
+    if (cod === 'CERRADA' || id === '1' || nombre.includes('CERRAD')) {
+      return 'estatus-caja-pill--cerrada';
+    }
+    if (cod === 'SUSPENDIDA' || id === '3' || nombre.includes('SUSPEND')) {
+      return 'estatus-caja-pill--suspendida';
+    }
+    if (cod === 'MANTENIMIENTO' || id === '4' || nombre.includes('MANTEN')) {
+      return 'estatus-caja-pill--mantenimiento';
+    }
+    if (cod === 'DISPONIBLE' || id === '5' || nombre.includes('DISPON')) {
+      return 'estatus-caja-pill--disponible';
+    }
+    return 'estatus-caja-pill--default';
   }
 }
