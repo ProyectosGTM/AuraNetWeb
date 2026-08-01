@@ -213,7 +213,7 @@ export class ListaAfiliadosComponent implements OnInit {
     return { fecha: s };
   }
 
-  /** true cuando el grid usa paginación remota contra el servidor. */
+  /** true cuando el grid usa paginación remota contra el servidorsss. */
   get remotePaging(): boolean {
     return this.modoLista === 'paginado';
   }
@@ -1317,10 +1317,10 @@ export class ListaAfiliadosComponent implements OnInit {
     }
     const nombre = rowData.nombreCompleto || rowData.numeroIdentificacion || `ID ${rowData.id}`;
     Swal.fire({
-      title: 'Cancelar autoexclusión',
+      title: '¡Cancelar Autoexclusión!',
       html:
         `¿Cancelar la autoexclusión de <strong>${nombre}</strong>?<br><br>` +
-        '<small style="color:#94a3b8">Solo aplica cuando ya finalizó el periodo de autoexclusión. Si aún está vigente, el sistema no permitirá completar la operación.</small>',
+        '<small style="color:#94a3b8">Este procedimiento cancela la autoexclusión sin necesidad de esperar el final del periodo.</small>',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#c12a42',

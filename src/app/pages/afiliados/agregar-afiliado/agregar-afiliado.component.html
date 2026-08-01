@@ -20,7 +20,7 @@
           </div>
         </div>
         <div class="row mt-3 gy-4">
-          <form [formGroup]="afiliadoForm" autocomplete="off">
+          <form [formGroup]="afiliadoForm" autocomplete="off" novalidate>
             <div class="col-12">
 
               <!-- Datos personales -->
@@ -64,15 +64,13 @@
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
                       <span class="field-label text-white">Fecha de nacimiento <span class="field-req" aria-hidden="true">*</span></span>
-                      <dx-date-box
-                        formControlName="fechaNacimiento"
-                        type="date"
-                        displayFormat="yyyy-MM-dd"
-                        dateSerializationFormat="yyyy-MM-dd"
-                        [openOnFieldClick]="true"
-                        [inputAttr]="dateBoxAttr('fecha-nacimiento')"
-                        class="dx-select-box-custom">
-                      </dx-date-box>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar"></i>
+                        <input formControlName="fechaNacimiento" id="fecha-nacimiento" name="fechaNacimientoAfiliado"
+                          class="sleek-control" type="date" autocomplete="off" autocorrect="off" autocapitalize="off"
+                          spellcheck="false" />
+                        <span class="sleek-line"></span>
+                      </div>
                     </label>
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
@@ -165,15 +163,13 @@
                   <div class="col-12 col-md-6 col-lg-4 mt-1">
                     <label class="field">
                       <span class="field-label text-white">Vigencia de identificación</span>
-                      <dx-date-box
-                        formControlName="vigenciaIdentificacion"
-                        type="date"
-                        displayFormat="yyyy-MM-dd"
-                        dateSerializationFormat="yyyy-MM-dd"
-                        [openOnFieldClick]="true"
-                        [inputAttr]="dateBoxAttr('vigencia-identificacion')"
-                        class="dx-select-box-custom">
-                      </dx-date-box>
+                      <div class="input-sleek">
+                        <i class="fas fa-calendar"></i>
+                        <input formControlName="vigenciaIdentificacion" id="vigencia-identificacion"
+                          name="vigenciaIdentificacionAfiliado" class="sleek-control" type="date" autocomplete="off"
+                          autocorrect="off" autocapitalize="off" spellcheck="false" />
+                        <span class="sleek-line"></span>
+                      </div>
                     </label>
                   </div>
                 </div>
@@ -192,7 +188,8 @@
                       <span class="field-label text-white">Correo electrónico</span>
                       <div class="input-sleek">
                         <i class="fas fa-envelope"></i>
-                        <input formControlName="email" class="sleek-control" type="email" placeholder="juan.perez@example.com" />
+                        <input formControlName="email" class="sleek-control" type="email" autocomplete="off"
+                          placeholder="juan.perez@example.com" />
                         <span class="sleek-line"></span>
                       </div>
                     </label>
@@ -202,7 +199,7 @@
                       <span class="field-label text-white">Teléfono</span>
                       <div class="input-sleek">
                         <i class="fas fa-phone-alt"></i>
-                        <input formControlName="telefono" class="sleek-control" maxlength="10"
+                        <input formControlName="telefono" class="sleek-control" maxlength="10" autocomplete="off"
                           (keypress)="allowOnlyNumbers($event)" placeholder="5551002000" />
                         <span class="sleek-line"></span>
                       </div>
