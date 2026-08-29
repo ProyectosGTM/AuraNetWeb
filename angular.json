@@ -22,7 +22,8 @@
           "options": {
             "allowedCommonJsDependencies": [
               "rxjs", "simplebar", "ng5-slider", "apexcharts", "ng2-charts", "chart.js", "core-js","leaflet","bs-custom-file-input","@ckeditor/ckeditor5-build-classic","sweetalert2",
-              "can-use-dom","ev-emitter/ev-emitter","file-saver","dropzone"
+              "can-use-dom","ev-emitter/ev-emitter","file-saver","dropzone",
+              "devextreme-quill", "jszip", "devexpress-diagram", "devexpress-gantt"
             ],
             "outputPath": "dist/minible-ng",
             "index": "src/index.html",
@@ -89,7 +90,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "buildTarget": "minible-ng:build",
-            "ssl": true
+            "ssl": false
           },
           "configurations": {
             "production": {

@@ -41,6 +41,7 @@
     position: fixed;
     top: 0;
     box-shadow: $box-shadow;
+    transition: width 0.3s ease;
 
     .vertical-menu-btn {
         position: absolute;
@@ -55,6 +56,7 @@
     overflow: hidden;
     position: relative;
     min-height: 100vh;
+    transition: margin-left 0.3s ease;
 
     .content {
         padding: 0 15px 10px 15px;
@@ -69,6 +71,12 @@
 
 #sidebar-menu {
     padding: 10px 0 30px 0;
+
+    .menu-title {
+        overflow: hidden;
+        white-space: nowrap;
+        transition: opacity 0.2s ease;
+    }
 
     .mm-active {
         > .has-arrow {
@@ -101,6 +109,10 @@
                 transition: all 0.4s;
                 margin: 0 10px;
                 border-radius: 3px;
+
+                span {
+                    transition: opacity 0.2s ease;
+                }
 
                 i {
                     display: inline-block;
@@ -249,6 +261,12 @@ body[data-sidebar-size="sm"] {
         position: absolute;
         width: $sidebar-collapsed-width !important;
         z-index: 1001;
+        overflow: hidden;
+
+        &:hover,
+        &:focus-within {
+            overflow: visible;
+        }
 
         .simplebar-mask,
         .simplebar-content-wrapper {
@@ -289,6 +307,9 @@ body[data-sidebar-size="sm"] {
 
                     > a {
                         padding: 15px 0;
+                        margin: 0 10px !important;
+                        width: auto !important;
+                        max-width: calc(#{$sidebar-collapsed-width} - 20px);
                         transition: none;
 
                         &:hover,
@@ -313,7 +334,8 @@ body[data-sidebar-size="sm"] {
                     &:hover {
                         > a {
                             position: relative;
-                            width: calc(180px + #{$sidebar-collapsed-width});
+                            width: calc(180px + #{$sidebar-collapsed-width}) !important;
+                            max-width: none;
                             color: $primary;
                             background-color: var(--#{$prefix}sidebar-menu-item-active-bg-color);
                             transition: none;

@@ -8,6 +8,29 @@
   border-radius: 5px;
 }
 
+:host-context(body[data-sidebar-size="sm"]) {
+  .side-nav-link-ref {
+    margin-left: 0;
+    width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .side-nav-link-ref.active-link,
+  .side-nav-link-ref:hover,
+  .side-nav-link-ref:focus,
+  li.active-li > a.side-nav-link-ref,
+  .metismenu li.mm-active > a.is-parent {
+    margin-left: 0 !important;
+  }
+
+  #sidebar-menu .metismenu > li > a.side-nav-link-ref.active-link,
+  #sidebar-menu .metismenu > li > a.side-nav-link-ref {
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+  }
+}
+
 a {
   color: #ffffff;
 }
