@@ -382,7 +382,7 @@ export class ListaTurnosComponent {
       size: 'lg',
       windowClass: 'modal-holder modal-mi-turno-activo',
       centered: true,
-      backdrop: true,
+      backdrop: 'static',
       keyboard: true,
     });
     this.cargarMiTurnoActivo();
@@ -457,7 +457,7 @@ export class ListaTurnosComponent {
       size: 'lg',
       windowClass: 'modal-holder modal-turnos-activos',
       centered: true,
-      backdrop: true,
+      backdrop: 'static',
       keyboard: true,
     });
   }

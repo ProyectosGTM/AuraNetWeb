@@ -299,7 +299,7 @@ export class ListaMonederosComponent {
       motivo: ''
     });
     this.modalRef = this.modalService.open(this.modalCambiarEstatus, {
-      size: 'md',
+      size: 'lg',
       windowClass: 'modal-holder modal-cambiar-estatus',
       centered: true,
       backdrop: 'static',
@@ -371,7 +371,7 @@ export class ListaMonederosComponent {
           justificacion: ''
         });
         this.modalRef = this.modalService.open(this.modalAjusteMonedero, {
-          size: 'md',
+          size: 'lg',
           windowClass: 'modal-holder modal-ajuste-monedero',
           centered: true,
           backdrop: 'static',
@@ -550,7 +550,7 @@ export class ListaMonederosComponent {
       transferirSaldo: true
     });
     this.modalRef = this.modalService.open(this.modalReemplazarMonedero, {
-      size: 'md',
+      size: 'lg',
       windowClass: 'modal-holder modal-reemplazar-monedero',
       centered: true,
       backdrop: 'static',

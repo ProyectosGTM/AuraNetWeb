@@ -1,77 +1,125 @@
-<div class="login-wrapper">
-  <div class="login-shell animate-slide-up">
+<div class="casino-login">
+  <!-- Fondo animado -->
+  <div class="bg-layer" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+    <span class="grid-floor"></span>
+    <span class="suit s-1">♠</span>
+    <span class="suit s-2">♥</span>
+    <span class="suit s-3">♦</span>
+    <span class="suit s-4">♣</span>
+    <span class="suit s-5">♥</span>
+    <span class="suit s-6">♠</span>
+    <span class="chip c-1"></span>
+    <span class="chip c-2"></span>
+    <span class="chip c-3"></span>
+  </div>
 
-    <div class="login-visual">
-      <div class="visual-glow"></div>
+  <div class="container-fluid position-relative">
+    <div class="row min-vh-100 align-items-center justify-content-center g-0 py-4 py-lg-0">
 
-      <div class="brand brand-center">
-        <div class="brand-avatar">
-          <i class="fas fa-user-circle"></i>
+      <!-- Escaparate -->
+      <div class="col-12 col-lg-6 col-xl-7 showcase d-flex flex-column align-items-center justify-content-center text-center px-3 px-md-5 mb-4 mb-lg-0">
+        <img src="assets/images/icono.png" alt="AuraNet" class="brand-logo mb-3" />
+        <span class="badge-live mb-3"><i class="fas fa-circle"></i> Sala en línea</span>
+        <h1 class="brand-title mb-2">Aura<span>Net</span></h1>
+        <p class="brand-tagline mb-4">Sistema de Gestión de Casinos</p>
+
+        <div class="slot-machine d-none d-sm-flex mb-4">
+          <div class="reel"><div class="strip strip-1"><span>7</span><span>♦</span><span>★</span><span>♠</span><span>7</span></div></div>
+          <div class="reel"><div class="strip strip-2"><span>7</span><span>♥</span><span>★</span><span>♣</span><span>7</span></div></div>
+          <div class="reel"><div class="strip strip-3"><span>7</span><span>♠</span><span>★</span><span>♦</span><span>7</span></div></div>
         </div>
 
-        <div class="brand-text">
-          <div class="brand-title">Bienvenido</div>
-          <div class="brand-subtitle">Sistema de Gestión Auranet</div>
-        </div>
-      </div>
-
-      <div class="visual-image-wrap">
-        <img src="assets/images/fondo.png" alt="Fondo" class="visual-image" />
-      </div>
-    </div>
-
-    <div class="login-panel">
-      <div class="panel-head">
-        <div class="panel-icon">
-          <i class="fas fa-sign-in-alt"></i>
-        </div>
-
-        <div class="panel-titles">
-          <h2 class="panel-title fw-bold">Iniciar Sesión</h2>
-          <p class="panel-subtitle text-white">Ingresa tus credenciales</p>
-        </div>
-      </div>
-
-      <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit($event)" novalidate>
-        <label class="field">
-          <span class="field-label text-white">Correo</span>
-          <div class="field-control">
-            <i class="fas fa-envelope"></i>
-            <input formControlName="userName" class="custom-input" type="email" placeholder="correo@dominio.com" />
+        <div class="row g-2 g-md-3 w-100 features d-none d-md-flex">
+          <div class="col-4">
+            <div class="feature f-red">
+              <span class="f-corner">♦</span>
+              <div class="f-icon"><i class="fas fa-piggy-bank"></i></div>
+              <span class="f-title">Bóveda</span>
+              <span class="f-desc d-none d-lg-block">Control total del efectivo</span>
+            </div>
           </div>
-        </label>
-
-        <label class="field">
-          <span class="field-label text-white">Contraseña</span>
-          <div class="field-control">
-            <i class="fas fa-key"></i>
-            <input class="custom-input" [type]="type" formControlName="password" placeholder="••••••••" />
-            <button type="button" class="icon-btn" aria-label="Mostrar contraseña" (click)="myFunctionPasswordCurrent()">
-              <i class="fas fa-eye"></i>
-            </button>
+          <div class="col-4">
+            <div class="feature f-gold">
+              <span class="f-corner">♠</span>
+              <div class="f-icon"><i class="fas fa-coins"></i></div>
+              <span class="f-title">Monederos</span>
+              <span class="f-desc d-none d-lg-block">Saldos y recargas al instante</span>
+            </div>
           </div>
-        </label>
-
-        <div class="row-actions">
-          <a class="link text-white" [routerLink]="['/account','reset-password']">¿Olvidaste tu contraseña?</a>
+          <div class="col-4">
+            <div class="feature f-blue">
+              <span class="f-corner">♥</span>
+              <div class="f-icon"><i class="fas fa-crown"></i></div>
+              <span class="f-title">Lealtad VIP</span>
+              <span class="f-desc d-none d-lg-block">Premia a tus mejores jugadores</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <button class="btn-accent btn-main" type="submit" [disabled]="loginForm.invalid || loading">
-          <span class="loader" *ngIf="loading"></span>
-          <span class="btn-icon" *ngIf="!loading"><i class="fas fa-arrow-right"></i></span>
-          <span class="textButton" *ngIf="!loading">Entrar</span>
-          <span style="margin-left: 5px;" *ngIf="loading">Cargando...</span>
-        </button>
+      <!-- Acceso -->
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4 px-3 px-sm-4">
+        <div class="login-card">
+          <div class="marquee" aria-hidden="true"></div>
 
-        <div class="divider">
-          <span>o</span>
+          <div class="card-inner p-4 p-sm-5">
+            <div class="text-center mb-4">
+              <div class="card-emblem mx-auto mb-3"><i class="fas fa-dice"></i></div>
+              <h2 class="login-title mb-1">Iniciar Sesión</h2>
+              <p class="login-subtitle mb-0">Ingresa tus credenciales para entrar a la sala</p>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit($event)" novalidate>
+              <div class="mb-3">
+                <label class="form-label lbl" for="loginUser">Correo</label>
+                <div class="input-neon">
+                  <i class="fas fa-envelope"></i>
+                  <input id="loginUser" formControlName="userName" type="email" class="form-control"
+                         placeholder="correo@dominio.com" autocomplete="username" />
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label lbl" for="loginPass">Contraseña</label>
+                <div class="input-neon">
+                  <i class="fas fa-lock"></i>
+                  <input id="loginPass" [type]="type" formControlName="password" class="form-control"
+                         placeholder="••••••••" autocomplete="current-password" />
+                  <button type="button" class="eye-btn" aria-label="Mostrar u ocultar contraseña"
+                          (click)="myFunctionPasswordCurrent()">
+                    <i class="fas" [ngClass]="type === 'password' ? 'fa-eye' : 'fa-eye-slash'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end mb-4">
+                <a class="link-soft" [routerLink]="['/account','reset-password']">¿Olvidaste tu contraseña?</a>
+              </div>
+
+              <button class="btn-jackpot w-100" type="submit" [disabled]="loginForm.invalid || loading">
+                <ng-container *ngIf="!loading">
+                  <span>Entrar</span><i class="fas fa-arrow-right ms-2"></i>
+                </ng-container>
+                <ng-container *ngIf="loading">
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>Cargando...
+                </ng-container>
+              </button>
+
+              <div class="divider my-4"><span>o</span></div>
+
+              <p class="text-center foot mb-0">
+                ¿No tienes cuenta?
+                <a class="link-accent" [routerLink]="['/account','afiliacion']">Crear cuenta</a>
+              </p>
+            </form>
+          </div>
         </div>
+        <p class="text-center copy mt-3 mb-0">© AuraNet · Juega con responsabilidad</p>
+      </div>
 
-        <div class="panel-foot text-white">
-          ¿No tienes cuenta?&nbsp;
-          <a class="link-accent" [routerLink]="['/account','afiliacion']">Crear cuenta</a>
-        </div>
-      </form>
     </div>
   </div>
 </div>

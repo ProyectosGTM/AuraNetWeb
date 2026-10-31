@@ -95,13 +95,6 @@
   }
 }
 
-.modal-accion-header--mi-turno .modal-title,
-.modal-accion-header--detalle-turno .modal-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .turno-ficha-hero {
   display: flex;
   flex-wrap: wrap;
@@ -958,11 +951,6 @@
   }
 }
 
-// Estilos para modal-body-historial (igual que Bóveda)
-.modal-body-historial {
-  padding: 24px;
-}
-
 // Estilos para movimientos-list (igual que Bóveda)
 .movimientos-list {
   max-height: 500px;
@@ -1202,12 +1190,6 @@
   color: #9ca3af;
   span i { margin-right: 4px; opacity: 0.8; }
 }
-.historial-count {
-  color: #9ca3af;
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .btn-action-large {
   flex: 1;
   min-width: 200px;
@@ -1380,16 +1362,6 @@
   }
 }
 
-/* Botones confirmar en modales Turnos (colores sólidos) */
-.btn-confirm-turnos-abrir { background: #00acc1 !important; border: 2px solid #00acc1 !important; color: #fff !important; }
-.btn-confirm-turnos-cerrar { background: #ff6d00 !important; border: 2px solid #ff6d00 !important; color: #fff !important; }
-.btn-confirm-turnos-reponer { background: #00c853 !important; border: 2px solid #00c853 !important; color: #fff !important; }
-.btn-confirm-turnos-retirar { background: #ff9800 !important; border: 2px solid #ff9800 !important; color: #fff !important; }
-.btn-confirm-turnos-suspender { background: #c62828 !important; border: 2px solid #c62828 !important; color: #fff !important; }
-.btn-confirm-turnos-reactivar { background: #009688 !important; border: 2px solid #009688 !important; color: #fff !important; }
-.btn-confirm-turnos-corte { background: #673ab7 !important; border: 2px solid #673ab7 !important; color: #fff !important; }
-.btn-confirm-turnos-consultar-caja { background: #2979ff !important; border: 2px solid #2979ff !important; color: #fff !important; }
-
 @media (max-width: 768px) {
   .action-buttons-content {
     flex-direction: column;
@@ -1401,282 +1373,11 @@
 }
 
 ::ng-deep {
-  // Modales de acciones rápidas (igual que Bóveda)
-  .modal-abrir-turno,
-  .modal-cerrar-turno,
-  .modal-reponer-turno,
-  .modal-retirar-turno,
-  .modal-suspender-turno,
-  .modal-reactivar-turno,
-  .modal-corte-parcial,
-  .modal-consultar-saldo-caja {
-    .modal-content {
-      background: #0d121d;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: #fff;
-      overflow: hidden;
-    }
-
-    .modal-header {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 10px;
-      border-radius: 12px 12px 0 0;
-    }
-
-    .modal-body {
-      padding: 24px;
-    }
-
-    .modal-footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 16px 24px;
-    }
-
-    .btn-close {
-      filter: invert(1);
-      opacity: 0.8;
-      margin: 0;
-      padding: 0.5rem;
-      border: none;
-      background: transparent;
-      font-size: 1.5rem;
-      
-      &::before {
-        display: none;
-      }
-
-      i {
-        display: block;
-        font-size: 1.25rem;
-      }
-    }
-
-    .btn-close:hover {
-      opacity: 1;
-    }
-  }
-
-  // Modales de columna (Resumen, Movimientos, Mi turno, Detalle) - igual que Bóveda
-  .modal-resumen-turno,
-  .modal-movimientos-turno,
-  .modal-mi-turno-activo,
-  .modal-detalle-turno {
-    .modal-content {
-      background: #0d121d;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: #fff;
-      overflow: hidden;
-    }
-
-    .modal-header {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 10px;
-      border-radius: 12px 12px 0 0;
-    }
-
-    .modal-body {
-      padding: 24px;
-    }
-
-    .modal-body-resumen {
-      padding: 20px 24px;
-    }
-
-    .modal-footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 16px 24px;
-    }
-
-    .btn-close {
-      filter: invert(1);
-      opacity: 0.8;
-      margin: 0;
-      padding: 0.5rem;
-      border: none;
-      background: transparent;
-      font-size: 1.5rem;
-      
-      &::before {
-        display: none;
-      }
-
-      i {
-        display: block;
-        font-size: 1.25rem;
-      }
-    }
-
-    .btn-close:hover {
-      opacity: 1;
-    }
-  }
-
   .modal-mi-turno-activo,
   .modal-detalle-turno {
     .modal-body.modal-accion-body.modal-body-resumen {
       max-height: min(72vh, 560px);
       overflow-y: auto;
-    }
-  }
-
-  // Estilos para modal-accion-header (igual que Bóveda)
-  .modal-accion-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    margin: 0;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px 12px 0 0;
-    position: relative;
-    background: rgba(255, 255, 255, 0.03);
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      border-radius: 12px 0 0 0;
-    }
-
-    .modal-title {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 18px;
-        opacity: 0.9;
-      }
-    }
-
-    &.modal-accion-header--reactivar-turno::before {
-      background: linear-gradient(180deg, #34c38f, #2aa876);
-    }
-
-    &.modal-accion-header--reactivar-turno .modal-title i {
-      color: #34c38f;
-    }
-
-    &.modal-accion-header--corte-parcial::before {
-      background: linear-gradient(180deg, #50a5f1, #3d8bd9);
-    }
-
-    &.modal-accion-header--corte-parcial .modal-title i {
-      color: #50a5f1;
-    }
-
-    &.modal-accion-header--turnos-activos::before {
-      background: linear-gradient(180deg, #50a5f1, #2563eb);
-    }
-
-    &.modal-accion-header--turnos-activos .modal-title {
-      flex: 1;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    &.modal-accion-header--turnos-activos .modal-title i {
-      color: #7dd3fc;
-    }
-
-    &.modal-accion-header--mi-turno::before {
-      background: linear-gradient(180deg, #17a2b8, #138496);
-    }
-
-    &.modal-accion-header--mi-turno .modal-title i {
-      color: #17a2b8;
-    }
-
-    &.modal-accion-header--detalle-turno::before {
-      background: linear-gradient(180deg, #7c3aed, #5b21b6);
-    }
-
-    &.modal-accion-header--detalle-turno .modal-title i {
-      color: #a78bfa;
-    }
-  }
-
-  .modal-accion-body {
-    padding: 20px 18px;
-  }
-
-  .modal-accion-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 14px 18px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  // Estilos para modales de columna (Resumen y Movimientos) - igual que Bóveda
-  .modal-header-resumen-turno {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(23, 162, 184, 0.25);
-    margin: 0;
-    border: none;
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-      }
-    }
-  }
-
-  .modal-header-movimientos-turno {
-    background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(253, 126, 20, 0.25);
-    margin: 0;
-    border: none;
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-      }
-    }
-
-    .historial-count {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
     }
   }
 
@@ -1881,19 +1582,6 @@
   }
 
   @media (max-width: 768px) {
-    .modal-header-abrir-turno,
-    .modal-header-cerrar-turno {
-      padding: 16px 20px;
-
-      .modal-title {
-        font-size: 18px;
-
-        i {
-          font-size: 20px;
-        }
-      }
-    }
-
     .action-icon {
       width: 60px;
       height: 60px;

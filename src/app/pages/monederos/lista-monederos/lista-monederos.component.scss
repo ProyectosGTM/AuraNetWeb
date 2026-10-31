@@ -264,56 +264,6 @@
   }
 }
 
-::ng-deep {
-  .modal-accion-header {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 14px;
-  }
-
-  .modal-accion-header::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    border-radius: 0 8px 8px 0;
-    background: #50a5f1;
-  }
-
-  .modal-accion-header .modal-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-  }
-
-  .modal-accion-header .modal-title i {
-    color: #50a5f1;
-  }
-
-  /* ✅ REEMPLAZAR (MORADO) */
-  .modal-accion-header--reemplazar::before {
-    background: #9b59b6;
-  }
-
-  .modal-accion-header--reemplazar .modal-title i {
-    color: #9b59b6;
-  }
-
-  /* AJUSTE SALDO (TEAL) */
-  .modal-accion-header--ajuste::before {
-    background: #17a2b8;
-  }
-
-  .modal-accion-header--ajuste .modal-title i {
-    color: #17a2b8;
-  }
-}
-
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -575,113 +525,7 @@
 
 ::ng-deep {
 
-  .modal-cargar-monedero,
-  .modal-descargar-monedero,
-  .modal-consultar-saldo,
-  .modal-reemplazar-monedero,
-  .modal-traspaso,
-  .modal-monederos-afiliado {
-    .modal-content {
-      background: #0d121d;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: #fff;
-      overflow: hidden;
-    }
-
-    .modal-header {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 10px;
-      border-radius: 12px 12px 0 0;
-    }
-
-    .modal-body {
-      padding: 24px;
-    }
-
-    .modal-footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 16px 24px;
-    }
-
-    .btn-close {
-      filter: invert(1);
-      opacity: 0.8;
-      margin: 0;
-      padding: 0.5rem;
-      border: none;
-      background: transparent;
-      font-size: 1.5rem;
-
-      &::before {
-        display: none;
-      }
-
-      i {
-        display: block;
-        font-size: 1.25rem;
-      }
-    }
-
-    .btn-close:hover {
-      opacity: 1;
-    }
-  }
-
-  // Estilos para modal-accion-header (igual que Bóveda - barra lateral)
-  .modal-accion-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    margin: 0;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px 12px 0 0;
-    position: relative;
-    background: rgba(255, 255, 255, 0.03);
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      border-radius: 12px 0 0 0;
-    }
-
-    .modal-title {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 18px;
-        opacity: 0.9;
-      }
-    }
-  }
-
-  .modal-accion-body {
-    padding: 20px 18px;
-  }
-
-  .modal-accion-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 14px 18px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
   .modal-body-historial {
-    padding: 24px;
-
     .modal-afiliado-nombre-autoexclusion {
       margin-bottom: 14px;
       padding: 12px 16px;
@@ -694,85 +538,6 @@
       color: #fff;
       letter-spacing: 0.02em;
       line-height: 1.35;
-    }
-  }
-
-  .modal-body-resumen {
-    padding: 20px 24px;
-  }
-
-  // Modales de columna (Consultar Saldo e Historial) - gradiente completo como Bóveda
-  .modal-header-consultar-saldo {
-    background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(80, 165, 241, 0.25);
-    margin: 0;
-    border: none;
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-      }
-    }
-  }
-
-  .modal-header-historial-monedero {
-    background: linear-gradient(135deg, #50a5f1 0%, #3d8bd9 100%);
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(80, 165, 241, 0.25);
-    margin: 0;
-    border: none;
-
-    .modal-header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-      }
-    }
-
-    .header-badge {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-    }
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 16px 20px;
     }
   }
 
@@ -1537,23 +1302,6 @@
 
   @media (max-width: 768px) {
 
-    .modal-header-cargar-monedero,
-    .modal-header-descargar-monedero,
-    .modal-header-consultar-saldo,
-    .modal-header-reemplazar-monedero,
-    .modal-header-traspaso-monedero,
-    .modal-header-monederos-por-afiliado-info {
-      padding: 16px 20px;
-
-      .modal-title {
-        font-size: 18px;
-
-        i {
-          font-size: 20px;
-        }
-      }
-    }
-
     .action-icon {
       width: 60px;
       height: 60px;
@@ -1576,26 +1324,6 @@
 
     .saldo-info-grid {
       grid-template-columns: 1fr;
-    }
-  }
-}
-
-::ng-deep {
-  .modal-accion-header--historial::before {
-    background: #50a5f1;
-  }
-
-  .modal-accion-header--historial .modal-title i {
-    color: #50a5f1;
-  }
-
-  .modal-historial-movimientos {
-    .modal-content {
-      background: #0d121d;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: #fff;
-      overflow: hidden;
     }
   }
 }
@@ -1959,27 +1687,6 @@
   background: rgba(80, 165, 241, 0.7);
 }
 
-/* lista-monederos.component.scss (AGREGA AL FINAL) */
-::ng-deep {
-  .modal-accion-header--saldos::before {
-    background: #22c55e;
-  }
-
-  .modal-accion-header--saldos .modal-title i {
-    color: #22c55e;
-  }
-
-  .modal-saldos-monedero {
-    .modal-content {
-      background: #0d121d;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: #fff;
-      overflow: hidden;
-    }
-  }
-}
-
 .saldos-body {
   padding: 22px 22px 18px;
 }
@@ -2262,44 +1969,7 @@
   }
 }
 
-@mixin afiliados-info-close-btn() {
-  filter: none !important;
-  opacity: 1 !important;
-  padding: 0.45rem 0.55rem !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
-  border-radius: 8px !important;
-  background: rgba(255, 255, 255, 0.12) !important;
-
-  &::before {
-    display: none;
-  }
-
-  i {
-    display: block;
-    color: #fff;
-    font-size: 1.15rem;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
-  }
-}
-
 ::ng-deep .modal-holder.modal-consultar-saldo {
-  .modal-header-consultar-saldo {
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
-    border-bottom: none !important;
-
-    .modal-title i {
-      color: #fff;
-    }
-  }
-
-  .modal-header-consultar-saldo .btn-close {
-    @include afiliados-info-close-btn();
-  }
-
   .saldo-consulta-fila-loading {
     min-height: 200px;
     display: flex;
@@ -2434,25 +2104,6 @@
 }
 
 ::ng-deep .modal-holder.modal-historial-movimientos {
-  .modal-header-historial-monedero {
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
-    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
-    border-bottom: none !important;
-
-    .modal-title i {
-      color: #fff;
-    }
-
-    .header-badge {
-      background: rgba(255, 255, 255, 0.22);
-      color: #fff;
-    }
-  }
-
-  .modal-header-historial-monedero .btn-close {
-    @include afiliados-info-close-btn();
-  }
-
   .movimientos-list {
     &::-webkit-scrollbar-thumb {
       background: rgba(148, 163, 184, 0.32);
@@ -2531,38 +2182,6 @@
 }
 
 ::ng-deep .modal-holder.modal-monederos-afiliado {
-  .modal-header-info-afiliados.modal-header-monederos-por-afiliado-info {
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 0;
-    border: none;
-    background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
-    box-shadow: 0 4px 20px rgba(20, 184, 166, 0.28);
-    border-bottom: none !important;
-
-    .modal-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      i {
-        font-size: 22px;
-        color: #ecfdf9;
-      }
-    }
-  }
-
-  .modal-header-monederos-por-afiliado-info .btn-close {
-    @include afiliados-info-close-btn();
-  }
-
   .monederos-por-afiliado-info-resultados .monederos-afiliado-list {
     &::-webkit-scrollbar-thumb {
       background: rgba(148, 163, 184, 0.32);

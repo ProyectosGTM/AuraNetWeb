@@ -281,18 +281,20 @@
 
 <!-- Modal Resumen -->
 <ng-template #modalResumen let-modal>
-    <div class="modal-header modal-header-info-boveda">
-        <div class="modal-header-left">
-            <h5 class="modal-title">
+    <div class="modal-header modal-header-info modal-header-info--morado">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
                 <i class="fas fa-chart-line"></i>
                 <span>Resumen de Boveda</span>
             </h5>
         </div>
-        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarResumen()">
-            <i class="fas fa-times"></i>
-        </button>
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarResumen()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
-    <div class="modal-body modal-body-resumen" *ngIf="resumenData">
+    <div class="modal-body modal-accion-body modal-body-resumen" *ngIf="resumenData">
         <div class="resumen-compact">
             <div class="resumen-header">
                 <span class="resumen-sala">{{ resumenData.nombreSala || 'Sin registro' }}</span>
@@ -355,7 +357,7 @@
             </div>
         </div>
     </div>
-    <div class="modal-footer modal-footer-resumen">
+    <div class="modal-footer modal-accion-footer">
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarResumen()">
             <i class="fas fa-times"></i><span>Cerrar</span>
         </button>
@@ -364,18 +366,20 @@
 
 <!-- Modal Bóveda abierta de la sala -->
 <ng-template #modalBovedaAbiertaSala let-modal>
-    <div class="modal-header modal-header-boveda-abierta-sala">
-        <div class="modal-header-left">
-            <h5 class="modal-title">
+    <div class="modal-header modal-header-info modal-header-info--teal">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
                 <i class="fas fa-coins" aria-hidden="true"></i>
                 <span>Bóveda abierta de la sala</span>
             </h5>
         </div>
-        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalBovedaAbiertaSala()">
-            <i class="fas fa-times"></i>
-        </button>
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalBovedaAbiertaSala()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
-    <div class="modal-body modal-body-boveda-abierta-sala">
+    <div class="modal-body modal-accion-body modal-body-boveda-abierta-sala">
         <div *ngIf="bovedaAbiertaSalaVacio" class="bas-empty-state">
             <div class="bas-empty-icon">
                 <i class="fas fa-door-closed" aria-hidden="true"></i>
@@ -466,19 +470,21 @@
 
 <!-- Modal Historial -->
 <ng-template #modalHistorial let-modal>
-    <div class="modal-header modal-header-historial">
-        <div class="modal-header-left">
-            <h5 class="modal-title">
+    <div class="modal-header modal-header-info modal-header-info--morado">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
                 <i class="fas fa-history"></i>
                 <span>Historial de Movimientos</span>
             </h5>
         </div>
-        <div class="header-badge">{{ historialData.length }} movimiento{{ historialData.length !== 1 ? 's' : '' }}</div>
-        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarHistorial()">
-            <i class="fas fa-times"></i>
-        </button>
+        <div class="d-flex align-items-center gap-3">
+            <span class="header-badge">{{ historialData.length }} movimiento{{ historialData.length !== 1 ? 's' : '' }}</span>
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarHistorial()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
-    <div class="modal-body modal-body-historial">
+    <div class="modal-body modal-accion-body modal-body-historial">
         <div *ngIf="historialData.length === 0" class="empty-state">
             <div class="empty-icon">
                 <i class="fas fa-inbox"></i>
@@ -540,7 +546,7 @@
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Boveda *</span>
+                        <span class="field-label text-white">Boveda <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box [dataSource]="listaTesoreriaAbierta" displayExpr="text" valueExpr="id"
                             formControlName="idTesoreria" placeholder="Selecciona boveda abierta..."
                             searchEnabled="true" searchMode="contains" [showClearButton]="true"
@@ -552,7 +558,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Fondo Contado *</span>
+                        <span class="field-label text-white">Fondo Contado <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
                             <input #inpFondoContadoCerrar class="sleek-control" type="text" inputmode="decimal"
@@ -580,9 +586,9 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-danger" (click)="guardarCerrarTesoreria()"
+        <button type="button" class="btn-alt btn-alt--cerrar-boveda" (click)="guardarCerrarTesoreria()"
             [disabled]="cerrarTesoreriaForm.invalid">
-            <i class="fas fa-check"></i> Cerrar Boveda
+            <i class="fas fa-door-closed"></i><span>Cerrar Boveda</span>
         </button>
     </div>
 </ng-template>
@@ -608,7 +614,7 @@
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Boveda *</span>
+                        <span class="field-label text-white">Boveda <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box [dataSource]="listaTesoreriaReponer" displayExpr="text" valueExpr="id"
                             formControlName="idTesoreria" placeholder="Selecciona boveda abierta..."
                             searchEnabled="true" searchMode="contains" [showClearButton]="true"
@@ -620,7 +626,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monto *</span>
+                        <span class="field-label text-white">Monto <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
                             <input #inpMontoReponer class="sleek-control" type="text" inputmode="decimal"
@@ -659,9 +665,9 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-success" (click)="guardarReponerTesoreria()"
+        <button type="button" class="btn-alt btn-alt--reponer-boveda" (click)="guardarReponerTesoreria()"
             [disabled]="reponerTesoreriaForm.invalid">
-            <i class="fas fa-check"></i> Reponer
+            <i class="fas fa-arrow-up"></i><span>Reponer</span>
         </button>
     </div>
 </ng-template>
@@ -686,7 +692,7 @@
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Boveda *</span>
+                        <span class="field-label text-white">Boveda <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box [dataSource]="listaTesoreriaRetirar" displayExpr="text" valueExpr="id"
                             formControlName="idTesoreria" placeholder="Selecciona boveda abierta..."
                             searchEnabled="true" searchMode="contains" [showClearButton]="true"
@@ -698,7 +704,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monto *</span>
+                        <span class="field-label text-white">Monto <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
                             <input #inpMontoRetirar class="sleek-control" type="text" inputmode="decimal"
@@ -737,9 +743,9 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-warning" (click)="guardarRetirarTesoreria()"
+        <button type="button" class="btn-alt btn-alt--retirar-boveda" (click)="guardarRetirarTesoreria()"
             [disabled]="retirarTesoreriaForm.invalid">
-            <i class="fas fa-check"></i> Retirar
+            <i class="fas fa-arrow-down"></i><span>Retirar</span>
         </button>
     </div>
 </ng-template>

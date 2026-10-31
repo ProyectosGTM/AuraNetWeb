@@ -34,6 +34,11 @@ export class ListaModulosComponent {
   public filtroActivo: string = '';
   procesandoEstatusModuloId: number | null = null;
 
+  /** Módulos activos en la página cargada (encabezado). */
+  get activosPagina(): number {
+    return (this.paginaActualData || []).filter((m: any) => Number(m?.estatus) === 1).length;
+  }
+
   constructor(
     private router: Router,
     private moduloService: ModulosService,

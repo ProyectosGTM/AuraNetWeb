@@ -90,7 +90,8 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "buildTarget": "minible-ng:build",
-            "ssl": false
+            "ssl": false,
+            "port": 7200
           },
           "configurations": {
             "production": {

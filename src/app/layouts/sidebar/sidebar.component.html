@@ -1,6 +1,6 @@
-<div class="vertical-menu" style="background-color: #0d121d;">
+<div class="vertical-menu aura-side">
   <div class="navbar-brand-box"
-    style="background-color: #22252f; display: flex; justify-content: center; align-items: center;">
+    style="display: flex; justify-content: center; align-items: center;">
     <a [routerLink]="['/']" class="logo logo-dark">
       <span class="logo-sm">
         <img src="assets/images/icono.png" alt="" height="35">
@@ -31,7 +31,7 @@
 
 <ng-template #contentTemplate>
   <div id="sidebar-menu">
-    <ul class="metismenu list-unstyled" style="margin-top: 40px;" id="side-menu" #sideMenu>
+    <ul class="metismenu list-unstyled" id="side-menu" #sideMenu>
       @for (item of menuItems; track $index) {
       <ng-container *ngIf="!item.permiso || hasPermission(item.permiso)">
         @if(item.isTitle){
@@ -76,7 +76,7 @@
                 <li *ngIf="!subitem.subItems || !hasItems(subitem)" routerLinkActive="active-li"
                   [routerLinkActiveOptions]="{ exact: true }">
                   <ng-container *ngIf="!subitem.permiso || hasPermission(subitem.permiso)">
-                    <a [routerLink]="subitem.link" style="color: white;" class="side-nav-link-ref"
+                    <a [routerLink]="subitem.link" class="side-nav-link-ref"
                       routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: false }">
                       {{ subitem.label | translate }}
                       <span *ngIf="subitem.badge" class="badge rounded-pill bg-{{subitem.badge.variant}} float-end">
@@ -111,7 +111,7 @@
         </li>
         <li
           *ngIf="!item.isTitle && !item.isLayout && !hasItems(item) && (!item.permiso || hasPermission(item.permiso))">
-          <a [routerLink]="item.link" style="color: #ff1a5b;" class="side-nav-link-ref"
+          <a [routerLink]="item.link" class="side-nav-link-ref"
             [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active-link">
             <i *ngIf="item.icon" class="bx {{ item.icon }}"></i>
             <span>{{ item.label | translate }}</span>

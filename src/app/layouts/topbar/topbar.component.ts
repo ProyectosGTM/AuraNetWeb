@@ -71,7 +71,24 @@ export class TopbarComponent implements OnInit {
   @Output() settingsButtonClicked = new EventEmitter();
   @Output() mobileMenuButtonClicked = new EventEmitter();
 
+  /** Reloj del header. */
+  ahora = new Date();
+  private relojId?: ReturnType<typeof setInterval>;
+
+  get horaTexto(): string {
+    return this.ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  }
+
+  get fechaTexto(): string {
+    return this.ahora.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+
+  ngOnDestroy() {
+    if (this.relojId) clearInterval(this.relojId);
+  }
+
   ngOnInit() {
+    this.relojId = setInterval(() => (this.ahora = new Date()), 1000);
     this.openMobileMenu = false;
     this.element = document.documentElement;
     this.configData = {

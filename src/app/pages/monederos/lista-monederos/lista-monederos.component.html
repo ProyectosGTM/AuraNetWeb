@@ -297,7 +297,7 @@
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Caja *</span>
+                        <span class="field-label text-white">Caja <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaCajasCargar"
                             displayExpr="text"
@@ -314,7 +314,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monedero *</span>
+                        <span class="field-label text-white">Monedero <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaMonederosDisponibles"
                             displayExpr="text"
@@ -331,7 +331,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monto *</span>
+                        <span class="field-label text-white">Monto <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
                             <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"
@@ -349,10 +349,10 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-success" (click)="guardarCargarMonedero()" [disabled]="cargarMonederoForm.invalid || guardandoCargarMonedero">
+        <button type="button" class="btn-alt btn-alt--cargar-monedero" (click)="guardarCargarMonedero()" [disabled]="cargarMonederoForm.invalid || guardandoCargarMonedero">
             <i class="fas fa-spinner fa-spin" *ngIf="guardandoCargarMonedero"></i>
-            <i class="fas fa-check" *ngIf="!guardandoCargarMonedero"></i>
-            {{ guardandoCargarMonedero ? 'Cargando...' : 'Cargar' }}
+            <i class="fas fa-arrow-up" *ngIf="!guardandoCargarMonedero"></i>
+            <span>{{ guardandoCargarMonedero ? 'Cargando...' : 'Cargar' }}</span>
         </button>
     </div>
 </ng-template>
@@ -377,7 +377,7 @@
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Caja *</span>
+                        <span class="field-label text-white">Caja <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaCajasDescargar"
                             displayExpr="text"
@@ -394,7 +394,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monedero *</span>
+                        <span class="field-label text-white">Monedero <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaMonederosDisponiblesDescargar"
                             displayExpr="text"
@@ -411,7 +411,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monto *</span>
+                        <span class="field-label text-white">Monto <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
                             <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"
@@ -429,10 +429,10 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-monederos-descargar" (click)="guardarDescargarMonedero()" [disabled]="descargarMonederoForm.invalid || guardandoDescargarMonedero">
+        <button type="button" class="btn-alt btn-alt--descargar-monedero" (click)="guardarDescargarMonedero()" [disabled]="descargarMonederoForm.invalid || guardandoDescargarMonedero">
             <i class="fas fa-spinner fa-spin" *ngIf="guardandoDescargarMonedero"></i>
-            <i class="fas fa-check" *ngIf="!guardandoDescargarMonedero"></i>
-            {{ guardandoDescargarMonedero ? 'Descargando...' : 'Descargar' }}
+            <i class="fas fa-arrow-down" *ngIf="!guardandoDescargarMonedero"></i>
+            <span>{{ guardandoDescargarMonedero ? 'Descargando...' : 'Descargar' }}</span>
         </button>
     </div>
 </ng-template>
@@ -465,7 +465,7 @@
                 </div>
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Nuevo estatus *</span>
+                        <span class="field-label text-white">Nuevo estatus <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaEstatusMonederoOpciones"
                             displayExpr="text"
@@ -481,7 +481,7 @@
                 </div>
                         <div class="col-12">
                             <label class="field">
-                                <span class="field-label text-white">Motivo *</span>
+                                <span class="field-label text-white">Motivo <span class="field-req" aria-hidden="true">*</span></span>
                                 <div class="input-sleek">
                                     <i class="fas fa-comment-alt"></i>
                                     <input formControlName="motivo" class="sleek-control" type="text"
@@ -497,17 +497,17 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-primary" (click)="guardarCambiarEstatus()" [disabled]="cambiarEstatusForm.invalid || guardandoCambiarEstatusMonedero">
+        <button type="button" class="btn-alt btn-alt--estatus-monedero" (click)="guardarCambiarEstatus()" [disabled]="cambiarEstatusForm.invalid || guardandoCambiarEstatusMonedero">
             <i class="fas fa-spinner fa-spin" *ngIf="guardandoCambiarEstatusMonedero"></i>
-            <i class="fas fa-check" *ngIf="!guardandoCambiarEstatusMonedero"></i>
-            {{ guardandoCambiarEstatusMonedero ? 'Guardando...' : 'Cambiar estatus' }}
+            <i class="fas fa-exchange-alt" *ngIf="!guardandoCambiarEstatusMonedero"></i>
+            <span>{{ guardandoCambiarEstatusMonedero ? 'Guardando...' : 'Cambiar estatus' }}</span>
         </button>
     </div>
 </ng-template>
 
 <!-- Modal Historial Movimientos Monedero -->
 <ng-template #modalHistorialMonedero let-modal>
-    <div class="modal-header modal-header-historial-monedero">
+    <div class="modal-header modal-header-info modal-header-info--morado">
         <div class="modal-header-left d-flex align-items-center gap-3">
             <h5 class="modal-title mb-0">
                 <i class="fas fa-history"></i>
@@ -521,7 +521,7 @@
             </button>
         </div>
     </div>
-    <div class="modal-body modal-body-historial">
+    <div class="modal-body modal-accion-body modal-body-historial">
         <div class="modal-afiliado-nombre-autoexclusion" *ngIf="monederoSeleccionadoHistorial">
             {{ monederoSeleccionadoHistorial.numeroMonedero || monederoSeleccionadoHistorial.alias || 'Monedero' }}
         </div>
@@ -585,7 +585,7 @@
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Monedero *</span>
+                        <span class="field-label text-white">Monedero <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaMonederosDisponiblesAjuste"
                             displayExpr="text"
@@ -601,7 +601,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Tipo de ajuste *</span>
+                        <span class="field-label text-white">Tipo de ajuste <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="[{ id: 'positivo', text: 'Agregar' }, { id: 'negativo', text: 'Quitar' }]"
                             displayExpr="text"
@@ -613,7 +613,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Tipo de saldo *</span>
+                        <span class="field-label text-white">Tipo de saldo <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaTipoSaldoAjuste"
                             displayExpr="text"
@@ -625,7 +625,7 @@
                 </div>
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Monto *</span>
+                        <span class="field-label text-white">Monto <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
                             <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"
@@ -638,7 +638,7 @@
                 </div>
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Justificación *</span>
+                        <span class="field-label text-white">Justificación <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-comment-alt"></i>
                             <input formControlName="justificacion" class="sleek-control" type="text"
@@ -654,10 +654,10 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-primary" (click)="guardarAjusteMonedero()" [disabled]="ajusteMonederoForm.invalid || guardandoAjusteMonedero">
+        <button type="button" class="btn-alt btn-alt--ajuste-monedero" (click)="guardarAjusteMonedero()" [disabled]="ajusteMonederoForm.invalid || guardandoAjusteMonedero">
             <i class="fas fa-spinner fa-spin" *ngIf="guardandoAjusteMonedero"></i>
-            <i class="fas fa-check" *ngIf="!guardandoAjusteMonedero"></i>
-            {{ guardandoAjusteMonedero ? 'Ajustando...' : 'Ajustar' }}
+            <i class="fas fa-balance-scale" *ngIf="!guardandoAjusteMonedero"></i>
+            <span>{{ guardandoAjusteMonedero ? 'Ajustando...' : 'Ajustar' }}</span>
         </button>
     </div>
 </ng-template>
@@ -690,7 +690,7 @@
                 </div>
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Número monedero nuevo *</span>
+                        <span class="field-label text-white">Número monedero nuevo <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-wallet"></i>
                             <input formControlName="numeroMonederoNuevo" class="sleek-control" type="text"
@@ -701,7 +701,7 @@
                 </div>
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Motivo *</span>
+                        <span class="field-label text-white">Motivo <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-comment-alt"></i>
                             <input formControlName="motivo" class="sleek-control" type="text"
@@ -730,26 +730,30 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-primary" (click)="guardarReemplazarMonedero()" [disabled]="reemplazarMonederoForm.invalid || guardandoReemplazarMonedero">
+        <button type="button" class="btn-alt btn-alt--reemplazar-monedero" (click)="guardarReemplazarMonedero()" [disabled]="reemplazarMonederoForm.invalid || guardandoReemplazarMonedero">
             <i class="fas fa-spinner fa-spin" *ngIf="guardandoReemplazarMonedero"></i>
-            <i class="fas fa-check" *ngIf="!guardandoReemplazarMonedero"></i>
-            {{ guardandoReemplazarMonedero ? 'Reemplazando...' : 'Reemplazar' }}
+            <i class="fas fa-sync-alt" *ngIf="!guardandoReemplazarMonedero"></i>
+            <span>{{ guardandoReemplazarMonedero ? 'Reemplazando...' : 'Reemplazar' }}</span>
         </button>
     </div>
 </ng-template>
 
 <!-- Modal Consultar Saldo -->
 <ng-template #modalConsultarSaldo let-modal>
-    <div class="modal-header modal-header-consultar-saldo">
-        <h5 class="modal-title">
-            <i class="fas fa-search-dollar"></i>
-            <span>Consultar Saldo de Monedero</span>
-        </h5>
-        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
-            <i class="fas fa-times"></i>
-        </button>
+    <div class="modal-header modal-header-info modal-header-info--morado">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
+                <i class="fas fa-search-dollar"></i>
+                <span>Consultar Saldo de Monedero</span>
+            </h5>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
-    <div class="modal-body modal-body-resumen">
+    <div class="modal-body modal-accion-body modal-body-resumen">
         <div *ngIf="cargandoConsultaSaldoFila" class="saldo-consulta-fila-loading text-center py-5 px-3">
             <i class="fas fa-spinner fa-spin fa-2x saldo-consulta-fila-loading__icon mb-3" aria-hidden="true"></i>
             <p class="text-white-50 mb-0">Consultando saldo del monedero…</p>
@@ -763,7 +767,7 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="field">
-                            <span class="field-label text-white">Monedero *</span>
+                            <span class="field-label text-white">Monedero <span class="field-req" aria-hidden="true">*</span></span>
                             <dx-select-box
                                 [dataSource]="listaMonederosConsultaSaldo"
                                 displayExpr="text"
@@ -946,17 +950,17 @@
             <i class="fas" [ngClass]="iconoPieIzquierdoConsultarSaldo()" aria-hidden="true"></i>
             <span>{{ etiquetaPieIzquierdoConsultarSaldo() }}</span>
         </button>
-        <button *ngIf="!saldoData && !cargandoConsultaSaldoFila" type="button" class="btn btn-monederos-consultar-saldo" (click)="buscarSaldo()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo || cargandoMonederosConsultaSaldo">
+        <button *ngIf="!saldoData && !cargandoConsultaSaldoFila" type="button" class="btn-alt btn-alt--consultar" (click)="buscarSaldo()" [disabled]="consultarSaldoForm.invalid || consultandoSaldo || cargandoMonederosConsultaSaldo">
             <i class="fas fa-spinner fa-spin" *ngIf="consultandoSaldo"></i>
             <i class="fas fa-search" *ngIf="!consultandoSaldo"></i>
-            {{ consultandoSaldo ? 'Consultando...' : 'Consultar' }}
+            <span>{{ consultandoSaldo ? 'Consultando...' : 'Consultar' }}</span>
         </button>
     </div>
 </ng-template>
 
 <!-- Modal Traspasar Saldo -->
 <ng-template #modalTraspaso let-modal>
-    <div class="modal-header modal-accion-header modal-header-traspaso-monedero">
+    <div class="modal-header modal-accion-header modal-accion-header--traspaso">
         <h5 class="modal-title">
             <i class="fas fa-exchange-alt"></i>
             <span>Traspasar Saldo entre Monederos</span>
@@ -974,7 +978,7 @@
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Afiliado *</span>
+                        <span class="field-label text-white">Afiliado <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaAfiliadosTraspaso"
                             displayExpr="text"
@@ -991,7 +995,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Caja *</span>
+                        <span class="field-label text-white">Caja <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaCajasTraspaso"
                             displayExpr="text"
@@ -1008,7 +1012,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monedero Origen *</span>
+                        <span class="field-label text-white">Monedero Origen <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaMonederosTraspaso"
                             displayExpr="text"
@@ -1025,7 +1029,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monedero Destino *</span>
+                        <span class="field-label text-white">Monedero Destino <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaMonederosTraspaso"
                             displayExpr="text"
@@ -1041,7 +1045,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Monto *</span>
+                        <span class="field-label text-white">Monto <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-dollar-sign"></i>
                             <input class="sleek-control" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"
@@ -1059,31 +1063,35 @@
         <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
             <i class="fas fa-times"></i><span>Cancelar</span>
         </button>
-        <button type="button" class="btn btn-primary" (click)="guardarTraspasoMonedero()" [disabled]="traspasoMonederoForm.invalid || guardandoTraspasoMonedero">
+        <button type="button" class="btn-alt btn-alt--traspaso-monedero" (click)="guardarTraspasoMonedero()" [disabled]="traspasoMonederoForm.invalid || guardandoTraspasoMonedero">
             <i class="fas fa-spinner fa-spin" *ngIf="guardandoTraspasoMonedero"></i>
             <i class="fas fa-exchange-alt" *ngIf="!guardandoTraspasoMonedero"></i>
-            {{ guardandoTraspasoMonedero ? 'Traspasando...' : 'Traspasar' }}
+            <span>{{ guardandoTraspasoMonedero ? 'Traspasando...' : 'Traspasar' }}</span>
         </button>
     </div>
 </ng-template>
 
 <!-- Modal Monederos por Afiliado -->
 <ng-template #modalMonederosPorAfiliado let-modal>
-    <div class="modal-header modal-header-info-afiliados modal-header-monederos-por-afiliado-info">
-        <h5 class="modal-title mb-0">
-            <i class="fas fa-users"></i>
-            <span>Monederos por Afiliado</span>
-        </h5>
-        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
-            <i class="fas fa-times"></i>
-        </button>
+    <div class="modal-header modal-header-info modal-header-info--teal">
+        <div class="modal-header-left d-flex align-items-center gap-3">
+            <h5 class="modal-title mb-0">
+                <i class="fas fa-users"></i>
+                <span>Monederos por Afiliado</span>
+            </h5>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
     <div class="modal-body modal-accion-body">
         <form [formGroup]="monederosPorAfiliadoForm">
             <div class="row g-3">
                 <div class="col-12">
                     <label class="field">
-                        <span class="field-label text-white">Afiliado *</span>
+                        <span class="field-label text-white">Afiliado <span class="field-req" aria-hidden="true">*</span></span>
                         <dx-select-box
                             [dataSource]="listaAfiliadosMonederos"
                             displayExpr="text"

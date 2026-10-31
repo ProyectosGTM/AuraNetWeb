@@ -990,7 +990,7 @@ export class ListaTesoreriaComponent {
         this.cerrarTesoreriaForm.reset({ idTesoreria: null, fondoContado: null, observaciones: '' });
 
         this.modalRef = this.modalService.open(this.modalCerrarTesoreria, {
-          size: 'md',
+          size: 'lg',
           windowClass: 'modal-holder modal-accion',
           centered: true,
           backdrop: 'static',
@@ -1096,7 +1096,7 @@ export class ListaTesoreriaComponent {
         this.reponerTesoreriaForm.reset({ idTesoreria: null, monto: null, referencia: '', observaciones: '' });
 
         this.modalRef = this.modalService.open(this.modalReponerTesoreria, {
-          size: 'md',
+          size: 'lg',
           windowClass: 'modal-holder modal-accion',
           centered: true,
           backdrop: 'static',
@@ -1203,7 +1203,7 @@ export class ListaTesoreriaComponent {
         this.retirarTesoreriaForm.reset({ idTesoreria: null, monto: null, referencia: '', observaciones: '' });
 
         this.modalRef = this.modalService.open(this.modalRetirarTesoreria, {
-          size: 'md',
+          size: 'lg',
           windowClass: 'modal-holder modal-accion',
           centered: true,
           backdrop: 'static',

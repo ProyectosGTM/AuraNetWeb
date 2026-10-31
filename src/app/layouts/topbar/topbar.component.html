@@ -1,10 +1,17 @@
-<header id="page-topbar" style="background-color: #0d121d;">
+<header id="page-topbar" class="aura-topbar">
+  <span class="tb-line" aria-hidden="true"></span>
   <div class="navbar-header">
-    <div class="d-flex">
-      <button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect vertical-menu-btn"
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+      <button type="button" class="btn header-item vertical-menu-btn tb-burger"
         id="vertical-menu-btn" (click)="toggleMobileMenu($event)" title="Menú" aria-label="Abrir o cerrar menú">
-        <i class="fa fa-fw fa-bars"></i>
+        <span class="tb-burger-box"><i class="fas fa-bars"></i></span>
       </button>
+
+      <div class="tb-clock d-none d-lg-inline-flex">
+        <i class="far fa-clock"></i>
+        <span class="tb-time">{{ horaTexto }}</span>
+        <span class="tb-date">{{ fechaTexto }}</span>
+      </div>
 
       <!-- App Search-->
       <!-- <form class="app-search d-none d-lg-block">
@@ -16,7 +23,7 @@
 
     </div>
 
-    <div class="d-flex">
+    <div class="d-flex align-items-center gap-2">
 
       <!-- <div class="dropdown d-inline-block d-lg-none ms-2" ngbDropdown>
         <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown" data-toggle="dropdown" aria-haspopup="true" ngbDropdownToggle aria-expanded="false">
@@ -106,8 +113,8 @@
       </div> -->
 
       <div class="dropdown d-none d-lg-inline-block ms-1">
-        <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen" (click)="fullscreen()">
-          <i class="uil-minus-path"></i>
+        <button type="button" class="btn header-item tb-icon-btn" data-bs-toggle="fullscreen" (click)="fullscreen()" title="Pantalla completa" aria-label="Pantalla completa">
+          <span class="tb-icon-box"><i class="fas fa-expand"></i></span>
         </button>
       </div>
 
@@ -206,24 +213,30 @@
       </div> -->
 
       <div class="dropdown d-inline-block" ngbDropdown>
-        <button style="display: flex; align-items: center; justify-content: center;" type="button" class="btn header-item waves-effect" ngbDropdownToggle id="page-header-user-dropdown">
-          <img class="rounded-circle header-profile-user" [src]="'https://transmovi.s3.us-east-2.amazonaws.com/imagenes/user_default.png'" (error)="onAvatarError($event)"
-            alt="Header Avatar">
-
-          <span class="d-none d-xl-inline-flex ms-1 topbar-user-meta">
-            <span class="topbar-user-name">{{ showNombre }}</span>
-            <span class="topbar-user-role">{{ showRol }}</span>
+        <button type="button" class="btn header-item tb-user" ngbDropdownToggle id="page-header-user-dropdown">
+          <span class="tb-avatar">
+            <img class="rounded-circle header-profile-user" [src]="'https://transmovi.s3.us-east-2.amazonaws.com/imagenes/user_default.png'" (error)="onAvatarError($event)"
+              alt="Header Avatar">
+            <span class="tb-avatar-dot"></span>
           </span>
-          <i class="uil-angle-down d-none d-xl-inline-block font-size-15" style="color: #09fa3a;"></i>
+          <span class="d-none d-xl-inline-flex topbar-user-meta">
+            <span class="topbar-user-name">{{ showNombre }}</span>
+            <span class="topbar-user-role"><i class="fas fa-crown"></i>{{ showRol }}</span>
+          </span>
+          <i class="uil-angle-down d-none d-xl-inline-block tb-caret"></i>
         </button>
-        <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
-          <a class="dropdown-item" style="color: white;" href="javascript: void(0);" (click)="perfilUsuario()">
-            <i class="uil uil-user-circle font-size-18 align-middle me-1 text-muted"></i>
-            <span class="align-middle">{{ 'Perfil Usuario'}}</span>
+        <div class="dropdown-menu dropdown-menu-end tb-menu" ngbDropdownMenu>
+          <div class="tb-menu-head">
+            <span class="tb-menu-name">{{ showNombre }}</span>
+            <span class="tb-menu-role">{{ showRol }}</span>
+          </div>
+          <a class="dropdown-item tb-item" href="javascript: void(0);" (click)="perfilUsuario()">
+            <span class="tb-item-icon"><i class="uil uil-user-circle"></i></span>
+            <span>{{ 'Perfil Usuario'}}</span>
           </a>
-          <div class="dropdown-item" style="color: white; cursor: pointer;" (click)="logout($event)">
-            <i class="uil uil-sign-out-alt font-size-18 align-middle me-1 text-muted"></i>
-            <span class="align-middle">{{ 'HEADER.LOGIN.LOGOUT' | translate }}</span>
+          <div class="dropdown-item tb-item tb-item--out" (click)="logout($event)">
+            <span class="tb-item-icon"><i class="uil uil-sign-out-alt"></i></span>
+            <span>{{ 'HEADER.LOGIN.LOGOUT' | translate }}</span>
           </div>
         </div>
       </div>
