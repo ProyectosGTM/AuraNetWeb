@@ -1,25 +1,30 @@
-<div class="container-fluid" [@fadeInRight]>
-    <div class="row">
-        <div class="col-12">
-            <div class="title-banner-card shadow-sm">
-                <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="title-icon">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <div>
-                            <h4 class="title-title"> {{title}} </h4>
-                            <p class="title-subtitle">Captura la información requerida para el registro.</p>
-                        </div>
-                    </div>
-                    <div class="title-actions">
-                        <div class="title-tagline">
-                            <span class="line"></span>
-                            <span class="text">Control y configuración centralizada</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3 gy-4">
+<div class="container-fluid ap-page hm-admin" [@fadeInRight]>
+
+  <!-- ================= Encabezado ================= -->
+  <section class="ap-hero ap-hero--gold mb-4">
+    <span class="ap-corner tl">K<br>♦</span><span class="ap-corner br">K<br>♦</span>
+    <div class="d-flex align-items-center gap-3">
+      <div class="ap-hero-icon"><i class="fas" [ngClass]="idPermiso ? 'fa-pen' : 'fa-plus'"></i></div>
+      <div class="min-w-0">
+        <nav class="ap-crumbs mb-1" aria-label="Ruta">
+          <span><i class="fas fa-shield-alt"></i>Administración</span><i class="fas fa-chevron-right sep"></i>
+          <span>Permisos</span><i class="fas fa-chevron-right sep"></i><span class="now">{{ idPermiso ? 'Editar' : 'Nuevo' }}</span>
+        </nav>
+        <h1 class="ap-title mb-1">{{ title }}</h1>
+        <p class="ap-sub mb-0">Captura la información requerida para el registro.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <!-- ================= Formulario ================= -->
+    <div class="col-12 col-lg-8">
+      <section class="ap-panel h-100">
+        <header class="ap-panel-head">
+          <h2 class="ap-panel-title"><i class="fas fa-lock"></i>Información del permiso</h2>
+          <span class="ap-chip"><i class="fas fa-asterisk"></i>Campos obligatorios</span>
+        </header>
+
                     <form [formGroup]="permisoForm">
                         <div class="col-12">
                             <div class="row g-3">
@@ -65,19 +70,35 @@
                             </div>
                         </div>
                     </form>
-                </div>
-                <div class="row mt-4">
-                    <div class="col-12 d-flex justify-content-start gap-3 flex-wrap">
-                        <button (click)="submit()" type="button" class="btn-alt btn-alt--success">
-                            <i class="fas fa-check"></i>
-                            <span>{{submitButton}}</span>
-                        </button>
-                        <button (click)="regresar()" type="button" class="btn-alt btn-alt--cancel">
-                            <i class="fas fa-times"></i>
-                            <span>Cancelar</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+        <footer class="ap-form-foot">
+          <button (click)="regresar()" type="button" class="ap-btn ap-btn--ghost">
+            <span class="ap-btn-icon"><i class="fas fa-arrow-left"></i></span>
+            <span class="ap-btn-text"><span class="ap-btn-label">Cancelar</span><span class="ap-btn-desc">Volver al listado</span></span>
+          </button>
+          <button (click)="submit()" type="button" class="ap-btn ap-btn--primary">
+            <span class="ap-btn-icon"><i class="fas" [ngClass]="loading ? 'fa-spinner fa-spin' : 'fa-check'"></i></span>
+            <span class="ap-btn-text"><span class="ap-btn-label">{{ submitButton }}</span><span class="ap-btn-desc">{{ idPermiso ? 'Aplicar los cambios' : 'Registrar el permiso' }}</span></span>
+          </button>
+        </footer>
+      </section>
     </div>
+
+    <!-- ================= Vista previa ================= -->
+    <div class="col-12 col-lg-4">
+      <aside class="ap-preview h-100">
+        <span class="ap-preview-tag"><i class="fas fa-eye"></i>Vista previa</span>
+        <div class="ap-preview-card">
+          <div class="ap-preview-icon"><i class="fas fa-lock"></i></div>
+          <h3 class="ap-preview-name text-truncate">{{ permisoForm.get('nombre')?.value || 'Nombre del permiso' }}</h3>
+          <p class="ap-preview-desc">{{ permisoForm.get('descripcion')?.value || 'Aquí verás la descripción mientras la escribes.' }}</p>
+          <span class="estatus estatus-activo">Activo</span>
+        </div>
+        <ul class="ap-tips list-unstyled mb-0">
+          <li><i class="fas fa-lightbulb"></i>Usa nombres cortos y claros.</li>
+          <li><i class="fas fa-toggle-on"></i>Se crea activo; puedes desactivarlo desde el listado.</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</div>

@@ -1,37 +1,38 @@
-<div class="container-fluid" [@fadeInRight]>
-    <div class="row">
-        <div class="col-12">
-            <div class="title-banner-card shadow-sm">
-                <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="title-icon">
-                            <i class="fas fa-list-ol"></i>
-                        </div>
-                        <div>
-                            <h4 class="title-title">Registro de Actividad</h4>
-                            <p class="title-subtitle">
-                                Consulta los movimientos y eventos generados por los usuarios
-                            </p>
-                        </div>
-                    </div>
-                    <div class="title-actions">
-                        <div class="title-tagline">
-                            <span class="line"></span>
-                            <span class="text">Control y configuración centralizada</span>
-                        </div>
-                        <div class="title-buttons">
-                            <button (click)="toggleExpandGroups()" type="button" class="btn-title btn-title--ghost">
-                                <i class="fas fa-expand"></i>
-                                <span>Contraer Grid</span>
-                            </button>
-                            <button (click)="limpiarCampos()" type="button" class="btn-title btn-title--danger">
-                                <i class="fas fa-sync-alt"></i>
-                                <span>Restablecer</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3 gy-4">
+<div class="container-fluid ap-page hm-admin" [@fadeInRight]>
+
+  <!-- ================= Encabezado ================= -->
+  <section class="ap-hero mb-4">
+    <span class="ap-corner tl">A<br>♠</span><span class="ap-corner br">A<br>♠</span>
+    <div class="row g-4 align-items-center">
+      <div class="col-12 col-xl-7">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+          <div class="ap-hero-icon"><i class="fas fa-list-ol"></i></div>
+          <div class="min-w-0 flex-grow-1">
+            <nav class="ap-crumbs mb-1" aria-label="Ruta">
+              <span><i class="fas fa-shield-alt"></i>Administración</span><i class="fas fa-chevron-right sep"></i><span class="now">Bitácora</span>
+            </nav>
+            <h1 class="ap-title mb-1">Registro de Actividad</h1>
+            <p class="ap-sub mb-0">Consulta los movimientos y eventos generados por los usuarios</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-5">
+        <div class="row g-2 g-sm-3">
+          <div class="col-4">
+            <div class="ap-stat"><span class="ap-stat-val">{{ totalRegistros }}</span><span class="ap-stat-lab">Registrados</span></div>
+          </div>
+          <div class="col-4">
+            <div class="ap-stat ap-stat--green"><span class="ap-stat-val">{{ paginaActualData?.length || 0 }}</span><span class="ap-stat-lab">En esta página</span></div>
+          </div>
+          <div class="col-4">
+            <div class="ap-stat ap-stat--gold"><span class="ap-stat-val">{{ paginaActual }}/{{ totalPaginas || 1 }}</span><span class="ap-stat-lab">Página</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Listado ================= -->
+    <div class="ap-grid-wrap mt-4">
                     <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
                         [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="'true'"
                         [dataSource]="bitacoraList" [keyExpr]="'id'" [width]="'100%'"
@@ -50,6 +51,25 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+                        <!-- Barra del grid: agrupación, botones propios y buscador -->
+                        <dxo-toolbar>
+                            <dxi-item name="groupPanel" location="before"></dxi-item>
+                            <dxi-item location="after" template="tbContraer"></dxi-item>
+                            <dxi-item location="after" template="tbRestablecer"></dxi-item>
+                            <dxi-item name="searchPanel" location="after"></dxi-item>
+                        </dxo-toolbar>
+                        <div *dxTemplate="let t of 'tbContraer'">
+                            <button (click)="toggleExpandGroups()" type="button" class="ap-tool-btn ap-tool-btn--blue"
+                                ngbTooltip="Abrir o cerrar grupos" placement="top">
+                                <span class="ap-tool-icon"><i class="fas fa-expand"></i></span><span class="ap-tool-label">Contraer grid</span>
+                            </button>
+                        </div>
+                        <div *dxTemplate="let t of 'tbRestablecer'">
+                            <button (click)="limpiarCampos()" type="button" class="ap-tool-btn ap-tool-btn--gold"
+                                ngbTooltip="Quitar agrupación y recargar" placement="top">
+                                <span class="ap-tool-icon"><i class="fas fa-sync-alt"></i></span><span class="ap-tool-label">Restablecer</span>
+                            </button>
+                        </div>
                         <dxi-column dataField="modulo" caption="Módulo" alignment="center" [width]="200"></dxi-column>
                         <dxi-column dataField="accionTexto" caption="Acción" alignment="center"
                             [width]="250"></dxi-column>
@@ -66,8 +86,6 @@
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
                     </dx-data-grid>
-                </div>
-            </div>
-        </div>
     </div>
+  </section>
 </div>

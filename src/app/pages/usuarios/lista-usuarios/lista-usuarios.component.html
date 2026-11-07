@@ -1,41 +1,43 @@
-<div class="container-fluid" [@fadeInRight]>
-    <div class="row">
-        <div class="col-12">
-            <div class="title-banner-card shadow-sm">
-                <div class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="title-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div>
-                            <h4 class="title-title">Administración de Usuarios</h4>
-                            <p class="title-subtitle">
-                                Controla el acceso y los datos de cada usuario
-                            </p>
-                        </div>
-                    </div>
-                    <div class="title-actions">
-                        <div class="title-tagline">
-                            <span class="line"></span>
-                            <span class="text">Control y configuración centralizada</span>
-                        </div>
-                        <div class="title-buttons">
-                            <button type="button" (click)="agregar()" class="btn-title btn-title--primary">
-                                <i class="fas fa-plus"></i>
-                                <span>Nuevo</span>
-                            </button>
-                            <button (click)="toggleExpandGroups()" type="button" class="btn-title btn-title--ghost">
-                                <i class="fas fa-expand"></i>
-                                <span>Contraer Grid</span>
-                            </button>
-                            <button (click)="limpiarCampos()" type="button" class="btn-title btn-title--danger">
-                                <i class="fas fa-sync-alt"></i>
-                                <span>Restablecer</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3 gy-4">
+<div class="container-fluid ap-page hm-admin" [@fadeInRight]>
+
+  <!-- ================= Encabezado ================= -->
+  <section class="ap-hero mb-4">
+    <span class="ap-corner tl">A<br>♠</span><span class="ap-corner br">A<br>♠</span>
+    <div class="row g-4 align-items-center">
+      <div class="col-12 col-xl-7">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+          <div class="ap-hero-icon"><i class="fas fa-users"></i></div>
+          <div class="min-w-0 flex-grow-1">
+            <nav class="ap-crumbs mb-1" aria-label="Ruta">
+              <span><i class="fas fa-shield-alt"></i>Administración</span><i class="fas fa-chevron-right sep"></i><span class="now">Usuarios</span>
+            </nav>
+            <h1 class="ap-title mb-1">Administración de Usuarios</h1>
+            <p class="ap-sub mb-0">Controla el acceso y los datos de cada usuario</p>
+          </div>
+          <!-- Acción principal junto al título -->
+          <button type="button" (click)="agregar()" class="ap-btn ap-btn--primary ap-btn--cta">
+            <span class="ap-btn-icon"><i class="fas fa-plus"></i></span>
+            <span class="ap-btn-text"><span class="ap-btn-label">Nuevo usuario</span><span class="ap-btn-desc">Registrar un usuario</span></span>
+          </button>
+        </div>
+      </div>
+      <div class="col-12 col-xl-5">
+        <div class="row g-2 g-sm-3">
+          <div class="col-4">
+            <div class="ap-stat"><span class="ap-stat-val">{{ totalRegistros }}</span><span class="ap-stat-lab">Registrados</span></div>
+          </div>
+          <div class="col-4">
+            <div class="ap-stat ap-stat--green"><span class="ap-stat-val">{{ activosPagina }}</span><span class="ap-stat-lab">Activos en página</span></div>
+          </div>
+          <div class="col-4">
+            <div class="ap-stat ap-stat--gold"><span class="ap-stat-val">{{ paginaActual }}/{{ totalPaginas || 1 }}</span><span class="ap-stat-lab">Página</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Listado ================= -->
+    <div class="ap-grid-wrap mt-4">
                     <dx-data-grid id="gridContainer" [columnHidingEnabled]="true" [showBorders]="true"
                         [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="true"
                         [dataSource]="listaUsuarios" [keyExpr]="'Id'" [remoteOperations]="{ paging: true }"
@@ -52,6 +54,25 @@
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
+                        <!-- Barra del grid: agrupación, botones propios y buscador -->
+                        <dxo-toolbar>
+                            <dxi-item name="groupPanel" location="before"></dxi-item>
+                            <dxi-item location="after" template="tbContraer"></dxi-item>
+                            <dxi-item location="after" template="tbRestablecer"></dxi-item>
+                            <dxi-item name="searchPanel" location="after"></dxi-item>
+                        </dxo-toolbar>
+                        <div *dxTemplate="let t of 'tbContraer'">
+                            <button (click)="toggleExpandGroups()" type="button" class="ap-tool-btn ap-tool-btn--blue"
+                                ngbTooltip="Abrir o cerrar grupos" placement="top">
+                                <span class="ap-tool-icon"><i class="fas fa-expand"></i></span><span class="ap-tool-label">Contraer grid</span>
+                            </button>
+                        </div>
+                        <div *dxTemplate="let t of 'tbRestablecer'">
+                            <button (click)="limpiarCampos()" type="button" class="ap-tool-btn ap-tool-btn--gold"
+                                ngbTooltip="Quitar agrupación y recargar" placement="top">
+                                <span class="ap-tool-icon"><i class="fas fa-sync-alt"></i></span><span class="ap-tool-label">Restablecer</span>
+                            </button>
+                        </div>
                         <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[20]"
                             [showInfo]="true"></dxo-pager>
                         <!-- <dxi-column dataField="Logotipo" caption="Logotipo" alignment="center" cellTemplate="cellTemplate">
@@ -117,8 +138,6 @@
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
                     </dx-data-grid>
-                </div>
-            </div>
-        </div>
     </div>
+  </section>
 </div>

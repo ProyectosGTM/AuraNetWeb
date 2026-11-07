@@ -51,6 +51,23 @@ $brand-h: 90px;
   }
 }
 
+/* Sidebar colapsado: sin hueco entre la marca y los iconos */
+:host-context(body[data-sidebar-size="sm"]) {
+  .navbar-brand-box { height: 70px; }
+  .sidebar-menu-scroll { margin-top: 0 !important; padding-top: 0 !important; }
+  #side-menu { margin-top: .75rem; padding: 0 .5rem !important; }
+  // icono siempre en el mismo lugar, también al desplegar con hover
+  #side-menu > li > a.side-nav-link-ref {
+    padding: .45rem !important; margin: 5px 0 !important; transform: none !important;
+    .bx { margin: 0 !important; }
+  }
+  #side-menu > li:hover > a.side-nav-link-ref {
+    padding: .45rem !important;
+    span { padding-left: .5rem !important; }
+  }
+  #side-menu > li > a.side-nav-link-ref::before { display: none; }
+}
+
 #side-menu { margin-top: .5rem; padding: 0 1rem 2.5rem .85rem; }
 
 /* ================= Títulos de sección ================= */

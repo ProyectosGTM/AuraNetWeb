@@ -33,6 +33,11 @@ export class ListaPermisosComponent implements OnInit {
   public totalPaginas: number = 0;
   public data: string;
   public paginaActualData: any[] = [];
+
+  /** Registros activos en la página cargada (encabezado). */
+  get activosPagina(): number {
+    return (this.paginaActualData || []).filter((r: any) => Number(r?.estatus ?? r?.Estatus) === 1).length;
+  }
   public filtroActivo: string = '';
   procesandoEstatusPermisoId: number | null = null;
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;

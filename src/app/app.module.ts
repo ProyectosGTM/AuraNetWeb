@@ -30,7 +30,6 @@ import { LayoutsModule } from './layouts/layouts.module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { initFirebaseBackend } from './authUtils';
 import { ErrorInterceptor } from './core/helpers/error.interceptor';
@@ -43,9 +42,7 @@ import { NgxPermissionsModule } from 'ngx-permissions';
 
 import { DxoColorizerModule, DxoSizeModule, DxoTitleModule } from 'devextreme-angular/ui/nested';
 import { locale, loadMessages } from "devextreme/localization"; // Importa localización
-export function createTranslateLoader(http: HttpClient): any {
-  return new TranslateHttpLoader(http, 'assets/i18n/', '.json');
-}
+import { StaticTranslateLoader } from './core/i18n/static-translate.loader';
 
 @NgModule({
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -83,8 +80,7 @@ export function createTranslateLoader(http: HttpClient): any {
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
-        useFactory: createTranslateLoader,
-        deps: [HttpClient]
+        useClass: StaticTranslateLoader
       }
     }),
     LayoutsModule,

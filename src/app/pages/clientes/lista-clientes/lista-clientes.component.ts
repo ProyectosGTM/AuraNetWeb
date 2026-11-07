@@ -36,6 +36,11 @@ export class ListaClientesComponent implements OnInit {
   public autoExpandAllGroups: boolean = true;
   isGrouped: boolean = false;
   public paginaActualData: any[] = [];
+
+  /** Registros activos en la página cargada (encabezado). */
+  get activosPagina(): number {
+    return (this.paginaActualData || []).filter((r: any) => Number(r?.estatus ?? r?.Estatus) === 1).length;
+  }
   public filtroActivo: string = '';
   procesandoEstatusClienteId: number | null = null;
 
