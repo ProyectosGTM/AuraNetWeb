@@ -28,13 +28,14 @@
                     <form [formGroup]="clienteForm">
                         <div class="col-12">
                             <!-- Sección: Información General -->
-                            <div class="form-section">
-                                <div class="section-header">
-                                    <div class="section-icon">
+                            <div class="cs cs--red">
+                                <span class="cs-suit" aria-hidden="true">♠</span>
+                                <div class="cs-head">
+                                    <div class="cs-ico">
                                         <i class="fas fa-info-circle"></i>
                                     </div>
-                                    <h5 class="section-title">Información General</h5>
-                                    <div class="section-line"></div>
+                                    <h5 class="cs-title">Información General</h5>
+                                    <div class="cs-line"><span aria-hidden="true">♠</span></div>
                                 </div>
                                 <div class="row mt-0">
                                     <div class="col-12 col-md-6 col-lg-4 mt-1">
@@ -164,13 +165,14 @@
                             </div>
 
                             <!-- Sección: Dirección -->
-                            <div class="form-section">
-                                <div class="section-header">
-                                    <div class="section-icon">
+                            <div class="cs cs--blue">
+                                <span class="cs-suit" aria-hidden="true">♦</span>
+                                <div class="cs-head">
+                                    <div class="cs-ico">
                                         <i class="fas fa-map-marker-alt"></i>
                                     </div>
-                                    <h5 class="section-title">Dirección</h5>
-                                    <div class="section-line"></div>
+                                    <h5 class="cs-title">Dirección</h5>
+                                    <div class="cs-line"><span aria-hidden="true">♦</span></div>
                                 </div>
                                 <div class="row mt-0">
                                     <div class="col-12 col-md-6 col-lg-4 mt-1">
@@ -273,13 +275,14 @@
                             </div>
 
                             <!-- Sección: Datos del Encargado -->
-                            <div class="form-section">
-                                <div class="section-header">
-                                    <div class="section-icon">
+                            <div class="cs cs--gold">
+                                <span class="cs-suit" aria-hidden="true">♣</span>
+                                <div class="cs-head">
+                                    <div class="cs-ico">
                                         <i class="fas fa-user-tie"></i>
                                     </div>
-                                    <h5 class="section-title">Datos del Encargado</h5>
-                                    <div class="section-line"></div>
+                                    <h5 class="cs-title">Datos del Encargado</h5>
+                                    <div class="cs-line"><span aria-hidden="true">♣</span></div>
                                 </div>
                                 <div class="row mt-0">
                                     <div class="col-12 col-md-6 col-lg-4 mt-1">
@@ -322,210 +325,51 @@
                             </div>
 
                             <!-- Sección: Documentos -->
-                            <div class="form-section">
-                                <div class="section-header">
-                                    <div class="section-icon">
+                            <div class="cs cs--pink">
+                                <span class="cs-suit" aria-hidden="true">♥</span>
+                                <div class="cs-head">
+                                    <div class="cs-ico">
                                         <i class="fas fa-file-alt"></i>
                                     </div>
-                                    <h5 class="section-title">Documentos</h5>
-                                    <div class="section-line"></div>
+                                    <h5 class="cs-title">Documentos</h5>
+                                    <div class="cs-line"><span aria-hidden="true">♥</span></div>
                                 </div>
-                                <div class="row mt-0">
-                                    <div class="col-12 col-md-6 col-lg-3">
-                                        <div class="pf-uploader" [class.has-file]="logoPreviewUrl || logoFileName"
-                                            [class.dragging]="logoDragging" (click)="openLogoFilePicker()"
-                                            (dragover)="onLogoDragOver($event)" (dragleave)="onLogoDragLeave($event)"
-                                            (drop)="onLogoDrop($event)">
-                                            <div class="pf-top">
-                                                <div class="pf-title">
-                                                    <i class="fas fa-image"></i>
-                                                    <span>Logotipo</span>
-                                                </div>
-                                                <div class="pf-badge">5 MB</div>
-                                            </div>
-                                            <div class="pf-mid" *ngIf="logoPreviewUrl || logoFileName; else pfEmptyLogo">
-                                                <div class="pf-hero" *ngIf="logoPreviewUrl">
-                                                    <img [src]="logoPreviewUrl" alt="Logotipo" />
-                                                </div>
-                                                <div class="file-name" *ngIf="logoFileName">{{ logoFileName }}</div>
-                                                <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                    <button type="button" class="pf-btn pf-btn--primary"
-                                                        (click)="openLogoFilePicker()">
-                                                        <i class="fas fa-sync-alt"></i>
-                                                        <span>Reemplazar</span>
-                                                    </button>
-                                                    <button type="button" class="pf-btn pf-btn--ghost"
-                                                        (click)="clearLogoImage($event)">
-                                                        <i class="fas fa-trash"></i>
-                                                        <span>Eliminar</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <ng-template #pfEmptyLogo>
-                                                <div class="pf-empty">
-                                                    <div class="pf-orb">
-                                                        <i class="fas fa-cloud-upload-alt"></i>
-                                                    </div>
-                                                    <div class="pf-copy">
-                                                        <div class="pf-main">Subir logotipo</div>
-                                                        <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP/PDF</div>
-                                                    </div>
-                                                    <div class="pf-cta">
-                                                        <span>Seleccionar</span>
-                                                        <i class="fas fa-arrow-right"></i>
-                                                    </div>
-                                                </div>
-                                            </ng-template>
+                                <div class="row g-3">
+                                    <div class="col-12 col-sm-6 col-xl-3">
+                                        <div class="dc dc--gold" [class.is-loaded]="docTiene('logo')" data-campo-destino="logotipo" [class.is-drag]="logoDragging"
+                                            (click)="openLogoFilePicker()" (dragover)="onLogoDragOver($event)"
+                                            (dragleave)="onLogoDragLeave($event)" (drop)="onLogoDrop($event)">
+                                            <ng-container *ngTemplateOutlet="docCuerpo; context: { k: 'logo', titulo: 'Logotipo', icono: 'fa-image', peso: '5 MB', accion: 'Subir logotipo' }"></ng-container>
                                             <input type="file" #logoFileInput accept=".jpg,.jpeg,.png,.webp,.pdf" hidden
                                                 (change)="onLogoFileSelected($event)" />
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6 col-lg-3">
-                                        <div class="pf-uploader" [class.has-file]="csfPreviewUrl || csfFileName"
-                                            [class.dragging]="csfDragging" (click)="openCsfFilePicker()"
-                                            (dragover)="onCsfDragOver($event)" (dragleave)="onCsfDragLeave($event)"
-                                            (drop)="onCsfDrop($event)">
-                                            <div class="pf-top">
-                                                <div class="pf-title">
-                                                    <i class="fas fa-file-pdf"></i>
-                                                    <span>Constancia Situación Fiscal</span>
-                                                </div>
-                                                <div class="pf-badge">3 MB</div>
-                                            </div>
-                                            <div class="pf-mid" *ngIf="csfPreviewUrl || csfFileName; else pfEmptyCsf">
-                                                <div class="pf-hero" *ngIf="csfPreviewUrl">
-                                                    <img [src]="csfPreviewUrl" alt="Constancia" />
-                                                </div>
-                                                <div class="file-name" *ngIf="csfFileName">{{ csfFileName }}</div>
-                                                <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                    <button type="button" class="pf-btn pf-btn--primary"
-                                                        (click)="openCsfFilePicker()">
-                                                        <i class="fas fa-sync-alt"></i>
-                                                        <span>Reemplazar</span>
-                                                    </button>
-                                                    <button type="button" class="pf-btn pf-btn--ghost"
-                                                        (click)="clearCsfFile($event)">
-                                                        <i class="fas fa-trash"></i>
-                                                        <span>Eliminar</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <ng-template #pfEmptyCsf>
-                                                <div class="pf-empty">
-                                                    <div class="pf-orb">
-                                                        <i class="fas fa-cloud-upload-alt"></i>
-                                                    </div>
-                                                    <div class="pf-copy">
-                                                        <div class="pf-main">Subir constancia</div>
-                                                        <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP/PDF</div>
-                                                    </div>
-                                                    <div class="pf-cta">
-                                                        <span>Seleccionar</span>
-                                                        <i class="fas fa-arrow-right"></i>
-                                                    </div>
-                                                </div>
-                                            </ng-template>
+                                    <div class="col-12 col-sm-6 col-xl-3">
+                                        <div class="dc dc--red" [class.is-loaded]="docTiene('csf')" data-campo-destino="constanciaSituacionFiscal" [class.is-drag]="csfDragging"
+                                            (click)="openCsfFilePicker()" (dragover)="onCsfDragOver($event)"
+                                            (dragleave)="onCsfDragLeave($event)" (drop)="onCsfDrop($event)">
+                                            <ng-container *ngTemplateOutlet="docCuerpo; context: { k: 'csf', titulo: 'Constancia Situación Fiscal', icono: 'fa-file-pdf', peso: '3 MB', accion: 'Subir constancia' }"></ng-container>
                                             <input type="file" #csfFileInput accept=".jpg,.jpeg,.png,.webp,.pdf" hidden
                                                 (change)="onCsfFileSelected($event)" />
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6 col-lg-3">
-                                        <div class="pf-uploader" [class.has-file]="compDomPreviewUrl || compDomFileName"
-                                            [class.dragging]="compDomDragging" (click)="openCompDomFilePicker()"
-                                            (dragover)="onCompDomDragOver($event)" (dragleave)="onCompDomDragLeave($event)"
-                                            (drop)="onCompDomDrop($event)">
-                                            <div class="pf-top">
-                                                <div class="pf-title">
-                                                    <i class="fas fa-file-pdf"></i>
-                                                    <span>Comprobante Domicilio</span>
-                                                </div>
-                                                <div class="pf-badge">3 MB</div>
-                                            </div>
-                                            <div class="pf-mid" *ngIf="compDomPreviewUrl || compDomFileName; else pfEmptyCompDom">
-                                                <div class="pf-hero" *ngIf="compDomPreviewUrl">
-                                                    <img [src]="compDomPreviewUrl" alt="Comprobante" />
-                                                </div>
-                                                <div class="file-name" *ngIf="compDomFileName">{{ compDomFileName }}</div>
-                                                <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                    <button type="button" class="pf-btn pf-btn--primary"
-                                                        (click)="openCompDomFilePicker()">
-                                                        <i class="fas fa-sync-alt"></i>
-                                                        <span>Reemplazar</span>
-                                                    </button>
-                                                    <button type="button" class="pf-btn pf-btn--ghost"
-                                                        (click)="clearCompDomFile($event)">
-                                                        <i class="fas fa-trash"></i>
-                                                        <span>Eliminar</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <ng-template #pfEmptyCompDom>
-                                                <div class="pf-empty">
-                                                    <div class="pf-orb">
-                                                        <i class="fas fa-cloud-upload-alt"></i>
-                                                    </div>
-                                                    <div class="pf-copy">
-                                                        <div class="pf-main">Subir comprobante</div>
-                                                        <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP/PDF</div>
-                                                    </div>
-                                                    <div class="pf-cta">
-                                                        <span>Seleccionar</span>
-                                                        <i class="fas fa-arrow-right"></i>
-                                                    </div>
-                                                </div>
-                                            </ng-template>
+                                    <div class="col-12 col-sm-6 col-xl-3">
+                                        <div class="dc dc--blue" [class.is-loaded]="docTiene('compDom')" data-campo-destino="comprobanteDomicilio" [class.is-drag]="compDomDragging"
+                                            (click)="openCompDomFilePicker()" (dragover)="onCompDomDragOver($event)"
+                                            (dragleave)="onCompDomDragLeave($event)" (drop)="onCompDomDrop($event)">
+                                            <ng-container *ngTemplateOutlet="docCuerpo; context: { k: 'compDom', titulo: 'Comprobante Domicilio', icono: 'fa-file-pdf', peso: '3 MB', accion: 'Subir comprobante' }"></ng-container>
                                             <input type="file" #compDomFileInput accept=".jpg,.jpeg,.png,.webp,.pdf" hidden
                                                 (change)="onCompDomFileSelected($event)" />
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6 col-lg-3">
-                                        <div class="pf-uploader" [class.has-file]="actaPreviewUrl || actaFileName"
-                                            [class.dragging]="actaDragging" (click)="openActaFilePicker()"
-                                            (dragover)="onActaDragOver($event)" (dragleave)="onActaDragLeave($event)"
-                                            (drop)="onActaDrop($event)">
-                                            <div class="pf-top">
-                                                <div class="pf-title">
-                                                    <i class="fas fa-file-pdf"></i>
-                                                    <span>Acta Constitutiva</span>
-                                                </div>
-                                                <div class="pf-badge">3 MB</div>
-                                            </div>
-                                            <div class="pf-mid" *ngIf="actaPreviewUrl || actaFileName; else pfEmptyActa">
-                                                <div class="pf-hero" *ngIf="actaPreviewUrl">
-                                                    <img [src]="actaPreviewUrl" alt="Acta" />
-                                                </div>
-                                                <div class="file-name" *ngIf="actaFileName">{{ actaFileName }}</div>
-                                                <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                    <button type="button" class="pf-btn pf-btn--primary"
-                                                        (click)="openActaFilePicker()">
-                                                        <i class="fas fa-sync-alt"></i>
-                                                        <span>Reemplazar</span>
-                                                    </button>
-                                                    <button type="button" class="pf-btn pf-btn--ghost"
-                                                        (click)="clearActaFile($event)">
-                                                        <i class="fas fa-trash"></i>
-                                                        <span>Eliminar</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <ng-template #pfEmptyActa>
-                                                <div class="pf-empty">
-                                                    <div class="pf-orb">
-                                                        <i class="fas fa-cloud-upload-alt"></i>
-                                                    </div>
-                                                    <div class="pf-copy">
-                                                        <div class="pf-main">Subir acta</div>
-                                                        <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP/PDF</div>
-                                                    </div>
-                                                    <div class="pf-cta">
-                                                        <span>Seleccionar</span>
-                                                        <i class="fas fa-arrow-right"></i>
-                                                    </div>
-                                                </div>
-                                            </ng-template>
+                                    <div class="col-12 col-sm-6 col-xl-3">
+                                        <div class="dc dc--green" [class.is-loaded]="docTiene('acta')" data-campo-destino="actaConstitutiva" [class.is-drag]="actaDragging"
+                                            (click)="openActaFilePicker()" (dragover)="onActaDragOver($event)"
+                                            (dragleave)="onActaDragLeave($event)" (drop)="onActaDrop($event)">
+                                            <ng-container *ngTemplateOutlet="docCuerpo; context: { k: 'acta', titulo: 'Acta Constitutiva', icono: 'fa-file-pdf', peso: '3 MB', accion: 'Subir acta' }"></ng-container>
                                             <input type="file" #actaFileInput accept=".jpg,.jpeg,.png,.webp,.pdf" hidden
                                                 (change)="onActaFileSelected($event)" />
                                         </div>
@@ -547,5 +391,68 @@
         </footer>
       </section>
     </div>
+  </div>
+</div>
+
+<!-- ================= Cuerpo de cada documento ================= -->
+<ng-template #docCuerpo let-k="k" let-titulo="titulo" let-icono="icono" let-peso="peso" let-accion="accion">
+  <header class="dc-head">
+    <span class="dc-ico"><i class="fas" [ngClass]="icono"></i></span>
+    <span class="dc-title">{{ titulo }}</span>
+    <span class="dc-peso">{{ peso }}</span>
+  </header>
+
+  <!-- Sin archivo -->
+  <div class="dc-stage dc-stage--vacio" *ngIf="!docTiene(k); else conArchivo">
+    <span class="dc-orb"><i class="fas fa-cloud-upload-alt"></i></span>
+    <span class="dc-main">{{ accion }}</span>
+    <span class="dc-sub">Arrastra o haz clic · JPG/PNG/WEBP/PDF</span>
+    <span class="dc-cta">Seleccionar<i class="fas fa-arrow-right"></i></span>
+  </div>
+
+  <!-- Con archivo -->
+  <ng-template #conArchivo>
+    <button type="button" class="dc-stage dc-stage--lleno" (click)="verDoc(k, titulo, $event)" [attr.aria-label]="'Ver ' + titulo">
+      <img *ngIf="docTipo(k) === 'image' && docFuente(k); else noImagen" class="dc-img" [src]="docFuente(k)" [alt]="titulo" />
+      <ng-template #noImagen>
+        <span class="dc-placeholder"><i class="fas" [ngClass]="docTipo(k) === 'pdf' ? 'fa-file-pdf' : 'fa-file'"></i></span>
+        <iframe *ngIf="docTipo(k) === 'pdf' && docMiniatura(k) as mini" class="dc-pdf" [src]="mini" [title]="titulo" tabindex="-1"></iframe>
+      </ng-template>
+      <span class="dc-tipo">{{ docTipo(k) === 'image' ? 'imagen' : docTipo(k) === 'pdf' ? 'pdf' : 'archivo' }}</span>
+      <span class="dc-veil"><span class="dc-ver"><i class="fas fa-eye"></i>Ver</span></span>
+    </button>
+    <div class="dc-foot" (click)="$event.stopPropagation()">
+      <span class="dc-nombre" [title]="docNombre(k)"><i class="fas fa-check-circle"></i><span>{{ docNombre(k) }}</span></span>
+      <div class="dc-acciones">
+        <button type="button" class="dc-btn" (click)="docSeleccionar(k)"><i class="fas fa-sync-alt"></i>Reemplazar</button>
+        <button type="button" class="dc-btn dc-btn--quitar" (click)="docQuitar(k, $event)"><i class="fas fa-trash"></i>Eliminar</button>
+      </div>
+    </div>
+  </ng-template>
+</ng-template>
+
+<!-- ================= Modal de vista previa ================= -->
+<div class="dm-fondo" *ngIf="docModal as m" (click)="cerrarDoc()">
+  <div class="dm" role="dialog" aria-modal="true" [attr.aria-label]="m.titulo" (click)="$event.stopPropagation()">
+    <header class="dm-head">
+      <span class="dm-ico"><i class="fas" [ngClass]="m.tipo === 'image' ? 'fa-image' : 'fa-file-pdf'"></i></span>
+      <div class="dm-textos">
+        <h3 class="dm-titulo">{{ m.titulo }}</h3>
+        <span class="dm-nombre">{{ m.nombre }}</span>
+      </div>
+      <button type="button" class="dm-cerrar" (click)="cerrarDoc()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+    </header>
+    <div class="dm-cuerpo">
+      <img *ngIf="m.tipo === 'image' && m.src" class="dm-img" [src]="m.src" [alt]="m.titulo" />
+      <iframe *ngIf="m.tipo === 'pdf' && m.seguro" class="dm-pdf" [src]="m.seguro" [title]="m.titulo"></iframe>
+      <div *ngIf="(m.tipo !== 'image' && m.tipo !== 'pdf') || !m.src" class="dm-vacio">
+        <i class="fas fa-file"></i>
+        <span>Este archivo no se puede previsualizar aquí.</span>
+      </div>
+    </div>
+    <footer class="dm-pie">
+      <a *ngIf="m.src" class="dm-abrir" [href]="m.src" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i>Abrir en otra pestaña</a>
+      <button type="button" class="dm-listo" (click)="cerrarDoc()">Cerrar</button>
+    </footer>
   </div>
 </div>

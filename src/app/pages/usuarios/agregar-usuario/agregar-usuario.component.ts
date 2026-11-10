@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { campoDeEtiqueta } from 'src/app/shared/utils/ir-a-campo';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fadeInRightAnimation } from 'src/app/core/fade-in-right.animation';
@@ -220,6 +221,32 @@ export class AgregarUsuarioComponent implements OnInit {
     }
   }
 
+  asignadosModulo(modulo: any): number {
+    return (modulo?.permisos || []).filter((p: any) => this.isPermisoAsignado(p?.id)).length;
+  }
+
+  get totalPermisos(): number {
+    return (this.listaModulos || []).reduce((n: number, m: any) => n + (m?.permisos?.length || 0), 0);
+  }
+
+  get totalAsignados(): number {
+    return (this.listaModulos || []).reduce((n: number, m: any) => n + this.asignadosModulo(m), 0);
+  }
+
+  porcentaje(parte: number, total: number): number {
+    return total ? (parte / total) * 100 : 0;
+  }
+
+  iconoPermiso(nombre: string): string {
+    const n = (nombre || '').toLowerCase();
+    if (/^(listado|listar|ver|consultar)/.test(n)) return 'fa-list-ul';
+    if (/^(crear|agregar)/.test(n)) return 'fa-plus';
+    if (/^(actualizar|editar)/.test(n)) return 'fa-pen';
+    if (/^(eliminar|borrar)/.test(n)) return 'fa-trash';
+    if (/estatus/.test(n)) return 'fa-power-off';
+    return 'fa-key';
+  }
+
   isPermisoAsignado(id: any): boolean {
     const nid = Number(id);
     return Array.isArray(this.permisosIds) && this.permisosIds.includes(nid);
@@ -272,6 +299,17 @@ export class AgregarUsuarioComponent implements OnInit {
   pwdHintText = '';
   pwdAllOk = false;
   pwdHintSwap = false;
+  pwdReglas = [
+    { texto: 'Mayúscula y minúscula', icono: 'fa-font', ok: false },
+    { texto: 'Un caracter especial (#?!&)', icono: 'fa-hashtag', ok: false },
+    { texto: 'Un número', icono: 'fa-sort-numeric-down', ok: false },
+    { texto: 'Más de 6 y menos de 16 caracteres', icono: 'fa-ruler-horizontal', ok: false },
+  ];
+  trackRegla = (i: number) => i;
+
+  get pwdNivel(): number {
+    return this.pwdReglas.filter((r) => r.ok).length;
+  }
 
   onPwdFocus() {
     this.showPwdHints = true;
@@ -297,6 +335,8 @@ export class AgregarUsuarioComponent implements OnInit {
     const caseOk = /[A-Z]/.test(v) && /[a-z]/.test(v);
     const specialOk = /[^a-zA-Z0-9]/.test(v);
     const numberOk = /\d/.test(v);
+
+    [caseOk, specialOk, numberOk, lengthOk].forEach((ok, i) => (this.pwdReglas[i].ok = ok));
 
     let nextText = '';
     let nextAllOk = false;
@@ -376,6 +416,34 @@ export class AgregarUsuarioComponent implements OnInit {
   private pulseConfirmHint() {
     this.confirmHintSwap = false;
     setTimeout(() => (this.confirmHintSwap = true), 0);
+  }
+
+  /* Vista previa de la imagen de perfil */
+  imagenModal = false;
+
+  get imagenFuente(): string | null {
+    return typeof this.logoPreviewUrl === 'string' && this.logoPreviewUrl ? this.logoPreviewUrl : null;
+  }
+
+  get imagenNombre(): string {
+    if (this.logoFileName) return this.logoFileName;
+    const ultimo = (this.imagenFuente || '').split(/[?#]/)[0].split('/').pop() || '';
+    if (!ultimo || this.imagenFuente?.startsWith('data:')) return 'Imagen cargada';
+    try {
+      return decodeURIComponent(ultimo);
+    } catch {
+      return ultimo;
+    }
+  }
+
+  verImagen(e: Event) {
+    e.stopPropagation();
+    this.imagenModal = true;
+  }
+
+  @HostListener('document:keydown.escape')
+  cerrarImagen() {
+    this.imagenModal = false;
   }
 
   @ViewChild('logoFileInput') logoFileInput!: ElementRef<HTMLInputElement>;
@@ -524,10 +592,7 @@ export class AgregarUsuarioComponent implements OnInit {
       const lista = mensajes
         .map(
           (campo, index) => `
-      <div style="padding:8px 12px;border-left:4px solid #d9534f;
-                  background:#caa8a8;text-align:center;margin-bottom:8px;border-radius:4px;">
-        <strong style="color:#b02a37;">${index + 1}. ${campo}</strong>
-      </div>`
+      <div class="sw-falta" data-campo="${campoDeEtiqueta(etiquetas, campo)}" role="button" tabindex="0" style="--i:${index}"><span class="sw-falta-n">${index + 1}</span><span class="sw-falta-t">${campo}</span><i class="fas fa-exclamation-circle sw-falta-i"></i></div>`
         )
         .join('');
 
@@ -685,9 +750,7 @@ export class AgregarUsuarioComponent implements OnInit {
           ${listaMensajes
             .map(
               (msg, idx) => `
-            <div style="padding:8px 12px;border-left:4px solid #d9534f;background:#caa8a8;text-align:center;margin-bottom:8px;border-radius:4px;">
-              <strong style="color:#b02a37;">${idx + 1}. ${msg}</strong>
-            </div>`
+            <div class="sw-falta" data-campo="${campoDeEtiqueta(etiquetas, msg)}" role="button" tabindex="0" style="--i:${idx}"><span class="sw-falta-n">${idx + 1}</span><span class="sw-falta-t">${msg}</span><i class="fas fa-exclamation-circle sw-falta-i"></i></div>`
             )
             .join('')}
         </div>`,
@@ -783,10 +846,7 @@ export class AgregarUsuarioComponent implements OnInit {
   private mostrarAlertaPermisos(): void {
     const html = `
       <div style="max-height:350px;overflow-y:auto;">
-        <div style="padding:8px 12px;border-left:4px solid #d9534f;
-                    background:#caa8a8;text-align:center;margin-bottom:8px;border-radius:4px;">
-          <strong style="color:#b02a37;">Debes asignar los permisos correspondientes al usuario.</strong>
-        </div>
+        <div class="sw-falta"><span class="sw-falta-n">!</span><span class="sw-falta-t">Debes asignar los permisos correspondientes al usuario.</span><i class="fas fa-exclamation-circle sw-falta-i"></i></div>
       </div>
     `;
     Swal.fire({

@@ -1,0 +1,46 @@
+/* Etiquetas de la columna Acción */
+.accion-tag {
+  --c: #34d399;
+  --c2: #0d9f6e;
+  position: relative; overflow: hidden; isolation: isolate;
+  display: inline-flex; align-items: center; gap: .55rem;
+  min-width: 132px; padding: 3px 12px 3px 3px; border-radius: 11px;
+  font-family: 'Poppins', 'IBM Plex Sans', sans-serif; line-height: 1;
+  background:
+    radial-gradient(120% 160% at 0% 50%, color-mix(in srgb, var(--c) 24%, transparent), transparent 65%) padding-box,
+    linear-gradient(160deg, #182032, #0c111b) padding-box,
+    linear-gradient(120deg, var(--c), rgba(255, 255, 255, .07) 55%, color-mix(in srgb, var(--c) 55%, transparent)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .35), 0 0 10px color-mix(in srgb, var(--c) 18%, transparent);
+  transition: transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s;
+
+  // destello
+  &::before {
+    content: ''; position: absolute; top: 0; left: -70%; width: 45%; height: 100%; z-index: -1;
+    background: linear-gradient(115deg, transparent, rgba(255, 255, 255, .2), transparent);
+    transform: skewX(-20deg); transition: left .65s ease;
+  }
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .4), 0 0 16px color-mix(in srgb, var(--c) 40%, transparent);
+    &::before { left: 130%; }
+    .accion-tag-suit { opacity: .75; transform: rotate(-12deg) scale(1.15); }
+  }
+}
+
+.accion-tag--actualizar { --c: #6a8cff; --c2: #3f5fd9; }
+.accion-tag--eliminar { --c: #ff1a5b; --c2: #e40041; }
+
+.accion-tag-icon {
+  flex: 0 0 auto; width: 24px; height: 24px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 10.5px; color: #fff;
+  background: linear-gradient(135deg, var(--c), var(--c2));
+  box-shadow: 0 2px 7px color-mix(in srgb, var(--c) 50%, transparent), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+
+.accion-tag-text { flex: 1; text-align: left; font-size: 12.5px; font-weight: 600; color: #fff; letter-spacing: .01em; }
+
+.accion-tag-suit {
+  font-size: 14px; color: var(--c); opacity: .45;
+  transition: opacity .25s, transform .25s;
+}

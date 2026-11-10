@@ -1,5 +1,7 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { campoDeEtiqueta } from 'src/app/shared/utils/ir-a-campo';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, finalize, forkJoin, map, of } from 'rxjs';
@@ -9,13 +11,16 @@ import { ClientesService } from 'src/app/shared/services/clientes.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import Swal from 'sweetalert2';
 
+type DocClave = 'logo' | 'csf' | 'compDom' | 'acta';
+type DocTipo = 'image' | 'pdf' | 'file';
+
 @Component({
   selector: 'app-alta-clientes',
   templateUrl: './agregar-cliente.component.html',
   styleUrl: './agregar-cliente.component.scss',
   animations: [fadeInRightAnimation],
 })
-export class AgregarClienteComponent implements OnInit {
+export class AgregarClienteComponent implements OnInit, OnDestroy {
   public submitButton: string = 'Guardar';
   public loading: boolean = false;
   public clienteForm: FormGroup;
@@ -37,6 +42,7 @@ export class AgregarClienteComponent implements OnInit {
     private route: Router,
     private usuaService: UsuariosService,
     private users: AuthenticationService,
+    private sanitizer: DomSanitizer,
   ) {
     // const user = this.users.getUser();
     // if(user.rol.nombre == 'SA' ){
@@ -147,7 +153,7 @@ export class AgregarClienteComponent implements OnInit {
   private formatControlErrors(label: string, errors: ValidationErrors): string[] {
     const out: string[] = [];
     if (errors['required']) {
-      out.push(`${label}: obligatorio`);
+      out.push(`${label}: Obligatorio`);
     }
     if (errors['email']) {
       out.push(`${label}: formato de correo no válido`);
@@ -385,9 +391,7 @@ export class AgregarClienteComponent implements OnInit {
       const lista = camposFaltantes
         .map(
           (campo, index) => `
-      <div style="padding:8px 12px;border-left:4px solid #d9534f;background:#caa8a8;text-align:center;margin-bottom:8px;border-radius:4px;">
-        <strong style="color:#b02a37;">${index + 1}. ${campo}</strong>
-      </div>
+      <div class="sw-falta" data-campo="${campoDeEtiqueta(etiquetas, campo)}" role="button" tabindex="0" style="--i:${index}"><span class="sw-falta-n">${index + 1}</span><span class="sw-falta-t">${campo}</span><i class="fas fa-exclamation-circle sw-falta-i"></i></div>
     `
         )
         .join('');
@@ -511,9 +515,7 @@ export class AgregarClienteComponent implements OnInit {
       const lista = camposFaltantes
         .map(
           (campo, index) => `
-        <div style="padding:8px 12px;border-left:4px solid #d9534f;background:#caa8a8;text-align:center;margin-bottom:8px;border-radius:4px;">
-          <strong style="color:#b02a37;">${index + 1}. ${campo}</strong>
-        </div>`
+        <div class="sw-falta" data-campo="${campoDeEtiqueta(etiquetas, campo)}" role="button" tabindex="0" style="--i:${index}"><span class="sw-falta-n">${index + 1}</span><span class="sw-falta-t">${campo}</span><i class="fas fa-exclamation-circle sw-falta-i"></i></div>`
         )
         .join('');
 
@@ -630,6 +632,123 @@ export class AgregarClienteComponent implements OnInit {
 
   private readonly DEFAULT_LOGO_URL =
     'https://transmovi.s3.us-east-2.amazonaws.com/logos/Logo_QMT_final.png';
+
+  /* ================= Vista previa de documentos ================= */
+  private readonly docCampos: Record<DocClave, string> = {
+    logo: 'logotipo',
+    csf: 'constanciaSituacionFiscal',
+    compDom: 'comprobanteDomicilio',
+    acta: 'actaConstitutiva',
+  };
+  private docBlobs = new Map<File, string>();
+  private docSeguros = new Map<string, SafeResourceUrl>();
+  docModal: { titulo: string; nombre: string; tipo: DocTipo; src: string | null; seguro: SafeResourceUrl | null } | null = null;
+
+  private docValor(k: DocClave): any {
+    return this.clienteForm?.get(this.docCampos[k])?.value;
+  }
+
+  private docPrevia(k: DocClave): string | null {
+    const v = (this as any)[`${k}PreviewUrl`];
+    return typeof v === 'string' && v ? v : null;
+  }
+
+  private docSeguro(url: string): SafeResourceUrl {
+    // se reutiliza el mismo objeto para que el iframe no se recargue en cada ciclo
+    let s = this.docSeguros.get(url);
+    if (!s) {
+      s = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      this.docSeguros.set(url, s);
+    }
+    return s;
+  }
+
+  docTiene(k: DocClave): boolean {
+    return !!(this.docPrevia(k) || (this as any)[`${k}FileName`] || this.docValor(k));
+  }
+
+  docFuente(k: DocClave): string | null {
+    const previa = this.docPrevia(k);
+    if (previa) return previa;
+    const v = this.docValor(k);
+    if (this.isFileLike(v)) {
+      let url = this.docBlobs.get(v);
+      if (!url) {
+        url = URL.createObjectURL(v);
+        this.docBlobs.set(v, url);
+      }
+      return url;
+    }
+    return typeof v === 'string' && /^(https?:|blob:)/i.test(v.trim()) ? v.trim() : null;
+  }
+
+  docTipo(k: DocClave): DocTipo {
+    if (this.docPrevia(k)) return 'image';
+    const v = this.docValor(k);
+    if (this.isFileLike(v)) return this.isImage(v) ? 'image' : this.isPdf(v) ? 'pdf' : 'file';
+    if (typeof v === 'string' && v) {
+      if (this.isImageUrl(v)) return 'image';
+      if (/\.pdf([?#].*)?$/i.test(v)) return 'pdf';
+    }
+    return 'file';
+  }
+
+  docMiniatura(k: DocClave): SafeResourceUrl | null {
+    const src = this.docFuente(k);
+    return src ? this.docSeguro(`${src}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`) : null;
+  }
+
+  docNombre(k: DocClave): string {
+    const nombre = (this as any)[`${k}FileName`];
+    if (nombre) return nombre;
+    const v = this.docValor(k);
+    if (typeof v === 'string' && v) {
+      const ultimo = v.split(/[?#]/)[0].split('/').pop() || '';
+      try {
+        return decodeURIComponent(ultimo) || 'Archivo cargado';
+      } catch {
+        return ultimo || 'Archivo cargado';
+      }
+    }
+    return 'Archivo cargado';
+  }
+
+  docSeleccionar(k: DocClave) {
+    if (k === 'logo') this.openLogoFilePicker();
+    else if (k === 'csf') this.openCsfFilePicker();
+    else if (k === 'compDom') this.openCompDomFilePicker();
+    else this.openActaFilePicker();
+  }
+
+  docQuitar(k: DocClave, e: Event) {
+    if (k === 'logo') this.clearLogoImage(e);
+    else if (k === 'csf') this.clearCsfFile(e);
+    else if (k === 'compDom') this.clearCompDomFile(e);
+    else this.clearActaFile(e);
+  }
+
+  verDoc(k: DocClave, titulo: string, e: Event) {
+    e.stopPropagation();
+    const src = this.docFuente(k);
+    const tipo = this.docTipo(k);
+    this.docModal = {
+      titulo,
+      nombre: this.docNombre(k),
+      tipo,
+      src,
+      seguro: src && tipo === 'pdf' ? this.docSeguro(src) : null,
+    };
+  }
+
+  @HostListener('document:keydown.escape')
+  cerrarDoc() {
+    this.docModal = null;
+  }
+
+  ngOnDestroy(): void {
+    this.docBlobs.forEach((url) => URL.revokeObjectURL(url));
+    this.docBlobs.clear();
+  }
 
   @ViewChild('logoFileInput') logoFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('csfFileInput') csfFileInput!: ElementRef<HTMLInputElement>;

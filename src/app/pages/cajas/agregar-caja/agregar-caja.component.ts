@@ -1,3 +1,4 @@
+import { campoDeEtiqueta } from 'src/app/shared/utils/ir-a-campo';
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -339,11 +340,7 @@ export class AgregarCajaComponent implements OnInit, AfterViewInit {
       const lista = camposFaltantes
         .map(
           (campo, index) => `
-            <div style="padding: 8px 12px; border-left: 4px solid #d9534f;
-                        background: #caa8a8; text-align: center; margin-bottom: 8px;
-                        border-radius: 4px;">
-              <strong style="color: #b02a37;">${index + 1}. ${campo}</strong>
-            </div>
+            <div class="sw-falta" data-campo="${campoDeEtiqueta(etiquetas, campo)}" role="button" tabindex="0" style="--i:${index}"><span class="sw-falta-n">${index + 1}</span><span class="sw-falta-t">${campo}</span><i class="fas fa-exclamation-circle sw-falta-i"></i></div>
           `
         )
         .join('');

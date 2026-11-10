@@ -71,6 +71,12 @@ export class ListaUsuariosComponent implements OnInit {
   }
 
   onGridOptionChanged(e: any) {
+    // Al cambiar de página, regresar al inicio de la vista
+    if (e.fullName === 'paging.pageIndex') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (e.fullName !== 'searchPanel.text') return;
 
     const grid = this.dataGrid?.instance;

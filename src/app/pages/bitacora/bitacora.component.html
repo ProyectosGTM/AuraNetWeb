@@ -72,7 +72,20 @@
                         </div>
                         <dxi-column dataField="modulo" caption="Módulo" alignment="center" [width]="200"></dxi-column>
                         <dxi-column dataField="accionTexto" caption="Acción" alignment="center"
-                            [width]="250"></dxi-column>
+                            [width]="250" cellTemplate="accionTag">
+                            <div *dxTemplate="let i of 'accionTag'">
+                                <ng-container *ngIf="i.data.accionTexto as accion">
+                                    <span class="accion-tag"
+                                        [ngClass]="accion === 'Crear' ? 'accion-tag--crear' : accion === 'Actualizar' ? 'accion-tag--actualizar' : 'accion-tag--eliminar'">
+                                        <span class="accion-tag-icon">
+                                            <i class="fas" [ngClass]="accion === 'Crear' ? 'fa-plus' : accion === 'Actualizar' ? 'fa-pen' : 'fa-trash-alt'"></i>
+                                        </span>
+                                        <span class="accion-tag-text">{{ accion }}</span>
+                                        <span class="accion-tag-suit" aria-hidden="true">{{ accion === 'Crear' ? '♣' : accion === 'Actualizar' ? '♠' : '♥' }}</span>
+                                    </span>
+                                </ng-container>
+                            </div>
+                        </dxi-column>
                         <dxi-column dataField="UserNameUsuario" caption="Usuario" alignment="center"
                             [width]="250"></dxi-column>
                         <dxi-column dataField="descripcion" caption="Descripción" alignment="center"></dxi-column>

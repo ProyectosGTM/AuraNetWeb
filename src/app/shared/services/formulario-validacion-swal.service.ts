@@ -1,3 +1,4 @@
+import { campoDeEtiqueta } from 'src/app/shared/utils/ir-a-campo';
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -21,7 +22,7 @@ export class FormularioValidacionSwalService {
     }
 
     const mensajes = this.construirMensajesDesdeControlesInvalidos(form, etiquetas);
-    this.mostrarSwalLista(mensajes);
+    this.mostrarSwalLista(mensajes, etiquetas);
     return true;
   }
 
@@ -48,26 +49,18 @@ export class FormularioValidacionSwalService {
     return out;
   }
 
-  private mostrarSwalLista(mensajes: string[]): void {
+  private mostrarSwalLista(mensajes: string[], etiquetas: Record<string, string>): void {
     const lista =
       mensajes.length > 0
         ? mensajes
             .map(
               (campo, index) => `
-        <div style="padding: 8px 12px; border-left: 4px solid #d9534f;
-                    background: #caa8a8; text-align: center; margin-bottom: 8px;
-                    border-radius: 4px;">
-          <strong style="color: #b02a37;">${index + 1}. ${campo}</strong>
-        </div>
+        <div class="sw-falta" data-campo="${campoDeEtiqueta(etiquetas, campo)}" role="button" tabindex="0" style="--i:${index}"><span class="sw-falta-n">${index + 1}</span><span class="sw-falta-t">${campo}</span><i class="fas fa-exclamation-circle sw-falta-i"></i></div>
       `
             )
             .join('')
         : `
-        <div style="padding: 8px 12px; border-left: 4px solid #d9534f;
-                    background: #caa8a8; text-align: center; margin-bottom: 8px;
-                    border-radius: 4px;">
-          <strong style="color: #b02a37;">Revisa los campos del formulario.</strong>
-        </div>
+        <div class="sw-falta"><span class="sw-falta-n">!</span><span class="sw-falta-t">Revisa los campos del formulario.</span><i class="fas fa-exclamation-circle sw-falta-i"></i></div>
       `;
 
     Swal.fire({

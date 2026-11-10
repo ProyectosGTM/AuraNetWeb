@@ -26,8 +26,16 @@
         </header>
 
                     <form [formGroup]="usuarioForm">
-                        <div class="col-12">
+                        <div class="cs cs--red">
+                            <span class="cs-suit" aria-hidden="true">♠</span>
+                            <div class="cs-head">
+                                <div class="cs-ico"><i class="fas fa-info-circle"></i></div>
+                                <h5 class="cs-title">Información General</h5>
+                                <div class="cs-line"><span aria-hidden="true">♠</span></div>
+                            </div>
                             <div class="row g-3">
+                                <div class="col-12 col-xl-9">
+                                <div class="row g-3">
                                 <div class="col-12 col-md-6 col-lg-4">
                                     <label class="field">
                                         <span class="field-label text-white">Nombre</span>
@@ -50,7 +58,7 @@
                                         </div>
                                     </label>
                                 </div>
-                                <div class="col-12 col-md-6 col-lg-4">
+                                <div class="col-12 col-lg-4" [ngClass]="inputContrasena ? 'col-md-6' : 'col-md-12'">
                                     <label class="field">
                                         <span class="field-label text-white">Apellido Materno</span>
                                         <div class="input-sleek">
@@ -72,7 +80,7 @@
                                         </div>
                                     </label>
                                 </div>
-                                <div class="col-12 col-md-6 col-lg-4">
+                                <div class="col-12 col-md-6" [ngClass]="inputContrasena ? 'col-lg-4' : 'col-lg-6'">
                                     <label class="field">
                                         <span class="field-label text-white">Teléfono</span>
                                         <div class="input-sleek">
@@ -84,7 +92,7 @@
                                         </div>
                                     </label>
                                 </div>
-                                <div class="col-12 col-md-6 col-lg-4">
+                                <div class="col-12 col-md-6" [ngClass]="inputContrasena ? 'col-lg-4' : 'col-lg-6'">
                                     <label class="field">
                                         <span class="field-label text-white">Rol</span>
                                         <dx-select-box
@@ -100,7 +108,7 @@
                                         </dx-select-box>
                                     </label>
                                 </div>
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-6">
                                     <label class="field">
                                         <span class="field-label text-white">Cliente</span>
                                         <dx-select-box
@@ -116,7 +124,7 @@
                                         </dx-select-box>
                                     </label>
                                 </div>
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-6">
                                     <label class="field">
                                         <span class="field-label text-white">Sala</span>
                                         <dx-select-box
@@ -133,7 +141,7 @@
                                     </label>
                                 </div>
 
-                                <div class="col-12 col-md-6 col-lg-4" *ngIf="inputContrasena">
+                                <div class="col-12 col-md-6" *ngIf="inputContrasena">
                                     <label class="field">
                                         <span class="field-label text-white">Contraseña</span>
                                         <div class="input-sleek input-sleek--eye-right">
@@ -151,14 +159,8 @@
                                             <span class="sleek-line"></span>
                                         </div>
                                     </label>
-                                    <div class="pwd-validate" *ngIf="showPwdHints">
-                                        <div class="pwd-hint" [class.pwd-hint--ok]="pwdAllOk"
-                                            [class.pwd-hint--bad]="!pwdAllOk" [class.pwd-hint--swap]="pwdHintSwap">
-                                            {{ pwdHintText }}
-                                        </div>
-                                    </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-lg-4" *ngIf="inputContrasena">
+                                <div class="col-12 col-md-6" *ngIf="inputContrasena">
                                     <label class="field">
                                         <span class="field-label text-white">Confirmar Contraseña</span>
                                         <div class="input-sleek input-sleek--eye-right">
@@ -176,57 +178,61 @@
                                             <span class="sleek-line"></span>
                                         </div>
                                     </label>
-                                    <div class="pwd-validate" *ngIf="confirmHintVisible">
-                                        <div class="pwd-hint" [class.pwd-hint--ok]="confirmMatch"
-                                            [class.pwd-hint--bad]="!confirmMatch"
-                                            [class.pwd-hint--swap]="confirmHintSwap">
-                                            {{ confirmHintText }}
+                                </div>
+                                <div class="col-12" *ngIf="inputContrasena && (showPwdHints || confirmHintVisible)">
+                                    <div class="pw" [class.pw--ok]="pwdAllOk" [attr.data-nivel]="pwdNivel">
+                                        <div class="pw-head" *ngIf="showPwdHints">
+                                            <span class="pw-escudo"><i class="fas" [ngClass]="pwdAllOk ? 'fa-shield-alt' : 'fa-lock'"></i></span>
+                                            <div class="pw-estado">
+                                                <span class="pw-titulo" [class.pw-swap]="pwdHintSwap">{{ pwdHintText }}</span>
+                                                <span class="pw-sub">{{ pwdNivel }} de {{ pwdReglas.length }} reglas cumplidas</span>
+                                            </div>
+                                            <div class="pw-medidor" aria-hidden="true">
+                                                <span class="pw-seg" *ngFor="let regla of pwdReglas; trackBy: trackRegla; let i = index" [class.is-on]="i < pwdNivel"></span>
+                                            </div>
+                                        </div>
+                                        <ul class="pw-reglas" *ngIf="showPwdHints">
+                                            <li class="pw-regla" *ngFor="let regla of pwdReglas; trackBy: trackRegla; let i = index" [class.is-ok]="regla.ok" [style.animation-delay.ms]="i * 70">
+                                                <span class="pw-regla__ico"><i class="fas" [ngClass]="regla.icono"></i></span>
+                                                <span class="pw-regla__txt">{{ regla.texto }}</span>
+                                                <span class="pw-regla__check"><i class="fas fa-check"></i></span>
+                                            </li>
+                                        </ul>
+                                        <div class="pw-igual" *ngIf="confirmHintVisible" [class.is-ok]="confirmMatch" [class.pw-swap]="confirmHintSwap">
+                                            <i class="fas" [ngClass]="confirmMatch ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                                            <span>{{ confirmHintText }}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-lg-4 mt-2">
-                                    <div class="pf-uploader" [class.has-file]="logoPreviewUrl || logoFileName"
-                                        [class.dragging]="logoDragging" (click)="openLogoFilePicker()"
-                                        (dragover)="onLogoDragOver($event)" (dragleave)="onLogoDragLeave($event)"
-                                        (drop)="onLogoDrop($event)">
-
-                                        <div class="pf-top">
-                                            <div class="pf-title">
-                                                <i class="fas fa-user-circle"></i>
-                                                <span>Imagen Perfil</span>
-                                            </div>
-                                            <div class="pf-badge">3 MB</div>
+                                </div>
+                                </div>
+                                <div class="col-12 col-xl-3 us-img">
+                                    <div class="dc dc--gold" [class.is-loaded]="logoPreviewUrl || logoFileName" data-campo-destino="logotipo" [class.is-drag]="logoDragging"
+                                        (click)="openLogoFilePicker()" (dragover)="onLogoDragOver($event)"
+                                        (dragleave)="onLogoDragLeave($event)" (drop)="onLogoDrop($event)">
+                                        <header class="dc-head">
+                                            <span class="dc-ico"><i class="fas fa-user-circle"></i></span>
+                                            <span class="dc-title">Imagen Perfil</span>
+                                            <span class="dc-peso">3 MB</span>
+                                        </header>
+                                        <div class="dc-stage dc-stage--vacio" *ngIf="!(logoPreviewUrl || logoFileName); else conImagen">
+                                            <span class="dc-orb"><i class="fas fa-cloud-upload-alt"></i></span>
+                                            <span class="dc-main">Subir imagen</span>
+                                            <span class="dc-sub">Arrastra o haz clic · JPG/PNG/WEBP</span>
+                                            <span class="dc-cta">Seleccionar<i class="fas fa-arrow-right"></i></span>
                                         </div>
-                                        <div class="pf-mid" *ngIf="logoPreviewUrl || logoFileName; else pfEmpty">
-                                            <div class="pf-hero" *ngIf="logoPreviewUrl">
-                                                <img [src]="logoPreviewUrl" alt="Imagen Perfil" />
-                                            </div>
-                                            <div class="file-name" *ngIf="logoFileName">{{ logoFileName }}</div>
-                                            <div class="pf-actions" (click)="$event.stopPropagation()">
-                                                <button type="button" class="pf-btn pf-btn--primary"
-                                                    (click)="openLogoFilePicker()">
-                                                    <i class="fas fa-sync-alt"></i>
-                                                    <span>Reemplazar</span>
-                                                </button>
-                                                <button type="button" class="pf-btn pf-btn--ghost"
-                                                    (click)="clearLogoImage($event)">
-                                                    <i class="fas fa-trash"></i>
-                                                    <span>Eliminar</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <ng-template #pfEmpty>
-                                            <div class="pf-empty">
-                                                <div class="pf-orb">
-                                                    <i class="fas fa-cloud-upload-alt"></i>
-                                                </div>
-                                                <div class="pf-copy">
-                                                    <div class="pf-main">Subir imagen</div>
-                                                    <div class="pf-sub">Arrastra o haz clic · JPG/PNG/WEBP</div>
-                                                </div>
-                                                <div class="pf-cta">
-                                                    <span>Seleccionar</span>
-                                                    <i class="fas fa-arrow-right"></i>
+                                        <ng-template #conImagen>
+                                            <button type="button" class="dc-stage dc-stage--lleno" (click)="verImagen($event)" aria-label="Ver imagen de perfil">
+                                                <img *ngIf="imagenFuente; else sinMiniatura" class="dc-img" [src]="imagenFuente" alt="Imagen Perfil" />
+                                                <ng-template #sinMiniatura><span class="dc-placeholder"><i class="fas fa-file"></i></span></ng-template>
+                                                <span class="dc-tipo">{{ imagenFuente ? 'imagen' : 'archivo' }}</span>
+                                                <span class="dc-veil"><span class="dc-ver"><i class="fas fa-eye"></i>Ver</span></span>
+                                            </button>
+                                            <div class="dc-foot" (click)="$event.stopPropagation()">
+                                                <span class="dc-nombre" [title]="imagenNombre"><i class="fas fa-check-circle"></i><span>{{ imagenNombre }}</span></span>
+                                                <div class="dc-acciones">
+                                                    <button type="button" class="dc-btn" (click)="openLogoFilePicker()"><i class="fas fa-sync-alt"></i>Reemplazar</button>
+                                                    <button type="button" class="dc-btn dc-btn--quitar" (click)="clearLogoImage($event)"><i class="fas fa-trash"></i>Eliminar</button>
                                                 </div>
                                             </div>
                                         </ng-template>
@@ -234,71 +240,55 @@
                                             (change)="onLogoFileSelected($event)" />
                                     </div>
                                 </div>
-                                <div class="col-12 mt-5">
-                                    <div
-                                        class="title-banner-content d-flex align-items-center justify-content-between flex-wrap p-1 pb-0">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div>
-                                                <h5 class="title-title">Permisos</h5>
-                                                <p class="title-subtitle">Asigna permisos por módulo para este
-                                                    usuario.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="perm-view">
-                                        <div class="perm-module"
-                                            *ngFor="let modulo of listaModulos; trackBy: trackModulo">
-                                            <div class="perm-module__head">
-                                                <div class="perm-module__left">
-                                                    <div class="perm-badge">
-                                                        {{ (modulo?.nombre || 'M') | slice: 0:1 }}
-                                                    </div>
-                                                    <div class="perm-meta">
-                                                        <div class="perm-title text-truncate" [title]="modulo?.nombre">
-                                                            {{ modulo?.nombre }}
-                                                        </div>
-                                                        <div class="perm-sub text-truncate"
-                                                            [title]="modulo?.descripcion || ''">
-                                                            {{ modulo?.descripcion || 'Sin descripción' }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="perm-module__right">
-                                                    <label class="perm-mod-toggle"
-                                                        [class.perm-mod-toggle--on]="isModuloCompleto(modulo)"
-                                                        title="Activar o desactivar todos los permisos de este módulo">
-                                                        <input type="checkbox" class="perm-mod-toggle__input"
-                                                            [checked]="isModuloCompleto(modulo)"
-                                                            (change)="onToggleModulo(modulo, $any($event.target).checked)" />
-                                                        <span class="perm-mod-toggle__visual" aria-hidden="true">
-                                                            <span class="perm-mod-toggle__knob"></span>
-                                                        </span>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="perm-module__body"
-                                                *ngIf="modulo?.permisos?.length; else noPerms2">
-                                                <div class="perm-chips">
-                                                    <button type="button" class="perm-chip"
-                                                        *ngFor="let permiso of modulo.permisos; trackBy: trackPermiso"
-                                                        [class.is-on]="isPermisoAsignado(permiso?.idPermiso ?? permiso?.id)"
-                                                        (click)="onToggle(permiso, !isPermisoAsignado(permiso?.idPermiso ?? permiso?.id))">
-                                                        <span class="perm-chip__text">
-                                                            {{ permiso?.nombre }}
-                                                        </span>
-                                                        <span class="perm-chip__dot"></span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <ng-template #noPerms2>
-                                                <div class="perm-empty">Este módulo no tiene permisos</div>
-                                            </ng-template>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
-                    </form>
+
+                        <div class="cs cs--pink">
+                            <span class="cs-suit" aria-hidden="true">♥</span>
+                            <div class="cs-head">
+                                <div class="cs-ico"><i class="fas fa-user-shield"></i></div>
+                                <h5 class="cs-title">Permisos</h5>
+                                <div class="cs-line"><span aria-hidden="true">♥</span></div>
+                            </div>
+                            <div class="perm-resumen">
+                                <p class="perm-resumen__txt">Asigna permisos por módulo para este usuario.</p>
+                                <div class="perm-resumen__meta">
+                                    <span class="perm-resumen__num"><b>{{ totalAsignados }}</b> de {{ totalPermisos }} asignados</span>
+                                    <span class="perm-barra perm-barra--total"><span [style.width.%]="porcentaje(totalAsignados, totalPermisos)"></span></span>
+                                </div>
+                            </div>
+                            <div class="perm-view">
+                                <article class="perm-module" *ngFor="let modulo of listaModulos; trackBy: trackModulo"
+                                    [class.is-activo]="asignadosModulo(modulo) > 0" [class.is-completo]="isModuloCompleto(modulo)">
+                                    <div class="perm-module__head">
+                                        <div class="perm-badge">{{ (modulo?.nombre || 'M') | slice: 0:1 }}</div>
+                                        <div class="perm-meta">
+                                            <div class="perm-title" [title]="modulo?.nombre">{{ modulo?.nombre }}</div>
+                                            <div class="perm-sub" *ngIf="modulo?.descripcion" [title]="modulo.descripcion">{{ modulo.descripcion }}</div>
+                                        </div>
+                                        <span class="perm-cuenta">{{ asignadosModulo(modulo) }}/{{ modulo?.permisos?.length || 0 }}</span>
+                                        <label class="perm-mod-toggle" [class.perm-mod-toggle--on]="isModuloCompleto(modulo)"
+                                            title="Activar o desactivar todos los permisos de este módulo">
+                                            <input type="checkbox" class="perm-mod-toggle__input" [checked]="isModuloCompleto(modulo)"
+                                                (change)="onToggleModulo(modulo, $any($event.target).checked)" />
+                                            <span class="perm-mod-toggle__visual" aria-hidden="true"><span class="perm-mod-toggle__knob"></span></span>
+                                        </label>
+                                    </div>
+                                    <div class="perm-tiles" *ngIf="modulo?.permisos?.length; else noPerms2">
+                                        <button type="button" class="perm-tile" *ngFor="let permiso of modulo.permisos; trackBy: trackPermiso"
+                                            [class.is-on]="isPermisoAsignado(permiso?.idPermiso ?? permiso?.id)"
+                                            [attr.aria-pressed]="isPermisoAsignado(permiso?.idPermiso ?? permiso?.id)"
+                                            (click)="onToggle(permiso, !isPermisoAsignado(permiso?.idPermiso ?? permiso?.id))">
+                                            <span class="perm-tile__ico"><i class="fas" [ngClass]="iconoPermiso(permiso?.nombre)"></i></span>
+                                            <span class="perm-tile__txt">{{ permiso?.descripcion || permiso?.nombre }}</span>
+                                            <span class="perm-tile__check"><i class="fas fa-check"></i></span>
+                                        </button>
+                                    </div>
+                                    <ng-template #noPerms2><div class="perm-empty">Este módulo no tiene permisos</div></ng-template>
+                                </article>
+                            </div>
+                        </div>
+                        </form>
 
         <footer class="ap-form-foot">
           <button (click)="regresar()" type="button" class="ap-btn ap-btn--ghost">
@@ -312,5 +302,30 @@
         </footer>
       </section>
     </div>
+  </div>
+</div>
+
+<!-- ================= Modal de vista previa ================= -->
+<div class="dm-fondo" *ngIf="imagenModal" (click)="cerrarImagen()">
+  <div class="dm" role="dialog" aria-modal="true" aria-label="Imagen Perfil" (click)="$event.stopPropagation()">
+    <header class="dm-head">
+      <span class="dm-ico"><i class="fas fa-image"></i></span>
+      <div class="dm-textos">
+        <h3 class="dm-titulo">Imagen Perfil</h3>
+        <span class="dm-nombre">{{ imagenNombre }}</span>
+      </div>
+      <button type="button" class="dm-cerrar" (click)="cerrarImagen()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+    </header>
+    <div class="dm-cuerpo">
+      <img *ngIf="imagenFuente" class="dm-img" [src]="imagenFuente" alt="Imagen Perfil" />
+      <div *ngIf="!imagenFuente" class="dm-vacio">
+        <i class="fas fa-file"></i>
+        <span>Este archivo no se puede previsualizar aquí.</span>
+      </div>
+    </div>
+    <footer class="dm-pie">
+      <a *ngIf="imagenFuente" class="dm-abrir" [href]="imagenFuente" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i>Abrir en otra pestaña</a>
+      <button type="button" class="dm-listo" (click)="cerrarImagen()">Cerrar</button>
+    </footer>
   </div>
 </div>

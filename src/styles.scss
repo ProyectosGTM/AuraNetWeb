@@ -2161,7 +2161,6 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .ap-grid-wrap {
   position: relative; z-index: 1;
   padding-top: 1.5rem; margin-bottom: 1rem;
-  border-top: 1px dashed rgba(255, 255, 255, .1);
 }
 
 /* ---------- Paneles ---------- */
@@ -2461,3 +2460,84 @@ $hm-red: #e40041; $hm-pink: #ff1a5b; $hm-blue: #6a8cff; $hm-gold: #ffc94d; $hm-g
   &.btn-promo-green { --c: #{$hm-green}; } &.btn-promo-teal { --c: #0d9488; } &.btn-promo-teal-dark { --c: #0f766e; }
   &.btn-promo-purple { --c: #7c4dff; }
 }
+
+
+/* ---------- Lista de campos faltantes en las alertas de formularios ---------- */
+.sw-falta {
+  position: relative; overflow: hidden; display: flex; align-items: center; gap: .7rem;
+  margin: 0 6px 8px 0; padding: 6px 12px 6px 6px; border-radius: 12px; text-align: left;
+  font-family: 'Poppins', sans-serif;
+  background:
+    radial-gradient(120% 170% at 0% 50%, rgba(228, 0, 65, .2), transparent 62%) padding-box,
+    linear-gradient(160deg, #1a2234, #0d121d) padding-box,
+    linear-gradient(115deg, rgba(255, 26, 91, .75), rgba(255, 255, 255, .06) 58%, rgba(255, 201, 77, .35)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 5px 13px rgba(0, 0, 0, .32);
+  animation: sw-falta-in .32s cubic-bezier(.2, .85, .25, 1) both;
+  animation-delay: calc(min(var(--i, 0), 10) * 35ms);
+  transition: transform .2s;
+  &:last-child { margin-bottom: 0; }
+}
+.sw-falta[data-campo]:not([data-campo=""]) {
+  cursor: pointer; user-select: none;
+  transition: transform .2s, box-shadow .2s, filter .2s;
+  .sw-falta-n, .sw-falta-i { transition: transform .22s cubic-bezier(.2, .8, .2, 1), color .2s; }
+  &:hover, &:focus-visible {
+    outline: none; transform: translateX(4px); filter: brightness(1.18);
+    box-shadow: 0 7px 16px rgba(0, 0, 0, .4), 0 0 16px rgba(255, 26, 91, .38);
+    .sw-falta-n { transform: scale(1.1) rotate(-6deg); }
+    .sw-falta-i { transform: scale(1.2); color: #fff; }
+  }
+  &:active { transform: translateX(2px) scale(.99); }
+}
+.sw-falta-n {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+  font-family: 'Russo One', 'Poppins', sans-serif; font-size: 12.5px; color: #fff;
+  background: linear-gradient(135deg, #e40041, #ff1a5b);
+  box-shadow: 0 3px 9px rgba(228, 0, 65, .45), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.sw-falta-t { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 500; line-height: 1.3; color: #fff; overflow-wrap: anywhere; }
+.sw-falta-i { flex: 0 0 auto; font-size: 13px; color: #ffc94d; filter: drop-shadow(0 0 4px rgba(255, 201, 77, .55)); }
+@keyframes sw-falta-in { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sw-falta { animation: none; } }
+
+/* Campo señalado desde la alerta de faltantes */
+.campo-resaltado {
+  position: relative; z-index: 5; border-radius: 16px;
+  animation: campo-sacude .5s ease .35s;
+  // marco separado del contenido, sin mover el formulario
+  &::before {
+    content: ''; position: absolute; inset: -9px -10px; z-index: -1; border-radius: 18px; pointer-events: none;
+    border: 1px solid rgba(255, 26, 91, .85);
+    background: rgba(255, 26, 91, .07);
+    animation: campo-pulso 1s ease-in-out .35s 3;
+  }
+  &.dc::before { inset: 0; border-radius: 20px; }
+  .main-content .page-content & .field-label, .main-content .page-content & .ap-label { color: #ffc94d !important; }
+  .dc-title { color: #ffc94d !important; }
+}
+@keyframes campo-sacude {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+@keyframes campo-pulso {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 26, 91, 0); }
+  50% { box-shadow: 0 0 14px 2px rgba(255, 26, 91, .45), 0 0 26px 6px rgba(255, 201, 77, .18); }
+}
+@media (prefers-reduced-motion: reduce) { .campo-resaltado, .campo-resaltado::before { animation: none; } }
+
+.campo-aviso {
+  position: absolute; top: -2px; right: 0; z-index: 6;
+  display: inline-flex; align-items: center; gap: .35rem; padding: 3px 10px; border-radius: 50rem;
+  font-family: 'Poppins', sans-serif; font-size: 11.5px; font-weight: 600; line-height: 1.2; color: #fff; white-space: nowrap;
+  background: linear-gradient(135deg, #e40041, #ff1a5b);
+  box-shadow: 0 4px 12px rgba(228, 0, 65, .55);
+  pointer-events: none;
+  animation: campo-aviso-in .3s cubic-bezier(.2, .9, .3, 1.3) .3s both;
+}
+.dc > .campo-aviso { top: auto; right: 12px; bottom: 12px; }
+@keyframes campo-aviso-in { from { opacity: 0; transform: translateY(6px) scale(.85); } to { opacity: 1; transform: none; } }
+
+.campo-saliendo::before, .campo-saliendo > .campo-aviso { animation: campo-sale .22s ease forwards; }
+@keyframes campo-sale { to { opacity: 0; transform: scale(.98); } }
