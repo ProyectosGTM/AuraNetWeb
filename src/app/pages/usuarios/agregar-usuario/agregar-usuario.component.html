@@ -274,6 +274,7 @@
                                             <span class="perm-mod-toggle__visual" aria-hidden="true"><span class="perm-mod-toggle__knob"></span></span>
                                         </label>
                                     </div>
+                                    <!-- dawda -->
                                     <div class="perm-tiles" *ngIf="modulo?.permisos?.length; else noPerms2">
                                         <button type="button" class="perm-tile" *ngFor="let permiso of modulo.permisos; trackBy: trackPermiso"
                                             [class.is-on]="isPermisoAsignado(permiso?.idPermiso ?? permiso?.id)"
