@@ -21,7 +21,7 @@
             </div>
 
             <p class="greet mb-1">{{ saludo }}, <strong>{{ nombreUsuario }}</strong> · {{ fechaHoyLarga }}</p>
-            <h1 class="jp-label mb-2"><i class="fas fa-crown"></i>Ingreso bruto del periodo</h1>
+            <h1 class="jp-label mb-2"><i class="fas fa-crown"></i>Ingreso Bruto del Periodo</h1>
 
             <div class="row g-3 align-items-center">
               <div class="col-12 col-md-auto">
@@ -52,7 +52,7 @@
                 <div class="jp-mini jm-red">
                   <span class="jm-icon"><i class="fas fa-hand-holding-usd"></i></span>
                   <div class="jm-body">
-                    <span class="lab">Ingreso neto</span>
+                    <span class="lab">Ingreso Neto</span>
                     <span class="val">{{ formatearMoneda(anim['ngr']) }}</span>
                     <span class="jm-note">Después de bonos</span>
                   </div>
@@ -62,7 +62,7 @@
                 <div class="jp-mini jm-blue">
                   <span class="jm-icon"><i class="fas fa-users"></i></span>
                   <div class="jm-body">
-                    <span class="lab">Jugadores activos</span>
+                    <span class="lab">Jugadores Activos</span>
                     <span class="val">{{ formatearEntero(anim['jugadoresActivos']) }}</span>
                     <span class="jm-note">Pico diario {{ formatearEntero(data?.kpis?.dauMaximo) }}</span>
                   </div>
@@ -72,7 +72,7 @@
                 <div class="jp-mini jm-gold">
                   <span class="jm-icon"><i class="fas fa-percentage"></i></span>
                   <div class="jm-body">
-                    <span class="lab">Pago a jugadores</span>
+                    <span class="lab">Pago a Jugadores</span>
                     <span class="val">{{ payoutPct | number: '1.0-1' }}%</span>
                     <span class="jm-bar"><span [style.width.%]="payoutPct"></span></span>
                   </div>
@@ -92,7 +92,7 @@
       </div>
 
       <!-- Cinta LED -->
-      <div class="ticker" aria-label="Indicadores rápidos">
+      <div class="ticker" aria-label="Indicadores Rápidos">
         <div class="ticker-track">
           <ng-container *ngFor="let vuelta of [0, 1]">
             <span class="tick" *ngFor="let c of cintaIndicadores">
@@ -123,7 +123,7 @@
               <button type="button" class="btn-soft bs-blue w-100" (click)="presetSemanaActual()">
                 <div class="btn-action-icon"><i class="fas fa-calendar-week"></i></div>
                 <div class="btn-action-text">
-                  <span class="btn-action-label">Semana actual</span>
+                  <span class="btn-action-label">Semana Actual</span>
                   <span class="btn-action-desc">De lunes a domingo</span>
                 </div>
               </button>
@@ -132,7 +132,7 @@
               <button type="button" class="btn-soft bs-gold w-100" (click)="presetMesActual()">
                 <div class="btn-action-icon"><i class="fas fa-calendar-alt"></i></div>
                 <div class="btn-action-text">
-                  <span class="btn-action-label">Mes actual</span>
+                  <span class="btn-action-label">Mes Actual</span>
                   <span class="btn-action-desc">Mes calendario en curso</span>
                 </div>
               </button>
@@ -181,7 +181,7 @@
           <article class="card-play cp-red">
             <span class="corner tl">A<br>♥</span><span class="corner br">A<br>♥</span>
             <div class="cp-icon"><i class="fas fa-exchange-alt"></i></div>
-            <span class="cp-lab">Flujo de efectivo neto</span>
+            <span class="cp-lab">Flujo de Efectivo Neto</span>
             <span class="cp-val" [class.neg]="(data?.kpis?.netCashFlow || 0) < 0">{{ formatearMoneda(anim['netCashFlow']) }}</span>
             <div class="flow"><span [style.width.%]="pctDepositos"></span></div>
             <div class="cp-foot">
@@ -195,7 +195,7 @@
           <article class="card-play cp-gold">
             <span class="corner tl">K<br>♦</span><span class="corner br">K<br>♦</span>
             <div class="cp-icon"><i class="fas fa-coins"></i></div>
-            <span class="cp-lab">Apuestas vs premios</span>
+            <span class="cp-lab">Apuestas vs Premios</span>
             <span class="cp-val">{{ formatearMoneda(data?.kpis?.totalApuestas) }}</span>
             <div class="flow flow-gold"><span [style.width.%]="payoutPct"></span></div>
             <div class="cp-foot">
@@ -208,7 +208,7 @@
           <article class="card-play cp-pink">
             <span class="corner tl">Q<br>♠</span><span class="corner br">Q<br>♠</span>
             <div class="cp-icon"><i class="fas fa-gift"></i></div>
-            <span class="cp-lab">Bonos entregados</span>
+            <span class="cp-lab">Bonos Entregados</span>
             <span class="cp-val">{{ formatearMoneda(anim['totalBonos']) }}</span>
             <div class="cp-foot">
               <span>Del ingreso bruto</span><strong>{{ formatearNumero(data?.kpis?.bonusToGgrPorcentaje) }}%</strong>
@@ -223,7 +223,7 @@
           <article class="card-play cp-blue">
             <span class="corner tl">J<br>♣</span><span class="corner br">J<br>♣</span>
             <div class="cp-icon"><i class="fas fa-gamepad"></i></div>
-            <span class="cp-lab">Sesiones de juego</span>
+            <span class="cp-lab">Sesiones de Juego</span>
             <span class="cp-val">{{ formatearEntero(anim['totalSesiones']) }}</span>
             <div class="cp-foot">
               <span>Duración media</span><strong>{{ formatearNumero(data?.kpis?.duracionPromedioSesionMin) }} min</strong>
@@ -239,15 +239,15 @@
       <section class="row g-3 mb-4">
         <div class="col-12 col-md-4">
           <div class="chip-stat"><span class="poker pk-red"><i class="fas fa-user-friends"></i></span>
-            <div><span class="cs-lab">Promedio diario de jugadores</span><span class="cs-val">{{ formatearNumero(data?.kpis?.dauPromedio) }}</span></div></div>
+            <div><span class="cs-lab">Promedio Diario de Jugadores</span><span class="cs-val">{{ formatearNumero(data?.kpis?.dauPromedio) }}</span></div></div>
         </div>
         <div class="col-12 col-md-4">
           <div class="chip-stat"><span class="poker pk-gold"><i class="fas fa-fire"></i></span>
-            <div><span class="cs-lab">Pico diario de jugadores</span><span class="cs-val">{{ formatearEntero(data?.kpis?.dauMaximo) }}</span></div></div>
+            <div><span class="cs-lab">Pico Diario de Jugadores</span><span class="cs-val">{{ formatearEntero(data?.kpis?.dauMaximo) }}</span></div></div>
         </div>
         <div class="col-12 col-md-4">
           <div class="chip-stat"><span class="poker pk-blue"><i class="fas fa-user-check"></i></span>
-            <div><span class="cs-lab">Jugadores activos</span><span class="cs-val">{{ formatearEntero(data?.kpis?.jugadoresActivos) }}</span></div></div>
+            <div><span class="cs-lab">Jugadores Activos</span><span class="cs-val">{{ formatearEntero(data?.kpis?.jugadoresActivos) }}</span></div></div>
         </div>
       </section>
 
@@ -256,11 +256,11 @@
         <span class="corner tl">10<br>♣</span><span class="corner br">10<br>♣</span>
         <header class="sc-head">
           <div>
-            <h2 class="sc-title"><i class="fas fa-chart-area"></i>Tendencia de la sala</h2>
+            <h2 class="sc-title"><i class="fas fa-chart-area"></i>Tendencia de la Sala</h2>
             <p class="sc-sub">Ingreso bruto, apuestas y premios del periodo</p>
           </div>
           <div class="legend">
-            <span><i class="l-red"></i>Ingreso bruto</span>
+            <span><i class="l-red"></i>Ingreso Bruto</span>
             <span><i class="l-blue"></i>Apuestas</span>
             <span><i class="l-gold"></i>Premios</span>
           </div>
@@ -289,7 +289,7 @@
             <span class="corner tl">K<br>♠</span><span class="corner br">K<br>♠</span>
             <header class="sc-head mb-3">
               <div>
-                <h2 class="sc-title"><i class="fas fa-trophy"></i>Máquinas estrella</h2>
+                <h2 class="sc-title"><i class="fas fa-trophy"></i>Máquinas Estrella</h2>
                 <p class="sc-sub">Las cinco con más apuestas</p>
               </div>
             </header>

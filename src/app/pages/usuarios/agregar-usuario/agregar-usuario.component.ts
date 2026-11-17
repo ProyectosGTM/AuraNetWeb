@@ -9,6 +9,7 @@ import { RolesService } from 'src/app/shared/services/roles.service';
 import { SalaService } from 'src/app/shared/services/salas.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import Swal from 'sweetalert2';
+import { PreviewSection } from 'src/app/shared/ui/form-preview/form-preview.component';
 
 @Component({
   selector: 'app-alta-usuario',
@@ -600,7 +601,7 @@ export class AgregarUsuarioComponent implements OnInit {
       this.loading = false;
 
       Swal.fire({
-        title: '¡Faltan campos obligatorios!',
+        title: '¡Faltan Campos Obligatorios!',
         background: '#0d121d',
         html: `
       <p style="text-align:center;font-size:15px;margin-bottom:16px;color:white">
@@ -663,6 +664,14 @@ export class AgregarUsuarioComponent implements OnInit {
       this.mostrarAlertaPermisos();
       return;
     }
+
+    if (!this.previewConfirmado) {
+      this.submitButton = 'Guardar';
+      this.loading = false;
+      this.abrirVistaPrevia();
+      return;
+    }
+    this.previewConfirmado = false;
 
     this.usuaService.agregarUsuario(payload).subscribe({
       next: () => {
@@ -740,7 +749,7 @@ export class AgregarUsuarioComponent implements OnInit {
       this.loading = false;
 
       Swal.fire({
-        title: '¡Faltan campos obligatorios!',
+        title: '¡Faltan Campos Obligatorios!',
         background: '#0d121d',
         html: `
         <p style="text-align: center; font-size: 15px; margin-bottom: 16px; color: white">
@@ -810,6 +819,14 @@ export class AgregarUsuarioComponent implements OnInit {
     }
 
 
+    if (!this.previewConfirmado) {
+      this.submitButton = 'Actualizar';
+      this.loading = false;
+      this.abrirVistaPrevia();
+      return;
+    }
+    this.previewConfirmado = false;
+
     this.usuaService.actualizarUsuario(this.idUsuario, payload).subscribe({
       next: () => {
         this.submitButton = 'Actualizar';
@@ -850,7 +867,7 @@ export class AgregarUsuarioComponent implements OnInit {
       </div>
     `;
     Swal.fire({
-      title: '¡Faltan permisos!',
+      title: '¡Faltan Permisos!',
       background: '#0d121d',
       html,
       icon: 'warning',
@@ -858,6 +875,71 @@ export class AgregarUsuarioComponent implements OnInit {
       showCancelButton: false,
       customClass: { popup: 'swal2-padding swal2-border' },
     });
+  }
+
+
+  /* ===== Vista previa antes de guardar ===== */
+  public previewOpen = false;
+  public previewSections: PreviewSection[] = [];
+  private previewConfirmado = false;
+
+  private txt(lista: any[], id: any): string {
+    if (id === null || id === undefined || id === '') return '';
+    return lista.find((x: any) => Number(x.id) === Number(id))?.text ?? '';
+  }
+
+  cerrarVistaPrevia(): void {
+    this.previewOpen = false;
+  }
+
+  confirmarVistaPrevia(): void {
+    this.previewOpen = false;
+    this.previewConfirmado = true;
+    this.submit();
+  }
+
+  get previewNombre(): string {
+    const v = this.usuarioForm?.value || {};
+    return [v.nombre, v.apellidoPaterno, v.apellidoMaterno].filter(Boolean).join(' ');
+  }
+
+  get previewBadges(): string[] {
+    const v = this.usuarioForm?.value || {};
+    return [this.txt(this.listaRoles, v.idRol)].filter(Boolean);
+  }
+
+  abrirVistaPrevia(): void {
+    const v = this.usuarioForm.value;
+    const ids = (v.permisosIds || []).map((x: any) => Number(x));
+    const grupos = this.listaModulos
+      .map((m: any) => ({ title: m.nombre, items: (m.permisos || []).filter((p: any) => ids.includes(Number(p.id))).map((p: any) => p.nombre) }))
+      .filter((g: any) => g.items.length);
+    const totalPermisos = grupos.reduce((n: number, g: any) => n + g.items.length, 0);
+    const conPass = !this.idUsuario || (this.inputContrasena && !!v.passwordHash);
+
+    this.previewSections = [
+      {
+        title: 'Información General', icon: 'fas fa-id-card',
+        items: [
+          { label: 'Nombre', value: v.nombre, icon: 'fas fa-user' },
+          { label: 'Apellido Paterno', value: v.apellidoPaterno, icon: 'fas fa-user' },
+          { label: 'Apellido Materno', value: v.apellidoMaterno, icon: 'fas fa-user' },
+          { label: 'Teléfono', value: v.telefono, icon: 'fas fa-phone' },
+          { label: 'Correo Electrónico', value: v.userName, icon: 'fas fa-envelope' },
+        ],
+      },
+      {
+        title: 'Acceso y Asignación', icon: 'fas fa-user-shield',
+        items: [
+          { label: 'Rol', value: this.txt(this.listaRoles, v.idRol), icon: 'fas fa-user-tag' },
+          { label: 'Cliente', value: this.txt(this.listaClientes, v.idCliente), icon: 'fas fa-building' },
+          { label: 'Sala', value: this.txt(this.listaSalas, v.idSala), icon: 'fas fa-store' },
+          ...(conPass ? [{ label: 'Contraseña', value: v.passwordHash, icon: 'fas fa-lock', masked: true }] : []),
+        ],
+      },
+      { title: 'Permisos Asignados (' + totalPermisos + ')', icon: 'fas fa-key', groups: grupos },
+    ];
+    this.previewOpen = true;
   }
 
   regresar() {

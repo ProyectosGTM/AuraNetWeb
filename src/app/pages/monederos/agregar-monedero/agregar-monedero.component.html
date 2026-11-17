@@ -82,6 +82,17 @@
                 </div>
                 <div class="col-12 col-md-6 col-lg-4">
                   <label class="field">
+                    <span class="field-label text-white">{{ idMonedero ? 'PIN Nuevo (Opcional)' : 'PIN del Monedero' }}</span>
+                    <div class="input-sleek">
+                      <i class="fas fa-key"></i>
+                      <input formControlName="pin" class="sleek-control" type="password" inputmode="numeric" maxlength="6"
+                        autocomplete="new-password" placeholder="4 a 6 dígitos" />
+                      <span class="sleek-line"></span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="field">
                     <span class="field-label text-white">Estatus Monedero</span>
                     <dx-select-box [dataSource]="listaEstatusMonedero" displayExpr="text" valueExpr="id"
                       formControlName="idEstatusMonedero" placeholder="Selecciona un estatus..." searchEnabled="true"

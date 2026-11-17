@@ -10,6 +10,7 @@ import { AuthenticationService } from 'src/app/core/services/auth.service';
 import { ClientesService } from 'src/app/shared/services/clientes.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import Swal from 'sweetalert2';
+import { PreviewSection } from 'src/app/shared/ui/form-preview/form-preview.component';
 
 type DocClave = 'logo' | 'csf' | 'compDom' | 'acta';
 type DocTipo = 'image' | 'pdf' | 'file';
@@ -397,7 +398,7 @@ export class AgregarClienteComponent implements OnInit, OnDestroy {
         .join('');
 
       Swal.fire({
-        title: 'Revisa el formulario',
+        title: 'Revisa el Formulario',
         background: '#0d121d',
         html: `
         <p style="text-align:center;font-size:15px;margin-bottom:16px;color:white">
@@ -411,6 +412,14 @@ export class AgregarClienteComponent implements OnInit, OnDestroy {
       });
       return;
     }
+
+    if (!this.previewConfirmado) {
+      this.submitButton = 'Guardar';
+      this.loading = false;
+      this.abrirVistaPrevia();
+      return;
+    }
+    this.previewConfirmado = false;
 
     if (this.clienteForm.contains('id')) this.clienteForm.removeControl('id');
     const v = this.clienteForm.value;
@@ -520,7 +529,7 @@ export class AgregarClienteComponent implements OnInit, OnDestroy {
         .join('');
 
       Swal.fire({
-        title: 'Revisa el formulario',
+        title: 'Revisa el Formulario',
         background: '#0d121d',
         html: `
         <p style="text-align:center;font-size:15px;margin-bottom:16px;color:white">
@@ -536,6 +545,14 @@ export class AgregarClienteComponent implements OnInit, OnDestroy {
     }
 
     const v = this.clienteForm.getRawValue();
+
+    if (!this.previewConfirmado) {
+      this.submitButton = 'Actualizar';
+      this.loading = false;
+      this.abrirVistaPrevia();
+      return;
+    }
+    this.previewConfirmado = false;
 
     const urls$ = forkJoin({
       logotipo: this.resolveUrlForField('logotipo', v.logotipo),
@@ -611,6 +628,91 @@ export class AgregarClienteComponent implements OnInit, OnDestroy {
           });
         },
       });
+  }
+
+
+  /* ===== Vista previa antes de guardar ===== */
+  public previewOpen = false;
+  public previewSections: PreviewSection[] = [];
+  private previewConfirmado = false;
+
+  private txt(lista: any[], id: any): string {
+    if (id === null || id === undefined || id === '') return '';
+    return lista.find((x: any) => Number(x.id) === Number(id))?.text ?? '';
+  }
+
+  cerrarVistaPrevia(): void {
+    this.previewOpen = false;
+  }
+
+  confirmarVistaPrevia(): void {
+    this.previewOpen = false;
+    this.previewConfirmado = true;
+    this.submit();
+  }
+
+  get previewNombre(): string {
+    const v = this.clienteForm?.value || {};
+    return [v.nombre, v.apellidoPaterno, v.apellidoMaterno].filter(Boolean).join(' ');
+  }
+
+  get previewBadges(): string[] {
+    const v = this.clienteForm?.value || {};
+    const tipo = this.txt(this.tipoPersonaItems, v.tipoPersona);
+    return [tipo ? 'Persona ' + tipo : '', v.rfc].filter(Boolean);
+  }
+
+  get previewLogo(): string | null {
+    const u = this.logoPreviewUrl;
+    return typeof u === 'string' && u ? u : null;
+  }
+
+  abrirVistaPrevia(): void {
+    const v = this.clienteForm.value;
+    const doc = (k: DocClave) => (this.docTiene(k) ? this.docNombre(k) : '');
+    this.previewSections = [
+      {
+        title: 'Información General', icon: 'fas fa-info-circle',
+        items: [
+          { label: 'Cuenta Padre', value: this.txt(this.listaClientes, v.idPadre), icon: 'fas fa-sitemap' },
+          { label: 'RFC', value: v.rfc, icon: 'fas fa-id-card' },
+          { label: 'Tipo Persona', value: this.txt(this.tipoPersonaItems, v.tipoPersona), icon: 'fas fa-user-tie' },
+          { label: 'Teléfono', value: v.telefono, icon: 'fas fa-phone' },
+          { label: 'Correo Electrónico', value: v.correo, icon: 'fas fa-envelope' },
+          { label: 'Sitio Web', value: v.sitioWeb, icon: 'fas fa-globe' },
+        ],
+      },
+      {
+        title: 'Domicilio', icon: 'fas fa-map-marker-alt',
+        items: [
+          { label: 'Calle', value: v.calle, icon: 'fas fa-road' },
+          { label: 'Número Exterior', value: v.numeroExterior, icon: 'fas fa-hashtag' },
+          { label: 'Número Interior', value: v.numeroInterior, icon: 'fas fa-hashtag' },
+          { label: 'Colonia', value: v.colonia, icon: 'fas fa-map' },
+          { label: 'Municipio', value: v.municipio, icon: 'fas fa-city' },
+          { label: 'Estado', value: v.estado, icon: 'fas fa-flag' },
+          { label: 'Código Postal', value: v.cp, icon: 'fas fa-mail-bulk' },
+          { label: 'Entre Calles', value: v.entreCalles, icon: 'fas fa-directions', full: true },
+        ],
+      },
+      {
+        title: 'Datos del Encargado', icon: 'fas fa-user-check',
+        items: [
+          { label: 'Nombre del Encargado', value: v.nombreEncargado, icon: 'fas fa-user' },
+          { label: 'Teléfono del Encargado', value: v.telefonoEncargado, icon: 'fas fa-phone' },
+          { label: 'Correo del Encargado', value: v.correoEncargado, icon: 'fas fa-envelope' },
+        ],
+      },
+      {
+        title: 'Documentos', icon: 'fas fa-folder-open',
+        items: [
+          { label: 'Constancia Situación Fiscal', value: doc('csf'), icon: 'fas fa-file-invoice', action: { label: 'Ver Documento', icon: 'fas fa-eye', run: () => this.verDoc('csf', 'Constancia Situación Fiscal', new Event('click')) } },
+          { label: 'Comprobante de Domicilio', value: doc('compDom'), icon: 'fas fa-file-alt', action: { label: 'Ver Documento', icon: 'fas fa-eye', run: () => this.verDoc('compDom', 'Comprobante de Domicilio', new Event('click')) } },
+          { label: 'Acta Constitutiva', value: doc('acta'), icon: 'fas fa-file-signature', action: { label: 'Ver Documento', icon: 'fas fa-eye', run: () => this.verDoc('acta', 'Acta Constitutiva', new Event('click')) } },
+        ],
+      },
+    ];
+    this.previewOpen = true;
   }
 
   regresar() {
@@ -891,7 +993,7 @@ export class AgregarClienteComponent implements OnInit, OnDestroy {
       if (tooLarge) {
         this.clienteForm.get('logotipo')?.setErrors({ maxSize: true });
         Swal.fire({
-          title: 'Archivo demasiado grande',
+          title: 'Archivo Demasiado Grande',
           text: `El logotipo no debe exceder ${this.MAX_LOGO_MB} MB.`,
           icon: 'warning',
           confirmButtonText: 'Entendido',

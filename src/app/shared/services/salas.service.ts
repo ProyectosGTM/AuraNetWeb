@@ -76,6 +76,11 @@ export class SalaService {
     );
   }
 
+  /** PATCH salas/:id/exige-pin — el Gerente decide si su sala exige el PIN del monedero (§13.4). */
+  actualizarExigePin(idSala: number, exigePin: boolean): Observable<any> {
+    return this.http.patch(`${environment.API_SECURITY}/salas/${idSala}/exige-pin`, { exigePin });
+  }
+
   obtenerMonedas(): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/catmonedas/list`);
   }

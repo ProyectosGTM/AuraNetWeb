@@ -146,7 +146,7 @@ export class AgregarPermisoComponent implements OnInit {
         .join('');
 
       Swal.fire({
-        title: '¡Faltan campos obligatorios!',
+        title: '¡Faltan Campos Obligatorios!',
         background: '#0d121d',
         html: `
           <p style="text-align: center; font-size: 15px; margin-bottom: 16px; color: white">
@@ -226,7 +226,7 @@ export class AgregarPermisoComponent implements OnInit {
         .join('');
 
       Swal.fire({
-        title: '¡Faltan campos obligatorios!',
+        title: '¡Faltan Campos Obligatorios!',
         background: '#0d121d',
         html: `
           <p style="text-align: center; font-size: 15px; margin-bottom: 16px; color: white">

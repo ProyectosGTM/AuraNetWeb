@@ -198,8 +198,14 @@
                         <dxi-column dataField="alias" caption="Alias" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreCompletoAfiliado" caption="Afiliado" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="esPrincipalTexto" caption="Es Principal" [width]="150" alignment="center" dataType="string" [allowSearch]="true"></dxi-column>
+                        <dxi-column caption="PIN" cellTemplate="TienePin" alignment="center" dataType="string" [width]="110"></dxi-column>
                         <dxi-column dataField="idEstatusMonedero" caption="ID Estatus Monedero" alignment="center" dataType="number" [visible]="false" [allowSearch]="true"></dxi-column>
                         <dxi-column dataField="nombreEstatusMonedero" caption="Nombre Estatus Monedero" alignment="center" dataType="string" [visible]="false" [allowSearch]="true"></dxi-column>
+                        <div *dxTemplate="let row of 'TienePin'" class="d-flex justify-content-center">
+                            <span [style.color]="row.data.tienePin ? '#34d399' : '#ffc94d'" [ngbTooltip]="row.data.tienePin ? 'El monedero tiene PIN' : 'Sin PIN: asígnalo antes de operar'">
+                                <i class="fas" [class.fa-lock]="row.data.tienePin" [class.fa-lock-open]="!row.data.tienePin"></i> {{ row.data.tienePin ? 'Asignado' : 'Sin PIN' }}
+                            </span>
+                        </div>
                         <div *dxTemplate="let row of 'EstatusMonedero'" class="d-flex justify-content-center">
                             <span class="estatus-afiliado-pill" [ngClass]="obtenerClaseEstatusMonedero(row.data)">
                                 {{ row.data.estatusMonederoTexto }}
@@ -248,6 +254,13 @@
                                     (click)="abrirCambiarEstatus(row.data)"
                                     ngbTooltip="Cambiar estatus del monedero (Activo/Inactivo)" placement="top">
                                     <i class="fa fa-exchange-alt"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" class="btnAcciones btnAcciones--digital"
+                                    (click)="abrirMonederoDigital(row.data)"
+                                    ngbTooltip="Monedero digital: vincular y ver teléfonos" placement="top">
+                                    <i class="fas fa-mobile-alt"></i>
                                 </button>
                             </div>
                             <div>
@@ -371,13 +384,13 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--warning">
             <i class="fas fa-arrow-down"></i>
-            <span>Retira efectivo del monedero hacia la caja. Requiere saldo disponible en el monedero.</span>
+            <span>Retira efectivo del monedero hacia la caja. Solo se descarga el saldo en efectivo y se pide el PIN del monedero.</span>
         </div>
         <form [formGroup]="descargarMonederoForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="field">
-                        <span class="field-label text-white">Caja <span class="field-req" aria-hidden="true">*</span></span>
+                        <span class="field-label text-white">Caja <small class="text-muted">(Opcional: sale de tu turno)</small></span>
                         <dx-select-box
                             [dataSource]="listaCajasDescargar"
                             displayExpr="text"
@@ -422,6 +435,19 @@
                         </div>
                     </label>
                 </div>
+                <ng-container *ngIf="exigePin">
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">PIN del Monedero <span class="field-req" aria-hidden="true" *ngIf="exigePin">*</span></span>
+                        <div class="input-sleek">
+                            <i class="fas fa-key"></i>
+                            <input formControlName="pin" class="sleek-control" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
+                                placeholder="4 a 6 dígitos" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                </ng-container>
             </div>
         </form>
     </div>
@@ -579,7 +605,7 @@
     <div class="modal-body modal-accion-body">
         <div class="form-indication form-indication--info">
             <i class="fas fa-info-circle"></i>
-            <span>Realiza un ajuste manual de saldo. Requiere justificación obligatoria y un perfil con permiso para esta operación.</span>
+            <span>Ajuste manual de saldo (solo Gerente). Requiere motivo del catálogo y justificación. Arriba del tope se pide una segunda autorización.</span>
         </div>
         <form [formGroup]="ajusteMonederoForm">
             <div class="row g-3">
@@ -638,6 +664,19 @@
                 </div>
                 <div class="col-12">
                     <label class="field">
+                        <span class="field-label text-white">Motivo <span class="field-req" aria-hidden="true">*</span></span>
+                        <dx-select-box
+                            [dataSource]="listaMotivosAjuste"
+                            displayExpr="nombre"
+                            valueExpr="codigo"
+                            formControlName="motivo"
+                            placeholder="Selecciona el motivo..."
+                            class="dx-select-box-custom">
+                        </dx-select-box>
+                    </label>
+                </div>
+                <div class="col-12">
+                    <label class="field">
                         <span class="field-label text-white">Justificación <span class="field-req" aria-hidden="true">*</span></span>
                         <div class="input-sleek">
                             <i class="fas fa-comment-alt"></i>
@@ -647,6 +686,44 @@
                         </div>
                     </label>
                 </div>
+                <ng-container *ngIf="requiereAutorizacionAjuste">
+                    <div class="col-12">
+                        <div class="form-indication form-indication--warning">
+                            <i class="fas fa-user-shield"></i>
+                            <span>El ajuste supera el tope. <strong>Otro</strong> Gerente o Administrador debe autorizarlo aquí mismo.</span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="field">
+                            <span class="field-label text-white">Usuario que Autoriza <span class="field-req" aria-hidden="true">*</span></span>
+                            <div class="input-sleek">
+                                <i class="fas fa-user-check"></i>
+                                <input formControlName="autUserName" class="sleek-control" type="text" autocomplete="off" placeholder="correo@dominio.com" />
+                                <span class="sleek-line"></span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="field">
+                            <span class="field-label text-white">Contraseña de quien Autoriza <span class="field-req" aria-hidden="true">*</span></span>
+                            <div class="input-sleek">
+                                <i class="fas fa-lock"></i>
+                                <input formControlName="autPassword" class="sleek-control" type="password" autocomplete="off" placeholder="••••••••" />
+                                <span class="sleek-line"></span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="col-12 col-md-6" *ngIf="requiereCodigoAutorizacion">
+                        <label class="field">
+                            <span class="field-label text-white">Código de su App <span class="field-req" aria-hidden="true">*</span></span>
+                            <div class="input-sleek">
+                                <i class="fas fa-shield-alt"></i>
+                                <input formControlName="autCodigo" class="sleek-control" type="text" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="000000" />
+                                <span class="sleek-line"></span>
+                            </div>
+                        </label>
+                    </div>
+                </ng-container>
             </div>
         </form>
     </div>
@@ -710,6 +787,30 @@
                         </div>
                     </label>
                 </div>
+                <ng-container *ngIf="exigePin">
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">PIN del Monedero Anterior <span class="field-req" aria-hidden="true" *ngIf="exigePin">*</span></span>
+                        <div class="input-sleek">
+                            <i class="fas fa-key"></i>
+                            <input formControlName="pinActual" class="sleek-control" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
+                                placeholder="4 a 6 dígitos" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                </ng-container>
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">PIN Nuevo (Opcional: si no, se conserva)</span>
+                        <div class="input-sleek">
+                            <i class="fas fa-key"></i>
+                            <input formControlName="pinNuevo" class="sleek-control" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
+                                placeholder="4 a 6 dígitos" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
                 <div class="col-12">
                     <div class="reemplazar-transfer-highlight" role="group" aria-labelledby="lbl-transferir-saldo-reemplazo">
                         <span class="reemplazar-transfer-pill"><i class="fas fa-eye"></i>Lee con atención</span>
@@ -717,8 +818,8 @@
                             <input type="checkbox" formControlName="transferirSaldo" class="reemplazar-transfer-check__input" id="transferSaldoReemplazoMonedero" />
                             <span class="reemplazar-transfer-check__box" aria-hidden="true"></span>
                             <span class="reemplazar-transfer-check__copy">
-                                <span class="reemplazar-transfer-check__lead">¿Transferir saldo al monedero nuevo?</span>
-                                <span class="reemplazar-transfer-check__detail">Incluye <strong>efectivo</strong>, saldo <strong>promocional</strong> y <strong>puntos</strong>. Desmarcar puede dejar saldos solo en el monedero anterior.</span>
+                                <span class="reemplazar-transfer-check__lead">Se transfiere todo el saldo al monedero nuevo</span>
+                                <span class="reemplazar-transfer-check__detail">El reemplazo siempre mueve <strong>efectivo</strong>, saldo <strong>promocional</strong> y <strong>puntos</strong>.</span>
                             </span>
                         </label>
                     </div>
@@ -1056,6 +1157,19 @@
                         </div>
                     </label>
                 </div>
+                <ng-container *ngIf="exigePin">
+                <div class="col-12 col-md-6">
+                    <label class="field">
+                        <span class="field-label text-white">PIN del Monedero Origen <span class="field-req" aria-hidden="true" *ngIf="exigePin">*</span></span>
+                        <div class="input-sleek">
+                            <i class="fas fa-key"></i>
+                            <input formControlName="pin" class="sleek-control" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
+                                placeholder="4 a 6 dígitos" />
+                            <span class="sleek-line"></span>
+                        </div>
+                    </label>
+                </div>
+                </ng-container>
             </div>
         </form>
     </div>
@@ -1137,6 +1251,75 @@
         <div *ngIf="cargandoMonederosAfiliado" class="mt-4 text-center">
             <i class="fas fa-spinner fa-spin fa-2x"></i>
             <p class="text-muted mt-2">Cargando monederos...</p>
+        </div>
+    </div>
+    <div class="modal-footer modal-accion-footer">
+        <button type="button" class="btn-alt btn-alt--cancel" (click)="cerrarModal()">
+            <i class="fas fa-times"></i><span>Cerrar</span>
+        </button>
+    </div>
+</ng-template>
+
+<!-- Modal Monedero Digital (§13.7) -->
+<ng-template #modalDigital let-modal>
+    <div class="modal-header modal-accion-header modal-accion-header--digital">
+        <h5 class="modal-title">
+            <i class="fas fa-mobile-alt"></i>
+            <span>Monedero Digital · {{ monederoDigital?.numeroMonedero || monederoDigital?.alias }}</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body modal-accion-body">
+        <div class="md-grid">
+            <section class="md-box">
+                <h6 class="md-title"><i class="fas fa-link"></i>Vincular Teléfono</h6>
+                <ng-container *ngIf="!vinculacion">
+                    <p class="md-text">El afiliado abre la app AuraNet Wallet y captura el código o escanea el QR.</p>
+                    <ng-container *ngIf="puedeVincularTelefono; else sinPermisoVincular">
+                        <label class="field" *ngIf="exigePin">
+                            <span class="field-label text-white">PIN del Monedero <span class="field-req">*</span></span>
+                            <div class="input-sleek">
+                                <i class="fas fa-key"></i>
+                                <input class="sleek-control" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
+                                    [(ngModel)]="pinVinculacion" [ngModelOptions]="{ standalone: true }" placeholder="4 a 6 dígitos" />
+                                <span class="sleek-line"></span>
+                            </div>
+                        </label>
+                        <button type="button" class="btn-alt btn-alt--ajuste-monedero w-100 mt-3" (click)="generarVinculacion()"
+                            [disabled]="generandoVinculacion || (exigePin && !(pinVinculacion?.length >= 4))">
+                            <i class="fas" [class.fa-qrcode]="!generandoVinculacion" [class.fa-spinner]="generandoVinculacion" [class.fa-spin]="generandoVinculacion"></i>
+                            <span>{{ generandoVinculacion ? 'Generando...' : 'Generar Código' }}</span>
+                        </button>
+                    </ng-container>
+                    <ng-template #sinPermisoVincular><p class="md-text md-text--muted">La vinculación la hace el Cajero.</p></ng-template>
+                </ng-container>
+                <div class="md-codigo" *ngIf="vinculacion">
+                    <app-qr-code *ngIf="vinculacion.urlVinculacion" [data]="vinculacion.urlVinculacion" [size]="150"></app-qr-code>
+                    <span class="md-codigo-txt">{{ vinculacion.codigo }}</span>
+                    <span class="md-expira" [class.md-expira--fin]="segundosVinculacion <= 0">
+                        <i class="fas fa-hourglass-half"></i>{{ segundosVinculacion > 0 ? 'Vence en ' + cuentaRegresivaVinculacion : 'Código vencido' }}
+                    </span>
+                    <button type="button" class="btn-alt btn-alt--cancel" (click)="vinculacion = null"><i class="fas fa-redo"></i><span>Generar Otro</span></button>
+                </div>
+            </section>
+
+            <section class="md-box">
+                <h6 class="md-title"><i class="fas fa-mobile"></i>Teléfonos Vinculados</h6>
+                <div *ngIf="cargandoDispositivos" class="md-text"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+                <div *ngIf="!cargandoDispositivos && !dispositivosDigitales.length" class="md-text md-text--muted">Sin teléfonos vinculados.</div>
+                <div class="md-disp" *ngFor="let d of dispositivosDigitales" [class.md-disp--off]="d.revocado || d.estatus === 0">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div class="md-disp-txt">
+                        <strong>{{ d.nombre || d.modelo || d.dispositivo || ('Teléfono #' + (d.id ?? d.idDispositivo)) }}</strong>
+                        <small>{{ (d.fechaVinculacion || d.fechaCreacion) ? ((d.fechaVinculacion || d.fechaCreacion) | date: 'dd/MM/yyyy HH:mm') : '' }}{{ (d.revocado || d.estatus === 0) ? ' · Revocado' : '' }}</small>
+                    </div>
+                    <button type="button" class="btnAcciones" *ngIf="puedeRevocarTelefono && !(d.revocado || d.estatus === 0)" (click)="revocarDispositivo(d)" ngbTooltip="Revocar teléfono">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                </div>
+            </section>
         </div>
     </div>
     <div class="modal-footer modal-accion-footer">

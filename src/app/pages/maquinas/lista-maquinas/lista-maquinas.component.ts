@@ -1,3 +1,4 @@
+import { AccionesSeguridadService } from 'src/app/shared/services/acciones-seguridad.service';
 import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { DxDataGridComponent } from 'devextreme-angular';
@@ -33,7 +34,7 @@ export class ListaMaquinasComponent {
   public filtroActivo: string = '';
   procesandoEstatusMaquinaId: number | null = null;
 
-  constructor(
+  constructor(public seg: AccionesSeguridadService, 
     private router: Router,
     private maquinasService: MaquinasService,
   ) {

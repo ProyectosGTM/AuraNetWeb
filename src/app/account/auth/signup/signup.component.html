@@ -1,26 +1,4 @@
-<div class="signup-wrapper">
-  <div class="signup-shell animate-slide-up">
-
-    <div class="signup-visual">
-      <div class="visual-glow"></div>
-
-      <div class="brand brand-center">
-        <div class="brand-avatar">
-          <i class="fas fa-user-plus"></i>
-        </div>
-
-        <div class="brand-text">
-          <div class="brand-title">Registro</div>
-          <div class="brand-subtitle">Sistema de Gestión Auranet</div>
-        </div>
-      </div>
-
-      <div class="visual-image-wrap">
-        <img src="assets/images/fondo.png" alt="Fondo" class="visual-image" />
-      </div>
-    </div>
-
-    <div class="signup-panel">
+<app-auth-escena icono="fas fa-lock" titulo="Cambiar Contraseña" subtitulo="Ingresa tu nueva contraseña" etiqueta="Acceso Seguro">
       <div class="panel-head">
         <div class="panel-icon">
           <i class="fas fa-key"></i>
@@ -123,6 +101,6 @@
           </div>
         </div>
       </form>
-    </div>
-  </div>
-</div>
+</app-auth-escena>
+
+<app-cargando [visible]="loading" texto="Guardando Contraseña"></app-cargando>

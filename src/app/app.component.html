@@ -1,1 +1,6 @@
-<router-outlet></router-outlet>
+<div class="ruta-auth" [class.ruta-auth--fuera]="claveRuta !== 'sistema'" [@rutaAuth]="claveRuta">
+  <router-outlet></router-outlet>
+</div>
+
+<!-- Cortina entre pantallas fuera del sistema: misma ruleta de carga -->
+<app-cargando [visible]="cortina" texto="Cargando"></app-cargando>

@@ -1,3 +1,4 @@
+import { AccionesSeguridadService } from 'src/app/shared/services/acciones-seguridad.service';
 import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { DxDataGridComponent } from 'devextreme-angular';
@@ -36,7 +37,7 @@ export class ListaSalasComponent {
   /** Mientras se actualiza estatus vía API (activar/desactivar). */
   procesandoEstatusSalaId: number | null = null;
 
-  constructor(
+  constructor(public seg: AccionesSeguridadService, 
     private router: Router,
     private salasService: SalaService,
   ) {

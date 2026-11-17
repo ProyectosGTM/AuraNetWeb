@@ -2230,3 +2230,19 @@
     border: 1px solid rgba(248, 113, 113, 0.42);
   }
 }
+
+
+/* ===== Monedero digital (§13.7) ===== */
+::ng-deep .modal-monedero-digital {
+  .md-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .md-box { padding: 1rem; border-radius: 14px; background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .08); }
+  .md-title { display: flex; align-items: center; gap: .5rem; margin: 0 0 .7rem; font-size: .92rem; font-weight: 700; color: #fff; i { color: #ff1a5b; } }
+  .md-text { font-size: .82rem; color: rgba(255, 255, 255, .7); &--muted { color: rgba(255, 255, 255, .45); font-style: italic; } }
+  .md-codigo { display: flex; flex-direction: column; align-items: center; gap: .7rem; }
+  .md-codigo-txt { font-size: 2rem; font-weight: 800; letter-spacing: .12em; color: #ffc94d; text-shadow: 0 0 18px rgba(255, 201, 77, .4); }
+  .md-expira { font-size: .8rem; color: #34d399; i { margin-right: .35rem; } &--fin { color: #f46a6a; } }
+  .md-disp { display: flex; align-items: center; gap: .7rem; padding: .6rem 0; border-bottom: 1px dashed rgba(255, 255, 255, .08); color: #fff;
+    > i { color: #ff1a5b; } &--off { opacity: .5; } }
+  .md-disp-txt { flex: 1; display: flex; flex-direction: column; small { color: rgba(255, 255, 255, .5); } }
+  @media (max-width: 767.98px) { .md-grid { grid-template-columns: 1fr; } }
+}

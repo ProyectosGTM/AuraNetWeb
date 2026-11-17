@@ -69,7 +69,8 @@ export class MonederosServices {
     return this.http.post(`${environment.API_SECURITY}/pos/monederos/cargar`, data);
   }
 
-  descargarMonedero(data: any): Observable<any> {
+  /** POST pos/monederos/descargar — { idMonedero, monto, pin, idCaja? } (§3). */
+  descargarMonedero(data: { idMonedero: number; monto: number; pin?: string; idCaja?: number }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/monederos/descargar`, data);
   }
 
@@ -77,17 +78,18 @@ export class MonederosServices {
     return this.http.get(`${environment.API_SECURITY}/pos/monederos/${numero}`);
   }
 
-  /** POST monederos/cambiar-estatus - Cambiar estatus de un monedero */
-  cambiarEstatus(payload: { idMonedero: number; idEstatusMonedero: number; motivo: string }): Observable<any> {
+  /** POST monederos/cambiar-estatus — estatus permitidos 1 Activo, 3 Extraviado, 4 Robado, 6 Cancelado (§5). */
+  cambiarEstatus(payload: { idMonedero: number; idEstatusMonedero: number; motivo?: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/monederos/cambiar-estatus`, payload);
   }
 
-  /** POST monederos/traspaso - Traspasar saldo entre monederos del mismo afiliado */
+  /** POST monederos/traspaso — `pin` es el del monedero ORIGEN; el turno sale de la sesión (§3). */
   traspasoMonedero(payload: {
-    idTurnoCaja: number;
+    idTurnoCaja?: number;
     idMonederoOrigen: number;
     idMonederoDestino: number;
     monto: number;
+    pin?: string;
   }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/monederos/traspaso`, payload);
   }
@@ -97,13 +99,20 @@ export class MonederosServices {
     return this.http.get(`${environment.API_SECURITY}/monederos/afiliado/${idAfiliado}`);
   }
 
-  /** POST monederos/ajuste - Ajustar saldo de un monedero (solo GERENTE) */
+  /** GET monederos/motivos-ajuste — catálogo [{ codigo, nombre }] (§4). */
+  obtenerMotivosAjuste(): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/monederos/motivos-ajuste`);
+  }
+
+  /** POST monederos/ajuste — solo Gerente; `autorizacion` solo arriba del tope (§4, §13.3). */
   ajusteMonedero(payload: {
     idMonedero: number;
     tipoAjuste: 'positivo' | 'negativo';
     idTipoSaldo: number;
     monto: number;
+    motivo: string;
     justificacion: string;
+    autorizacion?: { userName: string; password: string; codigo?: string };
   }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/monederos/ajuste`, payload);
   }
@@ -118,13 +127,39 @@ export class MonederosServices {
     return this.http.get(`${environment.API_SECURITY}/monederos/movimientos/historial/${idMonedero}`);
   }
 
-  /** POST monederos/reemplazar - Reemplazar un monedero por uno nuevo */
+  /** POST monederos/reemplazar — `pinActual` obligatorio; `pin` es el PIN nuevo (opcional) (§3). */
   reemplazarMonedero(payload: {
     idMonederoAnterior: number;
     numeroMonederoNuevo: string;
-    motivo: string;
-    transferirSaldo: boolean;
+    pinActual?: string;
+    codigoRFID?: string;
+    pin?: string;
+    alias?: string;
+    motivo?: string;
+    transferirSaldo?: true;
   }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/monederos/reemplazar`, payload);
+  }
+
+  /* ===== Monedero digital (§13.7) ===== */
+
+  /** POST monederos/:id/digital/vinculacion — { pin } → { codigo, urlVinculacion?, expira }. */
+  generarVinculacionDigital(idMonedero: number, pin: string): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/monederos/${idMonedero}/digital/vinculacion`, { pin });
+  }
+
+  /** GET monederos/:id/digital/dispositivos — teléfonos vinculados. */
+  obtenerDispositivosDigitales(idMonedero: number): Observable<any> {
+    return this.http.get(`${environment.API_SECURITY}/monederos/${idMonedero}/digital/dispositivos`);
+  }
+
+  /** POST monederos/digital/dispositivos/:id/revocar — { motivo } (Gerente). */
+  revocarDispositivoDigital(idDispositivo: number, motivo: string): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/monederos/digital/dispositivos/${idDispositivo}/revocar`, { motivo });
+  }
+
+  /** POST pos/monedero-digital/resolver — { codigoQr } → { idMonedero }. */
+  resolverQrDigital(codigoQr: string): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/pos/monedero-digital/resolver`, { codigoQr });
   }
 }

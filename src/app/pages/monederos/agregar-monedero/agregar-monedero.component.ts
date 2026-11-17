@@ -227,10 +227,12 @@ export class AgregarMonederoComponent implements OnInit {
       esPrincipal: [0],
       alias: [''],
       idEstatusMonedero: [null, Validators.required],
+      pin: ['', Validators.pattern(/^d{4,6}$/)],
     });
   }
 
   private mensajeError(error: any): string {
+    if (error?.codigo || typeof error?.message === 'string' && error?.status) return error.error || error.message;
     const e = error?.error;
     if (typeof e === 'string') return e;
     if (e?.message) return String(e.message);
@@ -238,6 +240,24 @@ export class AgregarMonederoComponent implements OnInit {
     return 'Ocurrió un error al procesar la solicitud.';
   }
 
+  /** Cuerpo de la EDICIÓN: solo campos editables (§5). idEstatusMonedero, idAfiliado e idMonederoReemplazo responden 400. */
+  buildPayloadEdicionMonedero(): any {
+    const formValue = this.monederoForm.value;
+    const rawValue = this.monederoForm.getRawValue();
+    const payload: any = {
+      numeroMonedero: formValue.numeroMonedero || '',
+      esPrincipal: Number(rawValue.esPrincipal ?? 0),
+    };
+    const codigo = String(formValue.codigoRFID ?? '').trim();
+    if (codigo) payload.codigoRFID = codigo;
+    const alias = String(formValue.alias ?? '').trim();
+    payload.alias = alias || null;
+    const pin = String(formValue.pin ?? '').trim();
+    if (pin) payload.pin = pin;
+    return payload;
+  }
+
+  /** Cuerpo del ALTA. El PIN (4 a 6 dígitos) se manda en claro y el servidor lo guarda con hash (§3). */
   buildPayloadMonedero(): any {
     const formValue = this.monederoForm.value;
     const rawValue = this.monederoForm.getRawValue();
@@ -254,11 +274,15 @@ export class AgregarMonederoComponent implements OnInit {
     const alias = String(formValue.alias ?? '').trim();
     payload.alias = alias || null;
 
+    const pin = String(formValue.pin ?? '').trim();
+    if (pin) payload.pin = pin;
+
     return payload;
   }
 
   agregarMonedero(): void {
     const payload = this.buildPayloadMonedero();
+    this.monederoForm.patchValue({ pin: '' });
     this.loading = true;
     this.monederosService.agregarMonedero(payload).subscribe({
       next: (response) => {
@@ -288,7 +312,8 @@ export class AgregarMonederoComponent implements OnInit {
   }
 
   actualizarMonedero(): void {
-    const payload = this.buildPayloadMonedero();
+    const payload = this.buildPayloadEdicionMonedero();
+    this.monederoForm.patchValue({ pin: '' });
     this.loading = true;
     this.monederosService.actualizarMonedero(this.idMonedero, payload).subscribe({
       next: (response) => {

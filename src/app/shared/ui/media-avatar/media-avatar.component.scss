@@ -1,0 +1,58 @@
+:host { display: inline-flex; }
+
+.ma {
+  --s: 52px;
+  position: relative; display: inline-flex; flex-direction: column; align-items: center;
+}
+
+.ma-frame { position: relative; display: grid; place-items: center; }
+.ma-frame img { display: block; }
+
+/* ===== Con imagen ===== */
+
+/* Persona: foto redonda, sin marco ni fondo */
+.ma--persona:not(.ma--sin-img) .ma-frame { width: var(--s); height: var(--s); }
+.ma--persona:not(.ma--sin-img) .ma-frame img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+/* Logo: completo, sin recorte, sin fondo */
+.ma--logo:not(.ma--sin-img) .ma-frame img {
+  max-width: calc(var(--s) * 1.35); max-height: var(--s); width: auto; height: auto; object-fit: contain;
+}
+
+/* ===== Sin imagen: insignia redonda con iniciales (estática) ===== */
+.ma--sin-img .ma-frame { width: calc(var(--s) * .62); height: calc(var(--s) * .62); }
+
+.ma-ini {
+  width: 100%; height: 100%; display: grid; place-items: center; border-radius: 50%;
+  font-family: 'Poppins', sans-serif; font-weight: 400; letter-spacing: .05em;
+  font-size: calc(var(--s) * .2);
+}
+
+/* Usuario sin foto: rojo AuraNet */
+.ma--persona .ma-ini {
+  color: #fff;
+  background: linear-gradient(160deg, #b0003a, #4a0d2a);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25), 0 0 0 4px rgba(228, 0, 65, .12);
+}
+
+/* Cliente sin logo: dorado */
+.ma--logo .ma-ini {
+  color: #ffd978;
+  background: linear-gradient(160deg, #3a2c1a, #1d1622);
+  box-shadow: inset 0 0 0 1px rgba(255, 201, 77, .55), 0 0 0 4px rgba(255, 201, 77, .08);
+}
+
+/* ===== Vista ampliada al pasar el cursor (solo cuando hay imagen) ===== */
+.ma-zoom {
+  position: fixed; z-index: 3000; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: .4rem; width: 170px; padding: .6rem;
+  border-radius: 16px; background: linear-gradient(160deg, #1f1729, #120f19); border: 1px solid rgba(255, 26, 91, .45);
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .8);
+  transform: translate(-50%, -100%);
+  &.ma-zoom--abajo { transform: translate(-50%, 0); }
+  img { width: 150px; height: 150px; border-radius: 12px; object-fit: contain; }
+  span { font-size: .72rem; font-weight: 500; color: #fff; text-align: center; line-height: 1.25; }
+}
+.ma--persona .ma-zoom img { object-fit: cover; border-radius: 50%; }
+
+@media (hover: none) { .ma-zoom { display: none; } }

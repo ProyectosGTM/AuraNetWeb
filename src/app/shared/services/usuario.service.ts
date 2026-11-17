@@ -55,6 +55,21 @@ export class UsuariosService {
     );
   }
 
+  /** POST usuarios/:id/reiniciar-contrasena — devuelve una contraseña temporal (§7). */
+  reiniciarContrasena(idUsuario: number): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/usuarios/${idUsuario}/reiniciar-contrasena`, {});
+  }
+
+  /** POST usuarios/:id/segundo-factor/reiniciar — teléfono perdido (§13.2). */
+  reiniciarSegundoFactor(idUsuario: number): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/usuarios/${idUsuario}/segundo-factor/reiniciar`, {});
+  }
+
+  /** POST login/cambiar/accesso con la sesión normal: `passwordActual` obligatorio (§7). */
+  cambiarContrasenaSesion(data: { userName: string; password: string; passwordActual: string }) {
+    return this.http.post(environment.API_SECURITY + '/login/cambiar/accesso', data, { responseType: 'text' as const });
+  }
+
   solicitarCambioContrasena(data: any) {
     return this.http.post(
       environment.API_SECURITY + '/login/usuario/recuperar/acceso',

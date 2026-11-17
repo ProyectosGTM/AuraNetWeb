@@ -9,12 +9,12 @@ export const MENU: MenuItem[] = [
         label: 'Administración',
         icon: 'uil-users-alt',
         subItems: [
-            { id: 31, label: 'Modulos', link: '/modulos' },
+            { id: 31, label: 'Módulos', link: '/modulos' },
             { id: 29, label: 'Permisos', link: '/permisos' },
             { id: 30, label: 'Roles', link: '/roles' },
             { id: 3, label: 'Clientes', link: '/clientes' },
             { id: 28, label: 'Usuarios', link: '/usuarios' },
-            { id: 32, label: 'Bitacora', link: '/bitacora' }
+            { id: 32, label: 'Bitácora', link: '/bitacora' }
         ]
     },
 
@@ -28,7 +28,7 @@ export const MENU: MenuItem[] = [
         subItems: [
             { id: 5, label: 'Salas', link: '/salas' },
             { id: 4, label: 'Zonas', link: '/zonas' },
-            { id: 6, label: 'Maquinas', link: '/maquinas' },
+            { id: 6, label: 'Máquinas', link: '/maquinas' },
             { id: 37, label: 'Cajas', link: '/cajas' },
             { id: 40, label: 'Afiliados', link: '/afiliados' },
             { id: 11, label: 'Monederos', icon: 'uil-moneybag-alt', link: '/monederos' },
@@ -38,13 +38,14 @@ export const MENU: MenuItem[] = [
     { id: 1003, label: 'Operación', isTitle: true },
 
     // --- NO AGRUPADOS (se quedan solos)
-    { id: 36, label: 'Boveda', icon: 'uil-wallet', link: '/tesoreria' },
+    { id: 36, label: 'Bóveda', icon: 'uil-wallet', link: '/tesoreria' },
     { id: 38, label: 'Ap. Turnos', icon: 'uil-clock', link: '/turnos' },
     /* { id: 58, label: 'Cajero', icon: 'uil-money-stack', link: '/cajero' }, */
+    { id: 59, label: 'Tablero de Sala', icon: 'uil-chart-line', link: '/tablero-sala' },
     { id: 41, label: 'Transacciones', icon: 'uil-exchange-alt', link: '/transacciones' },
     { id: 57, label: 'POS', icon: 'uil-shopping-bag', link: '/recarga' },
 
-    { id: 1004, label: 'Gestión comercial', isTitle: true },
+    { id: 1004, label: 'Gestión Comercial', isTitle: true },
 
     { id: 50, label: 'Promociones', icon: 'uil-gift', link: '/promociones' },
     { id: 27, label: 'Monitoreo', icon: 'uil-map', link: '/monitoreo' },
@@ -54,8 +55,8 @@ export const MENU: MenuItem[] = [
         label: 'Indicadores',
         icon: 'uil-chart',
         subItems: [
-            { id: 14, label: 'Saldo no debitado', link: '/saldo-no-debitado' },
-            { id: 15, label: 'Premios entregados', link: '/premios-entregados' },
+            { id: 14, label: 'Saldo No Debitado', link: '/saldo-no-debitado' },
+            { id: 15, label: 'Premios Entregados', link: '/premios-entregados' },
             { id: 16, label: 'Venta Acumulada', link: '/venta-acumulada' }
         ]
     }, */

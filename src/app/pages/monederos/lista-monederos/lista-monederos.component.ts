@@ -13,6 +13,8 @@ import { MonederosServices } from 'src/app/shared/services/monederos.service';
 import { CajasService } from 'src/app/shared/services/cajas.service';
 import { TurnosActivosDescargaMonederoService } from 'src/app/shared/services/turnos-activos-descarga-monedero.service';
 import Swal from 'sweetalert2';
+import { PinSalaService } from 'src/app/shared/services/pin-sala.service';
+import { mensajeError } from 'src/app/shared/utils/api-error';
 import {
   aplicarMontoBlurEnCampo,
   aplicarMontoInputEnCampo,
@@ -144,6 +146,7 @@ export class ListaMonederosComponent {
     private turnosActivosDescargaMonedero: TurnosActivosDescargaMonederoService,
     private auth: AuthenticationService,
     private rolAcceso: RolAccesoService,
+    private pinSala: PinSalaService,
   ) {
     this.showFilterRow = true;
     this.showHeaderFilter = true;
@@ -153,9 +156,10 @@ export class ListaMonederosComponent {
       monto: ['', [Validators.required, Validators.min(0.01)]]
     });
     this.descargarMonederoForm = this.fb.group({
-      idCaja: [null, Validators.required],
+      idCaja: [null],
       idMonedero: [null, Validators.required],
-      monto: ['', [Validators.required, Validators.min(0.01)]]
+      monto: ['', [Validators.required, Validators.min(0.01)]],
+      pin: ['']
     });
     this.consultarSaldoForm = this.fb.group({
       numero: ['', [Validators.required, Validators.minLength(1)]]
@@ -167,10 +171,11 @@ export class ListaMonederosComponent {
     });
     this.traspasoMonederoForm = this.fb.group({
       idAfiliado: [null, Validators.required],
-      idTurnoCaja: [null, Validators.required],
+      idTurnoCaja: [null],
       idMonederoOrigen: [null, Validators.required],
       idMonederoDestino: [null, Validators.required],
-      monto: ['', [Validators.required, Validators.min(0.01)]]
+      monto: ['', [Validators.required, Validators.min(0.01)]],
+      pin: ['']
     });
     this.monederosPorAfiliadoForm = this.fb.group({
       idAfiliado: [null, Validators.required]
@@ -179,18 +184,159 @@ export class ListaMonederosComponent {
       idMonederoAnterior: [null, Validators.required],
       numeroMonederoNuevo: ['', [Validators.required, Validators.minLength(1)]],
       motivo: ['', [Validators.required, Validators.minLength(1)]],
-      transferirSaldo: [true]
+      transferirSaldo: [{ value: true, disabled: true }],
+      pinActual: [''],
+      pinNuevo: ['', Validators.pattern(/^\d{4,6}$/)]
     });
     this.ajusteMonederoForm = this.fb.group({
       idMonedero: [null, Validators.required],
       tipoAjuste: ['positivo', Validators.required],
       idTipoSaldo: [null, Validators.required],
       monto: ['', [Validators.required, Validators.min(0.01)]],
-      justificacion: ['', [Validators.required, Validators.minLength(1)]]
+      motivo: [null, Validators.required],
+      justificacion: ['', [Validators.required, Validators.minLength(1)]],
+      autUserName: [''],
+      autPassword: [''],
+      autCodigo: ['']
+    });
+  }
+
+  /* ===== PIN del monedero (§3, §13.4) ===== */
+  exigePin = true;
+
+  /** Aplica los validadores del PIN según la sala (se llama al iniciar). */
+  private aplicarReglaPin(): void {
+    const pin = [Validators.pattern(/^\d{4,6}$/)];
+    const req = this.exigePin ? [Validators.required, ...pin] : pin;
+    this.descargarMonederoForm.get('pin')!.setValidators(req);
+    this.traspasoMonederoForm.get('pin')!.setValidators(req);
+    this.reemplazarMonederoForm.get('pinActual')!.setValidators(req);
+    ['pin'].forEach((k) => {
+      this.descargarMonederoForm.get(k)!.updateValueAndValidity();
+      this.traspasoMonederoForm.get(k)!.updateValueAndValidity();
+    });
+    this.reemplazarMonederoForm.get('pinActual')!.updateValueAndValidity();
+  }
+
+  /* ===== Ajuste (§4, §13.3) ===== */
+  public listaMotivosAjuste: { codigo: string; nombre: string }[] = [];
+  /** El ajuste superó el tope: se pide la segunda autorización. */
+  requiereAutorizacionAjuste = false;
+  /** Quien autoriza tiene segundo factor: se pide su código. */
+  requiereCodigoAutorizacion = false;
+
+  /* ===== Monedero digital (§13.7) ===== */
+  @ViewChild('modalDigital', { static: false }) modalDigital!: TemplateRef<any>;
+  monederoDigital: any = null;
+  dispositivosDigitales: any[] = [];
+  cargandoDispositivos = false;
+  pinVinculacion = '';
+  generandoVinculacion = false;
+  vinculacion: { codigo: string; urlVinculacion?: string; expira?: string } | null = null;
+  segundosVinculacion = 0;
+  private timerVinculacion: any;
+
+  get puedeVincularTelefono(): boolean { return this.rolAcceso.puede('vincularTelefonoMonedero'); }
+  get puedeRevocarTelefono(): boolean { return this.rolAcceso.puede('revocarTelefonoMonedero'); }
+
+  abrirMonederoDigital(row: any): void {
+    this.monederoDigital = row;
+    this.vinculacion = null;
+    this.pinVinculacion = '';
+    this.cargarDispositivos();
+    this.modalRef = this.modalService.open(this.modalDigital, {
+      size: 'lg', windowClass: 'modal-holder modal-monedero-digital', centered: true, backdrop: 'static', keyboard: true,
+    });
+    this.modalRef.result.finally(() => clearInterval(this.timerVinculacion));
+  }
+
+  cargarDispositivos(): void {
+    if (!this.monederoDigital) return;
+    this.cargandoDispositivos = true;
+    this.monederosService.obtenerDispositivosDigitales(Number(this.monederoDigital.id))
+      .pipe(finalize(() => (this.cargandoDispositivos = false)))
+      .subscribe({
+        next: (r: any) => { const d = r?.data ?? r; this.dispositivosDigitales = Array.isArray(d) ? d : []; },
+        error: () => { this.dispositivosDigitales = []; },
+      });
+  }
+
+  generarVinculacion(): void {
+    if (!this.rolAcceso.validar('vincularTelefonoMonedero')) return;
+    const pin = (this.pinVinculacion || '').trim();
+    if (this.exigePin && !PinSalaService.esPinValido(pin)) return;
+    this.generandoVinculacion = true;
+    this.pinVinculacion = '';
+    this.monederosService.generarVinculacionDigital(Number(this.monederoDigital.id), pin)
+      .pipe(finalize(() => (this.generandoVinculacion = false)))
+      .subscribe({
+        next: (r: any) => {
+          this.vinculacion = r?.data ?? r;
+          clearInterval(this.timerVinculacion);
+          const tick = () => {
+            const fin = this.vinculacion?.expira ? new Date(this.vinculacion.expira).getTime() : 0;
+            this.segundosVinculacion = Math.max(0, Math.round((fin - Date.now()) / 1000));
+            if (this.segundosVinculacion <= 0) clearInterval(this.timerVinculacion);
+          };
+          tick();
+          this.timerVinculacion = setInterval(tick, 1000);
+        },
+        error: (error) => {
+          Swal.fire({
+          title: '¡Error!',
+          text: mensajeError(error, 'No se pudo generar el código de vinculación.'),
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        },
+      });
+  }
+
+  get cuentaRegresivaVinculacion(): string {
+    const m = Math.floor(this.segundosVinculacion / 60);
+    const s = this.segundosVinculacion % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  revocarDispositivo(d: any): void {
+    if (!this.rolAcceso.validar('revocarTelefonoMonedero')) return;
+    Swal.fire({
+      title: '¡Revocar Teléfono!',
+      input: 'text',
+      inputLabel: 'Motivo de la revocación',
+      inputPlaceholder: 'Ej: El afiliado reportó el teléfono como robado',
+      inputValidator: (v) => (!v || v.trim().length < 3 ? 'Escribe el motivo.' : null),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Revocar',
+      cancelButtonText: 'Cancelar',
+      background: '#0d121d',
+      confirmButtonColor: '#e40041',
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+      this.monederosService.revocarDispositivoDigital(Number(d.id ?? d.idDispositivo), String(r.value).trim()).subscribe({
+        next: () => {
+          Swal.fire({ title: '¡Teléfono Revocado!', icon: 'success', background: '#0d121d', confirmButtonColor: '#3085d6' });
+          this.cargarDispositivos();
+        },
+        error: (error) => {
+          Swal.fire({
+          title: '¡Error!',
+          text: mensajeError(error, 'No se pudo revocar el teléfono.'),
+          icon: 'error',
+          background: '#0d121d',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Confirmar',
+        });
+        },
+      });
     });
   }
 
   ngOnInit() {
+    this.pinSala.exigePin().subscribe((v) => { this.exigePin = v; this.aplicarReglaPin(); });
     this.cargarEstatusMonedero();
     this.setupDataSource();
   }
@@ -226,6 +372,7 @@ export class ListaMonederosComponent {
         this.listaEstatusMonedero = response?.data || [];
         this.listaEstatusMonederoOpciones = this.listaEstatusMonedero
           .filter((e: any) => !this.esEstatusExcluidoSelectorCambio(e))
+          .filter((e: any) => [1, 3, 4, 6].includes(Number(e.id)))
           .map((e: any) => ({
             id: Number(e.id),
             text: e.nombre || e.nombreEstatusMonedero || ''
@@ -289,6 +436,7 @@ export class ListaMonederosComponent {
   }
 
   abrirCambiarEstatus(rowData: any) {
+    if (!this.rolAcceso.validar('cambiarEstatusMonedero')) return;
     this.monederoSeleccionadoCambio = {
       numeroMonedero: rowData.numeroMonedero,
       alias: rowData.alias
@@ -333,12 +481,17 @@ export class ListaMonederosComponent {
     this.abriendoModalAjuste = true;
     forkJoin({
       monederos: this.monederosService.obtenerMonederos(),
-      tiposSaldo: this.monederosService.obtenerCatTiposSaldo()
+      tiposSaldo: this.monederosService.obtenerCatTiposSaldo(),
+      motivos: this.monederosService.obtenerMotivosAjuste()
     })
       .pipe(finalize(() => (this.abriendoModalAjuste = false)))
       .subscribe({
       next: (responses) => {
         this.listaTipoSaldoAjuste = this.mapearTiposSaldoAjuste(responses.tiposSaldo);
+        const motivos = (responses.motivos as any)?.data ?? responses.motivos;
+        this.listaMotivosAjuste = Array.isArray(motivos) ? motivos : [];
+        this.requiereAutorizacionAjuste = false;
+        this.requiereCodigoAutorizacion = false;
         if (this.listaTipoSaldoAjuste.length === 0) {
           Swal.fire({
             title: '¡Atención!',
@@ -368,7 +521,11 @@ export class ListaMonederosComponent {
           tipoAjuste: 'positivo',
           idTipoSaldo: firstTipo,
           monto: '',
-          justificacion: ''
+          motivo: null,
+          justificacion: '',
+          autUserName: '',
+          autPassword: '',
+          autCodigo: ''
         });
         this.modalRef = this.modalService.open(this.modalAjusteMonedero, {
           size: 'lg',
@@ -411,13 +568,25 @@ export class ListaMonederosComponent {
       });
       return;
     }
-    const payload = {
-      idMonedero: Number(this.ajusteMonederoForm.value.idMonedero),
-      tipoAjuste: this.ajusteMonederoForm.value.tipoAjuste as 'positivo' | 'negativo',
-      idTipoSaldo: Number(this.ajusteMonederoForm.value.idTipoSaldo),
-      monto: Number(this.ajusteMonederoForm.value.monto),
-      justificacion: (this.ajusteMonederoForm.value.justificacion || '').trim()
+    const va = this.ajusteMonederoForm.value;
+    const payload: any = {
+      idMonedero: Number(va.idMonedero),
+      tipoAjuste: va.tipoAjuste as 'positivo' | 'negativo',
+      idTipoSaldo: Number(va.idTipoSaldo),
+      monto: Number(va.monto),
+      motivo: va.motivo,
+      justificacion: (va.justificacion || '').trim()
     };
+    if (this.requiereAutorizacionAjuste) {
+      if (!va.autUserName || !va.autPassword || (this.requiereCodigoAutorizacion && !/^\d{6}$/.test(va.autCodigo || ''))) {
+        Swal.fire({ title: '¡Atención!', text: 'Captura el usuario y la contraseña de quien autoriza' + (this.requiereCodigoAutorizacion ? ', y su código de 6 dígitos.' : '.'), icon: 'warning', background: '#0d121d', confirmButtonColor: '#3085d6' });
+        return;
+      }
+      payload.autorizacion = { userName: String(va.autUserName).trim(), password: va.autPassword };
+      if (this.requiereCodigoAutorizacion) payload.autorizacion.codigo = String(va.autCodigo).trim();
+    }
+    // La contraseña y el código de quien autoriza no se conservan.
+    this.ajusteMonederoForm.patchValue({ autPassword: '', autCodigo: '' });
     this.guardandoAjusteMonedero = true;
     this.monederosService
       .ajusteMonedero(payload)
@@ -434,13 +603,26 @@ export class ListaMonederosComponent {
         });
         if (this.modalRef) this.modalRef.close();
         this.ajusteMonederoForm.reset();
+        this.requiereAutorizacionAjuste = false;
+        this.requiereCodigoAutorizacion = false;
         this.setupDataSource();
         if (this.dataGrid?.instance) this.dataGrid.instance.refresh();
       },
       error: (error) => {
+        // Arriba del tope: pedir la segunda autorización y reenviar (§4).
+        if (error?.codigo === 'AJUSTE_REQUIERE_AUTORIZACION') {
+          this.requiereAutorizacionAjuste = true;
+          Swal.fire({ title: 'Se Requiere Autorización', text: 'El ajuste supera el tope. Otro Gerente o Administrador debe capturar su usuario y contraseña.', icon: 'info', background: '#0d121d', confirmButtonColor: '#3085d6' });
+          return;
+        }
+        if (error?.codigo === 'CODIGO_2FA_REQUERIDO') {
+          this.requiereCodigoAutorizacion = true;
+          Swal.fire({ title: 'Falta el Código', text: 'Quien autoriza tiene segundo factor: captura el código de 6 dígitos de su app.', icon: 'info', background: '#0d121d', confirmButtonColor: '#3085d6' });
+          return;
+        }
         Swal.fire({
           title: '¡Error!',
-          text: error?.error?.message || error?.error || 'No se pudo realizar el ajuste.',
+          text: mensajeError(error, 'No se pudo realizar el ajuste.'),
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -538,6 +720,7 @@ export class ListaMonederosComponent {
   }
 
   abrirReemplazarMonedero(rowData: any) {
+    if (!this.rolAcceso.validar('reemplazarMonedero')) return;
     this.monederoSeleccionadoReemplazar = {
       id: rowData.id,
       numeroMonedero: rowData.numeroMonedero,
@@ -547,7 +730,8 @@ export class ListaMonederosComponent {
       idMonederoAnterior: rowData.id,
       numeroMonederoNuevo: '',
       motivo: '',
-      transferirSaldo: true
+      pinActual: '',
+      pinNuevo: ''
     });
     this.modalRef = this.modalService.open(this.modalReemplazarMonedero, {
       size: 'lg',
@@ -570,12 +754,17 @@ export class ListaMonederosComponent {
       });
       return;
     }
-    const payload = {
-      idMonederoAnterior: Number(this.reemplazarMonederoForm.value.idMonederoAnterior),
-      numeroMonederoNuevo: (this.reemplazarMonederoForm.value.numeroMonederoNuevo || '').trim(),
-      motivo: (this.reemplazarMonederoForm.value.motivo || '').trim(),
-      transferirSaldo: !!this.reemplazarMonederoForm.value.transferirSaldo
+    const vr = this.reemplazarMonederoForm.getRawValue();
+    const payload: any = {
+      idMonederoAnterior: Number(vr.idMonederoAnterior),
+      numeroMonederoNuevo: (vr.numeroMonederoNuevo || '').trim(),
+      motivo: (vr.motivo || '').trim(),
+      // El reemplazo siempre mueve los tres saldos (§3).
+      transferirSaldo: true as const
     };
+    if (vr.pinActual) payload.pinActual = String(vr.pinActual);
+    if (vr.pinNuevo) payload.pin = String(vr.pinNuevo);
+    this.reemplazarMonederoForm.patchValue({ pinActual: '', pinNuevo: '' });
     this.guardandoReemplazarMonedero = true;
     this.monederosService
       .reemplazarMonedero(payload)
@@ -599,7 +788,7 @@ export class ListaMonederosComponent {
       error: (error) => {
         Swal.fire({
           title: '¡Error!',
-          text: error?.error?.message || error?.error || 'No se pudo reemplazar el monedero.',
+          text: mensajeError(error, 'No se pudo reemplazar el monedero.'),
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -651,7 +840,7 @@ export class ListaMonederosComponent {
           error: (error) => {
             Swal.fire({
               title: '¡Error!',
-              text: error?.error?.message || error?.error || 'No se pudo cambiar el estatus del monedero.',
+              text: mensajeError(error, 'No se pudo cambiar el estatus del monedero.'),
               icon: 'error',
               background: '#0d121d',
               confirmButtonColor: '#3085d6',
@@ -1192,11 +1381,11 @@ export class ListaMonederosComponent {
     try {
       const d = new Date(fecha);
       if (isNaN(d.getTime())) return 'Sin registro';
-      const dd = String(d.getUTCDate()).padStart(2, '0');
-      const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-      const yyyy = d.getUTCFullYear();
-      const hh = String(d.getUTCHours()).padStart(2, '0');
-      const min = String(d.getUTCMinutes()).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
       return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
     } catch {
       return 'Sin registro';
@@ -1486,11 +1675,11 @@ export class ListaMonederosComponent {
       return;
     }
 
-    const payload = {
-      idCaja: this.descargarMonederoForm.value.idCaja,
-      idMonedero: this.descargarMonederoForm.value.idMonedero,
-      monto: Number(this.descargarMonederoForm.value.monto)
-    };
+    const vd = this.descargarMonederoForm.value;
+    const payload: any = { idMonedero: Number(vd.idMonedero), monto: Number(vd.monto) };
+    if (vd.idCaja) payload.idCaja = Number(vd.idCaja);
+    if (vd.pin) payload.pin = String(vd.pin);
+    this.descargarMonederoForm.patchValue({ pin: '' });
 
     this.guardandoDescargarMonedero = true;
     this.monederosService
@@ -1512,7 +1701,7 @@ export class ListaMonederosComponent {
       error: (error) => {
         Swal.fire({
           title: '¡Error!',
-          text: error.error || 'No se pudo descargar el efectivo del monedero.',
+          text: mensajeError(error, 'No se pudo descargar el efectivo del monedero.'),
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',
@@ -1523,6 +1712,7 @@ export class ListaMonederosComponent {
   }
 
   traspasoMonedero() {
+    if (!this.rolAcceso.validar('traspasoMonedero')) return;
     this.abriendoModalTraspaso = true;
     const idSala = this.obtenerIdSalaUsuarioLogueado();
     forkJoin({
@@ -1615,12 +1805,14 @@ export class ListaMonederosComponent {
       });
       return;
     }
-    const payload = {
-      idTurnoCaja: Number(vals.idTurnoCaja),
+    const payload: any = {
       idMonederoOrigen: Number(vals.idMonederoOrigen),
       idMonederoDestino: Number(vals.idMonederoDestino),
       monto: Number(vals.monto)
     };
+    if (vals.idTurnoCaja) payload.idTurnoCaja = Number(vals.idTurnoCaja);
+    if (vals.pin) payload.pin = String(vals.pin);
+    this.traspasoMonederoForm.patchValue({ pin: '' });
     this.guardandoTraspasoMonedero = true;
     this.monederosService
       .traspasoMonedero(payload)
@@ -1644,7 +1836,7 @@ export class ListaMonederosComponent {
       error: (error) => {
         Swal.fire({
           title: '¡Error!',
-          text: error.error?.message || error.error || 'No se pudo realizar el traspaso.',
+          text: mensajeError(error, 'No se pudo realizar el traspaso.'),
           icon: 'error',
           background: '#0d121d',
           confirmButtonColor: '#3085d6',

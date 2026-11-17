@@ -73,6 +73,8 @@
                             [texts]="{ exportAll: 'Exportar todos los datos a Excel', exportSelectedRows: 'Exportar filas seleccionadas a Excel' }">
                         </dxo-export>
                         <div *dxTemplate="let row of 'Acciones'" class="d-flex gap-3 justify-content-center">
+                            <div><button type="button" class="btnAcciones btnAcciones--rb-enrolar" (click)="seg.enrolarRb(row.data)" ngbTooltip="Generar código de enrolamiento del RB" placement="top"><i class="fas fa-microchip"></i></button></div>
+                            <div><button type="button" class="btnAcciones btnAcciones--rb-revocar" (click)="seg.revocarRb(row.data)" ngbTooltip="Revocar RB de la máquina" placement="top"><i class="fas fa-unlink"></i></button></div>
                             <div>
                                 <button valueExpr="id" id="actualizarButton" class="btnAcciones"
                                     (click)="actualizarMaquina(row.data.id || row.data.id)"

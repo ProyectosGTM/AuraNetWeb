@@ -60,32 +60,38 @@ export class TurnosService {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/abrir`, data);
   }
 
-  cerrarTurno(data: any): Observable<any> {
+  /** POST /pos/turnos/cerrar — solo el cajero dueño cierra el suyo: { fondoContado, observaciones?, idCaja? } (§6). */
+  cerrarTurno(data: { fondoContado: number; observaciones?: string | null; idCaja?: number }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/cerrar`, data);
   }
 
+  /** POST /pos/turnos/cerrar-forzado — solo Gerente; `motivo` de 5 a 500 caracteres (§6). */
+  cerrarTurnoForzado(data: { idCaja: number; fondoContado: number; motivo: string; observaciones?: string | null }): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/pos/turnos/cerrar-forzado`, data);
+  }
+
   /** POST /pos/turnos/reponer - Reponer efectivo (Tesorería -> Caja) durante turno activo */
-  reponerTurno(data: { idCaja: number; monto: number; motivo: string }): Observable<any> {
+  reponerTurno(data: { idCaja: number; monto: number; motivo?: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/reponer`, data);
   }
 
   /** POST /pos/turnos/retirar - Retiro parcial (Caja -> Tesorería) durante turno activo */
-  retirarTurno(data: { idCaja: number; monto: number; motivo: string }): Observable<any> {
+  retirarTurno(data: { idCaja: number; monto: number; motivo?: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/retirar`, data);
   }
 
   /** POST /pos/turnos/suspender - Suspender turno temporalmente (pausa sin cerrar) */
-  suspenderTurno(data: { idCaja: number; motivo: string; efectivoContado: number }): Observable<any> {
+  suspenderTurno(data: { idCaja: number; motivo: string; efectivoContado?: number }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/suspender`, data);
   }
 
   /** POST /pos/turnos/reactivar - Reactivar turno suspendido (identificado por idCaja) */
-  reactivarTurno(data: { idCaja: number; observaciones?: string }): Observable<any> {
+  reactivarTurno(data: { idCaja: number; idNuevoCajero?: number; observaciones?: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/reactivar`, data);
   }
 
   /** POST /pos/turnos/corte-parcial - Corte parcial (Corte X). Genera reporte sin cerrar turno. Se identifica por idCaja. */
-  corteParcial(data: { idCaja: number; efectivoContado: number; observaciones?: string }): Observable<any> {
+  corteParcial(data: { idCaja?: number; efectivoContado: number; observaciones?: string }): Observable<any> {
     return this.http.post(`${environment.API_SECURITY}/pos/turnos/corte-parcial`, data);
   }
 

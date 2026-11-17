@@ -19,13 +19,13 @@
       <div class="col-12 col-xl-5">
         <div class="row g-2 g-sm-3">
           <div class="col-4">
-            <div class="ap-stat"><span class="ap-stat-val">{{ totalRegistros }}</span><span class="ap-stat-lab">Registrados</span></div>
+            <app-stat-card label="Registrados" icon="fas fa-database" tone="red" [value]="totalRegistros"></app-stat-card>
           </div>
           <div class="col-4">
-            <div class="ap-stat ap-stat--green"><span class="ap-stat-val">{{ paginaActualData?.length || 0 }}</span><span class="ap-stat-lab">En esta página</span></div>
+            <app-stat-card label="En Esta Página" icon="fas fa-list-ul" tone="green" [value]="paginaActualData?.length || 0"></app-stat-card>
           </div>
           <div class="col-4">
-            <div class="ap-stat ap-stat--gold"><span class="ap-stat-val">{{ paginaActual }}/{{ totalPaginas || 1 }}</span><span class="ap-stat-lab">Página</span></div>
+            <app-stat-card label="Página" icon="fas fa-layer-group" tone="gold" [value]="paginaActual" [total]="totalPaginas"></app-stat-card>
           </div>
         </div>
       </div>
@@ -33,10 +33,10 @@
 
     <!-- ================= Listado ================= -->
     <div class="ap-grid-wrap mt-4">
-                    <dx-data-grid #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
+                    <dx-data-grid (onCellPrepared)="celdaVacia($event)" #gridContainer id="gridContainer" [columnHidingEnabled]="true" [showBorders]="'true'"
                         [showColumnLines]="true" [showRowLines]="true" [rowAlternationEnabled]="'true'"
                         [dataSource]="bitacoraList" [keyExpr]="'id'" [width]="'100%'"
-                        [remoteOperations]="{ paging: true }" [paging]="{ pageSize: pageSize }" [pager]="{ 
+                        [remoteOperations]="{ paging: true, filtering: true }" [paging]="{ pageSize: pageSize }" [pager]="{ 
                                 showPageSizeSelector: true, 
                                 allowedPageSizes: [20], 
                                 showInfo: true,
@@ -49,6 +49,7 @@
                             [showInfo]="true"></dxo-pager>
                         <dxo-group-panel [emptyPanelText]="mensajeAgrupar" [visible]="true"></dxo-group-panel>
                         <dxo-filter-row [visible]="showFilterRow"></dxo-filter-row>
+                        <dxo-load-panel [enabled]="false"></dxo-load-panel>
                         <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
                         <dxo-grouping [autoExpandAll]="true"></dxo-grouping>
                         <!-- Barra del grid: agrupación, botones propios y buscador -->
@@ -61,7 +62,7 @@
                         <div *dxTemplate="let t of 'tbContraer'">
                             <button (click)="toggleExpandGroups()" type="button" class="ap-tool-btn ap-tool-btn--blue"
                                 ngbTooltip="Abrir o cerrar grupos" placement="top">
-                                <span class="ap-tool-icon"><i class="fas fa-expand"></i></span><span class="ap-tool-label">Contraer grid</span>
+                                <span class="ap-tool-icon"><i class="fas fa-expand"></i></span><span class="ap-tool-label">Contraer Grid</span>
                             </button>
                         </div>
                         <div *dxTemplate="let t of 'tbRestablecer'">
@@ -92,7 +93,7 @@
                         <dxi-column dataField="fechaCreacion" caption="Fecha" alignment="center" [width]="250"
                             cellTemplate="fech">
                             <div *dxTemplate="let i of 'fech' ">
-                                {{i.data.fechaCreacion | date: 'dd/MM/yyyy HH:mm:ss a' : '+0000'}}
+                                {{i.data.fechaCreacion | date: 'dd/MM/yyyy HH:mm:ss a'}}
                             </div>
                         </dxi-column>
                         <dxo-export [enabled]="false" [allowExportSelectedData]="true"
@@ -102,3 +103,4 @@
     </div>
   </section>
 </div>
+<app-cargando [visible]="loading" texto="Cargando Bitácora"></app-cargando>

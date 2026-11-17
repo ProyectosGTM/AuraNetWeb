@@ -1,3 +1,4 @@
+import { aplicarFiltroLocal, celdaVacia, LOOKUP_ESTATUS } from 'src/app/shared/utils/grid-admin';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DxDataGridComponent } from 'devextreme-angular';
 import CustomStore from 'devextreme/data/custom_store';
@@ -14,6 +15,10 @@ import Swal from 'sweetalert2';
   animations: [fadeInRightAnimation],
 })
 export class BitacoraComponent implements OnInit {
+  /** Administración: "--" en celdas vacías, filtros por columna y lista de Estatus. */
+  celdaVacia = celdaVacia;
+  lookupEstatus = LOOKUP_ESTATUS;
+
   public bitacoraList: any;
   public searchTerm: string = '';
   public startDate: string = '';
@@ -103,8 +108,8 @@ export class BitacoraComponent implements OnInit {
           this.paginaActualData = dataTransformada;
 
           return {
-            data: dataTransformada,
-            totalCount: totalRegistros,
+            data: aplicarFiltroLocal(dataTransformada, loadOptions),
+            totalCount: loadOptions?.filter ? aplicarFiltroLocal(dataTransformada, loadOptions).length : totalRegistros,
           };
         } catch (err) {
           this.loading = false;

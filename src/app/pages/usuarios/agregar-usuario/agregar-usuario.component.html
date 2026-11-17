@@ -21,7 +21,7 @@
     <div class="col-12">
       <section class="ap-panel h-100">
         <header class="ap-panel-head">
-          <h2 class="ap-panel-title"><i class="fas fa-user"></i>Información del usuario</h2>
+          <h2 class="ap-panel-title"><i class="fas fa-user"></i>Información del Usuario</h2>
           <span class="ap-chip"><i class="fas fa-asterisk"></i>Campos obligatorios</span>
         </header>
 
@@ -53,7 +53,7 @@
                                         <div class="input-sleek">
                                             <i class="fas fa-user"></i>
                                             <input formControlName="apellidoPaterno" class="sleek-control" type="text"
-                                                placeholder="Apellido Paterno" />
+                                                placeholder="Apellido paterno" />
                                             <span class="sleek-line"></span>
                                         </div>
                                     </label>
@@ -64,7 +64,7 @@
                                         <div class="input-sleek">
                                             <i class="fas fa-user"></i>
                                             <input formControlName="apellidoMaterno" class="sleek-control" type="text"
-                                                placeholder="Apellido Materno" />
+                                                placeholder="Apellido materno" />
                                             <span class="sleek-line"></span>
                                         </div>
                                     </label>
@@ -222,8 +222,8 @@
                                             <span class="dc-cta">Seleccionar<i class="fas fa-arrow-right"></i></span>
                                         </div>
                                         <ng-template #conImagen>
-                                            <button type="button" class="dc-stage dc-stage--lleno" (click)="verImagen($event)" aria-label="Ver imagen de perfil">
-                                                <img *ngIf="imagenFuente; else sinMiniatura" class="dc-img" [src]="imagenFuente" alt="Imagen Perfil" />
+                                            <button type="button" class="dc-stage dc-stage--lleno" (click)="verImagen($event)" aria-label="Ver Imagen de Perfil">
+                                                <img *ngIf="imagenFuente; else sinMiniatura" class="dc-img" [src]="imagenFuente" alt="Imagen perfil" />
                                                 <ng-template #sinMiniatura><span class="dc-placeholder"><i class="fas fa-file"></i></span></ng-template>
                                                 <span class="dc-tipo">{{ imagenFuente ? 'imagen' : 'archivo' }}</span>
                                                 <span class="dc-veil"><span class="dc-ver"><i class="fas fa-eye"></i>Ver</span></span>
@@ -318,7 +318,7 @@
       <button type="button" class="dm-cerrar" (click)="cerrarImagen()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
     </header>
     <div class="dm-cuerpo">
-      <img *ngIf="imagenFuente" class="dm-img" [src]="imagenFuente" alt="Imagen Perfil" />
+      <img *ngIf="imagenFuente" class="dm-img" [src]="imagenFuente" alt="Imagen perfil" />
       <div *ngIf="!imagenFuente" class="dm-vacio">
         <i class="fas fa-file"></i>
         <span>Este archivo no se puede previsualizar aquí.</span>
@@ -330,3 +330,17 @@
     </footer>
   </div>
 </div>
+
+<app-form-preview
+  [open]="previewOpen"
+  entity="Usuario"
+  icon="fas fa-user"
+  [editing]="!!idUsuario"
+  [name]="previewNombre"
+  [subtitle]="usuarioForm.value.userName"
+  [image]="imagenFuente"
+  [badges]="previewBadges"
+  [sections]="previewSections"
+  (confirmar)="confirmarVistaPrevia()"
+  (regresar)="cerrarVistaPrevia()">
+</app-form-preview>

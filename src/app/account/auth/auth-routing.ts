@@ -6,6 +6,8 @@ import { SignupComponent } from './signup/signup.component';
 import { PasswordresetComponent } from './passwordreset/passwordreset.component';
 import { VerifyComponent } from './verify/verify.component';
 import { AffiliationComponent } from './affiliation/affiliation.component';
+import { SegundoFactorComponent } from './segundo-factor/segundo-factor.component';
+import { CambiarContrasenaComponent } from './cambiar-contrasena/cambiar-contrasena.component';
 
 const routes: Routes = [
     {
@@ -27,6 +29,14 @@ const routes: Routes = [
     {
         path: 'afiliacion',
         component: AffiliationComponent
+    },
+    {
+        path: 'segundo-factor',
+        component: SegundoFactorComponent
+    },
+    {
+        path: 'cambiar-contrasena',
+        component: CambiarContrasenaComponent
     },
 ];
 

@@ -84,6 +84,11 @@ export class TesoreriaService {
     return this.http.post(`${environment.API_SECURITY}/tesorerias/retirar`, data);
   }
 
+  /** POST tesorerias/retirar-ganancia — solo Gerente (§8). */
+  retirarGananciaTesoreria(data: any): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/tesorerias/retirar-ganancia`, data);
+  }
+
   /** GET ledger/saldo/tesoreria/{id} - Obtener saldo de tesorería (bóveda) */
   obtenerSaldoTesoreria(id: number): Observable<any> {
     return this.http.get<any>(`${environment.API_SECURITY}/ledger/saldo/tesoreria/${id}`);

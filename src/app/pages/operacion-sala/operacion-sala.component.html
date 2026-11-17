@@ -1,0 +1,109 @@
+<div class="ap-page os">
+  <div class="os-head">
+    <div>
+      <h1 class="ap-title">Tablero de Sala</h1>
+      <p class="ap-sub">Efectivo en operación, cuadre contra el ledger y sesiones de juego en vivo.</p>
+    </div>
+    <div class="os-head-r">
+      <span class="os-upd" *ngIf="actualizado"><i class="fas fa-sync-alt"></i>{{ actualizado | date: 'HH:mm:ss' }}</span>
+      <button type="button" class="os-btn" (click)="cargar()" [disabled]="cargando">
+        <i class="fas fa-redo" [class.fa-spin]="cargando"></i>Actualizar
+      </button>
+    </div>
+  </div>
+
+  <div class="os-alert os-alert--err" *ngIf="error"><i class="fas fa-exclamation-triangle"></i>{{ error }}</div>
+
+  <ng-container *ngIf="data">
+    <!-- Alerta principal de cuadre -->
+    <div class="os-banner" [class.os-banner--ok]="data.cuadra" [class.os-banner--bad]="!data.cuadra">
+      <span class="os-banner-ico"><i class="fas" [class.fa-check-circle]="data.cuadra" [class.fa-exclamation-triangle]="!data.cuadra"></i></span>
+      <div>
+        <strong>{{ data.cuadra ? 'La Sala Cuadra' : 'Descuadre Detectado' }}</strong>
+        <span>{{ data.cuadra ? 'Todos los saldos coinciden con el ledger.' : descuadres + ' saldo(s) no coinciden con el ledger. Revisa las cajas y bóvedas marcadas.' }}</span>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-xl-3"><app-stat-card label="Efectivo en Cajas" icon="fas fa-cash-register" tone="red" [value]="pesos(data.efectivoEnCajasCentavos)"></app-stat-card></div>
+      <div class="col-6 col-xl-3"><app-stat-card label="Efectivo en Bóveda" icon="fas fa-piggy-bank" tone="gold" [value]="pesos(data.efectivoEnTesoreriaCentavos)"></app-stat-card></div>
+      <div class="col-6 col-xl-3"><app-stat-card label="Retenido en Máquinas" icon="fas fa-dice" tone="blue" [value]="pesos(data.retenidoEnMaquinasCentavos)"></app-stat-card></div>
+      <div class="col-6 col-xl-3"><app-stat-card label="Máquinas en Juego" icon="fas fa-gamepad" tone="green" [value]="data.maquinasEnJuego"></app-stat-card></div>
+    </div>
+
+    <div class="os-alert os-alert--warn" *ngIf="data.sesionesEnRevision > 0">
+      <i class="fas fa-user-clock"></i>
+      Hay <strong>{{ data.sesionesEnRevision }}</strong> sesión(es) en revisión que necesitan un cierre manual del Gerente.
+    </div>
+
+    <div class="row g-3">
+      <!-- Turnos -->
+      <div class="col-12 col-xl-6">
+        <section class="os-panel">
+          <h5><i class="fas fa-cash-register"></i>Turnos Abiertos <span class="os-count">{{ data.turnosAbiertos.length }}</span></h5>
+          <div class="os-empty" *ngIf="!data.turnosAbiertos.length">Sin turnos abiertos.</div>
+          <div class="os-row" *ngFor="let t of data.turnosAbiertos" [class.os-row--bad]="!t.cuadra">
+            <div class="os-row-main">
+              <strong>{{ t.caja }}</strong>
+              <small>{{ t.cajero }}{{ t.suspendido ? ' · Suspendido' : '' }}</small>
+            </div>
+            <div class="os-row-amt">
+              <strong>{{ pesos(t.saldoCentavos) }}</strong>
+              <small *ngIf="!t.cuadra">Ledger {{ pesos(t.ledgerCentavos) }}</small>
+            </div>
+            <span class="os-pill" [class.os-pill--ok]="t.cuadra" [class.os-pill--bad]="!t.cuadra">{{ t.cuadra ? 'Cuadra' : 'Descuadre' }}</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Bóvedas -->
+      <div class="col-12 col-xl-6">
+        <section class="os-panel">
+          <h5><i class="fas fa-piggy-bank"></i>Bóvedas <span class="os-count">{{ data.tesorerias.length }}</span></h5>
+          <div class="os-empty" *ngIf="!data.tesorerias.length">Sin bóvedas abiertas.</div>
+          <div class="os-row" *ngFor="let b of data.tesorerias" [class.os-row--bad]="!b.cuadra">
+            <div class="os-row-main"><strong>Bóveda #{{ b.idTesoreria }}</strong></div>
+            <div class="os-row-amt">
+              <strong>{{ pesos(b.saldoCentavos) }}</strong>
+              <small *ngIf="!b.cuadra">Ledger {{ pesos(b.ledgerCentavos) }}</small>
+            </div>
+            <span class="os-pill" [class.os-pill--ok]="b.cuadra" [class.os-pill--bad]="!b.cuadra">{{ b.cuadra ? 'Cuadra' : 'Descuadre' }}</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Sesiones -->
+      <div class="col-12 col-xl-8">
+        <section class="os-panel">
+          <h5><i class="fas fa-dice"></i>Sesiones de Juego Abiertas <span class="os-count">{{ data.sesionesAbiertas.length }}</span></h5>
+          <div class="os-empty" *ngIf="!data.sesionesAbiertas.length">Sin sesiones abiertas.</div>
+          <div class="os-row" *ngFor="let s of data.sesionesAbiertas" [class.os-row--warn]="s.estado === 'EN_REVISION'">
+            <div class="os-row-main">
+              <strong>{{ s.maquina }}</strong>
+              <small>Sesión #{{ s.idSesion }} · {{ s.fechaInicio | date: 'dd/MM/yyyy HH:mm' }}</small>
+            </div>
+            <div class="os-row-amt"><strong>{{ pesos(s.montoInicialCentavos) }}</strong><small>Inicial</small></div>
+            <span class="os-pill" [class.os-pill--warn]="s.estado === 'EN_REVISION'" [class.os-pill--ok]="s.estado === 'ACTIVA'">{{ s.estado === 'EN_REVISION' ? 'En Revisión' : (s.estado === 'ACTIVA' ? 'Activa' : s.estado) }}</span>
+            <button type="button" class="os-btn os-btn--sm" *ngIf="puedeCerrar" (click)="cierreManual(s)">
+              <i class="fas fa-hand-paper"></i>Cierre Manual
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Sin comunicación -->
+      <div class="col-12 col-xl-4">
+        <section class="os-panel">
+          <h5><i class="fas fa-wifi"></i>Sin Comunicación <span class="os-count" [class.os-count--bad]="data.maquinasSinComunicacion.length">{{ data.maquinasSinComunicacion.length }}</span></h5>
+          <div class="os-empty" *ngIf="!data.maquinasSinComunicacion.length">Todas las máquinas reportan.</div>
+          <div class="os-row os-row--bad" *ngFor="let m of data.maquinasSinComunicacion">
+            <div class="os-row-main">
+              <strong>Máquina #{{ m.idMaquina }}</strong>
+              <small>Último latido {{ m.ultimoLatido | date: 'dd/MM/yyyy HH:mm' }}</small>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </ng-container>
+</div>

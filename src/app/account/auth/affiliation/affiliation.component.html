@@ -1,26 +1,4 @@
-<div class="affiliation-wrapper">
-  <div class="affiliation-shell animate-slide-up">
-
-    <div class="affiliation-visual">
-      <div class="visual-glow"></div>
-
-      <div class="brand brand-center">
-        <div class="brand-avatar">
-          <i class="fas fa-user-plus"></i>
-        </div>
-
-        <div class="brand-text">
-          <div class="brand-title">Afiliación</div>
-          <div class="brand-subtitle">Sistema de Gestión Auranet</div>
-        </div>
-      </div>
-
-      <div class="visual-image-wrap">
-        <img src="assets/images/fondo.png" alt="Fondo" class="visual-image" />
-      </div>
-    </div>
-
-    <div class="affiliation-panel">
+<app-auth-escena icono="fas fa-id-card" titulo="Registro de Pasajero" subtitulo="Completa tus datos para afiliarte" etiqueta="Afiliación" [amplio]="true">
       <div class="panel-head">
         <div class="panel-icon">
           <i class="fas fa-id-card"></i>
@@ -153,9 +131,7 @@
           </div>
         </div>
       </form>
-    </div>
-  </div>
-</div>
+</app-auth-escena>
 
 <!-- Modal de Verificación OTP -->
 <ng-template #largeDataModal let-modal>
@@ -186,3 +162,5 @@
     </form>
   </div>
 </ng-template>
+
+<app-cargando [visible]="loading" texto="Registrando Afiliación"></app-cargando>

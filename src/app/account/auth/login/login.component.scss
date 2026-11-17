@@ -275,3 +275,19 @@ $gold: #ffc94d;
 @keyframes bulbs { 50% { opacity: .2; } }
 @keyframes wobble { 50% { transform: rotate(-8deg) scale(1.05); } }
 @keyframes sweep { 0% { left: -60%; } 60%, 100% { left: 130%; } }
+
+/* Cambio de paso (credenciales ↔ segundo factor) sin brincos */
+.card-inner form { animation: paso-in .5s cubic-bezier(.16, 1, .3, 1) both; }
+.login-card { animation: carta-in .8s .1s cubic-bezier(.16, 1, .3, 1) both; }
+.showcase > * { animation: paso-in .7s cubic-bezier(.16, 1, .3, 1) both; }
+.showcase > *:nth-child(2) { animation-delay: .08s; }
+.showcase > *:nth-child(3) { animation-delay: .16s; }
+.showcase > *:nth-child(4) { animation-delay: .24s; }
+.showcase > *:nth-child(5) { animation-delay: .32s; }
+.showcase > *:nth-child(6) { animation-delay: .4s; }
+@keyframes paso-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes carta-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .card-inner form, .login-card, .showcase > * { animation: none; } }

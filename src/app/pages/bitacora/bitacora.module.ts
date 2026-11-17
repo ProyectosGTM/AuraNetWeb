@@ -1,3 +1,4 @@
+import { SharedModule } from 'src/app/shared/shared.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -10,6 +11,7 @@ import { BitacoraComponent } from './bitacora.component';
 @NgModule({
   declarations: [BitacoraComponent],
   imports: [
+    SharedModule,
     CommonModule,
     BitacoraRoutingModule,
     FormsModule,

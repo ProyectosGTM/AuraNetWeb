@@ -1,3 +1,5 @@
+import { aplicarFiltroLocal, celdaVacia, LOOKUP_ESTATUS } from 'src/app/shared/utils/grid-admin';
+import { DocumentoCelda } from 'src/app/shared/ui/documentos-celda/documentos-celda.component';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -18,6 +20,10 @@ import Swal from 'sweetalert2';
   animations: [fadeInRightAnimation, previewModalAnimation],
 })
 export class ListaClientesComponent implements OnInit {
+  /** Administración: "--" en celdas vacías, filtros por columna y lista de Estatus. */
+  celdaVacia = celdaVacia;
+  lookupEstatus = LOOKUP_ESTATUS;
+
 
   isLoading: boolean = false;
   listaClientes: any;
@@ -110,15 +116,18 @@ export class ListaClientesComponent implements OnInit {
               idRol: item?.idRol != null ? Number(item.idRol) : null,
               idCliente: item?.idCliente != null ? Number(item.idCliente) : null,
               NombreCompleto: [nombre, paterno, materno].filter(Boolean).join(' '),
-              direccionCompleta
+              direccionCompleta,
+              tieneLogo: item?.logotipo && String(item.logotipo).trim() ? 'Con Logotipo' : 'Sin Logotipo',
+              estadoDocumentos: ((n: number) => (n === 3 ? 'Completo' : n ? 'Parcial' : 'Sin Documentos'))(
+                [item?.constanciaSituacionFiscal, item?.comprobanteDomicilio, item?.actaConstitutiva].filter((u: any) => u && String(u).trim()).length)
             };
           }).sort((a: any, b: any) => Number(b.id) - Number(a.id));
 
           this.paginaActualData = dataTransformada;
 
           return {
-            data: dataTransformada,
-            totalCount: totalRegistros
+            data: aplicarFiltroLocal(dataTransformada, loadOptions),
+            totalCount: loadOptions?.filter ? aplicarFiltroLocal(dataTransformada, loadOptions).length : totalRegistros
           };
 
         } catch (error) {
@@ -423,6 +432,24 @@ previewTitle = '';
 previewUrl: string | null = null;
 previewType: 'pdf' | 'image' | 'unknown' = 'unknown';
 previewSafeUrl: SafeResourceUrl | null = null;
+
+/** Nombre del archivo que se está viendo (para el encabezado del visor). */
+get nombreArchivoPreview(): string {
+  const u = String(this.previewUrl || '').split(/[?#]/)[0];
+  return decodeURIComponent(u.split('/').pop() || '') || 'Documento';
+}
+
+/** Los tres documentos del cliente para la celda única del grid. */
+documentosDe(row: any): DocumentoCelda[] {
+  if (!row) return [];
+  if (row.__docs) return row.__docs;
+  row.__docs = [
+    { titulo: 'Constancia Situación Fiscal', corto: 'Constancia', url: row.constanciaSituacionFiscal, icono: 'fas fa-file-invoice-dollar', color: '#fbbf24' },
+    { titulo: 'Comprobante de Domicilio', corto: 'Domicilio', url: row.comprobanteDomicilio, icono: 'fas fa-home', color: '#34d399' },
+    { titulo: 'Acta Constitutiva', corto: 'Acta', url: row.actaConstitutiva, icono: 'fas fa-file-signature', color: '#60a5fa' },
+  ];
+  return row.__docs;
+}
 
 previsualizar(url: string, titulo: string, row?: any) {
   if (!url) {

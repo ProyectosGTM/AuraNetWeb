@@ -1,0 +1,34 @@
+<app-auth-escena icono="fas fa-key" titulo="Cambia tu Contraseña" subtitulo="Define una contraseña nueva antes de continuar" etiqueta="Acceso Seguro">
+  <div class="sf-card sf-card--escena sf-card--sin-head">
+    <div class="sf-head">
+      <span class="sf-icon"><i class="fas fa-key"></i></span>
+      <h2>Cambia tu Contraseña</h2>
+      <p>Por seguridad, define una contraseña nueva antes de continuar.</p>
+    </div>
+
+    <form class="sf-form" (ngSubmit)="guardar()">
+      <label class="sf-label" for="ccActual">Contraseña Actual</label>
+      <input id="ccActual" name="actual" [(ngModel)]="passwordActual" [type]="ver ? 'text' : 'password'" class="sf-input sf-input--txt" autocomplete="current-password" />
+
+      <label class="sf-label" for="ccNueva">Contraseña Nueva (mínimo 6 caracteres)</label>
+      <input id="ccNueva" name="nueva" [(ngModel)]="password" [type]="ver ? 'text' : 'password'" class="sf-input sf-input--txt" autocomplete="new-password" />
+
+      <label class="sf-label" for="ccConfirmar">Confirmar Contraseña</label>
+      <input id="ccConfirmar" name="confirmar" [(ngModel)]="confirmar" [type]="ver ? 'text' : 'password'" class="sf-input sf-input--txt" autocomplete="new-password" />
+
+      <label class="sf-check"><input type="checkbox" name="ver" [(ngModel)]="ver" /><span>Mostrar contraseñas</span></label>
+
+      <small class="sf-err" *ngIf="confirmar && password !== confirmar"><i class="fas fa-exclamation-circle"></i>Las contraseñas no coinciden.</small>
+      <small class="sf-err" *ngIf="password && password === passwordActual"><i class="fas fa-exclamation-circle"></i>La nueva debe ser distinta a la actual.</small>
+      <small class="sf-err" *ngIf="error"><i class="fas fa-exclamation-circle"></i>{{ error }}</small>
+
+      <button class="sf-btn sf-btn--primary" type="submit" [disabled]="!valido || guardando">
+        <i class="fas" [class.fa-save]="!guardando" [class.fa-spinner]="guardando" [class.fa-spin]="guardando"></i>
+        {{ guardando ? 'Guardando...' : 'Guardar Contraseña' }}
+      </button>
+      <button class="sf-btn sf-btn--ghost" type="button" (click)="salir()"><i class="fas fa-sign-out-alt"></i>Salir</button>
+    </form>
+  </div>
+</app-auth-escena>
+
+<app-cargando [visible]="guardando" texto="Guardando Contraseña"></app-cargando>

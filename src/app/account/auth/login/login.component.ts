@@ -28,9 +28,9 @@ export class LoginComponent implements OnInit {
   type: 'password' | 'text' = 'password';
   hide = true;
 
-  step: 'login' | 'email' | 'otp' = 'login';
+  step: 'login' | 'email' | 'otp' | 'mfa' = 'login';
 
-  otp: string[] = ['', '', '', ''];
+  otp: string[] = ['', '', '', '', '', ''];
   resendDisabled = false;
   resendSeconds = 60;
   private resendTimer?: number;
@@ -72,7 +72,7 @@ export class LoginComponent implements OnInit {
     });
 
     this.verifyForm = this.fb.group({
-      codigo: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]]
+      codigo: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
     });
   }
 
@@ -104,33 +104,101 @@ export class LoginComponent implements OnInit {
         return EMPTY;
       })
     ).subscribe((result: any) => {
-      Swal.fire({
-        background: '#0d121d',
-        icon: 'success',
-        title: '¡Apuesta Ganadora!',
-        text: 'Has entrado al sistema correctamente.',
-        confirmButtonText: 'Continuar',
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      })
-      const permisosIds = (result?.permisos ?? []).map((p: any) => String(p.idPermiso));
-        result.permisos = permisosIds;
-
-        this.auth.setData(result);
-
-        let target = '/dashboard';
-
-        this.router.navigate([target]);
-        this.loading = false;
-        this.textLogin = 'Iniciar Sesión';
+      this.loading = false;
+      this.textLogin = 'Iniciar Sesión';
+      // Segundo factor activo: no llega token, llega un desafío (§13.1).
+      if (result?.segundoFactor === 'requerido' && result?.tokenDesafio) {
+        this.tokenDesafio = result.tokenDesafio;
+        this.codigoMfa = '';
+        this.errorMfa = null;
+        this.step = 'mfa';
+        this.cdr.detectChanges();
+        setTimeout(() => document.querySelector<HTMLInputElement>('#mfaCodigo')?.focus(), 0);
+        return;
+      }
+      this.finalizarLogin(result);
     });
+  }
+
+  /* ===== Segundo factor (§13.1) ===== */
+  tokenDesafio: string | null = null;
+  codigoMfa = '';
+  errorMfa: string | null = null;
+
+  /** 6 dígitos de la app o un código de respaldo XXXX-XXXX. */
+  get codigoMfaValido(): boolean {
+    const c = (this.codigoMfa || '').trim().toUpperCase();
+    return /^\d{6}$/.test(c) || /^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(c);
+  }
+
+  onVerificarMfa(e?: Event) {
+    e?.preventDefault();
+    if (!this.tokenDesafio || !this.codigoMfaValido || this.loading) return;
+    this.loading = true;
+    this.errorMfa = null;
+    this.auth.validarSegundoFactor({ tokenDesafio: this.tokenDesafio, codigo: this.codigoMfa.trim().toUpperCase() }).subscribe({
+      next: (result: any) => {
+        this.loading = false;
+        this.tokenDesafio = null;
+        this.finalizarLogin(result);
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.codigoMfa = '';
+        // 401 sin código = el desafío venció (5 min): volver al paso 1.
+        if (err?.status === 401 && !err?.codigo) {
+          this.cancelarMfa();
+          Swal.fire({ background: '#0d121d', icon: 'warning', title: '¡Tiempo Agotado!', text: 'El código expiró. Vuelve a iniciar sesión.', confirmButtonText: 'Entendido' });
+          return;
+        }
+        this.errorMfa = err?.codigo === 'CODIGO_2FA_USADO'
+          ? 'Ese código ya se usó. Espera el siguiente en tu app.'
+          : (err?.error || 'Código incorrecto.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  cancelarMfa() {
+    this.tokenDesafio = null;
+    this.codigoMfa = '';
+    this.errorMfa = null;
+    this.step = 'login';
+  }
+
+  /** Guarda la sesión y decide a dónde ir (§7 debeCambiarPassword, §13.2 debeConfigurarSegundoFactor). */
+  private finalizarLogin(result: any) {
+    const permisosIds = (result?.permisos ?? []).map((p: any) => String(p.idPermiso ?? p));
+    result.permisos = permisosIds;
+    this.auth.setData(result);
+
+    if (result?.debeCambiarPassword) {
+      Swal.fire({ background: '#0d121d', icon: 'info', title: 'Cambia tu Contraseña', text: 'Por seguridad debes cambiar tu contraseña antes de continuar.', confirmButtonText: 'Continuar', allowOutsideClick: false });
+      this.router.navigate(['/account/cambiar-contrasena']);
+      return;
+    }
+    if (result?.debeConfigurarSegundoFactor) {
+      Swal.fire({ background: '#0d121d', icon: 'info', title: 'Configura tu Segundo Factor', text: 'Tu rol requiere una app autenticadora para entrar al sistema.', confirmButtonText: 'Continuar', allowOutsideClick: false });
+      this.router.navigate(['/account/segundo-factor']);
+      return;
+    }
+    Swal.fire({
+      background: '#0d121d',
+      icon: 'success',
+      title: '¡Apuesta Ganadora!',
+      text: 'Has entrado al sistema correctamente.',
+      confirmButtonText: 'Continuar',
+      allowOutsideClick: false,
+      allowEscapeKey: false
+    });
+    this.router.navigate(['/dashboard']);
 
   }
 
   openEmailStep() {
     this.step = 'email';
     this.resendMsg = null;
-    this.otp = ['', '', '', ''];
+    this.otp = ['', '', '', '', '', ''];
     this.verifyForm.reset({ codigo: '' });
     this.cdr.markForCheck();
   }
@@ -145,7 +213,7 @@ export class LoginComponent implements OnInit {
   goToOtpStep() {
     this.step = 'otp';
     this.resendMsg = null;
-    this.otp = ['', '', '', ''];
+    this.otp = ['', '', '', '', '', ''];
     this.verifyForm.reset({ codigo: '' });
     this.cdr.detectChanges();
     setTimeout(() => {
@@ -202,13 +270,13 @@ export class LoginComponent implements OnInit {
     const v = (input.value || '').replace(/\D/g, '').slice(0, 1);
     input.value = v;
     this.otp[i] = v;
-    if (v && i < 3) {
+    if (v && i < 5) {
       const next = document.querySelector<HTMLInputElement>(`#otp-box-${i + 1}`);
       next?.focus();
       next?.select?.();
     }
     const joined = this.otp.join('');
-    if (joined.length === 4) {
+    if (joined.length === 6) {
       this.verifyForm.patchValue({ codigo: joined }, { emitEvent: false });
     }
   }
@@ -244,7 +312,7 @@ export class LoginComponent implements OnInit {
           </p>
           <div style="max-height:350px;overflow-y:auto;">
             <div style="padding:8px 12px;border-left:4px solid #d9534f;background:#f2d7d5;text-align:center;margin-bottom:8px;border-radius:4px;">
-              <strong style="color:#b02a37;">1. Código de Verificación (4 dígitos)</strong>
+              <strong style="color:#b02a37;">1. Código de Verificación (6 dígitos)</strong>
             </div>
           </div>
         `,
@@ -260,10 +328,10 @@ export class LoginComponent implements OnInit {
 
     const codigo = (this.verifyForm.get('codigo')!.value || '').toString().trim();
 
-    this.auth.reenviarCodigo({ codigo }).subscribe({
+    this.auth.reenviarCodigo({ userName: this.emailForm.get('userName')!.value, codigo }).subscribe({
       next: (msg: string) => {
         this.loading = false;
-        this.otp = ['', '', '', ''];
+        this.otp = ['', '', '', '', '', ''];
         this.verifyForm.reset({ codigo: '' }, { emitEvent: false });
         Swal.fire({
           background: '#0d121d',

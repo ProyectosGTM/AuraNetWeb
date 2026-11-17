@@ -1,26 +1,4 @@
-<div class="verify-wrapper">
-  <div class="verify-shell animate-slide-up">
-
-    <div class="verify-visual">
-      <div class="visual-glow"></div>
-
-      <div class="brand brand-center">
-        <div class="brand-avatar">
-          <i class="fas fa-shield-alt"></i>
-        </div>
-
-        <div class="brand-text">
-          <div class="brand-title">Verificación</div>
-          <div class="brand-subtitle">Sistema de Gestión Auranet</div>
-        </div>
-      </div>
-
-      <div class="visual-image-wrap">
-        <img src="assets/images/fondo.png" alt="Fondo" class="visual-image" />
-      </div>
-    </div>
-
-    <div class="verify-panel">
+<app-auth-escena icono="fas fa-check-circle" titulo="Verificar Código" subtitulo="Ingresa tu código de verificación" etiqueta="Verificación">
       <div class="panel-head">
         <div class="panel-icon">
           <i class="fas fa-check-circle"></i>
@@ -57,6 +35,6 @@
           <a class="link-accent" routerLink="/account/login">Iniciar sesión</a>
         </div>
       </form>
-    </div>
-  </div>
-</div>
+</app-auth-escena>
+
+<app-cargando [visible]="loading" texto="Verificando Código"></app-cargando>

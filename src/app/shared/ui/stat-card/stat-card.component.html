@@ -1,0 +1,24 @@
+<div class="sc" [ngClass]="'sc--' + tone">
+  <i class="sc-mark" [class]="icon"></i>
+  <span class="sc-shine"></span>
+
+  <div class="sc-head">
+    <span class="sc-lab"><span class="sc-dot"></span>{{ label }}</span>
+    <span class="sc-icon"><i [class]="icon"></i></span>
+  </div>
+
+  <div class="sc-val" *ngIf="!loading; else sk">
+    <span class="sc-num">{{ display }}</span>
+    <span *ngIf="hasTotal" class="sc-of">/ {{ totalSafe | number }}</span>
+  </div>
+  <ng-template #sk><span class="sc-skel"></span></ng-template>
+
+  <div class="sc-foot">
+    <div class="sc-bar" *ngIf="hasTotal; else wave"><span [style.width.%]="progress"></span></div>
+    <ng-template #wave>
+      <svg class="sc-wave" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 15 C15 15 20 6 35 8 S55 17 70 11 S95 3 120 5" />
+      </svg>
+    </ng-template>
+  </div>
+</div>

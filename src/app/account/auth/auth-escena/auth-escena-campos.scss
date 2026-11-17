@@ -1,0 +1,88 @@
+/* =====================================================================
+   Campos y botones de los formularios dentro de la escena: mismos que el login.
+   Selectores con 3 clases para ganar a los estilos propios de cada pantalla.
+   ===================================================================== */
+$red: #e40041;
+$pink: #ff1a5b;
+$gold: #ffc94d;
+
+.auth-escena .ae-contenido {
+  /* El encabezado propio de cada pantalla ya lo pone la escena */
+  .panel-head { display: none !important; }
+
+  form { animation: ae-paso .5s cubic-bezier(.16, 1, .3, 1) both; }
+
+  .row { --bs-gutter-y: .9rem; }
+
+  /* Etiqueta */
+  .field { display: flex; flex-direction: column; gap: .4rem; margin: 0 0 .25rem; width: 100%; }
+  .field .field-label, .sf-label { color: rgba(255, 255, 255, .85) !important; font-size: .85rem !important; font-weight: 500 !important; }
+
+  /* Campo (= .input-neon del login) */
+  .field .field-control,
+  .input-sleek {
+    position: relative; display: flex; align-items: center; gap: .6rem;
+    min-height: 50px; padding: 0 .9rem !important; border-radius: 14px !important;
+    background: rgba(255, 255, 255, .04) !important;
+    border: 1px solid rgba(255, 255, 255, .12) !important;
+    box-shadow: none !important;
+    transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+    > i { position: static !important; transform: none !important; color: $pink !important; font-size: .9rem; }
+    &:focus-within {
+      border-color: $pink !important; background: rgba(255, 26, 91, .06) !important;
+      box-shadow: 0 0 0 4px rgba(255, 26, 91, .18), 0 0 22px rgba(255, 26, 91, .25) !important;
+    }
+  }
+  .field .custom-input,
+  .input-sleek .sleek-control,
+  .sf-input {
+    flex: 1; min-width: 0; height: 48px; padding: 0 !important; border: 0 !important; outline: none;
+    background: transparent !important; color: #fff !important; font-size: .95rem; box-shadow: none !important;
+    &::placeholder { color: rgba(255, 255, 255, .38) !important; }
+  }
+  .sleek-line { display: none !important; }
+  .field .icon-btn, .eyeButton {
+    position: static !important; transform: none !important; border: 0; background: transparent;
+    color: rgba(255, 255, 255, .55); padding: 0; &:hover { color: $gold; }
+  }
+
+  /* Pistas de contraseña */
+  .password-hint .hint-item { font-size: .78rem; color: #f46a6a; &.valid { color: #34d399; } i { margin-right: .3rem; } }
+
+  /* Botones (= .btn-jackpot del login) */
+  .buttons-container { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1rem; }
+  .btn-accent, .btn-main, .sf-btn--primary {
+    position: relative; overflow: hidden; flex: 1 1 200px;
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    min-height: 52px; padding: .8rem 1.2rem !important; border-radius: 14px !important; border: 0 !important;
+    font-weight: 700; font-size: 1rem; letter-spacing: .02em; color: #fff !important;
+    background: linear-gradient(135deg, $red, $pink 55%, $gold) !important; background-size: 200% 100% !important;
+    box-shadow: 0 10px 28px -8px rgba(228, 0, 65, .75) !important;
+    transition: transform .25s ease, background-position .5s ease, box-shadow .25s ease;
+    &:hover:not(:disabled) { transform: translateY(-2px); background-position: 100% 0 !important; }
+    &:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .btn-content { display: inline-flex; align-items: center; gap: .5rem; }
+  }
+  .btn-cancel, .btn-secondary, .sf-btn--ghost {
+    flex: 1 1 140px; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+    min-height: 52px; padding: .8rem 1.2rem !important; border-radius: 14px !important;
+    color: rgba(255, 255, 255, .85) !important; font-weight: 600;
+    background: rgba(255, 255, 255, .04) !important; border: 1px solid rgba(255, 255, 255, .16) !important; box-shadow: none !important;
+    &:hover:not(:disabled) { color: #fff !important; border-color: rgba(255, 201, 77, .6) !important; background: rgba(255, 201, 77, .08) !important; }
+  }
+
+  /* Pie con enlaces */
+  .panel-foot { margin-top: 1.4rem; text-align: center; font-size: .9rem; color: rgba(255, 255, 255, .75) !important; }
+  .link-accent { color: $pink !important; font-weight: 600; text-decoration: none; &:hover { color: $gold !important; } }
+
+  /* Casillas OTP (afiliación / verificación) */
+  .otp-inputs { display: flex; justify-content: center; gap: .5rem; }
+  .otp-box {
+    width: 48px; height: 56px; border-radius: 12px; text-align: center; font-size: 1.4rem; font-weight: 700; color: #fff;
+    background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .14); outline: none;
+    &:focus { border-color: $pink; box-shadow: 0 0 0 4px rgba(255, 26, 91, .18); }
+  }
+}
+
+@keyframes ae-paso { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .auth-escena .ae-contenido form { animation: none; } }

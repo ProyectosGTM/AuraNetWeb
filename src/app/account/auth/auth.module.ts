@@ -1,6 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SegundoFactorComponent } from './segundo-factor/segundo-factor.component';
+import { AuthEscenaComponent } from './auth-escena/auth-escena.component';
+import { CambiarContrasenaComponent } from './cambiar-contrasena/cambiar-contrasena.component';
 
 import { NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -13,9 +16,10 @@ import { VerifyComponent } from './verify/verify.component';
 import { AffiliationComponent } from './affiliation/affiliation.component';
 
 @NgModule({
-  declarations: [LoginComponent, SignupComponent, PasswordresetComponent, VerifyComponent, AffiliationComponent],
+  declarations: [LoginComponent, SignupComponent, PasswordresetComponent, VerifyComponent, AffiliationComponent, SegundoFactorComponent, CambiarContrasenaComponent, AuthEscenaComponent],
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     NgbAlertModule,
     UIModule,

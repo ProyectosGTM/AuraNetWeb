@@ -25,6 +25,7 @@ const routes: Routes = [
   { path: 'icons', loadChildren: () => import('./icons/icons.module').then(m => m.IconsModule) },
   { path: 'maps', loadChildren: () => import('./maps/maps.module').then(m => m.MapsModule) },
 
+  { path: 'tablero-sala', loadChildren: () => import('./operacion-sala/operacion-sala.module').then(m => m.OperacionSalaModule)},
   { path: 'recarga', loadChildren: () => import('./recarga/recarga.module').then(m => m.RecargaModule)},
   { path: 'modulos', loadChildren: () => import('./modulos/modulos.module').then(m => m.ModulosModule)},
   { path: 'permisos', loadChildren: () => import('./permisos/permisos.module').then(m => m.PermisosModule)},

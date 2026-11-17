@@ -23,7 +23,27 @@ export type AccionConControlRol =
   | 'corteParcialTurno'
   | 'registrarPromocion'
   | 'descargarEfectivoMonedero'
-  | 'ajustarSaldoMonedero';
+  | 'ajustarSaldoMonedero'
+  | 'cargarMonedero'
+  | 'traspasoMonedero'
+  | 'reemplazarMonedero'
+  | 'gestionarMonedero'
+  | 'cambiarEstatusMonedero'
+  | 'abrirTurno'
+  | 'cerrarTurnoPropio'
+  | 'cerrarTurnoForzado'
+  | 'retirarTesoreria'
+  | 'otorgarBonoVentanilla'
+  | 'gestionarBonosAvanzado'
+  | 'canjearPuntos'
+  | 'cierreManualSesion'
+  | 'enrolarRb'
+  | 'gestionarUsuarios'
+  | 'verBitacora'
+  | 'verDashboardSala'
+  | 'exigirPinSala'
+  | 'vincularTelefonoMonedero'
+  | 'revocarTelefonoMonedero';
 
 /** Nombres por id de `user.rol` / login; alineado con `GET /roles/list` (contrato en docs). */
 const ROLES_CATALOGO: Record<string, string> = {
@@ -32,9 +52,9 @@ const ROLES_CATALOGO: Record<string, string> = {
   '3': 'Cliente',
   '4': 'Administrador',
   '5': 'Gerente',
-  '6': 'Sub-Gerente',
+  '6': 'Jefe de Sala',
   '7': 'Cajero',
-  '8': 'Recepcionista',
+  '8': 'Técnico',
 };
 
 /** Primera letra mayúscula y el resto minúsculas en cada palabra (títulos). */
@@ -86,7 +106,7 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
   },
   registrarAfiliado: {
     /** Alta y edición de afiliados en consola: solo perfil Cliente (misma regla que la validación actual). */
-    rolesPermitidosIds: ['3'],
+    rolesPermitidosIds: ['5', '6', '7'],
     titulo: 'No puedes agregar, ni actualizar afiliados',
     subtitulo:
       'Con tu usuario no está permitido dar de alta ni modificar afiliados. Pide apoyo a alguien con el perfil indicado.',
@@ -106,70 +126,70 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
   },
   bloquearAfiliado: {
     /** POST /afiliados/{id}/bloquear — solo Gerente (`user.rol` `"5"` en login auran3t). */
-    rolesPermitidosIds: ['5'],
+    rolesPermitidosIds: ['5', '6'],
     titulo: 'No puedes bloquear afiliados',
     subtitulo: 'Tu rol no tiene permiso para bloquear afiliados y sus monederos.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   registrarAutoexclusionAfiliado: {
     /** POST /afiliados/{id}/autoexclusion — solo Gerente (`user.rol` `"5"` en login auran3t). */
-    rolesPermitidosIds: ['5'],
+    rolesPermitidosIds: ['5', '6', '7'],
     titulo: 'No puedes registrar autoexclusión',
     subtitulo: 'Tu rol no tiene permiso para registrar autoexclusión de afiliados.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   cancelarAutoexclusionAfiliado: {
-    rolesPermitidosIds: ['1', '2', '3', '4'],
+    rolesPermitidosIds: ['5', '6'],
     titulo: 'No puedes cancelar autoexclusión',
     subtitulo: 'Tu rol no tiene permiso para cancelar la autoexclusión de un afiliado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
-  /** POST /tesorerias/abrir — Cliente, Administrador, Gerente, Sub-Gerente. */
+  /** POST /tesorerias/abrir — Gerente y Jefe de Sala (matriz R2). */
   abrirTesoreriaDelDia: {
-    rolesPermitidosIds: ['3', '4', '5', '6'],
+    rolesPermitidosIds: ['5', '6'],
     titulo: 'No puedes abrir la bóveda del día',
     subtitulo: 'Con tu usuario no está permitido abrir la bóveda. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   /** POST /tesorerias/cerrar — mismo alcance de perfiles que abrir bóveda del día. */
   cerrarTesoreriaDelDia: {
-    rolesPermitidosIds: ['3', '4', '5', '6'],
+    rolesPermitidosIds: ['5', '6'],
     titulo: 'No puedes cerrar la bóveda del día',
     subtitulo:
       'Con tu usuario no está permitido cerrar la bóveda ni registrar el arqueo final. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
-  /** POS turnos: Gerente, Sub-Gerente y Cajero (`user.rol` 5, 6, 7). */
+  /** POS turnos (matriz R2): reponer, retirar, suspender y reactivar → Gerente y Jefe de Sala; corte parcial → Cajero. */
   reponerEfectivoTurno: {
-    rolesPermitidosIds: ['5', '6', '7'],
+    rolesPermitidosIds: ['5', '6'],
     titulo: 'No puedes reponer efectivo',
     subtitulo:
       'Con tu usuario no está permitido transferir efectivo de tesorería a caja durante el turno. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   retirarEfectivoTurno: {
-    rolesPermitidosIds: ['5', '6', '7'],
+    rolesPermitidosIds: ['5', '6'],
     titulo: 'No puedes retirar efectivo',
     subtitulo:
       'Con tu usuario no está permitido retirar efectivo de caja hacia tesorería durante el turno. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   suspenderTurno: {
-    rolesPermitidosIds: ['5', '6', '7'],
+    rolesPermitidosIds: ['5', '6'],
     titulo: 'No puedes suspender el turno',
     subtitulo:
       'Con tu usuario no está permitido pausar temporalmente un turno de caja. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   reactivarTurno: {
-    rolesPermitidosIds: ['5', '6', '7'],
+    rolesPermitidosIds: ['5', '6'],
     titulo: 'No puedes reactivar el turno',
     subtitulo:
       'Con tu usuario no está permitido reanudar un turno suspendido. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
   corteParcialTurno: {
-    rolesPermitidosIds: ['5', '6', '7'],
+    rolesPermitidosIds: ['7'],
     titulo: 'No puedes realizar el corte parcial',
     subtitulo:
       'Con tu usuario no está permitido generar un corte parcial (Corte X) sin cerrar el turno. Pide apoyo a alguien con el perfil indicado.',
@@ -191,9 +211,129 @@ const ACCIONES: Record<AccionConControlRol, ConfigAccionRol> = {
       'Con tu usuario no está permitido retirar efectivo de un monedero hacia caja. Pide apoyo a alguien con el perfil indicado.',
     tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
   },
-  /** Ajuste manual de saldo en monedero — SA, Dev, Cliente, Administrador, Gerente y Sub-Gerente (no cajero ni recepción). */
-  ajustarSaldoMonedero: {
+  /** Ajuste manual de saldo en monedero — solo Gerente (matriz R2). */
+  cargarMonedero: {
+    rolesPermitidosIds: ['7'],
+    titulo: 'No puedes cargar monederos',
+    subtitulo: 'La carga de monederos en ventanilla solo la hace el Cajero.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  traspasoMonedero: {
+    rolesPermitidosIds: ['7'],
+    titulo: 'No puedes hacer traspasos',
+    subtitulo: 'El traspaso entre monederos solo lo hace el Cajero.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  reemplazarMonedero: {
+    rolesPermitidosIds: ['7'],
+    titulo: 'No puedes reemplazar monederos',
+    subtitulo: 'El reemplazo de monederos solo lo hace el Cajero.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  gestionarMonedero: {
+    rolesPermitidosIds: ['5', '6', '7'],
+    titulo: 'No puedes dar de alta ni editar monederos',
+    subtitulo: 'Tu rol no tiene permiso para dar de alta ni editar monederos.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  cambiarEstatusMonedero: {
+    rolesPermitidosIds: ['5', '6'],
+    titulo: 'No puedes cambiar el estatus del monedero',
+    subtitulo: 'Solo el Gerente y el Jefe de Sala cambian el estatus de un monedero.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  abrirTurno: {
+    rolesPermitidosIds: ['7'],
+    titulo: 'No puedes abrir turno',
+    subtitulo: 'Solo el Cajero abre su turno de caja.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  cerrarTurnoPropio: {
+    rolesPermitidosIds: ['7'],
+    titulo: 'No puedes cerrar turno',
+    subtitulo: 'Solo el Cajero dueño del turno lo cierra. El Gerente usa el cierre forzado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  cerrarTurnoForzado: {
+    rolesPermitidosIds: ['5'],
+    titulo: 'No puedes forzar el cierre de turnos',
+    subtitulo: 'Solo el Gerente cierra el turno de otro cajero.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  retirarTesoreria: {
+    rolesPermitidosIds: ['5'],
+    titulo: 'No puedes retirar de la bóveda',
+    subtitulo: 'Retirar efectivo o ganancia de la bóveda solo lo hace el Gerente.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  otorgarBonoVentanilla: {
+    rolesPermitidosIds: ['5', '6', '7'],
+    titulo: 'No puedes otorgar bonos',
+    subtitulo: 'Tu rol no tiene permiso para otorgar bonos o puntos en ventanilla.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  gestionarBonosAvanzado: {
+    rolesPermitidosIds: ['5'],
+    titulo: 'No puedes hacer esta operación de bonos',
+    subtitulo: 'Bonos con monto manual, masivos, cancelaciones y conversiones solo los hace el Gerente.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  canjearPuntos: {
+    rolesPermitidosIds: ['7'],
+    titulo: 'No puedes canjear puntos',
+    subtitulo: 'El canje de puntos solo lo hace el Cajero.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  cierreManualSesion: {
+    rolesPermitidosIds: ['5'],
+    titulo: 'No puedes cerrar sesiones de juego',
+    subtitulo: 'El cierre manual de sesiones de juego solo lo hace el Gerente.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  enrolarRb: {
+    rolesPermitidosIds: ['5', '8'],
+    titulo: 'No puedes enrolar el RB',
+    subtitulo: 'El enrolamiento y la revocación del RB los hacen el Gerente y el Técnico.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  gestionarUsuarios: {
+    rolesPermitidosIds: ['1', '3', '4', '5'],
+    titulo: 'No puedes gestionar usuarios',
+    subtitulo: 'Tu rol no tiene permiso para gestionar usuarios.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  verBitacora: {
+    rolesPermitidosIds: ['1', '2', '3', '4', '5'],
+    titulo: 'No puedes ver la bitácora',
+    subtitulo: 'Tu rol no tiene permiso para consultar la bitácora.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  verDashboardSala: {
     rolesPermitidosIds: ['1', '2', '3', '4', '5', '6'],
+    titulo: 'No puedes ver el tablero de sala',
+    subtitulo: 'Tu rol no tiene permiso para consultar el tablero de sala.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  exigirPinSala: {
+    rolesPermitidosIds: ['5'],
+    titulo: 'No puedes cambiar el PIN de sala',
+    subtitulo: 'Solo el Gerente decide si su sala exige el PIN del monedero.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  vincularTelefonoMonedero: {
+    rolesPermitidosIds: ['7'],
+    titulo: 'No puedes vincular teléfonos',
+    subtitulo: 'La vinculación del monedero digital la hace el Cajero.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  revocarTelefonoMonedero: {
+    rolesPermitidosIds: ['5'],
+    titulo: 'No puedes revocar teléfonos',
+    subtitulo: 'Solo el Gerente revoca un teléfono vinculado.',
+    tituloRolesPermitidos: 'Roles que sí pueden realizar esta acción',
+  },
+  ajustarSaldoMonedero: {
+    rolesPermitidosIds: ['5'],
     titulo: 'No puedes ajustar saldo de monederos',
     subtitulo:
       'Con tu usuario no está permitido realizar ajustes manuales de saldo en monederos. Pide apoyo a alguien con el perfil indicado.',
@@ -390,5 +530,29 @@ export class RolAccesoService {
         }
       },
     });
+  }
+
+  /** Atajo: ¿el usuario en sesión puede realizar la acción? (matriz R2, §8). */
+  puede(accion: AccionConControlRol): boolean {
+    return this.puedeRealizarAccion(accion, this.obtenerRolUsuarioLogueado());
+  }
+
+  /** Igual que `puede`, pero si no puede muestra el aviso de acceso denegado. */
+  validar(accion: AccionConControlRol): boolean {
+    if (this.puede(accion)) return true;
+    this.mostrarAccesoDenegado(accion);
+    return false;
+  }
+
+  /** Sala de la sesión (login de Gerente, Jefe de Sala, Cajero y Técnico) (§9). */
+  obtenerIdSalaSesion(): number | null {
+    const u: any = this.auth.getUser();
+    const v = Number(u?.idSala ?? u?.sala?.id ?? NaN);
+    return Number.isFinite(v) && v > 0 ? v : null;
+  }
+
+  /** Roles de sala: el servidor toma idCliente e idSala de la sesión (§9). */
+  esUsuarioDeSala(): boolean {
+    return ["5", "6", "7", "8"].includes(String(this.obtenerRolUsuarioLogueado() ?? ""));
   }
 }

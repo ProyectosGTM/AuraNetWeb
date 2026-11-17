@@ -1,3 +1,4 @@
+import { aplicarFiltroLocal, celdaVacia, LOOKUP_ESTATUS } from 'src/app/shared/utils/grid-admin';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { DxDataGridComponent } from 'devextreme-angular';
@@ -16,6 +17,10 @@ import Swal from 'sweetalert2';
   animations: [fadeInRightAnimation],
 })
 export class ListaPermisosComponent implements OnInit {
+  /** Administración: "--" en celdas vacías, filtros por columna y lista de Estatus. */
+  celdaVacia = celdaVacia;
+  lookupEstatus = LOOKUP_ESTATUS;
+
   isLoading: boolean = false;
   public listaPermisos: any;
   public grid: boolean = false;
@@ -94,8 +99,8 @@ export class ListaPermisosComponent implements OnInit {
           this.paginaActualData = dataTransformada;
 
           return {
-            data: dataTransformada,
-            totalCount: totalRegistros
+            data: aplicarFiltroLocal(dataTransformada, loadOptions),
+            totalCount: loadOptions?.filter ? aplicarFiltroLocal(dataTransformada, loadOptions).length : totalRegistros
           };
         } catch (error) {
           this.loading = false;

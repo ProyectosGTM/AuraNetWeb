@@ -1,0 +1,81 @@
+<app-auth-escena icono="fas fa-shield-alt" titulo="Segundo Factor" subtitulo="Protege el acceso a tu cuenta" etiqueta="Acceso Seguro">
+  <div class="sf-card sf-card--escena">
+    <div class="sf-steps">
+      <span class="sf-st" [class.sf-st--on]="paso === 'escanear' || paso === 'cargando'" [class.sf-st--done]="paso === 'respaldo'">
+        <i class="fas" [class.fa-qrcode]="paso !== 'respaldo'" [class.fa-check]="paso === 'respaldo'"></i>Vincular App
+      </span>
+      <span class="sf-line"></span>
+      <span class="sf-st" [class.sf-st--on]="paso === 'respaldo'"><i class="fas fa-life-ring"></i>Códigos de Respaldo</span>
+    </div>
+
+    <ng-container *ngIf="paso === 'cargando'">
+      <div class="sf-loading"><span class="spinner-border"></span><p>Preparando tu segundo factor...</p></div>
+    </ng-container>
+
+    <ng-container *ngIf="paso === 'error'">
+      <div class="sf-head">
+        <span class="sf-icon sf-icon--err"><i class="fas fa-exclamation-triangle"></i></span>
+        <h2>No se Pudo Iniciar</h2>
+        <p>{{ error }}</p>
+      </div>
+      <button class="sf-btn sf-btn--primary" type="button" (click)="iniciar()"><i class="fas fa-redo"></i>Reintentar</button>
+    </ng-container>
+
+    <ng-container *ngIf="paso === 'escanear'">
+      <div class="sf-head">
+        <span class="sf-icon"><i class="fas fa-shield-alt"></i></span>
+        <h2>Configura tu Segundo Factor</h2>
+        <p>Escanea el código con <strong>Google Authenticator</strong> o <strong>Microsoft Authenticator</strong>.</p>
+      </div>
+
+      <div class="sf-scan">
+        <app-qr-code [data]="uri" [size]="190"></app-qr-code>
+        <div class="sf-manual">
+          <span class="sf-label">¿No puedes escanear? Captura esta clave:</span>
+          <div class="sf-secret">
+            <code>{{ secretoAgrupado }}</code>
+            <button type="button" class="sf-copy" (click)="copiar(secreto)" [attr.aria-label]="'Copiar clave'">
+              <i class="fas" [class.fa-copy]="!copiado" [class.fa-check]="copiado"></i>
+            </button>
+          </div>
+          <span class="sf-label">Cuenta: {{ emisor }}</span>
+        </div>
+      </div>
+
+      <form class="sf-form" (ngSubmit)="activar()">
+        <label class="sf-label" for="sfCodigo">Código de 6 Dígitos de tu App</label>
+        <input id="sfCodigo" name="codigo" [(ngModel)]="codigo" class="sf-input" inputmode="numeric" maxlength="6"
+          autocomplete="one-time-code" placeholder="000000" />
+        <small class="sf-err" *ngIf="error"><i class="fas fa-exclamation-circle"></i>{{ error }}</small>
+        <button class="sf-btn sf-btn--primary" type="submit" [disabled]="!codigoValido || activando">
+          <i class="fas" [class.fa-check-circle]="!activando" [class.fa-spinner]="activando" [class.fa-spin]="activando"></i>
+          {{ activando ? 'Activando...' : 'Activar Segundo Factor' }}
+        </button>
+      </form>
+    </ng-container>
+
+    <ng-container *ngIf="paso === 'respaldo'">
+      <div class="sf-head">
+        <span class="sf-icon sf-icon--ok"><i class="fas fa-check"></i></span>
+        <h2>Guarda tus Códigos de Respaldo</h2>
+        <p>Úsalos si pierdes tu teléfono. <strong>Solo se muestran esta vez</strong> y cada uno sirve una sola vez.</p>
+      </div>
+      <ol class="sf-codes">
+        <li *ngFor="let c of codigosRespaldo"><code>{{ c }}</code></li>
+      </ol>
+      <div class="sf-actions">
+        <button type="button" class="sf-btn sf-btn--ghost" (click)="copiarCodigos()"><i class="fas" [class.fa-copy]="!copiado" [class.fa-check]="copiado"></i>{{ copiado ? 'Copiados' : 'Copiar' }}</button>
+        <button type="button" class="sf-btn sf-btn--ghost" (click)="imprimirCodigos()"><i class="fas fa-print"></i>Imprimir</button>
+      </div>
+      <label class="sf-check">
+        <input type="checkbox" [(ngModel)]="confirmoGuardado" name="confirmo" />
+        <span>Ya guardé mis códigos en un lugar seguro.</span>
+      </label>
+      <button class="sf-btn sf-btn--primary" type="button" [disabled]="!confirmoGuardado" (click)="continuar()">
+        <i class="fas fa-arrow-right"></i>Continuar al Sistema
+      </button>
+    </ng-container>
+  </div>
+</app-auth-escena>
+
+<app-cargando [visible]="activando" texto="Activando Segundo Factor"></app-cargando>

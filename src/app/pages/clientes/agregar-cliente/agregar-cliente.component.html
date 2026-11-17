@@ -21,7 +21,7 @@
     <div class="col-12">
       <section class="ap-panel h-100">
         <header class="ap-panel-head">
-          <h2 class="ap-panel-title"><i class="fas fa-users"></i>Información del cliente</h2>
+          <h2 class="ap-panel-title"><i class="fas fa-users"></i>Información del Cliente</h2>
           <span class="ap-chip"><i class="fas fa-asterisk"></i>Campos obligatorios</span>
         </header>
 
@@ -456,3 +456,17 @@
     </footer>
   </div>
 </div>
+
+<app-form-preview
+  [open]="previewOpen"
+  entity="Cliente"
+  icon="fas fa-building"
+  [editing]="!!idCliente"
+  [name]="previewNombre"
+  [subtitle]="clienteForm.value.correo"
+  [image]="previewLogo"
+  [badges]="previewBadges"
+  [sections]="previewSections"
+  (confirmar)="confirmarVistaPrevia()"
+  (regresar)="cerrarVistaPrevia()">
+</app-form-preview>

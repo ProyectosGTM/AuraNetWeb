@@ -1,3 +1,5 @@
+import { aplicarFiltroLocal, celdaVacia, LOOKUP_ESTATUS } from 'src/app/shared/utils/grid-admin';
+import { AccionesSeguridadService } from 'src/app/shared/services/acciones-seguridad.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { DxDataGridComponent } from 'devextreme-angular';
@@ -17,6 +19,10 @@ import Swal from 'sweetalert2';
   animations: [fadeInRightAnimation]
 })
 export class ListaUsuariosComponent implements OnInit {
+  /** Administración: "--" en celdas vacías, filtros por columna y lista de Estatus. */
+  celdaVacia = celdaVacia;
+  lookupEstatus = LOOKUP_ESTATUS;
+
 
   isLoading: boolean = false;
   listaUsuarios: any;
@@ -45,7 +51,7 @@ export class ListaUsuariosComponent implements OnInit {
   public registros: any[] = [];
   public showCliente: any
 
-  constructor(private usuService: UsuariosService, private route: Router,
+  constructor(public seg: AccionesSeguridadService, private usuService: UsuariosService, private route: Router,
     private users: AuthenticationService,
   ) {
     // const user = this.users.getUser();
@@ -172,14 +178,16 @@ export class ListaUsuariosComponent implements OnInit {
               idCliente: Number(item?.IdCliente),
 
 
-              NombreCompleto: [nombre, paterno, materno].filter(Boolean).join(' ')
+              NombreCompleto: [nombre, paterno, materno].filter(Boolean).join(' '),
+              clienteNombreCompleto: [item?.clienteNombre, item?.clienteApellidoPaterno, item?.clienteApellidoMaterno].filter((x: any) => x && String(x).trim()).join(' '),
+              tieneImagen: item?.FotoPerfil && !/user_default/i.test(String(item.FotoPerfil)) ? 'Con Imagen' : 'Sin Imagen'
             };
           });
           dataTransformada.sort((a, b) => b.id - a.id);
           this.paginaActualData = dataTransformada;
           return {
-            data: dataTransformada,
-            totalCount: totalRegistros
+            data: aplicarFiltroLocal(dataTransformada, loadOptions),
+            totalCount: loadOptions?.filter ? aplicarFiltroLocal(dataTransformada, loadOptions).length : totalRegistros
           };
         } catch (error) {
           this.loading = false;

@@ -1,3 +1,4 @@
+import { AccionesSeguridadService } from 'src/app/shared/services/acciones-seguridad.service';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +7,8 @@ import { slideDownFadeAnimation } from 'src/app/core/slide-down-fade.animation';
 import { AuthenticationService } from 'src/app/core/services/auth.service';
 import { UsuariosService } from 'src/app/shared/services/usuario.service';
 import Swal from 'sweetalert2';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
+import { EstadoSegundoFactor, SegundoFactorService } from 'src/app/shared/services/segundo-factor.service';
 
 @Component({
   selector: 'app-profile',
@@ -28,11 +31,16 @@ export class ProfileComponent implements OnInit {
   showNewPassword = false;
   showConfirmPassword = false;
 
-  constructor(
+  /** Lleva a la pantalla de alta del segundo factor (§13.2). */
+  irAltaSegundoFactor = () => this.router.navigate(['/account/segundo-factor']);
+
+  constructor(public seg: AccionesSeguridadService, 
     private authService: AuthenticationService,
     private usuarioService: UsuariosService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private rolAcceso: RolAccesoService,
+    private segundoFactor: SegundoFactorService
   ) {
     this.passwordForm = this.fb.group({
       contraseñaActual: ['', [Validators.required, Validators.minLength(6)]],
@@ -47,8 +55,39 @@ export class ProfileComponent implements OnInit {
     return nueva === confirmar ? null : { passwordMismatch: true };
   }
 
+  fotoError = false;
+  /** null = consultando. */
+  sf: EstadoSegundoFactor | null = null;
+
   ngOnInit(): void {
     this.cargarPerfil();
+    this.segundoFactor.estado().subscribe({
+      next: (r: any) => (this.sf = r?.data ?? r),
+      error: () => (this.sf = { activo: false, obligatorio: false, debeConfigurar: false, codigosRespaldoRestantes: 0, desde: null }),
+    });
+  }
+
+  get rolNombre(): string {
+    return this.rolAcceso.obtenerEtiquetaRol(this.user?.rol) || 'Usuario';
+  }
+
+  get iniciales(): string {
+    return (this.nombreCompleto || 'U').split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+  }
+
+  /** Contraseña (50) + segundo factor (40) + códigos de respaldo suficientes (10). */
+  get nivelSeguridad(): number {
+    let n = 50;
+    if (this.sf?.activo) n += 40;
+    if (this.sf?.activo && (this.sf.codigosRespaldoRestantes ?? 0) > 2) n += 10;
+    return n;
+  }
+
+  /** 0 a 4 según largo, mayúsculas, números y símbolos. */
+  get fuerza(): number {
+    const v: string = this.passwordForm.get('nuevaContrasena')?.value || '';
+    if (!v) return 0;
+    return [v.length >= 8, /[A-Z]/.test(v) && /[a-z]/.test(v), /\d/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length || 1;
   }
 
   private cargarPerfil(): void {

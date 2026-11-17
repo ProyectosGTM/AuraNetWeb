@@ -151,7 +151,13 @@ export class AuthenticationService extends BaseServicesService {
     );
   }
 
-  reenviarCodigo(payload: { codigo: string }) {
+  /** POST /login/segundo-factor — { tokenDesafio, codigo } → misma respuesta que un login exitoso (§13.1). */
+  validarSegundoFactor(body: { tokenDesafio: string; codigo: string }): Observable<User> {
+    return this.http.post<User>(environment.API_SECURITY + '/login/segundo-factor', body);
+  }
+
+  /** PATCH /login/verify — código de 6 dígitos y `userName` (§7). */
+  reenviarCodigo(payload: { userName: string; codigo: string }) {
     return this.http.patch<string>(
       environment.API_SECURITY + '/login/verify',
       payload,

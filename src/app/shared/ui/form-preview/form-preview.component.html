@@ -1,0 +1,143 @@
+<div class="fp" *ngIf="open" role="dialog" aria-modal="true">
+  <div class="fp-backdrop" (click)="!loading && regresar.emit()"></div>
+
+  <div class="fp-modal">
+    <!-- Encabezado con pasos -->
+    <header class="fp-top">
+      <div class="fp-steps">
+        <span class="fp-st fp-st--done"><i class="fas fa-check"></i>Formulario</span>
+        <span class="fp-st-line"></span>
+        <span class="fp-st fp-st--on"><i class="fas fa-eye"></i>Vista Previa</span>
+        <span class="fp-st-line fp-st-line--off"></span>
+        <span class="fp-st"><i class="fas fa-save"></i>{{ editing ? 'Actualizado' : 'Guardado' }}</span>
+      </div>
+      <button type="button" class="fp-x" (click)="regresar.emit()" [disabled]="loading" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+    </header>
+
+    <div class="fp-main">
+      <!-- Credencial -->
+      <aside class="fp-side">
+        <div class="fp-card" (mousemove)="tilt($event)" (mouseleave)="resetTilt()" [style.transform]="cardTransform">
+          <span class="fp-holo"></span>
+          <span class="fp-pattern"></span>
+
+          <div class="fp-card-top">
+            <span class="fp-brand"><i class="fas fa-gem"></i>AuraNet</span>
+            <span class="fp-tag">{{ editing ? 'Edición' : 'Nuevo' }} {{ entity }}</span>
+          </div>
+
+          <div class="fp-card-mid">
+            <div class="fp-avatar">
+              <img *ngIf="image; else ini" [src]="image" alt="Imagen" />
+              <ng-template #ini><span class="fp-ini">{{ iniciales }}</span></ng-template>
+            </div>
+            <span class="fp-chip-gold"><span></span><span></span><span></span></span>
+          </div>
+
+          <div class="fp-card-bot">
+            <h3 class="fp-name">{{ name || 'Sin Nombre' }}</h3>
+            <p class="fp-sub" *ngIf="subtitle">{{ subtitle }}</p>
+            <div class="fp-badges" *ngIf="badges?.length">
+              <span class="fp-badge" *ngFor="let b of badges">{{ b }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="fp-score">
+          <svg viewBox="0 0 44 44" class="fp-ring">
+            <circle cx="22" cy="22" r="19" class="fp-ring-bg"></circle>
+            <circle cx="22" cy="22" r="19" class="fp-ring-fg" [style.strokeDashoffset]="ringOffset"></circle>
+          </svg>
+          <div class="fp-score-txt">
+            <strong>{{ camposCapturados }}<small>/{{ totalCampos }}</small></strong>
+            <span>Campos Capturados</span>
+          </div>
+        </div>
+
+        <div class="fp-resumen">
+          <span class="fp-resumen-title">Resumen por Sección</span>
+          <div class="fp-res" *ngFor="let s of sections">
+            <span class="fp-res-ico" [class.fp-res-ico--ok]="pctDe(s) === 100"><i [class]="s.icon"></i></span>
+            <div class="fp-res-body">
+              <div class="fp-res-top">
+                <span>{{ s.title }}</span>
+                <strong *ngIf="s.items?.length">{{ capturadosDe(s) }}/{{ s.items?.length }}</strong>
+                <strong *ngIf="!s.items?.length && s.chips">{{ s.chips.length }}</strong>
+                <strong *ngIf="!s.items?.length && s.groups">{{ totalGrupos(s) }}</strong>
+              </div>
+              <div class="fp-res-bar"><span [style.width.%]="pctDe(s)" [class.fp-res-bar--ok]="pctDe(s) === 100"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="fp-note"><i class="fas fa-shield-alt"></i>Si algo no es correcto, regresa: tu información se conserva.</p>
+      </aside>
+
+      <!-- Ficha de datos -->
+      <section class="fp-data">
+        <div class="fp-title">
+          <h4>{{ editing ? 'Confirma los Cambios' : 'Confirma el Registro' }}</h4>
+          <span>Revisa que todo esté correcto antes de {{ editing ? 'actualizar' : 'guardar' }}.</span>
+        </div>
+
+        <div class="fp-scroll">
+          <div class="fp-sec" *ngFor="let s of sections; let si = index" [style.--d]="si" [class.fp-sec--wide]="(s.items?.length || 0) > 4 || !!s.chips || !!s.groups">
+            <div class="fp-sec-head">
+              <span class="fp-sec-ico"><i [class]="s.icon"></i></span>
+              <h5>{{ s.title }}</h5>
+              <span class="fp-sec-count" *ngIf="s.items?.length" [class.fp-sec-count--ok]="capturadosDe(s) === s.items?.length">
+                <i class="fas" [class.fa-check]="capturadosDe(s) === s.items?.length" [class.fa-pen]="capturadosDe(s) !== s.items?.length"></i>
+                {{ capturadosDe(s) }}/{{ s.items?.length }}
+              </span>
+            </div>
+
+            <dl class="fp-rows" *ngIf="s.items?.length">
+              <div class="fp-row" *ngFor="let it of s.items" [class.fp-row--empty]="!tieneValor(it.value)" [class.fp-row--doc]="it.action">
+                <dt><i [class]="it.icon || 'fas fa-circle'"></i>{{ it.label }}</dt>
+                <dd *ngIf="tieneValor(it.value) && it.action">
+                  <button type="button" class="fp-doc-btn" (click)="it.action.run()" [title]="it.value">
+                    <i [class]="it.action.icon || 'fas fa-eye'"></i>{{ it.action.label }}
+                  </button>
+                </dd>
+                <dd *ngIf="tieneValor(it.value) && !it.action">{{ it.masked ? '••••••••' : it.value }}</dd>
+                <dd class="fp-empty" *ngIf="!tieneValor(it.value)">Sin Capturar</dd>
+              </div>
+            </dl>
+
+            <div class="fp-mods" *ngIf="s.groups">
+              <div class="fp-mod" *ngFor="let g of s.groups">
+                <div class="fp-mod-head">
+                  <span class="fp-mod-ico"><i class="fas fa-cube"></i></span>
+                  <strong>{{ g.title }}</strong>
+                  <span class="fp-mod-n">{{ g.items.length }}</span>
+                </div>
+                <div class="fp-mod-perms">
+                  <span class="fp-perm" *ngFor="let p of g.items"><i [class]="iconoAccion(p)"></i>{{ accionLegible(p, g.title) }}</span>
+                </div>
+              </div>
+              <span class="fp-empty" *ngIf="!s.groups.length">Sin Permisos Asignados</span>
+            </div>
+
+            <div class="fp-chips" *ngIf="s.chips">
+              <span class="fp-chip" *ngFor="let c of s.chips">{{ c }}</span>
+              <span class="fp-empty" *ngIf="!s.chips.length">Sin Elementos</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="fp-foot">
+      <button type="button" class="fp-btn fp-btn--ghost" (click)="regresar.emit()" [disabled]="loading">
+        <i class="fas fa-pen"></i>Regresar y Editar
+      </button>
+      <button type="button" class="fp-btn fp-btn--primary" (click)="confirmar.emit()" [disabled]="loading">
+        <span class="fp-btn-shine"></span>
+        <i class="fas" [class.fa-check-circle]="!loading" [class.fa-spinner]="loading" [class.fa-spin]="loading"></i>
+        {{ loading ? 'Guardando...' : (editing ? 'Confirmar y Actualizar' : 'Confirmar y Guardar') }}
+      </button>
+    </footer>
+  </div>
+</div>

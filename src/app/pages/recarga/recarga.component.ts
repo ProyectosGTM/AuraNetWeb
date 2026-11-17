@@ -12,6 +12,11 @@ import { TurnosService } from 'src/app/shared/services/turnos.service';
 import { TesoreriaService } from 'src/app/shared/services/tesoreria.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { RolAccesoService } from 'src/app/shared/services/rol-acceso.service';
+import { PinSalaService } from 'src/app/shared/services/pin-sala.service';
+import { mensajeError } from 'src/app/shared/utils/api-error';
+import { AccionesSeguridadService } from 'src/app/shared/services/acciones-seguridad.service';
 
 @Component({
   selector: 'app-recarga',
@@ -59,6 +64,42 @@ export class RecargaComponent implements OnInit {
   saldoConsultado: any = null;
   consultandoSaldo = false;
 
+  /** Cajero cierra el suyo; Gerente usa el cierre forzado (§6). */
+  modoCierre: 'propio' | 'forzado' = 'propio';
+  miTurno: any = null;
+  saldoEsperadoCierre: number | null = null;
+  /** La sala exige PIN del monedero (§13.4). */
+  exigePin = true;
+
+  /** Montos con 2 decimales como máximo (§6). */
+  static dosDecimales(c: AbstractControl): ValidationErrors | null {
+    const v = c.value;
+    if (v === null || v === undefined || v === '') return null;
+    return /^\d+(\.\d{1,2})?$/.test(String(v)) ? null : { decimales: true };
+  }
+
+  get diferenciaCierre(): number {
+    const contado = Number(this.cerrarTurnoForm?.value?.fondoContado || 0);
+    return Math.round((contado - Number(this.saldoEsperadoCierre || 0)) * 100) / 100;
+  }
+
+  /** Monedero digital: el QR del teléfono resuelve el idMonedero y sigue el flujo de siempre (§13.7). */
+  leerQrTelefono() {
+    this.seg.leerQrMonedero().then((id) => {
+      if (!id) return;
+      if (!this.listaMonederos.some((m: any) => Number(m.id) === id)) {
+        Swal.fire({ title: '¡Atención!', text: 'El monedero del QR no está en la lista de esta sala.', icon: 'warning', background: '#0d121d', confirmButtonColor: '#3085d6' });
+        return;
+      }
+      this.recargaForm.patchValue({ idMonedero: id });
+      this.onMonederoChanged({ value: id });
+    });
+  }
+
+  private alertaError(e: any, porDefecto: string) {
+    Swal.fire({ title: '¡Ops!', text: mensajeError(e, porDefecto), icon: 'error', background: '#0d121d', confirmButtonColor: '#3085d6' });
+  }
+
   constructor(
     private fb: FormBuilder,
     private cajasService: CajasService,
@@ -66,7 +107,10 @@ export class RecargaComponent implements OnInit {
     private turnosService: TurnosService,
     private tesoreriaService: TesoreriaService,
     private modalService: NgbModal,
-    private router: Router
+    private router: Router,
+    private rolAcceso: RolAccesoService,
+    private pinSala: PinSalaService,
+    private seg: AccionesSeguridadService
   ) {
     this.recargaForm = this.fb.group({
       idCaja: [null, Validators.required],
@@ -82,15 +126,16 @@ export class RecargaComponent implements OnInit {
     });
 
     this.cerrarTurnoForm = this.fb.group({
-      idTurno: [null, Validators.required],
+      idTurno: [null],
       fondoContado: ['', [Validators.required, Validators.min(0)]],
+      motivo: [''],
       observaciones: ['']
     });
 
     this.descargarMonederoForm = this.fb.group({
-      idTurnoCaja: [null, Validators.required],
       idMonedero: [null, Validators.required],
-      monto: ['', [Validators.required, Validators.min(0.01)]]
+      monto: ['', [Validators.required, Validators.min(0.01), RecargaComponent.dosDecimales]],
+      pin: ['']
     });
 
     this.consultarSaldoForm = this.fb.group({
@@ -391,6 +436,7 @@ export class RecargaComponent implements OnInit {
   }
 
   abrirModalAbrirTurno() {
+    if (!this.rolAcceso.validar('abrirTurno')) return;
     forkJoin({
       cajas: this.cajasService.obtenerCajas(),
       tesoreria: this.tesoreriaService.obtenerTesoreriaData(1, 100),
@@ -445,56 +491,119 @@ export class RecargaComponent implements OnInit {
     });
   }
 
+  /** Saldo esperado del turno (para mostrar la diferencia del arqueo antes de confirmar). */
+  private saldoEsperadoDe(t: any): number | null {
+    const v = t?.saldoEsperado ?? t?.efectivoEsperado ?? t?.saldoActual ?? t?.saldo ?? null;
+    return v === null || v === undefined || isNaN(Number(v)) ? null : Number(v);
+  }
+
   abrirModalCerrarTurno() {
-    this.turnosService.obtenerTurnos().subscribe({
-      next: (r) => {
-        const data = r?.data || [];
-        this.listaTurnosActivos = (Array.isArray(data) ? data : []).map((t: any) => ({
-          ...t, id: Number(t.id), text: `Turno #${t.id} - ${t.codigoCaja || ''} - ${this.formatearFechaHora(t.fechaApertura)}`
-        }));
-        this.cerrarTurnoForm.reset();
-        this.modalRef = this.modalService.open(this.modalCerrarTurno, {
-          size: 'lg', windowClass: 'modal-holder modal-cerrar-turno',
-          centered: true, backdrop: 'static', keyboard: true
-        });
-      },
-      error: () => Swal.fire({ title: 'Error', text: 'No se pudieron cargar los turnos.', icon: 'error', background: '#0d121d', confirmButtonColor: '#3085d6' })
-    });
+    const forzado = this.rolAcceso.puede('cerrarTurnoForzado');
+    if (!forzado && !this.rolAcceso.validar('cerrarTurnoPropio')) return;
+    this.modoCierre = forzado ? 'forzado' : 'propio';
+    this.saldoEsperadoCierre = null;
+    this.cerrarTurnoForm.reset({ idTurno: null, fondoContado: '', motivo: '', observaciones: '' });
+
+    const motivo = this.cerrarTurnoForm.get('motivo')!;
+    const idTurno = this.cerrarTurnoForm.get('idTurno')!;
+    if (forzado) {
+      motivo.setValidators([Validators.required, Validators.minLength(5), Validators.maxLength(500)]);
+      idTurno.setValidators([Validators.required]);
+    } else {
+      motivo.clearValidators();
+      idTurno.clearValidators();
+    }
+    motivo.updateValueAndValidity();
+    idTurno.updateValueAndValidity();
+
+    const abrir = () => {
+      this.modalRef = this.modalService.open(this.modalCerrarTurno, {
+        size: 'lg', windowClass: 'modal-holder modal-cerrar-turno',
+        centered: true, backdrop: 'static', keyboard: true
+      });
+    };
+
+    if (forzado) {
+      this.turnosService.obtenerTurnosActivos().subscribe({
+        next: (r) => {
+          const data = r?.data ?? r ?? [];
+          this.listaTurnosActivos = (Array.isArray(data) ? data : []).map((t: any) => ({
+            ...t, id: Number(t.id ?? t.idTurno),
+            text: `Turno #${t.id ?? t.idTurno} - ${t.codigoCaja || t.caja || ''} - ${t.nombreCajero || t.cajero || ''}`.trim()
+          }));
+          idTurno.valueChanges.subscribe((id) => {
+            const t = this.listaTurnosActivos.find((x: any) => Number(x.id) === Number(id));
+            this.saldoEsperadoCierre = this.saldoEsperadoDe(t);
+          });
+          abrir();
+        },
+        error: (e) => this.alertaError(e, 'No se pudieron cargar los turnos.')
+      });
+    } else {
+      this.turnosService.obtenerMiTurnoActivo().subscribe({
+        next: (r) => {
+          this.miTurno = r?.data ?? r ?? null;
+          if (!this.miTurno) {
+            Swal.fire({ title: '¡Atención!', text: 'No tienes un turno activo.', icon: 'info', background: '#0d121d', confirmButtonColor: '#3085d6' });
+            return;
+          }
+          this.saldoEsperadoCierre = this.saldoEsperadoDe(this.miTurno);
+          abrir();
+        },
+        error: (e) => this.alertaError(e, 'No se pudo consultar tu turno activo.')
+      });
+    }
   }
 
   guardarCerrarTurno() {
     if (this.cerrarTurnoForm.invalid) return;
-    const idTurnoSeleccionado = Number(this.cerrarTurnoForm.value.idTurno);
-    const turno = this.listaTurnosActivos.find((t: any) => Number(t.id) === idTurnoSeleccionado);
-    const idCaja = turno?.idCaja != null ? Number(turno.idCaja) : null;
-    if (idCaja == null) {
-      Swal.fire({ title: 'Error', text: 'No se pudo obtener la caja del turno seleccionado.', icon: 'error', background: '#0d121d', confirmButtonColor: '#3085d6' });
-      return;
-    }
-    const payload = {
-      idCaja,
-      fondoContado: Number(this.cerrarTurnoForm.value.fondoContado),
-      observaciones: (this.cerrarTurnoForm.value.observaciones || '').trim() || null
+    const v = this.cerrarTurnoForm.value;
+    const fondoContado = Number(v.fondoContado);
+    const observaciones = (v.observaciones || '').trim() || null;
+
+    const confirmarDiferencia = (): Promise<boolean> => {
+      if (this.saldoEsperadoCierre === null || this.diferenciaCierre === 0) return Promise.resolve(true);
+      return Swal.fire({
+        title: '¡Turno Descuadrado!',
+        html: `La diferencia es de <strong>${this.formatearMoneda(this.diferenciaCierre)}</strong>. El turno quedará <strong>Descuadrado</strong>. ¿Continuar?`,
+        icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, Cerrar', cancelButtonText: 'Revisar',
+        background: '#0d121d', confirmButtonColor: '#e40041'
+      }).then((r) => !!r.isConfirmed);
     };
-    this.turnosService.cerrarTurno(payload).subscribe({
-      next: () => {
-        Swal.fire({ title: '¡Éxito!', text: 'Turno cerrado correctamente.', icon: 'success', background: '#0d121d', confirmButtonColor: '#3085d6' });
-        this.cerrarModal();
-        this.cargarListas();
-      },
-      error: (e) => Swal.fire({ title: 'Error', text: e?.error || 'No se pudo cerrar el turno.', icon: 'error', background: '#0d121d', confirmButtonColor: '#3085d6' })
+
+    confirmarDiferencia().then((ok) => {
+      if (!ok) return;
+      let peticion;
+      if (this.modoCierre === 'forzado') {
+        const turno = this.listaTurnosActivos.find((t: any) => Number(t.id) === Number(v.idTurno));
+        const idCaja = Number(turno?.idCaja);
+        if (!idCaja) { this.alertaError(null, 'No se pudo obtener la caja del turno seleccionado.'); return; }
+        peticion = this.turnosService.cerrarTurnoForzado({ idCaja, fondoContado, motivo: (v.motivo || '').trim(), observaciones });
+      } else {
+        peticion = this.turnosService.cerrarTurno({ fondoContado, observaciones });
+      }
+      peticion.subscribe({
+        next: () => {
+          Swal.fire({ title: '¡Éxito!', text: 'Turno cerrado correctamente.', icon: 'success', background: '#0d121d', confirmButtonColor: '#3085d6' });
+          this.cerrarModal();
+          this.cargarListas();
+        },
+        error: (e) => this.alertaError(e, 'No se pudo cerrar el turno.')
+      });
     });
   }
 
   abrirModalDescargarMonedero() {
+    if (!this.rolAcceso.validar('descargarEfectivoMonedero')) return;
     forkJoin({
-      turnos: this.turnosService.obtenerTurnos(),
-      monederos: this.monederosService.obtenerMonederos()
+      monederos: this.monederosService.obtenerMonederos(),
+      exigePin: this.pinSala.exigePin()
     }).subscribe({
       next: (r) => {
-        this.listaTurnosDescargar = (r.turnos?.data || []).map((t: any) => ({
-          ...t, id: Number(t.id), text: `Turno #${t.id} - ${t.codigoCaja || ''} - ${this.formatearFechaHora(t.fechaApertura)}`
-        }));
+        this.exigePin = r.exigePin;
+        const pin = this.descargarMonederoForm.get('pin')!;
+        pin.setValidators(this.exigePin ? [Validators.required, Validators.pattern(/^\d{4,6}$/)] : [Validators.pattern(/^\d{4,6}$/)]);
+        pin.updateValueAndValidity();
         this.listaMonederosDescargar = (r.monederos?.data || []).map((m: any) => {
           const nombreAfiliado = `${m?.nombreAfiliado || ''} ${m?.apellidoPaternoAfiliado || ''} ${m?.apellidoMaternoAfiliado || ''}`.trim() || 'Sin afiliado';
           return { ...m, id: Number(m.id), text: `${m.numeroMonedero || ''} - ${m.alias || ''}`.trim(), nombreCompletoAfiliado: nombreAfiliado };
@@ -511,18 +620,21 @@ export class RecargaComponent implements OnInit {
 
   guardarDescargarMonedero() {
     if (this.descargarMonederoForm.invalid) return;
-    const payload = {
-      idTurnoCaja: Number(this.descargarMonederoForm.value.idTurnoCaja),
-      idMonedero: Number(this.descargarMonederoForm.value.idMonedero),
-      monto: Number(this.descargarMonederoForm.value.monto)
+    const v = this.descargarMonederoForm.value;
+    const payload: { idMonedero: number; monto: number; pin?: string } = {
+      idMonedero: Number(v.idMonedero),
+      monto: Number(v.monto),
     };
+    if (v.pin) payload.pin = String(v.pin);
+    // El PIN no se conserva: se borra después de cada intento (§3).
+    this.descargarMonederoForm.patchValue({ pin: '' });
     this.monederosService.descargarMonedero(payload).subscribe({
       next: () => {
         Swal.fire({ title: '¡Éxito!', text: 'Se descargó efectivo del monedero.', icon: 'success', background: '#0d121d', confirmButtonColor: '#3085d6' });
         this.cerrarModal();
         this.cargarListas();
       },
-      error: (e) => Swal.fire({ title: 'Error', text: e?.error || 'No se pudo descargar.', icon: 'error', background: '#0d121d', confirmButtonColor: '#3085d6' })
+      error: (e) => this.alertaError(e, 'No se pudo descargar.')
     });
   }
 

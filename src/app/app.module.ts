@@ -32,7 +32,10 @@ import { AppComponent } from './app.component';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 
 import { initFirebaseBackend } from './authUtils';
+import { UIModule } from './shared/ui/ui.module';
 import { ErrorInterceptor } from './core/helpers/error.interceptor';
+import { IdempotencyInterceptor } from './core/helpers/idempotency.interceptor';
+import { SesionSalaInterceptor } from './core/helpers/sesion-sala.interceptor';
 import { JwtInterceptor } from './core/helpers/jwt.interceptor';
 import { FakeBackendInterceptor } from './core/helpers/fake-backend';
 import { AuthModule } from './account/auth/auth.module';
@@ -53,6 +56,7 @@ import { StaticTranslateLoader } from './core/i18n/static-translate.loader';
     NgxPermissionsModule.forRoot(),
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
     BrowserAnimationsModule,
+    UIModule,
     HttpClientModule,
     DxFileUploaderModule, 
     DxButtonModule,
@@ -102,6 +106,8 @@ import { StaticTranslateLoader } from './core/i18n/static-translate.loader';
 providers: [
   DatePipe,
   { provide: HTTP_INTERCEPTORS, useClass: InterceptService, multi: true },
+  { provide: HTTP_INTERCEPTORS, useClass: SesionSalaInterceptor, multi: true },
+  { provide: HTTP_INTERCEPTORS, useClass: IdempotencyInterceptor, multi: true },
   { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
 
 

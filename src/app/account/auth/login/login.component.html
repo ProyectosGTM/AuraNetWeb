@@ -72,7 +72,31 @@
               <p class="login-subtitle mb-0">Ingresa tus credenciales para entrar a la sala</p>
             </div>
 
-            <form [formGroup]="loginForm" (ngSubmit)="onSubmit($event)" novalidate>
+            <!-- Paso 2: segundo factor (§13.1) -->
+            <form *ngIf="step === 'mfa'" (ngSubmit)="onVerificarMfa($event)" novalidate>
+              <div class="mb-3">
+                <label class="form-label lbl" for="mfaCodigo">Código de tu App Autenticadora</label>
+                <div class="input-neon">
+                  <i class="fas fa-shield-alt"></i>
+                  <input id="mfaCodigo" name="mfaCodigo" [(ngModel)]="codigoMfa" type="text" class="form-control"
+                         inputmode="numeric" maxlength="9" autocomplete="one-time-code"
+                         placeholder="123456 o XXXX-XXXX" />
+                </div>
+                <small class="d-block mt-2" style="color: rgba(255,255,255,.6)">
+                  Abre Google o Microsoft Authenticator. También puedes usar uno de tus códigos de respaldo.
+                </small>
+                <small class="d-block mt-2" style="color: #f46a6a" *ngIf="errorMfa"><i class="fas fa-exclamation-circle me-1"></i>{{ errorMfa }}</small>
+              </div>
+              <button class="btn-jackpot w-100" type="submit" [disabled]="!codigoMfaValido || loading">
+                <ng-container *ngIf="!loading"><span>Verificar</span><i class="fas fa-check ms-2"></i></ng-container>
+                <ng-container *ngIf="loading"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Verificando...</ng-container>
+              </button>
+              <div class="d-flex justify-content-center mt-3">
+                <a class="link-soft" href="javascript:void(0)" (click)="cancelarMfa()"><i class="fas fa-arrow-left me-1"></i>Volver</a>
+              </div>
+            </form>
+
+            <form *ngIf="step !== 'mfa'" [formGroup]="loginForm" (ngSubmit)="onSubmit($event)" novalidate>
               <div class="mb-3">
                 <label class="form-label lbl" for="loginUser">Correo</label>
                 <div class="input-neon">
@@ -123,3 +147,5 @@
     </div>
   </div>
 </div>
+
+<app-cargando [visible]="loading" texto="Iniciando Sesión"></app-cargando>

@@ -48,6 +48,16 @@ export class MaquinasService {
     );
   }
 
+  /** POST maquinas/:id/rb/codigo-enrolamiento → { codigo, venceEn } (§10). Técnico y Gerente. */
+  generarCodigoEnrolamientoRb(idMaquina: number): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/maquinas/${idMaquina}/rb/codigo-enrolamiento`, {});
+  }
+
+  /** POST maquinas/:id/rb/revocar → { revocados } (§10). */
+  revocarRb(idMaquina: number): Observable<any> {
+    return this.http.post(`${environment.API_SECURITY}/maquinas/${idMaquina}/rb/revocar`, {});
+  }
+
   obtenerTiposMaquina(): Observable<any> {
     return this.http.get(`${environment.API_SECURITY}/cattiposmaquina/list`);
   }

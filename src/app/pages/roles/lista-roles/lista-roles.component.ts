@@ -1,3 +1,4 @@
+import { aplicarFiltroLocal, celdaVacia, LOOKUP_ESTATUS } from 'src/app/shared/utils/grid-admin';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { DxDataGridComponent } from 'devextreme-angular';
@@ -16,6 +17,10 @@ import Swal from 'sweetalert2';
   animations: [fadeInRightAnimation],
 })
 export class ListaRolesComponent implements OnInit {
+  /** Administración: "--" en celdas vacías, filtros por columna y lista de Estatus. */
+  celdaVacia = celdaVacia;
+  lookupEstatus = LOOKUP_ESTATUS;
+
   public permisoConsultarRol: string;
   public permisoAgregarRol: string;
   public permisoActualizarRol: string;
@@ -215,8 +220,8 @@ export class ListaRolesComponent implements OnInit {
           this.paginaActualData = dataTransformada;
 
           return {
-            data: dataTransformada,
-            totalCount: totalRegistros
+            data: aplicarFiltroLocal(dataTransformada, loadOptions),
+            totalCount: loadOptions?.filter ? aplicarFiltroLocal(dataTransformada, loadOptions).length : totalRegistros
           };
         } catch (err) {
           this.loading = false;
